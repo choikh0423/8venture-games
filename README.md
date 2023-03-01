@@ -14,13 +14,14 @@
 
 ## Basic Architecture
 **GameMode**
-- Enumerates/Add/delete Objects
+- State Controls
 - Draw Background & Objects
 - Performs Update on Every Components
 - Gather all assets
 
 **GameplayController**
 - Create platforms + walls (Populate Level)
+- Enumerates/Add/delete Objects
 - Apply Gravity and Force --> Enforce Interaction
 - Gather Gameplay-specific Assets
 
