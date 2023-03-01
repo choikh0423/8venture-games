@@ -4,7 +4,12 @@
 1. Open project with build.gradle > "Open as Project"
 2. Edit Configuration > Add Configuration
 3. "Add New" > Application
-4. name: rrga, -cp "rrga.desktop.main", java11, main class: desktoplauncher, working directory: rrga/assets
+4. Change the configuration setting to following:
+  - name: rrga, 
+  - cp "rrga.desktop.main"
+  - java version: java11
+  - main class: desktoplauncher
+  - working directory: rrga/assets
 5. Press OK > Build/Run
 
 ## Basic Architecture
