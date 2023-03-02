@@ -1,14 +1,27 @@
 # 8venture-games
 
+## Getting Started
+1. Open project with build.gradle > "Open as Project"
+2. Edit Configuration > Add Configuration
+3. "Add New" > Application
+4. Change the configuration setting to following:
+  - name: rrga, 
+  - cp "rrga.desktop.main"
+  - java version: java11
+  - main class: desktoplauncher
+  - working directory: rrga/assets
+5. Press OK > Build/Run
+
 ## Basic Architecture
 **GameMode**
-- Enumerates/Add/delete Objects
+- State Controls
 - Draw Background & Objects
 - Performs Update on Every Components
 - Gather all assets
 
 **GameplayController**
 - Create platforms + walls (Populate Level)
+- Enumerates/Add/delete Objects
 - Apply Gravity and Force --> Enforce Interaction
 - Gather Gameplay-specific Assets
 
