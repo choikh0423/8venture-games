@@ -227,7 +227,7 @@ public class DudeModel extends CapsuleObstacle {
 		jump_force = data.getFloat( "jump_force", 0 );
 		jumpLimit = data.getInt( "jump_cool", 0 );
 		shotLimit = data.getInt( "shot_cool", 0 );
-		sensorName = "DudeGroundSensor";
+		sensorName = " DudeGroundSensor";
 		this.data = data;
 
 		// Gameplay attributes
