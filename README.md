@@ -15,12 +15,12 @@
 ## Basic Architecture
 **GameMode**
 - State Controls
-- Draw Background & Objects
+- Gather all assets - calls GameplayController gather function
+- Draws everything
 - Performs Update on Every Components
-- Gather all assets
 
 **GameplayController**
-- Create platforms + walls (Populate Level)
+- Create Objects - Walls, Platform, Player (aka. everything)
 - Enumerates/Add/delete Objects
 - Apply Gravity and Force --> Enforce Interaction
 - Gather Gameplay-specific Assets
