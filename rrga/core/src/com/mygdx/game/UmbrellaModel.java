@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.CapsuleObstacle;
 
@@ -30,7 +31,17 @@ public class UmbrellaModel extends CapsuleObstacle {
     }
 
     /**Returns the angle away from the x-axis of the umbrella*/
-    public float getAngle(){
+    public float getRotation(){
         return angle;
+    }
+
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        float effect = faceRight ? 1.0f : -1.0f;
+        canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 }
