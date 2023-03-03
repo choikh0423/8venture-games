@@ -1,5 +1,5 @@
 /*
- * DudeModel.java
+ * PlayerModel.java
  *
  * You SHOULD NOT need to modify this file.  However, you may learn valuable lessons
  * for the rest of the lab by looking at it.
@@ -18,7 +18,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 
-import com.mygdx.game.*;
 import com.mygdx.game.obstacle.*;
 
 /**
@@ -27,7 +26,7 @@ import com.mygdx.game.obstacle.*;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class DudeModel extends CapsuleObstacle {
+public class PlayerModel extends CapsuleObstacle {
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -43,8 +42,6 @@ public class DudeModel extends CapsuleObstacle {
 	private final float jump_force;
 	/** Cooldown (in animation frames) for jumping */
 	private final int jumpLimit;
-	/** Cooldown (in animation frames) for shooting */
-	private final int shotLimit;
 
 	/** The current horizontal movement of the character */
 	private float   movement;
@@ -54,12 +51,8 @@ public class DudeModel extends CapsuleObstacle {
 	private int jumpCooldown;
 	/** Whether we are actively jumping */
 	private boolean isJumping;
-	/** How long until we can shoot again */
-	private int shootCooldown;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
-	/** Whether we are actively shooting */
-	private boolean isShooting;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 	
@@ -94,24 +87,7 @@ public class DudeModel extends CapsuleObstacle {
 			faceRight = true;
 		}
 	}
-	
-	/**
-	 * Returns true if the dude is actively firing.
-	 *
-	 * @return true if the dude is actively firing.
-	 */
-	public boolean isShooting() {
-		return isShooting && shootCooldown <= 0;
-	}
-	
-	/**
-	 * Sets whether the dude is actively firing.
-	 *
-	 * @param value whether the dude is actively firing.
-	 */
-	public void setShooting(boolean value) {
-		isShooting = value; 
-	}
+
 
 	/**
 	 * Returns true if the dude is actively jumping.
@@ -121,14 +97,14 @@ public class DudeModel extends CapsuleObstacle {
 	public boolean isJumping() {
 		return isJumping && isGrounded && jumpCooldown <= 0;
 	}
-	
+
 	/**
 	 * Sets whether the dude is actively jumping.
 	 *
 	 * @param value whether the dude is actively jumping.
 	 */
 	public void setJumping(boolean value) {
-		isJumping = value; 
+		isJumping = value;
 	}
 
 	/**
@@ -211,7 +187,7 @@ public class DudeModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public DudeModel(JsonValue data, float width, float height) {
+	public PlayerModel(JsonValue data, float width, float height) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
@@ -226,19 +202,16 @@ public class DudeModel extends CapsuleObstacle {
 		force = data.getFloat("force", 0);
 		jump_force = data.getFloat( "jump_force", 0 );
 		jumpLimit = data.getInt( "jump_cool", 0 );
-		shotLimit = data.getInt( "shot_cool", 0 );
-		sensorName = "DudeGroundSensor";
+		sensorName = "PlayerGroundSensor";
 		this.data = data;
 
 		// Gameplay attributes
 		isGrounded = false;
-		isShooting = false;
 		isJumping = false;
 		faceRight = true;
-		
-		shootCooldown = 0;
+
 		jumpCooldown = 0;
-		setName("dude");
+		setName("player");
 	}
 
 	/**
@@ -328,12 +301,6 @@ public class DudeModel extends CapsuleObstacle {
 			jumpCooldown = Math.max(0, jumpCooldown - 1);
 		}
 
-		if (isShooting()) {
-			shootCooldown = shotLimit;
-		} else {
-			shootCooldown = Math.max(0, shootCooldown - 1);
-		}
-		
 		super.update(dt);
 	}
 
