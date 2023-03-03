@@ -57,6 +57,8 @@ public class GameplayController implements ContactListener {
     private TextureRegion barrierTexture;
     /** Texture asset for the bridge plank */
     private TextureRegion bridgeTexture;
+    /** Texture asset for the wind gust */
+    private TextureRegion windTexture;
 
     /** The jump sound.  We only want to play once. */
     private Sound jumpSound;
@@ -109,6 +111,7 @@ public class GameplayController implements ContactListener {
         avatarTexture  = new TextureRegion(directory.getEntry("platform:dude", Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("platform:barrier",Texture.class));
         bridgeTexture = new TextureRegion(directory.getEntry("platform:rope",Texture.class));
+        windTexture = new TextureRegion(directory.getEntry("placeholder:wind",Texture.class));
 
         jumpSound = directory.getEntry( "platform:jump", Sound.class );
         fireSound = directory.getEntry( "platform:pew", Sound.class );
@@ -200,7 +203,21 @@ public class GameplayController implements ContactListener {
         avatar.setTexture(avatarTexture);
         addObject(avatar);
 
+        // Create wind gusts
+        String windName = "wind";
+        JsonValue windjv = constants.get("wind");
+        for (int ii = 0; ii < windjv.size; ii++) {
+            WindModel obj;
+            obj = new WindModel(windjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(windTexture);
+            obj.setName(windName+ii);
+            addObject(obj);
+        }
+
+
         volume = constants.getFloat("volume", 1.0f);
+
     }
 
     /**
