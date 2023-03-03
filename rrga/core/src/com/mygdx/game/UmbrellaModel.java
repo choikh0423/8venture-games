@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.CapsuleObstacle;
 
@@ -10,8 +11,8 @@ public class UmbrellaModel extends CapsuleObstacle {
     private String sensorName;
     /** Which direction is the umbrella facing */
     private boolean faceRight;
-    /**The angle of the umbrella*/
-    private float angle;
+    /**The angle of rotation of the umbrella. Needed for computing wind interactions*/
+    private float rotation;
 
     public UmbrellaModel(JsonValue data, float width, float height) {
         super(	data.get("pos").getFloat(0),
@@ -29,8 +30,20 @@ public class UmbrellaModel extends CapsuleObstacle {
         setName("umbrella");
     }
 
-    /**Returns the angle away from the x-axis of the umbrella*/
-    public float getAngle(){
-        return angle;
+    /**Returns the angle away from the x-axis of the umbrella.
+     * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC.
+     * */
+    public float getRotation(){
+        return rotation;
+    }
+
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        float effect = faceRight ? 1.0f : -1.0f;
+        canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
     }
 }
