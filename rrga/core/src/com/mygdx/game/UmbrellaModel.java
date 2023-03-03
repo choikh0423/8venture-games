@@ -11,8 +11,8 @@ public class UmbrellaModel extends CapsuleObstacle {
     private String sensorName;
     /** Which direction is the umbrella facing */
     private boolean faceRight;
-    /**The angle of the umbrella*/
-    private float angle;
+    /**The angle of rotation of the umbrella. Needed for computing wind interactions*/
+    private float rotation;
 
     public UmbrellaModel(JsonValue data, float width, float height) {
         super(	data.get("pos").getFloat(0),
@@ -30,9 +30,11 @@ public class UmbrellaModel extends CapsuleObstacle {
         setName("umbrella");
     }
 
-    /**Returns the angle away from the x-axis of the umbrella*/
+    /**Returns the angle away from the x-axis of the umbrella.
+     * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC.
+     * */
     public float getRotation(){
-        return angle;
+        return rotation;
     }
 
     /**
