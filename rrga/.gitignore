@@ -1,4 +1,8 @@
 ## Java
+.DS_Store
+.gradle
+.idea
+desktop/build
 
 *.class
 *.war
