@@ -16,8 +16,6 @@ public class UmbrellaModel extends BoxObstacle {
     private boolean faceRight;
     /** The current angular rotation of the umbrella */
     private float turning;
-    /** The angle of rotation of the umbrella. Needed for computing wind interactions */
-    private float rotation;
     /** The scale to multiply the texture by for drawing */
     private float textureScale;
 
@@ -33,17 +31,15 @@ public class UmbrellaModel extends BoxObstacle {
 
         force = data.getFloat("force", 0);
         textureScale = data.getFloat("texturescale", 1.0f);
-
         sensorName = "UmbrellaSensor";
         this.data = data;
         faceRight = true;
         setName("umbrella");
     }
 
-    /** Returns the angle away from the x-axis of the umbrella.
-     * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC.
-     * */
-    public float getRotation(){return rotation;}
+    /** Returns the angle away from the x-axis of the umbrella in radians.
+     * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC. */
+    public float getRotation(){return getAngle()+(float)Math.PI/2;}
 
     public float getForce(){return force;}
 
@@ -63,7 +59,6 @@ public class UmbrellaModel extends BoxObstacle {
         if (Math.abs(getAngularVelocity()) > (float)2*Math.PI)
             setAngularVelocity(Math.signum(getAngularVelocity())*2*(float)Math.PI);
         else body.applyTorque(turning, true);
-//        body.setTransform(body.getPosition(), body.getAngle()+turning*(float)Math.PI/36);
     }
 
     /**
