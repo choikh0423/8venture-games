@@ -54,6 +54,8 @@ public class GameplayController implements ContactListener {
     protected TextureRegion platformTile;
     /** Texture asset for character avatar */
     private TextureRegion avatarTexture;
+    /** Texture asset for the wind gust */
+    private TextureRegion windTexture;
     /** Texture asset for umbrella */
     private TextureRegion umbrellaTexture;
 
@@ -82,6 +84,9 @@ public class GameplayController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
+    /** The set of all wind bodies in a level */
+    protected ObjectSet<Body> winds = new ObjectSet<>();
+
     /**
      * Creates and initialize a new instance of the platformer game
      *
@@ -109,6 +114,7 @@ public class GameplayController implements ContactListener {
         platformTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
         avatarTexture  = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
+        windTexture = new TextureRegion(directory.getEntry("placeholder:wind",Texture.class));
 
         jumpSound = directory.getEntry( "platform:jump", Sound.class );
         fireSound = directory.getEntry( "platform:pew", Sound.class );
@@ -142,21 +148,23 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
+
         float dwidth  = platformTile.getRegionWidth()/scale.x;
         float dheight = platformTile.getRegionHeight()/scale.y;
 
-        JsonValue goal = constants.get("goal");
-        JsonValue goalpos = goal.get("pos");
-        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(platformTile);
-        goalDoor.setName("goal");
-        addObject(goalDoor);
+//        Commented out goal for future usage
+//        JsonValue goal = constants.get("goal");
+//        JsonValue goalpos = goal.get("pos");
+//        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
+//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+//        goalDoor.setDensity(goal.getFloat("density", 0));
+//        goalDoor.setFriction(goal.getFloat("friction", 0));
+//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+//        goalDoor.setSensor(true);
+//        goalDoor.setDrawScale(scale);
+//        goalDoor.setTexture(platformTile);
+//        goalDoor.setName("goal");
+//        addObject(goalDoor);
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
@@ -218,6 +226,20 @@ public class GameplayController implements ContactListener {
         jointDef.localAnchorB.set(0,constants.get("player").get("pos").getFloat(1)-constants.get("umbrella").get("pos").getFloat(1));
         world.createJoint(jointDef);
 
+        // Create wind gusts
+        String windName = "wind";
+        JsonValue windjv = constants.get("wind");
+        for (int ii = 0; ii < windjv.size; ii++) {
+            WindModel obj;
+            obj = new WindModel(windjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(windTexture);
+            obj.setName(windName+ii);
+            addObject(obj);
+            winds.add(obj.getBody());
+        }
+
+
         volume = constants.getFloat("volume", 1.0f);
     }
 
@@ -277,6 +299,15 @@ public class GameplayController implements ContactListener {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
             }
+
+            //something along these lines, can't really implement further until merged with movement branch
+            //if (bd1==umbrella && winds.contains(bd2) || (bd2==umbrella && winds.contains(bd1) {
+                //float ang = umbrella.getRotation;
+                //float umbrellax = (float) Math.cos(ang);
+                //float umbrellay = (float) Math.sin(ang);
+                //umbrella.setVX(umbrella.getVX()+ umbrellax*wind.getWindForce(umbrella));
+                //umbrella.setVY(umbrella.getVY()+ umbrellay*wind.getWindForce(umbrella));
+            //}
 
             // Check for win condition
             if ((bd1 == avatar   && bd2 == goalDoor) ||
