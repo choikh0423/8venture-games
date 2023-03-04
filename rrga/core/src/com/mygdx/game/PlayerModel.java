@@ -55,6 +55,9 @@ public class PlayerModel extends CapsuleObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
+
+	/** The scale to multiply the texture by for drawing */
+	private float textureScale;
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -63,7 +66,7 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Returns left/right movement of this character.
 	 * 
-	 * This is the result of input times dude force.
+	 * This is the result of input times player force.
 	 *
 	 * @return left/right movement of this character.
 	 */
@@ -74,7 +77,7 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Sets left/right movement of this character.
 	 * 
-	 * This is the result of input times dude force.
+	 * This is the result of input times player force.
 	 *
 	 * @param value left/right movement of this character.
 	 */
@@ -90,67 +93,67 @@ public class PlayerModel extends CapsuleObstacle {
 
 
 	/**
-	 * Returns true if the dude is actively jumping.
+	 * Returns true if the player is actively jumping.
 	 *
-	 * @return true if the dude is actively jumping.
+	 * @return true if the player is actively jumping.
 	 */
 	public boolean isJumping() {
 		return isJumping && isGrounded && jumpCooldown <= 0;
 	}
 
 	/**
-	 * Sets whether the dude is actively jumping.
+	 * Sets whether the player is actively jumping.
 	 *
-	 * @param value whether the dude is actively jumping.
+	 * @param value whether the player is actively jumping.
 	 */
 	public void setJumping(boolean value) {
 		isJumping = value;
 	}
 
 	/**
-	 * Returns true if the dude is on the ground.
+	 * Returns true if the player is on the ground.
 	 *
-	 * @return true if the dude is on the ground.
+	 * @return true if the player is on the ground.
 	 */
 	public boolean isGrounded() {
 		return isGrounded;
 	}
 	
 	/**
-	 * Sets whether the dude is on the ground.
+	 * Sets whether the player is on the ground.
 	 *
-	 * @param value whether the dude is on the ground.
+	 * @param value whether the player is on the ground.
 	 */
 	public void setGrounded(boolean value) {
 		isGrounded = value; 
 	}
 
 	/**
-	 * Returns how much force to apply to get the dude moving
+	 * Returns how much force to apply to get the player moving
 	 *
 	 * Multiply this by the input to get the movement value.
 	 *
-	 * @return how much force to apply to get the dude moving
+	 * @return how much force to apply to get the player moving
 	 */
 	public float getForce() {
 		return force;
 	}
 
 	/**
-	 * Returns ow hard the brakes are applied to get a dude to stop moving
+	 * Returns ow hard the brakes are applied to get a player to stop moving
 	 *
-	 * @return ow hard the brakes are applied to get a dude to stop moving
+	 * @return ow hard the brakes are applied to get a player to stop moving
 	 */
 	public float getDamping() {
 		return damping;
 	}
 	
 	/**
-	 * Returns the upper limit on dude left-right movement.  
+	 * Returns the upper limit on player left-right movement.
 	 *
 	 * This does NOT apply to vertical movement.
 	 *
-	 * @return the upper limit on dude left-right movement.  
+	 * @return the upper limit on player left-right movement.
 	 */
 	public float getMaxSpeed() {
 		return maxspeed;
@@ -177,13 +180,13 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 	/**
-	 * Creates a new dude avatar with the given physics data
+	 * Creates a new player avatar with the given physics data
 	 *
 	 * The size is expressed in physics units NOT pixels.  In order for 
 	 * drawing to work properly, you MUST set the drawScale. The drawScale 
 	 * converts the physics units to pixels.
 	 *
-	 * @param data  	The physics constants for this dude
+	 * @param data  	The physics constants for this player
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
@@ -200,6 +203,7 @@ public class PlayerModel extends CapsuleObstacle {
 		maxspeed = data.getFloat("maxspeed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
+		textureScale = data.getFloat("texturescale", 1.0f);
 		jump_force = data.getFloat( "jump_force", 0 );
 		jumpLimit = data.getInt( "jump_cool", 0 );
 		sensorName = "PlayerGroundSensor";
@@ -231,10 +235,10 @@ public class PlayerModel extends CapsuleObstacle {
 
 		// Ground Sensor
 		// -------------
-		// We only allow the dude to jump when he's on the ground. 
+		// We only allow the player to jump when he's on the ground.
 		// Double jumping is not allowed.
 		//
-		// To determine whether or not the dude is on the ground, 
+		// To determine whether or not the player is on the ground,
 		// we create a thin sensor under his feet, which reports 
 		// collisions with the world but has no collision response.
 		Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
@@ -256,7 +260,7 @@ public class PlayerModel extends CapsuleObstacle {
 	
 
 	/**
-	 * Applies the force to the body of this dude
+	 * Applies the force to the body of this player
 	 *
 	 * This method should be called after the force attribute is set.
 	 */
@@ -311,7 +315,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
-		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
 	}
 	
 	/**

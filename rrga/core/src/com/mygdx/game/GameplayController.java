@@ -4,6 +4,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 
@@ -53,12 +54,10 @@ public class GameplayController implements ContactListener {
     protected TextureRegion platformTile;
     /** Texture asset for character avatar */
     private TextureRegion avatarTexture;
-    /** Texture asset for the spinning barrier */
-    private TextureRegion barrierTexture;
-    /** Texture asset for the bridge plank */
-    private TextureRegion bridgeTexture;
     /** Texture asset for the wind gust */
     private TextureRegion windTexture;
+    /** Texture asset for umbrella */
+    private TextureRegion umbrellaTexture;
 
     /** The jump sound.  We only want to play once. */
     private Sound jumpSound;
@@ -77,6 +76,8 @@ public class GameplayController implements ContactListener {
     private JsonValue constants;
     /** Reference to the character avatar */
     private PlayerModel avatar;
+    /**Reference to the umbrella*/
+    private UmbrellaModel umbrella;
     /** Reference to the goalDoor (for collision detection) */
     private BoxObstacle goalDoor;
 
@@ -114,9 +115,9 @@ public class GameplayController implements ContactListener {
     public void gatherAssets(AssetDirectory directory) {
         platformTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
         avatarTexture  = new TextureRegion(directory.getEntry("platform:dude", Texture.class));
-        barrierTexture = new TextureRegion(directory.getEntry("platform:barrier",Texture.class));
-        bridgeTexture = new TextureRegion(directory.getEntry("platform:rope",Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind",Texture.class));
+        avatarTexture  = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
+        umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
 
         jumpSound = directory.getEntry( "platform:jump", Sound.class );
         fireSound = directory.getEntry( "platform:pew", Sound.class );
@@ -149,22 +150,22 @@ public class GameplayController implements ContactListener {
      * Lays out the game geography.
      */
     private void populateLevel() {
-        // Add level goal
+        // Add level goal - Commented Out for Now, but we will need this in future implementation
         float dwidth  = platformTile.getRegionWidth()/scale.x;
         float dheight = platformTile.getRegionHeight()/scale.y;
 
-        JsonValue goal = constants.get("goal");
-        JsonValue goalpos = goal.get("pos");
-        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(platformTile);
-        goalDoor.setName("goal");
-        addObject(goalDoor);
+//        JsonValue goal = constants.get("goal");
+//        JsonValue goalpos = goal.get("pos");
+//        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
+//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+//        goalDoor.setDensity(goal.getFloat("density", 0));
+//        goalDoor.setFriction(goal.getFloat("friction", 0));
+//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+//        goalDoor.setSensor(true);
+//        goalDoor.setDrawScale(scale);
+//        goalDoor.setTexture(platformTile);
+//        goalDoor.setName("goal");
+//        addObject(goalDoor);
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
@@ -200,13 +201,31 @@ public class GameplayController implements ContactListener {
         // This world is heavier
         world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
 
-        // Create dude
-        dwidth  = avatarTexture.getRegionWidth()/scale.x;
-        dheight = avatarTexture.getRegionHeight()/scale.y;
-        avatar = new PlayerModel(constants.get("dude"), dwidth, dheight);
+        // Create player
+        float scl = constants.get("player").getFloat("texturescale");
+        dwidth  = avatarTexture.getRegionWidth()/scale.x*scl;
+        dheight = avatarTexture.getRegionHeight()/scale.y*scl;
+        avatar = new PlayerModel(constants.get("player"), dwidth, dheight);
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         addObject(avatar);
+        scl = constants.get("umbrella").getFloat("texturescale");
+        dwidth = umbrellaTexture.getRegionWidth()/scale.x*scl;
+        dheight = umbrellaTexture.getRegionHeight()/scale.y*scl;
+        umbrella = new UmbrellaModel(constants.get("umbrella"), dwidth, dheight);
+        umbrella.setDrawScale(scale);
+        umbrella.setTexture(umbrellaTexture);
+        addObject(umbrella);
+        RevoluteJointDef jointDef = new RevoluteJointDef();
+        jointDef.collideConnected = false;
+        jointDef.enableLimit = true;
+        jointDef.lowerAngle = (float) (-Math.PI);
+        jointDef.upperAngle = (float) (Math.PI);
+        jointDef.bodyA = avatar.getBody();
+        jointDef.bodyB = umbrella.getBody();
+        jointDef.localAnchorA.set(0,0);
+        jointDef.localAnchorB.set(0,constants.get("player").get("pos").getFloat(1)-constants.get("umbrella").get("pos").getFloat(1));
+        world.createJoint(jointDef);
 
         // Create wind gusts
         String windName = "wind";
@@ -239,12 +258,18 @@ public class GameplayController implements ContactListener {
     public void update(InputController input, float dt) {
         // Process actions in object model
         avatar.setMovement(input.getHorizontal() *avatar.getForce());
-        avatar.setJumping(input.didPrimary());
+        umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
+        boolean right = umbrella.faceRight;
+        umbrella.faceRight = avatar.isFacingRight();
+        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
 
         avatar.applyForce();
+        umbrella.applyForce();
         if (avatar.isJumping()) {
 //            jumpId = playSound( jumpSound, jumpId, volume );
         }
+
+
     }
 
     /**
