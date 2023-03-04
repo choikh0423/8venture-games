@@ -1,4 +1,2 @@
 .DS_Store
-.gradle
-.idea
-desktop/build
+rrga/.gradle/
