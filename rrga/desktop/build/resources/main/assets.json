@@ -2,7 +2,6 @@
 	"textures": {
         "placeholder:background" : "placeholder/background.png",
         "placeholder:platform" : "placeholder/small_platform.png",
-        "placeholder:wind" : "placeholder/wind.png",
         "shared:earth" : {
             "file":  "shared/earthtile.png",
             "wrapU": "repeated",
