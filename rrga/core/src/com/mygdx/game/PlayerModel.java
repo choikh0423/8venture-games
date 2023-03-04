@@ -257,37 +257,56 @@ public class PlayerModel extends CapsuleObstacle {
 		
 		return true;
 	}
-	
 
 	/**
-	 * Applies the force to the body of this player
+	 * Applies force to the body of this player as given by movement.
 	 *
-	 * This method should be called after the force attribute is set.
+	 * This method should be called after the movement attribute is set.
 	 */
-	public void applyForce() {
+	public void applyInputForce() {
 		if (!isActive()) {
 			return;
 		}
-		
+
 		// Don't want to be moving. Damp out player motion
 		if (getMovement() == 0f) {
 			forceCache.set(-getDamping()*getVX(),0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
-		
-		// Velocity too high, clamp it
+
 		if (Math.abs(getVX()) >= getMaxSpeed()) {
 			setVX(Math.signum(getVX())*getMaxSpeed());
-		} else {
+		}{
 			forceCache.set(getMovement(),0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
-		// Jump!
-		if (isJumping()) {
-			forceCache.set(0, jump_force);
-			body.applyLinearImpulse(forceCache,getPosition(),true);
+		// TODO: consider/remove Jump!
+//		if (isJumping()) {
+//			forceCache.set(0, jump_force);
+//			body.applyLinearImpulse(forceCache,getPosition(),true);
+//		}
+	}
+
+	/**
+	 * Applies some external force to the body of this player.
+	 *
+	 * Horizontal component of force is ignored if player has reached horizontal maximum speed.
+	 *
+	 */
+	public void applyExternalForce(float fx, float fy) {
+		if (!isActive()) {
+			return;
 		}
+		if (Math.abs(getVX()) >= getMaxSpeed()) {
+			setVX(Math.signum(getVX())*getMaxSpeed());
+		}
+		else {
+			forceCache.set(fx,0);
+			body.applyForce(forceCache,getPosition(),true);
+		}
+		forceCache.set(0,fy);
+		body.applyForce(forceCache, getPosition(), true);
 	}
 	
 	/**

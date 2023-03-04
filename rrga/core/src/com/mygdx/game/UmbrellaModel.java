@@ -43,7 +43,7 @@ public class UmbrellaModel extends BoxObstacle {
     /** Returns the angle away from the x-axis of the umbrella.
      * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC.
      * */
-    public float getRotation(){return rotation;}
+    public float getRotation(){return getAngle()+(float)Math.PI/2;}
 
     public float getForce(){return force;}
 
