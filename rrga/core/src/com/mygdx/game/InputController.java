@@ -100,7 +100,6 @@ public class InputController {
      * @return true if the reset button was pressed.
      */
     public boolean didReset() {
-        System.out.println("IN!!!");
         return resetPressed && !resetPrevious;
     }
 
