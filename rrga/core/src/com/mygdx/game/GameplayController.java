@@ -235,6 +235,9 @@ public class GameplayController implements ContactListener {
         // Process actions in object model
         avatar.setMovement(input.getHorizontal() *avatar.getForce());
         umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
+        boolean right = umbrella.faceRight;
+        umbrella.faceRight = avatar.isFacingRight();
+        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
 
         avatar.applyForce();
         umbrella.applyForce();

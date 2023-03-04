@@ -13,7 +13,7 @@ public class UmbrellaModel extends BoxObstacle {
     /** Identifier to allow us to track the sensor in ContactListener */
     private String sensorName;
     /** Which direction is the umbrella facing */
-    private boolean faceRight;
+    public boolean faceRight;
     /** The current angular rotation of the umbrella */
     private float turning;
     /** The scale to multiply the texture by for drawing */
