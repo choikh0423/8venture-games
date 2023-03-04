@@ -83,6 +83,11 @@ public class GameplayController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
+    /** The set of all wind bodies in a level */
+    protected ObjectSet<Body> winds;
+
+
+
     /**
      * Creates and initialize a new instance of the platformer game
      *
@@ -213,6 +218,7 @@ public class GameplayController implements ContactListener {
             obj.setTexture(windTexture);
             obj.setName(windName+ii);
             addObject(obj);
+            winds.add(obj.getBody());
         }
 
 
@@ -270,6 +276,16 @@ public class GameplayController implements ContactListener {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
             }
+
+            //something along these lines, can't really implement further until merged with movement branch
+            //if (bd1==umbrella && winds.contains(bd2) || (bd2==umbrella && winds.contains(bd1) {
+                //float ang = umbrella.getRotation;
+                //float umbrellax = (float) Math.cos(ang);
+                //float umbrellay = (float) Math.sin(ang);
+                //umbrella.setVX(umbrella.getVX()+ umbrellax*wind.getWindForce(umbrella));
+                //umbrella.setVY(umbrella.getVY()+ umbrellay*wind.getWindForce(umbrella));
+            //}
+
 
             // Check for win condition
             if ((bd1 == avatar   && bd2 == goalDoor) ||
