@@ -29,7 +29,7 @@
 		"texturescale": 0.0625
 	},
 	"umbrella" : {
-		"pos": [2.5, 5.2],
+		"pos": [5.0, 14.2],
 		"shrink": [0.7, 0.95],
 		"force": 3.0,
 		"damping": 10.0,
