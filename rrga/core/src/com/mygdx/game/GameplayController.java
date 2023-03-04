@@ -84,8 +84,8 @@ public class GameplayController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    /** The set of all wind bodies in a level */
-    protected ObjectSet<Body> winds = new ObjectSet<>();
+    /** The set of all wind bodies that umbrella in contact with */
+    protected ObjectSet<WindModel> contactWinds = new ObjectSet<>();
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -236,7 +236,6 @@ public class GameplayController implements ContactListener {
             obj.setTexture(windTexture);
             obj.setName(windName+ii);
             addObject(obj);
-            winds.add(obj.getBody());
         }
 
 
@@ -255,17 +254,50 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Process actions in object model
+        if (!inBounds(avatar)){
+            reset();
+            return;
+        }
+
+        boolean touching_wind = contactWinds.size > 0;
+        float ang = umbrella.getRotation();
+        float umbrellaX = (float) Math.cos(ang);
+        float umbrellaY = (float) Math.sin(ang);
+        for (WindModel w : contactWinds){
+            float f = w.getWindForce(ang);
+            System.out.println("fx : " + umbrellaX * f);
+            System.out.println("fy : " + umbrellaY * f);
+            avatar.applyExternalForce(umbrellaX * f , umbrellaY * f);
+        }
+
         avatar.setMovement(input.getHorizontal() *avatar.getForce());
         umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
+
         boolean right = umbrella.faceRight;
         umbrella.faceRight = avatar.isFacingRight();
         if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
 
-        avatar.applyForce();
-        umbrella.applyForce();
-        if (avatar.isJumping()) {
-//            jumpId = playSound( jumpSound, jumpId, volume );
+        // Process actions in object model
+        if (avatar.isGrounded()){
+            avatar.setMovement(input.getHorizontal() *avatar.getForce());
+            avatar.applyInputForce();
         }
+        else if (!touching_wind){
+            // player must be falling through AIR
+            // apply horizontal force based on rotation, and upward drag.
+            float angle = umbrella.getRotation();
+            int scl = 10;
+            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+        }
+
+        umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
+        umbrella.applyForce();
+
+        /*
+        if (avatar.isJumping()) {
+            jumpId = playSound( jumpSound, jumpId, volume );
+        }
+        */
 
 
     }
@@ -294,20 +326,23 @@ public class GameplayController implements ContactListener {
             Obstacle bd2 = (Obstacle)body2.getUserData();
 
             // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
+            if ((avatar.getSensorName().equals(fd2) && bd1.getName().contains("platform")) ||
+                    (avatar.getSensorName().equals(fd1) && bd2.getName().contains("platform"))) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
             }
 
-            //something along these lines, can't really implement further until merged with movement branch
-            //if (bd1==umbrella && winds.contains(bd2) || (bd2==umbrella && winds.contains(bd1) {
-                //float ang = umbrella.getRotation;
-                //float umbrellax = (float) Math.cos(ang);
-                //float umbrellay = (float) Math.sin(ang);
-                //umbrella.setVX(umbrella.getVX()+ umbrellax*wind.getWindForce(umbrella));
-                //umbrella.setVY(umbrella.getVY()+ umbrellay*wind.getWindForce(umbrella));
-            //}
+            // See if umbrella touches wind
+            if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
+                    (umbrella == bd1 && bd2.getName().contains("wind"))) {
+                System.out.println("yes");
+                WindModel wind = (WindModel) (umbrella == bd2 ? bd1 : bd2);
+                contactWinds.add(wind);
+//                float ang = umbrella.getRotation();
+//                float umbrellaX = (float) Math.cos(ang);
+//                float umbrellaY = (float) Math.sin(ang);
+//                avatar.applyExternalForce(0,10);
+            }
 
             // Check for win condition
             if ((bd1 == avatar   && bd2 == goalDoor) ||
@@ -337,8 +372,8 @@ public class GameplayController implements ContactListener {
         Object fd1 = fix1.getUserData();
         Object fd2 = fix2.getUserData();
 
-        Object bd1 = body1.getUserData();
-        Object bd2 = body2.getUserData();
+        Obstacle bd1 = (Obstacle) body1.getUserData();
+        Obstacle bd2 = (Obstacle) body2.getUserData();
 
         if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
                 (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
@@ -346,6 +381,12 @@ public class GameplayController implements ContactListener {
             if (sensorFixtures.size == 0) {
                 avatar.setGrounded(false);
             }
+        }
+
+        if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
+                (umbrella == bd1 && bd2.getName().contains("wind"))) {
+            WindModel wind = (WindModel) (umbrella == bd2 ? bd1 : bd2);
+            contactWinds.remove(wind);
         }
     }
 
