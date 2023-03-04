@@ -12,7 +12,7 @@
     	"friction": 0.0,
     	"restitution": 0.0
     },
-	"dude" : {
+	"player": {
 		"pos": [2.5, 5.0],
 		"shrink": [0.7, 0.95],
 		"force": 20.0,
@@ -22,29 +22,26 @@
 		"maxspeed": 5.0,
 		"jump_force": 5.5,
 		"jump_cool": 30,
-		"shot_cool": 40,
 		"sensor": {
 			"shrink" : 0.6,
 			"height" : 0.05
-		}
+		},
+		"texturescale": 0.0625
 	},
-	"bridge" : {
-		"pos": [9.0, 3.8],
-	    "width": 14.0,
+	"umbrella" : {
+		"pos": [2.5, 5.2],
+		"shrink": [0.7, 0.95],
+		"force": 3.0,
+		"damping": 10.0,
 		"density": 1.0,
-		"pin_radius": 0.1
+		"friction": 0.0,
+		"maxspeed": 5.0,
+		"sensor": {
+			"shrink" : 0.6,
+			"height" : 0.05
+		},
+		"texturescale": 0.0625
 	},
-	"spinner" : {
-		"pos": [13.0,12.5],
-		"low_density" : 0.0,
-		"high_density": 10.0,
-		"radius": 0.1
-	},
-    "bullet": {
-    	"offset" : 0.2,
-    	"speed"  : 20.0,
-		"density": 10.0
-    },
 	"walls": 		[ 
 			 			[16.0, 18.0, 16.0, 17.0,  1.0, 17.0,  
 			 			  1.0,  0.0,  0.0,  0.0,  0.0, 18.0],
