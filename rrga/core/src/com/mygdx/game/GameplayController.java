@@ -84,7 +84,7 @@ public class GameplayController implements ContactListener {
     protected ObjectSet<Fixture> sensorFixtures;
 
     /** The set of all wind bodies in a level */
-    protected ObjectSet<Body> winds;
+    protected ObjectSet<Body> winds = new ObjectSet<>();
 
 
 
