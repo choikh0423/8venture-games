@@ -141,22 +141,22 @@ public class GameplayController implements ContactListener {
      * Lays out the game geography.
      */
     private void populateLevel() {
-        // Add level goal
+        // Add level goal - Commented Out for Now, but we will need this in future implementation
         float dwidth  = platformTile.getRegionWidth()/scale.x;
         float dheight = platformTile.getRegionHeight()/scale.y;
 
-        JsonValue goal = constants.get("goal");
-        JsonValue goalpos = goal.get("pos");
-        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(platformTile);
-        goalDoor.setName("goal");
-        addObject(goalDoor);
+//        JsonValue goal = constants.get("goal");
+//        JsonValue goalpos = goal.get("pos");
+//        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
+//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+//        goalDoor.setDensity(goal.getFloat("density", 0));
+//        goalDoor.setFriction(goal.getFloat("friction", 0));
+//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+//        goalDoor.setSensor(true);
+//        goalDoor.setDrawScale(scale);
+//        goalDoor.setTexture(platformTile);
+//        goalDoor.setName("goal");
+//        addObject(goalDoor);
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
