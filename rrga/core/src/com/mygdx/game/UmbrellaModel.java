@@ -27,7 +27,10 @@ public class UmbrellaModel extends BoxObstacle {
         setDensity(data.getFloat("density", 0));
         setFriction(data.getFloat("friction", 0));  /// WILL STICK TO WALLS IF YOU FORGET
         setFixedRotation(false);
+        //if we don't do this, the umbrella doesn't stay in position
         setGravityScale(0);
+        //makes sure the umbrella doesn't collide with platforms
+        setSensor(true);
 
         force = data.getFloat("force", 0);
         textureScale = data.getFloat("texturescale", 1.0f);
