@@ -1,4 +1,5 @@
 # 8venture-games
+Note for Professor White and TAs: For our first sprint, we were unsuccessful of merging different branches due to build files. Therefore, our contributors on the github may be inaccurate. Please refer to the status report for accurate contribution information! Thank you, and we appologize for any inconveniences.
 
 ## Getting Started
 1. Open project with build.gradle > "Open as Project"
