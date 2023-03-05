@@ -1,5 +1,14 @@
-rrga/.DS_Store
+.DS_Store
 
+
+# Build Related
 rrga/.gradle/
+rrga/.idea/
 rrga/desktop/build/
 rrga/core/build/
+
+# Build Artifact Related
+rrga/desktop/out/
+rrga/core/resources/
+
+/.idea/

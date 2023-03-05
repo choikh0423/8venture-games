@@ -34,8 +34,10 @@ public class PlayerModel extends CapsuleObstacle {
 	private final float force;
 	/** The amount to slow the character down */
 	private final float damping;
-	/** The maximum character speed */
-	private final float maxspeed;
+	/** The maximum character horizontal speed */
+	private final float maxspeed_x;
+	/** The maximum character vertical speed */
+	private final float maxspeed_y;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
 	/** The impulse for the character jump */
@@ -155,8 +157,19 @@ public class PlayerModel extends CapsuleObstacle {
 	 *
 	 * @return the upper limit on player left-right movement.
 	 */
-	public float getMaxSpeed() {
-		return maxspeed;
+	public float getMaxSpeedX() {
+		return maxspeed_x;
+	}
+
+	/**
+	 * Returns the upper limit on player vertical movement.
+	 *
+	 * This does NOT apply to vertical movement.
+	 *
+	 * @return the upper limit on player left-right movement.
+	 */
+	public float getMaxSpeedY() {
+		return maxspeed_y;
 	}
 
 	/**
@@ -200,7 +213,8 @@ public class PlayerModel extends CapsuleObstacle {
 		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
 
-		maxspeed = data.getFloat("maxspeed", 0);
+		maxspeed_x = data.getFloat("maxspeed_x", 0);
+		maxspeed_y = data.getFloat("maxspeed_y", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
@@ -275,8 +289,8 @@ public class PlayerModel extends CapsuleObstacle {
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
-		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX())*getMaxSpeed());
+		if (Math.abs(getVX()) >= getMaxSpeedX()) {
+			setVX(Math.signum(getVX())*getMaxSpeedX());
 		}{
 			forceCache.set(getMovement(),0);
 			body.applyForce(forceCache,getPosition(),true);
@@ -299,15 +313,21 @@ public class PlayerModel extends CapsuleObstacle {
 		if (!isActive()) {
 			return;
 		}
-		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX())*getMaxSpeed());
+		if (Math.abs(getVX()) >= getMaxSpeedX()) {
+			setVX(Math.signum(getVX())*getMaxSpeedX());
 		}
 		else {
 			forceCache.set(fx,0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
-		forceCache.set(0,fy);
-		body.applyForce(forceCache, getPosition(), true);
+
+		if (Math.abs(getVY()) >= getMaxSpeedY()) {
+			setVY(Math.signum(getVY())*getMaxSpeedY());
+		} else {
+			forceCache.set(0,fy);
+			body.applyForce(forceCache, getPosition(), true);
+		}
+
 	}
 	
 	/**

@@ -19,7 +19,8 @@
 		"damping": 10.0,
 		"density": 1.0,
 		"friction": 0.0,
-		"maxspeed": 5.0,
+		"maxspeed_x": 5.0,
+		"maxspeed_y": 7.0,
 		"jump_force": 5.5,
 		"jump_cool": 30,
 		"sensor": {
