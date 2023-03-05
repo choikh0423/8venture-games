@@ -15,6 +15,7 @@ import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
 
+import java.nio.channels.FileChannel;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
@@ -84,8 +85,11 @@ public class GameplayController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
+    /** The set of all wind fixtures that umbrella in contact with */
+    protected ObjectSet<Fixture> contactWindFix = new ObjectSet<>();
+
     /** The set of all wind bodies that umbrella in contact with */
-    protected ObjectSet<WindModel> contactWinds = new ObjectSet<>();
+    protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -259,16 +263,21 @@ public class GameplayController implements ContactListener {
             return;
         }
 
-        boolean touching_wind = contactWinds.size > 0;
+        boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
-        for (WindModel w : contactWinds){
-            float f = w.getWindForce(ang);
+        for (Fixture w : contactWindFix){
+            WindModel bod = (WindModel) w.getBody().getUserData();
+            float f = bod.getWindForce(ang);
             System.out.println("fx : " + umbrellaX * f);
             System.out.println("fy : " + umbrellaY * f);
-            avatar.applyExternalForce(umbrellaX * f , umbrellaY * f);
+            if(!contactWindBod.contains(bod)) {
+                avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
+                contactWindBod.add(bod);
+            }
         }
+        contactWindBod.clear();
 
         avatar.setMovement(input.getHorizontal() *avatar.getForce());
         umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
@@ -336,8 +345,8 @@ public class GameplayController implements ContactListener {
             if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
                     (umbrella == bd1 && bd2.getName().contains("wind"))) {
                 System.out.println("yes");
-                WindModel wind = (WindModel) (umbrella == bd2 ? bd1 : bd2);
-                contactWinds.add(wind);
+                Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
+                contactWindFix.add(windFix);
 //                float ang = umbrella.getRotation();
 //                float umbrellaX = (float) Math.cos(ang);
 //                float umbrellaY = (float) Math.sin(ang);
@@ -385,8 +394,9 @@ public class GameplayController implements ContactListener {
 
         if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
                 (umbrella == bd1 && bd2.getName().contains("wind"))) {
-            WindModel wind = (WindModel) (umbrella == bd2 ? bd1 : bd2);
-            contactWinds.remove(wind);
+            Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
+            System.out.println("no");
+            contactWindFix.remove(windFix);
         }
     }
 
