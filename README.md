@@ -12,6 +12,13 @@
   - working directory: rrga/assets
 5. Press OK > Build/Run
 
+## Running Executables
+For MacOS:
+java -XstartOnFirstThread -jar rrga_gameplay_prototype.jar
+
+For Windows:
+java -jar rrga_gameplay_prototype.jar
+
 ## Basic Architecture
 **GameMode**
 - State Controls
