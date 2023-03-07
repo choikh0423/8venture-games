@@ -31,6 +31,7 @@ public class WindModel extends PolygonObstacle {
         super(data.get(0).asFloatArray(), data.getFloat(1), data.getFloat(2));
         magnitude = data.getFloat(3);
         direction = data.getFloat(4);
+        setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
         setFriction(0);
