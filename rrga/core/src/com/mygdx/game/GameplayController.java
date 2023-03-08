@@ -279,12 +279,9 @@ public class GameplayController implements ContactListener {
         }
         contactWindBod.clear();
 
-        avatar.setMovement(input.getHorizontal() *avatar.getForce());
-        umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
-
-        boolean right = umbrella.faceRight;
-        umbrella.faceRight = avatar.isFacingRight();
-        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
+        //Commented this out since it looks like this is handled below
+        //avatar.setMovement(input.getHorizontal() *avatar.getForce());
+        //umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
 
         // Process actions in object model
         if (avatar.isGrounded()){
@@ -298,6 +295,11 @@ public class GameplayController implements ContactListener {
             int scl = 10;
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
         }
+
+        // Flip umbrella if player turned
+        boolean right = umbrella.faceRight;
+        umbrella.faceRight = avatar.isFacingRight();
+        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
 
         umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
         umbrella.applyForce();
