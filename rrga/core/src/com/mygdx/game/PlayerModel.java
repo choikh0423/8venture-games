@@ -57,9 +57,12 @@ public class PlayerModel extends CapsuleObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
-
 	/** The scale to multiply the texture by for drawing */
 	private float textureScale;
+	/** Max player hp */
+	private int MAX_HEALTH;
+	/** Player hp */
+	private int health;
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -190,6 +193,36 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public boolean isFacingRight() {
 		return faceRight;
+	}
+
+	/**
+	 * Returns the player's max hp. Should only be used when initializing the player
+	 *
+	 * @return the max hp
+	 */
+	public int getMaxHealth(){return MAX_HEALTH;}
+	/**
+	 * Sets the player's max hp. Should only be used when initializing the player
+	 *
+	 * @param hp the new max hp value
+	 */
+	public void setMaxHealth(int hp){MAX_HEALTH = hp;}
+	/**
+	 * Returns the player's current hp
+	 *
+	 * @return the current hp
+	 */
+	public int getHealth(){return health;}
+	/**
+	 * Sets the player's current hp. If this value is above the maximum,
+	 * sets it to the maximum. If this value is below 0, sets it to 0.
+	 *
+	 * @param hp the new hp value
+	 */
+	public void setHealth(int hp){
+		if (hp < 0) health = 0;
+		else if (hp > MAX_HEALTH) health = MAX_HEALTH;
+		else health = hp;
 	}
 
 	/**

@@ -27,7 +27,8 @@
 			"shrink" : 0.6,
 			"height" : 0.05
 		},
-		"texturescale": 0.0625
+		"texturescale": 0.0625,
+		"maxhealth": 3
 	},
 	"umbrella" : {
 		"pos": [7.0, 3.2],

@@ -59,6 +59,8 @@ public class GameplayController implements ContactListener {
     private TextureRegion windTexture;
     /** Texture asset for umbrella */
     private TextureRegion umbrellaTexture;
+    /** Texture asset for closed umbrella */
+    private TextureRegion closedTexture;
 
     /** The jump sound.  We only want to play once. */
     private Sound jumpSound;
@@ -118,6 +120,7 @@ public class GameplayController implements ContactListener {
         platformTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
         avatarTexture  = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
+        closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind",Texture.class));
 
         jumpSound = directory.getEntry( "platform:jump", Sound.class );
@@ -211,6 +214,7 @@ public class GameplayController implements ContactListener {
         avatar = new PlayerModel(constants.get("player"), dwidth, dheight);
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
+        avatar.setMaxHealth(constants.get("player").getInt("maxhealth"));
         addObject(avatar);
         scl = constants.get("umbrella").getFloat("texturescale");
         dwidth = umbrellaTexture.getRegionWidth()/scale.x*scl;
@@ -263,6 +267,13 @@ public class GameplayController implements ContactListener {
             return;
         }
 
+        // Check for whether the player toggled the umbrella being open/closed
+        if (input.didToggle()){
+            umbrella.setOpen(!umbrella.isOpen());
+            if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
+            else umbrella.setTexture(closedTexture);
+        }
+
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
@@ -270,9 +281,9 @@ public class GameplayController implements ContactListener {
         for (Fixture w : contactWindFix){
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
-//            System.out.println("fx : " + umbrellaX * f);
-//            System.out.println("fy : " + umbrellaY * f);
-            if(!contactWindBod.contains(bod)) {
+//                System.out.println("fx : " + umbrellaX * f);
+//                System.out.println("fy : " + umbrellaY * f);
+            if(!contactWindBod.contains(bod) && umbrella.isOpen()) {
                 avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
@@ -288,12 +299,15 @@ public class GameplayController implements ContactListener {
             avatar.setMovement(input.getHorizontal() *avatar.getForce());
             avatar.applyInputForce();
         }
-        else if (!touching_wind){
+        else if (!touching_wind && umbrella.isOpen()){
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation();
             int scl = 10;
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+        } else if (!umbrella.isOpen()){
+            //TODO: kill horizontal force/acceleration, set vertical force/acceleration
+            // to just be gravity
         }
 
         // Flip umbrella if player turned
