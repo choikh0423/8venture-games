@@ -11,8 +11,8 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import com.mygdx.game.Hazards.BirdHazard;
-import com.mygdx.game.Hazards.HazardModel;
+import com.mygdx.game.hazard.BirdHazard;
+import com.mygdx.game.hazard.HazardModel;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -96,6 +96,11 @@ public class GameplayController implements ContactListener {
     private TextureRegion umbrellaTexture;
 
     /**
+     * Texture asset for a bird
+     */
+    private TextureRegion birdTexture;
+
+    /**
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
@@ -151,7 +156,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all wind birds currently in the level
      */
-    private ObjectSet<BirdHazard> birds;
+    private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
     /**
      * Whether the player currently has i-frames/is invincible.
@@ -187,6 +192,7 @@ public class GameplayController implements ContactListener {
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
+        birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
 
         jumpSound = directory.getEntry("platform:jump", Sound.class);
         fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -310,6 +316,18 @@ public class GameplayController implements ContactListener {
             addObject(obj);
         }
 
+        //create birds
+        String birdName = "bird";
+        JsonValue birdjv = constants.get("birds");
+        for (int ii = 0; ii < birdjv.size; ii++) {
+            BirdHazard obj;
+            obj = new BirdHazard(birdjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(birdTexture);
+            obj.setName(birdName + ii);
+            addObject(obj);
+            birds.add(obj);
+        }
 
         volume = constants.getFloat("volume", 1.0f);
     }
@@ -374,7 +392,7 @@ public class GameplayController implements ContactListener {
         */
 
         //move the birds
-        for(BirdHazard b : birds){
+        for (BirdHazard b : birds) {
             b.move();
         }
 
@@ -435,8 +453,11 @@ public class GameplayController implements ContactListener {
             // check for bird sensor collision
             if ((avatar == bd1 && fd2 == "birdSensor") ||
                     (avatar == bd2 && fd1 == "birdSensor")) {
-                BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ?  bd1 : bd2);
-                bird.seesTarget = true;
+                BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
+                if (!bird.seesTarget) {
+                    bird.seesTarget = true;
+                    bird.setTargetDir(avatar.getX(), avatar.getY());
+                }
             }
 
             // Check for win condition
@@ -574,6 +595,7 @@ public class GameplayController implements ContactListener {
             if (obj.isRemoved()) {
                 obj.deactivatePhysics(world);
                 entry.remove();
+                if (obj.getClass() == BirdHazard.class) birds.remove((BirdHazard) obj);
             } else {
                 // Note that update is called last!
                 obj.update(dt);

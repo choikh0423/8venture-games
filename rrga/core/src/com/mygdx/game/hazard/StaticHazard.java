@@ -1,4 +1,4 @@
-package com.mygdx.game.Hazards;
+package com.mygdx.game.hazard;
 
 import com.badlogic.gdx.utils.JsonValue;
 

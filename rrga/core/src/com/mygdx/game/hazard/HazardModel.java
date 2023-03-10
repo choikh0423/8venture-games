@@ -1,4 +1,4 @@
-package com.mygdx.game.Hazards;
+package com.mygdx.game.hazard;
 
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
@@ -27,7 +27,7 @@ public abstract class HazardModel extends PolygonObstacle {
     }
 
     public HazardModel(JsonValue data) {
-        super(data.get(0).asFloatArray(), data.getFloat(1), data.getFloat(2));
+        super(data.get("points").asFloatArray(), data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
         setFriction(0);
