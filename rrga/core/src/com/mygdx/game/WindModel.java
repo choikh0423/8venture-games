@@ -12,6 +12,11 @@ import com.mygdx.game.obstacle.*;
  * to make drawing manageable/easier
  */
 public class WindModel extends PolygonObstacle {
+
+    private final float STRONG_WIND_SPEED = 20.0f;
+    private final float MED_WIND_SPEED = 15.0f;
+    private final float WEAK_WIND_SPEED = 10.0f;
+
     /**
      * The initializing data (to avoid magic numbers)
      */
@@ -29,6 +34,22 @@ public class WindModel extends PolygonObstacle {
 
     public WindModel(JsonValue data) {
         super(data.get(0).asFloatArray(), data.getFloat(1), data.getFloat(2));
+/*        int mag  = data.getInt(3);
+        float set_mag = 0;
+        switch (mag) {
+            case 1:
+                set_mag = WEAK_WIND_SPEED;
+                break;
+            case 2:
+                set_mag = MED_WIND_SPEED;
+                break;
+            case 3:
+                set_mag = STRONG_WIND_SPEED;
+                break;
+            default:
+                throw new Error("invalid wind speed in JSON");
+        }
+        magnitude = set_mag;*/
         magnitude = data.getFloat(3);
         direction = data.getFloat(4);
         setAngle(direction-((float) Math.PI/2));

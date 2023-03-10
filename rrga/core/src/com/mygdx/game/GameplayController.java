@@ -11,11 +11,12 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import com.mygdx.game.Hazards.BirdHazard;
+import com.mygdx.game.Hazards.HazardModel;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
 
-import java.nio.channels.FileChannel;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
@@ -146,6 +147,17 @@ public class GameplayController implements ContactListener {
      * The set of all wind bodies that umbrella in contact with
      */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+
+    /**
+     * The set of all wind birds currently in the level
+     */
+    private ObjectSet<BirdHazard> birds;
+
+    /**
+     * Whether the player currently has i-frames/is invincible.
+     * Need to implement
+     */
+    private boolean playerIFrames;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -361,6 +373,10 @@ public class GameplayController implements ContactListener {
         }
         */
 
+        //move the birds
+        for(BirdHazard b : birds){
+            b.move();
+        }
 
     }
 
@@ -401,17 +417,26 @@ public class GameplayController implements ContactListener {
                 contactWindFix.add(windFix);
             }
 
-            // Check for obstacle collision
-            if (((umbrella == bd2 || avatar == bd2) && (bd1.getClass() == HazardModel.class)) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2.getClass() == HazardModel.class))) {
-                //if (health - 1 != 0){
-                //  health -= 1;
+            // Check for hazard collision
+            if (((umbrella == bd2 || avatar == bd2) && (bd1.getClass() == HazardModel.class && !fix1.isSensor())) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2.getClass() == HazardModel.class && !fix2.isSensor()))) {
+                // HazardModel h = (bd1.getClass() == HazardModel.class ? bd1 : bd2)
+                // int dam = h.getDamage();
+                //if (health - dam <= 0){
+                //  health -= dam;
                 //  i frames? Would need a boolean variable in avatar that tells if invincible or not,
                 // and a way to count down and change this variable
                 //}
                 //else{
                 //  lose condition
                 //}
+            }
+
+            // check for bird sensor collision
+            if ((avatar == bd1 && fd2 == "birdSensor") ||
+                    (avatar == bd2 && fd1 == "birdSensor")) {
+                BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ?  bd1 : bd2);
+                bird.seesTarget = true;
             }
 
             // Check for win condition
@@ -455,7 +480,6 @@ public class GameplayController implements ContactListener {
         if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
                 (umbrella == bd1 && bd2.getName().contains("wind"))) {
             Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
-//            System.out.println("no");
             contactWindFix.remove(windFix);
         }
     }
