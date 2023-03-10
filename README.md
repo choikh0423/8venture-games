@@ -2,7 +2,7 @@
 **Note for Professor White and TAs:** For our first sprint, we were unsuccessful of merging different branches due to build files. Therefore, our contributors on the github may be inaccurate. Please refer to the status report for accurate contribution information! Thank you, and we appologize for any inconveniences.
 
 ## External Links
-Programming Sprint Board: https://www.notion.so/84f28aac67f1412ca7d8f1563ed1392e?v=63916ed0dc8a4220a1dfec5196c8d02e&pvs=4
+Programming Sprint Board: https://glen-crabapple-3a3.notion.site/84f28aac67f1412ca7d8f1563ed1392e?v=63916ed0dc8a4220a1dfec5196c8d02e
 
 ## Getting Started
 1. Open project with build.gradle > "Open as Project"
