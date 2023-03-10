@@ -99,9 +99,6 @@ public class BirdHazard extends HazardModel{
     }
 
     public void move(){
-        System.out.println(Arrays.toString(path));
-        System.out.println(currentPathIndex);
-        System.out.println(getX() + " " + getY());
         if(!seesTarget) {
             float pathX = path[currentPathIndex];
             float pathY = path[currentPathIndex + 1];
@@ -148,6 +145,7 @@ public class BirdHazard extends HazardModel{
             //move in direction of targetCoords until offscreen
             setX(getX() + (targetDir.x / 100));
             setY(getY() + (targetDir.y / 100));
+            //Need some way to delete when offscreen, should be handled by gamecontroller
         }
     }
 
