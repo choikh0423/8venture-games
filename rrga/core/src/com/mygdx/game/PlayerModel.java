@@ -64,6 +64,11 @@ public class PlayerModel extends CapsuleObstacle {
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
+	/**
+	 * Whether the player currently has i-frames/is invincible.
+	 */
+	private int iFrames;
+
 
 	/**
 	 * Returns left/right movement of this character.
@@ -230,6 +235,7 @@ public class PlayerModel extends CapsuleObstacle {
 
 		jumpCooldown = 0;
 		setName("player");
+		iFrames = 0;
 	}
 
 	/**
@@ -344,6 +350,7 @@ public class PlayerModel extends CapsuleObstacle {
 		} else {
 			jumpCooldown = Math.max(0, jumpCooldown - 1);
 		}
+		if(iFrames!=0) iFrames--;
 
 		super.update(dt);
 	}
@@ -355,6 +362,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
+		//going to want to have a flashing avatar when i frames != 0, new texture?
 		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
 	}
 	

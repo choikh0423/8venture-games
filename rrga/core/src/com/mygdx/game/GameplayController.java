@@ -46,6 +46,8 @@ public class GameplayController implements ContactListener {
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
+    public static final int NUM_I_FRAMES = 30;
+
 
     /**
      * All the objects in the world.
@@ -157,12 +159,6 @@ public class GameplayController implements ContactListener {
      * The set of all wind birds currently in the level
      */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
-
-    /**
-     * Whether the player currently has i-frames/is invincible.
-     * Need to implement
-     */
-    private boolean playerIFrames;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -445,13 +441,14 @@ public class GameplayController implements ContactListener {
                     ((umbrella == bd1 || avatar == bd1) && (bd2.getClass() == HazardModel.class && !fix2.isSensor()))) {
                 // HazardModel h = (bd1.getClass() == HazardModel.class ? bd1 : bd2)
                 // int dam = h.getDamage();
-                //if (health - dam <= 0){
-                //  health -= dam;
-                //  i frames? Would need a boolean variable in avatar that tells if invincible or not,
-                // and a way to count down and change this variable
-                //}
-                //else{
-                //  lose condition
+                //if (avatar.iFrames == 0){
+                //  if (health - dam <= 0 ){
+                //      health -= dam;
+                //      avatar.iFrames = NUM_I_FRAMES
+                //  }
+                //  else{
+                //      lose condition
+                //  }
                 //}
             }
 

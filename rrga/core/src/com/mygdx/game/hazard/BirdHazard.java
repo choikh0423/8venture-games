@@ -36,6 +36,9 @@ public class BirdHazard extends HazardModel{
     /** The coordinates this bird is currently moving to */
     private Vector2 move= new Vector2();
 
+    /** Which direction is the bird facing */
+    private boolean faceRight;
+
     /** If patrol is true, bird will go back and forth along its path.
      * If false, bird will disappear after reaching last point on path */
     private boolean patrol;
@@ -76,6 +79,7 @@ public class BirdHazard extends HazardModel{
         currentPathIndex = 0;
         sensorName = "birdSensor";
         seesTarget = false;
+        faceRight = true;
     }
 
     public boolean activatePhysics(World world) {
@@ -139,6 +143,8 @@ public class BirdHazard extends HazardModel{
                 else setX(getX() + (move.x / 100));
                 if(Math.abs((move.y / 100)) > Math.abs(pathY-getY())) setY(pathY);
                 else setY(getY() + (move.y / 100));
+                if(move.x > 0) faceRight = true;
+                else faceRight = false;
             }
         }
         else{
@@ -147,6 +153,16 @@ public class BirdHazard extends HazardModel{
             setY(getY() + (targetDir.y / 100));
             //Need some way to delete when offscreen, should be handled by gamecontroller
         }
+    }
+
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        float effect = faceRight ? 1.0f : -1.0f;
+        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*1,1);
     }
 
     /**
