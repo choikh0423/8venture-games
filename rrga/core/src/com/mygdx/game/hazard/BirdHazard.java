@@ -21,7 +21,7 @@ public class BirdHazard extends HazardModel{
     private CircleShape sensorShape;
 
     /** A list of points which represent this bird's flight path.
-     * Invariant: length >=2 and length is even.
+     * Invariant: length >=4 and length is even.
      */
     private float[] path;
 
@@ -72,7 +72,7 @@ public class BirdHazard extends HazardModel{
         super(data);
         path = data.get("path").asFloatArray();
         moveSpeed = data.getInt("movespeed");
-        //add patrol parameter to JSON?
+        patrol = data.getBoolean("patrol");
         currentPathIndex = 0;
         sensorName = "birdSensor";
         seesTarget = false;
@@ -100,13 +100,15 @@ public class BirdHazard extends HazardModel{
 
     public void move(){
         System.out.println(Arrays.toString(path));
+        System.out.println(currentPathIndex);
+        System.out.println(getX() + " " + getY());
         if(!seesTarget) {
             float pathX = path[currentPathIndex];
             float pathY = path[currentPathIndex + 1];
             float moveX = pathX - getX();
             float moveY = pathY - getY();
             //if at next point in path
-            if (moveX < .001 && moveY < .001) {
+            if (Math.abs(moveX) < .001 && Math.abs(moveY) < .001) {
                 //if at end of path
                 if(currentPathIndex == path.length - 2){
                     //if patrol
@@ -114,10 +116,10 @@ public class BirdHazard extends HazardModel{
                         for (int i = 0; i < path.length / 2; i+=2) {
                             float temp1 = path[i];
                             float temp2 = path[i+1];
-                            path[i] = path[path.length - i - 1];
-                            path[i+1] = path[path.length - i];
-                            path[path.length - i - 1] = temp1;
-                            path[path.length - i] = temp2;
+                            path[i] = path[path.length - i - 2];
+                            path[i+1] = path[path.length - i - 1];
+                            path[path.length - i - 2] = temp1;
+                            path[path.length - i - 1] = temp2;
                         }
                         currentPathIndex = 0;
                     }
@@ -136,8 +138,10 @@ public class BirdHazard extends HazardModel{
                 move.set(moveX, moveY);
                 move.nor();
                 move.scl(moveSpeed);
-                setX(getX() + (move.x / 100));
-                setY(getY() + (move.y / 100));
+                if(Math.abs((move.x / 100)) > Math.abs(pathX-getX())) setX(pathX);
+                else setX(getX() + (move.x / 100));
+                if(Math.abs((move.y / 100)) > Math.abs(pathY-getY())) setY(pathY);
+                else setY(getY() + (move.y / 100));
             }
         }
         else{
