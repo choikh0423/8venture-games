@@ -1,7 +1,9 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -96,6 +98,8 @@ public class GameplayController implements ContactListener {
      * Texture asset for umbrella
      */
     private TextureRegion umbrellaTexture;
+    /** Texture asset for closed umbrella */
+    private TextureRegion closedTexture;
 
     /**
      * Texture asset for a bird
@@ -154,6 +158,7 @@ public class GameplayController implements ContactListener {
      * The set of all wind bodies that umbrella in contact with
      */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+    private BitmapFont avatarHealthFont;
 
     /**
      * The set of all wind birds currently in the level
@@ -189,12 +194,16 @@ public class GameplayController implements ContactListener {
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
 
         jumpSound = directory.getEntry("platform:jump", Sound.class);
         fireSound = directory.getEntry("platform:pew", Sound.class);
         plopSound = directory.getEntry("platform:plop", Sound.class);
 
         constants = directory.getEntry("platform:constants", JsonValue.class);
+        
+        avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
+        avatarHealthFont.setColor(Color.RED);
     }
 
     /**
@@ -222,27 +231,15 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
+        float dwidth  = platformTile.getRegionWidth()/scale.x;
+        float dheight = platformTile.getRegionHeight()/scale.y;
 
-        float dwidth = platformTile.getRegionWidth() / scale.x;
-        float dheight = platformTile.getRegionHeight() / scale.y;
-
-//        Commented out goal for future usage
-//        JsonValue goal = constants.get("goal");
-//        JsonValue goalpos = goal.get("pos");
-//        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
-//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-//        goalDoor.setDensity(goal.getFloat("density", 0));
-//        goalDoor.setFriction(goal.getFloat("friction", 0));
-//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-//        goalDoor.setSensor(true);
-//        goalDoor.setDrawScale(scale);
-//        goalDoor.setTexture(platformTile);
-//        goalDoor.setName("goal");
-//        addObject(goalDoor);
+        // Setting Gravity on World
+        JsonValue defaults = constants.get("defaults");
+        world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
-        JsonValue defaults = constants.get("defaults");
         for (int ii = 0; ii < walljv.size; ii++) {
             PolygonObstacle obj;
             obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
@@ -271,16 +268,14 @@ public class GameplayController implements ContactListener {
             addObject(obj);
         }
 
-        // This world is heavier
-        world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
-
         // Create player
         float scl = constants.get("player").getFloat("texturescale");
-        dwidth = avatarTexture.getRegionWidth() / scale.x * scl;
-        dheight = avatarTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(constants.get("player"), dwidth, dheight);
+        dwidth  = avatarTexture.getRegionWidth()/scale.x*scl;
+        dheight = avatarTexture.getRegionHeight()/scale.y*scl;
+        avatar = new PlayerModel(constants.get("player"), dwidth, dheight, constants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
+        avatar.healthFont = avatarHealthFont;
         addObject(avatar);
         scl = constants.get("umbrella").getFloat("texturescale");
         dwidth = umbrellaTexture.getRegionWidth() / scale.x * scl;
@@ -288,6 +283,7 @@ public class GameplayController implements ContactListener {
         umbrella = new UmbrellaModel(constants.get("umbrella"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setTexture(umbrellaTexture);
+        umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
         RevoluteJointDef jointDef = new RevoluteJointDef();
         jointDef.collideConnected = false;
@@ -345,6 +341,13 @@ public class GameplayController implements ContactListener {
             return;
         }
 
+        // Check for whether the player toggled the umbrella being open/closed
+        if (input.didToggle()){
+            umbrella.setOpen(!umbrella.isOpen());
+            if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
+            else umbrella.setTexture(closedTexture);
+        }
+
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
@@ -352,51 +355,47 @@ public class GameplayController implements ContactListener {
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
-            if (!contactWindBod.contains(bod)) {
+
+            if(!contactWindBod.contains(bod) && umbrella.isOpen()) {
                 avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
         contactWindBod.clear();
 
-        avatar.setMovement(input.getHorizontal() * avatar.getForce());
-        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 
-        boolean right = umbrella.faceRight;
-        umbrella.faceRight = avatar.isFacingRight();
-        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle() * -1);
+        //Commented this out since it looks like this is handled below
+        //avatar.setMovement(input.getHorizontal() *avatar.getForce());
+        //umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
 
         // Process actions in object model
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyInputForce();
-        } else {
+        }
+        else if (!touching_wind && umbrella.isOpen()){
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            if (!touching_wind && avatar.getVY()<0) {
-                float angle = umbrella.getRotation() % (float) Math.PI;
-                if (angle < Math.PI) {
-                    float sclx = 10;
-                    float scly = 2;
-                    avatar.applyExternalForce(sclx * (float) Math.cos(angle), scly * (float) Math.sin(angle));
-                }
-            }
+            float angle = umbrella.getRotation();
+            int scl = 10;
+            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+        } else if (!umbrella.isOpen()){
+            Body body = avatar.getBody();
+            body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
         }
 
-        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
+        // Flip umbrella if player turned
+        boolean right = umbrella.faceRight;
+        umbrella.faceRight = avatar.isFacingRight();
+        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
+
+        umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
         umbrella.applyForce();
-
-        /*
-        if (avatar.isJumping()) {
-            jumpId = playSound( jumpSound, jumpId, volume );
-        }
-        */
 
         //move the birds
         for (BirdHazard b : birds) {
             b.move();
         }
-
     }
 
     /**

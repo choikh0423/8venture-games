@@ -14,10 +14,14 @@ public class UmbrellaModel extends BoxObstacle {
     private String sensorName;
     /** Which direction is the umbrella facing */
     public boolean faceRight;
+    /** Whether the umbrella is open or closed */
+    private boolean open;
     /** The current angular rotation of the umbrella */
     private float turning;
     /** The scale to multiply the texture by for drawing */
     private float textureScale;
+    /** Ratio of horizontal speed to conserve when closing the umbrella */
+    private float closedMomentum = 0;
 
     public UmbrellaModel(JsonValue data, float width, float height) {
         super(	data.get("pos").getFloat(0),
@@ -38,13 +42,23 @@ public class UmbrellaModel extends BoxObstacle {
         this.data = data;
         faceRight = true;
         setName("umbrella");
+        open = true;
     }
 
     /** Returns the angle away from the x-axis of the umbrella in radians.
      * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC. */
     public float getRotation(){return getAngle()+(float)Math.PI/2;}
 
+    /** Returns whether the umbrella is open */
+    public boolean isOpen(){return open;}
+    /** Sets if this umbrella is open or closed
+     * @param open whether the umbrella is open */
+    public void setOpen(boolean open){this.open = open;}
     public float getForce(){return force;}
+    /** Returns the ratio of horizontal speed to return when closing the umbrella */
+    public float getClosedMomentum(){return closedMomentum;}
+    /** Sets the ratio of horizontal speed to return when closing the umbrella */
+    public void setClosedMomentum(float closedMomentum){this.closedMomentum = closedMomentum;}
 
     /** Sets how much this umbrella is turning
      * @param value left/right turning of this umbrella.*/

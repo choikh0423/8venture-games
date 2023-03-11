@@ -11,6 +11,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -40,10 +41,6 @@ public class PlayerModel extends CapsuleObstacle {
 	private final float maxspeed_y;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
-	/** The impulse for the character jump */
-	private final float jump_force;
-	/** Cooldown (in animation frames) for jumping */
-	private final int jumpLimit;
 
 	/** The current horizontal movement of the character */
 	private float   movement;
@@ -57,9 +54,13 @@ public class PlayerModel extends CapsuleObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
-
 	/** The scale to multiply the texture by for drawing */
 	private float textureScale;
+	/** Max player hp */
+	private int MAX_HEALTH;
+	/** Player hp */
+	private int health;
+	public BitmapFont healthFont = new BitmapFont();
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -198,6 +199,41 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Returns the player's max hp. Should only be used when initializing the player
+	 *
+	 * @return the max hp
+	 */
+	public int getMaxHealth(){return MAX_HEALTH;}
+	/**
+	 * Sets the player's max hp. Does not allow max health to be less than 1;
+	 * we want the player to have hp!
+	 *
+	 * @param hp the new max hp value
+	 */
+	public void setMaxHealth(int hp){
+		if (hp >= 1) MAX_HEALTH = hp;
+		else MAX_HEALTH = 1;
+		if (getHealth() > MAX_HEALTH) setHealth(MAX_HEALTH);
+	}
+	/**
+	 * Returns the player's current hp
+	 *
+	 * @return the current hp
+	 */
+	public int getHealth(){return health;}
+	/**
+	 * Sets the player's current hp. If this value is above the maximum,
+	 * sets it to the maximum. If this value is below 0, sets it to 0.
+	 *
+	 * @param hp the new hp value
+	 */
+	public void setHealth(int hp){
+		if (hp < 0) health = 0;
+		else if (hp > MAX_HEALTH) health = MAX_HEALTH;
+		else health = hp;
+	}
+
+	/**
 	 * Creates a new player avatar with the given physics data
 	 *
 	 * The size is expressed in physics units NOT pixels.  In order for 
@@ -208,7 +244,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public PlayerModel(JsonValue data, float width, float height) {
+	public PlayerModel(JsonValue data, float width, float height, int maxHp) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
@@ -223,8 +259,6 @@ public class PlayerModel extends CapsuleObstacle {
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
-		jump_force = data.getFloat( "jump_force", 0 );
-		jumpLimit = data.getInt( "jump_cool", 0 );
 		sensorName = "PlayerGroundSensor";
 		this.data = data;
 
@@ -232,7 +266,8 @@ public class PlayerModel extends CapsuleObstacle {
 		isGrounded = false;
 		isJumping = false;
 		faceRight = true;
-
+		setMaxHealth(maxHp);
+		setHealth(getMaxHealth());
 		jumpCooldown = 0;
 		setName("player");
 		iFrames = 0;
@@ -345,15 +380,11 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public void update(float dt) {
 		// Apply cooldowns
-		if (isJumping()) {
-			jumpCooldown = jumpLimit;
-		} else {
-			jumpCooldown = Math.max(0, jumpCooldown - 1);
-		}
 		if(iFrames!=0) iFrames--;
 
 		super.update(dt);
 	}
+
 
 	/**
 	 * Draws the physics object.
@@ -364,6 +395,7 @@ public class PlayerModel extends CapsuleObstacle {
 		float effect = faceRight ? 1.0f : -1.0f;
 		//going to want to have a flashing avatar when i frames != 0, new texture?
 		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+		canvas.drawText("HP: " + getHealth(), healthFont, 25, canvas.getHeight()-25);
 	}
 	
 	/**

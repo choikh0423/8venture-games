@@ -33,7 +33,6 @@ public class WindModel extends PolygonObstacle {
     private float direction;
 
     public WindModel(JsonValue data) {
-        super(data.get(0).asFloatArray(), data.getFloat(1), data.getFloat(2));
 /*        int mag  = data.getInt(3);
         float set_mag = 0;
         switch (mag) {
@@ -50,8 +49,9 @@ public class WindModel extends PolygonObstacle {
                 throw new Error("invalid wind speed in JSON");
         }
         magnitude = set_mag;*/
-        magnitude = data.getFloat(3);
-        direction = data.getFloat(4);
+        super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
+        magnitude = data.getFloat("magnitude", 0);
+        direction = data.getFloat("direction", 0);
         setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);

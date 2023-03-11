@@ -12,7 +12,8 @@
         "shared:goal":   "shared/goaldoor.png",
         "platform:barrier": "platform/barrier.png",
         "placeholder:player": "placeholder/player.png",
-        "placeholder:umbrella": "placeholder/umbrella.png"
+        "placeholder:umbrella": "placeholder/umbrella.png",
+        "placeholder:closed": "placeholder/closed_umbrella.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json"
