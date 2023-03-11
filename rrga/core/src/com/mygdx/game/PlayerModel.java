@@ -66,7 +66,7 @@ public class PlayerModel extends CapsuleObstacle {
 	private final Vector2 forceCache = new Vector2();
 
 	/**
-	 * Whether the player currently has i-frames/is invincible.
+	 * The number i-frames the player currently has
 	 */
 	private int iFrames;
 
@@ -204,6 +204,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @return the max hp
 	 */
 	public int getMaxHealth(){return MAX_HEALTH;}
+
 	/**
 	 * Sets the player's max hp. Does not allow max health to be less than 1;
 	 * we want the player to have hp!
@@ -215,12 +216,14 @@ public class PlayerModel extends CapsuleObstacle {
 		else MAX_HEALTH = 1;
 		if (getHealth() > MAX_HEALTH) setHealth(MAX_HEALTH);
 	}
+
 	/**
 	 * Returns the player's current hp
 	 *
 	 * @return the current hp
 	 */
 	public int getHealth(){return health;}
+
 	/**
 	 * Sets the player's current hp. If this value is above the maximum,
 	 * sets it to the maximum. If this value is below 0, sets it to 0.
@@ -231,6 +234,22 @@ public class PlayerModel extends CapsuleObstacle {
 		if (hp < 0) health = 0;
 		else if (hp > MAX_HEALTH) health = MAX_HEALTH;
 		else health = hp;
+	}
+
+	/**
+	 * Returns the player's i-frames
+	 *
+	 * @return the current i-frames
+	 */
+	public int getiFrames(){return iFrames;}
+
+	/**
+	 * Sets the player's i-frames
+	 *
+	 * @param f the new i-frames value
+	 */
+	public void setiFrames(int f){
+		iFrames = f;
 	}
 
 	/**
