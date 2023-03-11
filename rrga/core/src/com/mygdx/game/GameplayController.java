@@ -1,7 +1,9 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
@@ -92,6 +94,7 @@ public class GameplayController implements ContactListener {
 
     /** The set of all wind bodies that umbrella in contact with */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+    private BitmapFont avatarHealthFont;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -128,6 +131,8 @@ public class GameplayController implements ContactListener {
         plopSound = directory.getEntry( "platform:plop", Sound.class );
 
         constants = directory.getEntry( "platform:constants", JsonValue.class );
+        avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
+        avatarHealthFont.setColor(Color.RED);
     }
 
     /**
@@ -211,10 +216,10 @@ public class GameplayController implements ContactListener {
         float scl = constants.get("player").getFloat("texturescale");
         dwidth  = avatarTexture.getRegionWidth()/scale.x*scl;
         dheight = avatarTexture.getRegionHeight()/scale.y*scl;
-        avatar = new PlayerModel(constants.get("player"), dwidth, dheight);
+        avatar = new PlayerModel(constants.get("player"), dwidth, dheight, constants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
-        avatar.setMaxHealth(constants.get("player").getInt("maxhealth"));
+        avatar.healthFont = avatarHealthFont;
         addObject(avatar);
         scl = constants.get("umbrella").getFloat("texturescale");
         dwidth = umbrellaTexture.getRegionWidth()/scale.x*scl;
@@ -222,6 +227,7 @@ public class GameplayController implements ContactListener {
         umbrella = new UmbrellaModel(constants.get("umbrella"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setTexture(umbrellaTexture);
+        umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
         RevoluteJointDef jointDef = new RevoluteJointDef();
         jointDef.collideConnected = false;
@@ -306,8 +312,8 @@ public class GameplayController implements ContactListener {
             int scl = 10;
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
         } else if (!umbrella.isOpen()){
-            //TODO: kill horizontal force/acceleration, set vertical force/acceleration
-            // to just be gravity
+            Body body = avatar.getBody();
+            body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
         }
 
         // Flip umbrella if player turned
@@ -323,8 +329,6 @@ public class GameplayController implements ContactListener {
             jumpId = playSound( jumpSound, jumpId, volume );
         }
         */
-
-
     }
 
     /**

@@ -11,6 +11,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -63,6 +64,7 @@ public class PlayerModel extends CapsuleObstacle {
 	private int MAX_HEALTH;
 	/** Player hp */
 	private int health;
+	public BitmapFont healthFont = new BitmapFont();
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -202,11 +204,16 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public int getMaxHealth(){return MAX_HEALTH;}
 	/**
-	 * Sets the player's max hp. Should only be used when initializing the player
+	 * Sets the player's max hp. Does not allow max health to be less than 1;
+	 * we want the player to have hp!
 	 *
 	 * @param hp the new max hp value
 	 */
-	public void setMaxHealth(int hp){MAX_HEALTH = hp;}
+	public void setMaxHealth(int hp){
+		if (hp >= 1) MAX_HEALTH = hp;
+		else MAX_HEALTH = 1;
+		if (getHealth() > MAX_HEALTH) setHealth(MAX_HEALTH);
+	}
 	/**
 	 * Returns the player's current hp
 	 *
@@ -236,7 +243,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public PlayerModel(JsonValue data, float width, float height) {
+	public PlayerModel(JsonValue data, float width, float height, int maxHp) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
@@ -260,7 +267,8 @@ public class PlayerModel extends CapsuleObstacle {
 		isGrounded = false;
 		isJumping = false;
 		faceRight = true;
-
+		setMaxHealth(maxHp);
+		setHealth(getMaxHealth());
 		jumpCooldown = 0;
 		setName("player");
 	}
@@ -381,6 +389,7 @@ public class PlayerModel extends CapsuleObstacle {
 		super.update(dt);
 	}
 
+
 	/**
 	 * Draws the physics object.
 	 *
@@ -389,6 +398,7 @@ public class PlayerModel extends CapsuleObstacle {
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
 		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+		canvas.drawText("HP: " + getHealth(), healthFont, 25, canvas.getHeight()-25);
 	}
 	
 	/**
