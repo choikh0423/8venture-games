@@ -258,7 +258,7 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Process actions in object model
-        if (!inBounds(avatar)){
+        if (!inBounds(avatar) || !inBounds(umbrella)){
             reset();
             return;
         }
@@ -521,5 +521,23 @@ public class GameplayController implements ContactListener {
         this.scale = scale;
     }
 
+    /**
+     *
+     * @return player x-coordinate on screen, -1 if no player is found.
+     * coordinates are non-negative.
+     */
+    public float getPlayerScreenX(){
+
+        return avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+    }
+
+    /**
+     *
+     * @return player y-coordinate on screen, -1 if no player is found.
+     * coordinates are non-negative.
+     */
+    public float getPlayerScreenY(){
+        return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+    }
 
 }

@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -31,6 +33,18 @@ public class GameMode implements Screen {
     public static final int WORLD_VELOC = 6;
     /** Number of position iterations for the constrain solvers */
     public static final int WORLD_POSIT = 2;
+
+    /** Current Width of the game world in Box2d units */
+    private float physicsWidth;
+
+    /** Current Height of the game world in Box2d units */
+    private float physicsHeight;
+
+    /** Current Width of the canvas in Box2d units */
+    private float displayWidth;
+
+    /** Current Height of the canvas in Box2d units */
+    private float displayHeight;
 
     /** Width of the game world in Box2d units */
     protected static final float DEFAULT_WIDTH  = 32.0f;
@@ -109,7 +123,6 @@ public class GameMode implements Screen {
         this.canvas = canvas;
         this.scale.x = canvas.getWidth()/bounds.getWidth();
         this.scale.y = canvas.getHeight()/bounds.getHeight();
-
         gameplayController.setScale(this.scale);
     }
 
@@ -189,6 +202,11 @@ public class GameMode implements Screen {
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
         backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
+        JsonValue data = directory.getEntry( "platform:constants", JsonValue.class ).get("world");
+//        physicsWidth = data.getFloat("max_width");
+//        physicsHeight = data.getFloat("max_height");
+//        displayWidth = data.getFloat("width");
+//        displayHeight = data.getFloat("height");
         gameplayController.gatherAssets(directory);
     }
 
@@ -234,6 +252,7 @@ public class GameMode implements Screen {
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
+
         return true;
     }
 
@@ -265,13 +284,29 @@ public class GameMode implements Screen {
     public void draw(float dt) {
         canvas.clear();
 
+        // focus camera on player
+        float px = gameplayController.getPlayerScreenX();
+        float py = gameplayController.getPlayerScreenY();
+
+        canvas.translateCameraToPoint(px,py);
         canvas.begin();
-        canvas.draw(backgroundTexture, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
+
+//        canvas.draw(backgroundTexture, Color.WHITE, 0, 0,
+//                bounds.getWidth() * scale.x, bounds.getHeight() * scale.y);
+
+        // center a background on player
+        // TODO: make sure to get the right rectangle of the full background.
+        //  For efficiency, DO NOT render the entire background.
+        //  ox and oy denotes the origin of the texture that we sample a rectangle from.
+        //  Currently, the
+        canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
+                py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+
 
         PooledList<Obstacle> objects = gameplayController.getObjects();
-
         for(Obstacle obj : gameplayController.getObjects()) {
             obj.draw(canvas);
+
         }
         canvas.end();
 
