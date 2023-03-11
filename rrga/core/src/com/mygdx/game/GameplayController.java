@@ -379,6 +379,12 @@ public class GameplayController implements ContactListener {
             float angle = umbrella.getRotation();
             int scl = 10;
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+
+//            if (angle < Math.PI) {
+//                float sclx = 10;
+//                float scly = 2;
+//                avatar.applyExternalForce(sclx * (float) Math.cos(angle), scly * (float) Math.sin(angle));
+//            }
         } else if (!umbrella.isOpen()){
             Body body = avatar.getBody();
             body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
