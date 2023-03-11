@@ -40,10 +40,6 @@ public class PlayerModel extends CapsuleObstacle {
 	private final float maxspeed_y;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
-	/** The impulse for the character jump */
-	private final float jump_force;
-	/** Cooldown (in animation frames) for jumping */
-	private final int jumpLimit;
 
 	/** The current horizontal movement of the character */
 	private float   movement;
@@ -218,8 +214,6 @@ public class PlayerModel extends CapsuleObstacle {
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
-		jump_force = data.getFloat( "jump_force", 0 );
-		jumpLimit = data.getInt( "jump_cool", 0 );
 		sensorName = "PlayerGroundSensor";
 		this.data = data;
 
@@ -339,11 +333,6 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	public void update(float dt) {
 		// Apply cooldowns
-		if (isJumping()) {
-			jumpCooldown = jumpLimit;
-		} else {
-			jumpCooldown = Math.max(0, jumpCooldown - 1);
-		}
 
 		super.update(dt);
 	}

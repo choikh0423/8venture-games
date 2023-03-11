@@ -123,7 +123,6 @@ public class GameplayController implements ContactListener {
         jumpSound = directory.getEntry( "platform:jump", Sound.class );
         fireSound = directory.getEntry( "platform:pew", Sound.class );
         plopSound = directory.getEntry( "platform:plop", Sound.class );
-
         constants = directory.getEntry( "platform:constants", JsonValue.class );
     }
 
@@ -152,27 +151,15 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
-
         float dwidth  = platformTile.getRegionWidth()/scale.x;
         float dheight = platformTile.getRegionHeight()/scale.y;
 
-//        Commented out goal for future usage
-//        JsonValue goal = constants.get("goal");
-//        JsonValue goalpos = goal.get("pos");
-//        goalDoor = new BoxObstacle(goalpos.getFloat(0),goalpos.getFloat(1),dwidth,dheight);
-//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-//        goalDoor.setDensity(goal.getFloat("density", 0));
-//        goalDoor.setFriction(goal.getFloat("friction", 0));
-//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-//        goalDoor.setSensor(true);
-//        goalDoor.setDrawScale(scale);
-//        goalDoor.setTexture(platformTile);
-//        goalDoor.setName("goal");
-//        addObject(goalDoor);
+        // Setting Gravity on World
+        JsonValue defaults = constants.get("defaults");
+        world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
-        JsonValue defaults = constants.get("defaults");
         for (int ii = 0; ii < walljv.size; ii++) {
             PolygonObstacle obj;
             obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
@@ -200,9 +187,6 @@ public class GameplayController implements ContactListener {
             obj.setName(pname+ii);
             addObject(obj);
         }
-
-        // This world is heavier
-        world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
 
         // Create player
         float scl = constants.get("player").getFloat("texturescale");
