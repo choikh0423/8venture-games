@@ -25,18 +25,12 @@ public class GameMode implements Screen {
 
     /** Exit code for quitting the game */
     public static final int EXIT_QUIT = 0;
-    /** The amount of time for a physics engine step. */
-    public static final float WORLD_STEP = 1/60.0f;
-    /** Number of velocity iterations for the constrain solvers */
-    public static final int WORLD_VELOC = 6;
-    /** Number of position iterations for the constrain solvers */
-    public static final int WORLD_POSIT = 2;
 
     /** Width of the game world in Box2d units */
     protected static final float DEFAULT_WIDTH  = 32.0f;
     /** Height of the game world in Box2d units */
     protected static final float DEFAULT_HEIGHT = 18.0f;
-    /** The default value of gravity (going down) */
+    /** Placeholder gravity value */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
     /** Reference to the game canvas */
@@ -61,8 +55,6 @@ public class GameMode implements Screen {
     private boolean failed;
     /** Whether or not debug mode is active */
     private boolean debug;
-    /** Countdown active for winning or losing */
-    private int countdown;
 
     /**
      * Returns true if debug mode is active.
@@ -155,7 +147,6 @@ public class GameMode implements Screen {
         failed = false;
         debug  = false;
         active = false;
-        countdown = -1;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
 
@@ -363,12 +354,10 @@ public class GameMode implements Screen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
-        if (active) {
             if (preUpdate(delta)) {
                 update(delta); // This is the one that must be defined.
             }
             draw(delta);
-        }
     }
 
     /**
