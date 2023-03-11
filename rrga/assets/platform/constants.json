@@ -15,7 +15,7 @@
 	"player": {
 		"pos": [7.0, 3.0],
 		"shrink": [0.7, 0.95],
-		"force": 20.0,
+		"force": 40.0,
 		"damping": 10.0,
 		"density": 1.0,
 		"friction": 0.0,
@@ -25,12 +25,13 @@
 			"shrink" : 0.6,
 			"height" : 0.05
 		},
-		"texturescale": 0.0625
+		"texturescale": 0.08333,
+		"maxhealth": 3
 	},
 	"umbrella" : {
-		"pos": [7.0, 3.2],
+		"pos": [7.0, 3.26666],
 		"shrink": [0.7, 0.95],
-		"force": 3.0,
+		"force": 9.0,
 		"damping": 10.0,
 		"density": 1.0,
 		"friction": 0.0,
@@ -39,7 +40,8 @@
 			"shrink" : 0.6,
 			"height" : 0.05
 		},
-		"texturescale": 0.0625
+		"texturescale": 0.08333,
+		"closedmomentum": 0.95
 	},
 
 	"wind": [
