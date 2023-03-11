@@ -213,9 +213,9 @@ public class InputController {
 
         // Mouse results
 
-        if(Gdx.input.getDeltaX() < -minDeltaX){
+        if(Gdx.input.getDeltaX() < -minDeltaX || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             mouseMovement = 1.0f;
-        } else if (Gdx.input.getDeltaX() > minDeltaX) {
+        } else if (Gdx.input.getDeltaX() > minDeltaX || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             mouseMovement = -1.0f;
         } else mouseMovement = 0;
     }
