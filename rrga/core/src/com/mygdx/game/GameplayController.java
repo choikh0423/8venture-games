@@ -261,7 +261,11 @@ public class GameplayController implements ContactListener {
         if (input.didToggle()){
             umbrella.setOpen(!umbrella.isOpen());
             if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
-            else umbrella.setTexture(closedTexture);
+            else {
+                umbrella.setTexture(closedTexture);
+                Body body = avatar.getBody();
+                body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
+            }
         }
 
         boolean touching_wind = contactWindFix.size > 0;
@@ -295,9 +299,6 @@ public class GameplayController implements ContactListener {
             float angle = umbrella.getRotation();
             int scl = 10;
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
-        } else if (!umbrella.isOpen()){
-            Body body = avatar.getBody();
-            body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
         }
 
         // Flip umbrella if player turned
