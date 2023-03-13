@@ -57,7 +57,8 @@ public class InputController {
     /** Whether the exit button was pressed. */
     private boolean exitPressed;
     private boolean exitPrevious;
-
+    /** Whether the player toggled the umbrella open/closed */
+    private boolean togglePressed;
     /** How much did we move horizontally? */
     private float horizontal;
     /** How much did the mouse move horizontally? */
@@ -120,6 +121,14 @@ public class InputController {
     public boolean didExit() {
         return exitPressed && !exitPrevious;
     }
+
+    /**
+     * Returns true if the button to toggle whether the umbrella is open or closed
+     * was pressed.
+     *
+     * @return true if the open/closed toggle button was pressed
+     */
+    public boolean didToggle() { return togglePressed; }
 
     /**
      * Creates a new input controller
@@ -202,7 +211,7 @@ public class InputController {
         debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.B));
         exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
 
-        // Directional controls
+        // A/D for moving character
         horizontal = (secondary ? horizontal : 0.0f);
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             horizontal += 1.0f;
@@ -211,13 +220,16 @@ public class InputController {
             horizontal -= 1.0f;
         }
 
-        // Mouse results
-
-        if(Gdx.input.getDeltaX() < -minDeltaX){
+        // Mouse/arrow keys for moving umbrella
+        if (Gdx.input.getDeltaX() < -minDeltaX || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             mouseMovement = 1.0f;
-        } else if (Gdx.input.getDeltaX() > minDeltaX) {
+        } else if (Gdx.input.getDeltaX() > minDeltaX || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             mouseMovement = -1.0f;
         } else mouseMovement = 0;
+
+        // E for toggling umbrella
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) togglePressed = true;
+        else togglePressed = false;
     }
 
     /**
