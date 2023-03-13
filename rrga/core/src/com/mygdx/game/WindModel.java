@@ -13,9 +13,9 @@ import com.mygdx.game.obstacle.*;
  */
 public class WindModel extends PolygonObstacle {
 
-    private final float STRONG_WIND_SPEED = 20.0f;
-    private final float MED_WIND_SPEED = 15.0f;
-    private final float WEAK_WIND_SPEED = 10.0f;
+    private static final float STRONG_WIND_SPEED = 20.0f;
+    private static final float MED_WIND_SPEED = 15.0f;
+    private static final float WEAK_WIND_SPEED = 10.0f;
 
     /**
      * The initializing data (to avoid magic numbers)
@@ -33,8 +33,13 @@ public class WindModel extends PolygonObstacle {
     private float direction;
 
     public WindModel(JsonValue data) {
-/*        int mag  = data.getInt(3);
-        float set_mag = 0;
+        super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
+        direction = data.getFloat("direction", 0);
+        magnitude = data.getFloat("magnitude");
+        //The following commented out code can be uncommented to implement 3 discrete wind speeds.
+        //Also would need to delete line above
+        /*int mag  = data.getInt("magnitude");
+        float set_mag;
         switch (mag) {
             case 1:
                 set_mag = WEAK_WIND_SPEED;
@@ -48,10 +53,8 @@ public class WindModel extends PolygonObstacle {
             default:
                 throw new Error("invalid wind speed in JSON");
         }
-        magnitude = set_mag;*/
-        super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
-        magnitude = data.getFloat("magnitude", 0);
-        direction = data.getFloat("direction", 0);
+        magnitude = set_mag;
+        magnitude = data.getFloat("magnitude", 0);*/
         setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);

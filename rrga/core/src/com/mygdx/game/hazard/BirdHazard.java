@@ -12,7 +12,10 @@ import java.util.Collections;
 public class BirdHazard extends HazardModel{
 
     /** Attack speed of a bird */
-    private final int ATTACK_SPEED = 15;
+    private static final int ATTACK_SPEED = 20;
+
+    /** Damage of a bird */
+    private static final int BIRD_DAMAGE = 1;
 
     /** Identifier to allow us to track the sensor in ContactListener */
     private final String sensorName;
@@ -72,7 +75,7 @@ public class BirdHazard extends HazardModel{
     }
 
     public BirdHazard(JsonValue data) {
-        super(data);
+        super(data, BIRD_DAMAGE);
         path = data.get("path").asFloatArray();
         moveSpeed = data.getInt("movespeed");
         patrol = data.getBoolean("patrol");
@@ -162,7 +165,7 @@ public class BirdHazard extends HazardModel{
      */
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*1,1);
+        canvas.draw(region,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*1,1);
     }
 
     /**

@@ -26,13 +26,14 @@ public abstract class HazardModel extends PolygonObstacle {
         return damage;
     }
 
-    public HazardModel(JsonValue data) {
+    public HazardModel(JsonValue data, int dam) {
         super(data.get("points").asFloatArray(), data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
         setFriction(0);
         setRestitution(0);
         this.data = data;
+        this.damage = dam;
     }
 }
 

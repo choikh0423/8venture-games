@@ -98,7 +98,9 @@ public class GameplayController implements ContactListener {
      * Texture asset for umbrella
      */
     private TextureRegion umbrellaTexture;
-    /** Texture asset for closed umbrella */
+    /**
+     * Texture asset for closed umbrella
+     */
     private TextureRegion closedTexture;
 
     /**
@@ -201,7 +203,7 @@ public class GameplayController implements ContactListener {
         plopSound = directory.getEntry("platform:plop", Sound.class);
 
         constants = directory.getEntry("platform:constants", JsonValue.class);
-        
+
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
         avatarHealthFont.setColor(Color.RED);
     }
@@ -231,12 +233,12 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
-        float dwidth  = platformTile.getRegionWidth()/scale.x;
-        float dheight = platformTile.getRegionHeight()/scale.y;
+        float dwidth = platformTile.getRegionWidth() / scale.x;
+        float dheight = platformTile.getRegionHeight() / scale.y;
 
         // Setting Gravity on World
         JsonValue defaults = constants.get("defaults");
-        world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
+        world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
@@ -270,8 +272,8 @@ public class GameplayController implements ContactListener {
 
         // Create player
         float scl = constants.get("player").getFloat("texturescale");
-        dwidth  = avatarTexture.getRegionWidth()/scale.x*scl;
-        dheight = avatarTexture.getRegionHeight()/scale.y*scl;
+        dwidth = avatarTexture.getRegionWidth() / scale.x * scl;
+        dheight = avatarTexture.getRegionHeight() / scale.y * scl;
         avatar = new PlayerModel(constants.get("player"), dwidth, dheight, constants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
@@ -342,7 +344,7 @@ public class GameplayController implements ContactListener {
         }
 
         // Check for whether the player toggled the umbrella being open/closed
-        if (input.didToggle()){
+        if (input.didToggle()) {
             umbrella.setOpen(!umbrella.isOpen());
             if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
             else umbrella.setTexture(closedTexture);
@@ -355,14 +357,12 @@ public class GameplayController implements ContactListener {
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
-
-            if(!contactWindBod.contains(bod) && umbrella.isOpen()) {
+            if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
                 avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
         contactWindBod.clear();
-
 
         //Commented this out since it looks like this is handled below
         //avatar.setMovement(input.getHorizontal() *avatar.getForce());
@@ -372,30 +372,26 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyInputForce();
-        }
-        else if (!touching_wind && umbrella.isOpen()){
+        } else if (!touching_wind && umbrella.isOpen()) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation();
-            int scl = 10;
-            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
-
-//            if (angle < Math.PI) {
-//                float sclx = 10;
-//                float scly = 2;
-//                avatar.applyExternalForce(sclx * (float) Math.cos(angle), scly * (float) Math.sin(angle));
-//            }
-        } else if (!umbrella.isOpen()){
+            float angle = umbrella.getRotation() % (2 * (float) Math.PI);
+            if(avatar.getVY()<0 && angle < Math.PI) {
+                int sclx = 10;
+                int scly = 6;
+                avatar.applyExternalForce(sclx * (float) Math.cos(angle), scly * (float) Math.sin(angle));
+            }
+        } else if (!umbrella.isOpen()) {
             Body body = avatar.getBody();
-            body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
+            body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y);
         }
 
         // Flip umbrella if player turned
         boolean right = umbrella.faceRight;
         umbrella.faceRight = avatar.isFacingRight();
-        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle()*-1);
+        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle() * -1);
 
-        umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
+        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
         umbrella.applyForce();
 
         //move the birds
@@ -442,19 +438,21 @@ public class GameplayController implements ContactListener {
             }
 
             // Check for hazard collision
-            if (((umbrella == bd2 || avatar == bd2) && (bd1.getClass() == HazardModel.class && !fix1.isSensor())) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2.getClass() == HazardModel.class && !fix2.isSensor()))) {
-                // HazardModel h = (bd1.getClass() == HazardModel.class ? bd1 : bd2)
-                // int dam = h.getDamage();
-                //if (avatar.iFrames == 0){
-                //  if (health - dam <= 0 ){
-                //      health -= dam;
-                //      avatar.iFrames = NUM_I_FRAMES
-                //  }
-                //  else{
-                //      lose condition
-                //  }
-                //}
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
+                System.out.println("hazard");
+                HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
+                int dam = h.getDamage();
+                if (avatar.getiFrames() == 0){
+                  if (avatar.getHealth() - dam > 0 ){
+                      avatar.setHealth(avatar.getHealth() - dam);
+                      avatar.setiFrames(NUM_I_FRAMES);
+                  }
+                  else{
+                      //lose condition
+                      //restart?
+                  }
+                }
             }
 
             // check for bird sensor collision
