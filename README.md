@@ -5,6 +5,8 @@
 Rain, Rain, Go Away is a puzzle platformer in which the player's primary mechanism of movement is parachute physics represented by an umbrella catching gusts of wind. By aiming their umbrella in the right position at the right time, the player is able to propel themselves from platform to platform. They must also be aware of hazards that can inhibit their progress or damage the umbrella.
 
 ## External Links
+Team Notion: https://glen-crabapple-3a3.notion.site/Essentials-1095ec178b324087bc984890605b5b20
+
 Programming Sprint Board: https://glen-crabapple-3a3.notion.site/84f28aac67f1412ca7d8f1563ed1392e?v=63916ed0dc8a4220a1dfec5196c8d02e
 
 API Documentation for Designers: https://glen-crabapple-3a3.notion.site/API-Documentation-for-Design-Team-bc768fd29d5c4cbdb35d02380e9d778c
