@@ -113,8 +113,8 @@ public class GameMode implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
-        this.scale.x = canvas.getWidth()/bounds.getWidth();
-        this.scale.y = canvas.getHeight()/bounds.getHeight();
+        this.scale.x = canvas.getWidth()/displayWidth;
+        this.scale.y = canvas.getHeight()/displayHeight;
         gameplayController.setScale(this.scale);
     }
 
@@ -194,10 +194,10 @@ public class GameMode implements Screen {
         // Allocate the tiles
         backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
         JsonValue data = directory.getEntry( "platform:constants", JsonValue.class ).get("world");
-//        physicsWidth = data.getFloat("max_width");
-//        physicsHeight = data.getFloat("max_height");
-//        displayWidth = data.getFloat("width");
-//        displayHeight = data.getFloat("height");
+        physicsWidth = data.getFloat("max_width", DEFAULT_WIDTH);
+        physicsHeight = data.getFloat("max_height", DEFAULT_HEIGHT);
+        displayWidth = data.getFloat("width", DEFAULT_WIDTH);
+        displayHeight = data.getFloat("height", DEFAULT_HEIGHT);
         gameplayController.gatherAssets(directory);
     }
 
@@ -207,6 +207,8 @@ public class GameMode implements Screen {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        this.bounds.set(0,0, physicsWidth, physicsHeight);
+        gameplayController.setBounds(this.bounds);
         gameplayController.reset();
     };
 
@@ -279,6 +281,7 @@ public class GameMode implements Screen {
         float px = gameplayController.getPlayerScreenX();
         float py = gameplayController.getPlayerScreenY();
 
+        canvas.setCameraDynamic();
         canvas.translateCameraToPoint(px,py);
         canvas.begin();
 
@@ -309,6 +312,13 @@ public class GameMode implements Screen {
             canvas.endDebug();
         }
 
+        // Draw all HUD content
+        canvas.setCameraHUD();
+        PlayerModel p = gameplayController.getPlayer();
+        canvas.begin();
+        p.drawInfo(canvas);
+        canvas.end();
+
         // Final message
         if (complete && !failed) {
             displayFont.setColor(Color.YELLOW);
@@ -321,6 +331,7 @@ public class GameMode implements Screen {
             canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
             canvas.end();
         }
+
     }
 
 

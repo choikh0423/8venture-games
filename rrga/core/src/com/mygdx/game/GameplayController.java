@@ -653,4 +653,20 @@ public class GameplayController implements ContactListener {
         return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
     }
 
+    /**
+     * This
+     * @return reference to player model
+     */
+    public PlayerModel getPlayer(){
+        return avatar;
+    }
+
+    /**
+     * set world bounds to be the given rectangle dimensions.
+     * This should be followed with a reset of the world.
+     * @param rect
+     */
+    public void setBounds(Rectangle rect){
+        this.bounds = new Rectangle(rect);
+    }
 }

@@ -414,6 +414,14 @@ public class PlayerModel extends CapsuleObstacle {
 		float effect = faceRight ? 1.0f : -1.0f;
 		//going to want to have a flashing avatar when i frames != 0, new texture?
 		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+	}
+
+	/**
+	 * Draws player HP information on screen and
+	 * TODO: possibly other status information
+	 * @param canvas
+	 */
+	public void drawInfo(GameCanvas canvas){
 		canvas.drawText("HP: " + getHealth(), healthFont, 25, canvas.getHeight()-25);
 	}
 	

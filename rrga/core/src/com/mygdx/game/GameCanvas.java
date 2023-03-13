@@ -76,6 +76,12 @@ public class GameCanvas {
     /** Camera for the underlying SpriteBatch */
     private OrthographicCamera camera;
 
+    /** Dynamic Camera instance */
+    private OrthographicCamera dynamicCamera;
+
+    /** Static HUD Camera */
+    private OrthographicCamera hudCamera;
+
     /** Value to cache window width (if we are currently full screen) */
     int width;
     /** Value to cache window height (if we are currently full screen) */
@@ -103,10 +109,11 @@ public class GameCanvas {
         debugRender = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
-        camera = new OrthographicCamera(getWidth(),getHeight());
-        camera.setToOrtho(false);
-        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
-        camera.update();
+        dynamicCamera = new OrthographicCamera(getWidth(),getHeight());
+        dynamicCamera.setToOrtho(false);
+        hudCamera = new OrthographicCamera(getWidth(),getHeight());
+        hudCamera.setToOrtho(false);
+        setCameraDynamic();
         spriteBatch.setProjectionMatrix(camera.combined);
         debugRender.setProjectionMatrix(camera.combined);
 
@@ -271,8 +278,6 @@ public class GameCanvas {
     public void resize() {
         // Resizing screws up the spriteBatch projection matrix
         spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
-        // added to fix resizing viewport issues for MAC
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
     }
 
     /**
@@ -379,24 +384,6 @@ public class GameCanvas {
     public void end() {
         spriteBatch.end();
         active = DrawPass.INACTIVE;
-    }
-
-    /**
-     * updates camera to a given point (px, py) on screen.
-     * @param px nonnegative coordinate in bounds
-     * @param py nonnegative coordinate in bounds
-     */
-    public void translateCameraToPoint(float px, float py){
-        camera.translate(px - camera.position.x, py - camera.position.y);
-        camera.update();
-    }
-
-    public void translateCameraByVelocity(float vx, float vy, float dt){
-        float cameraSpeed = 2f;
-        float cameraDeltaX = vx * dt * cameraSpeed;
-        float cameraDeltaY = vy * dt * cameraSpeed;
-        camera.translate(cameraDeltaX, cameraDeltaY);
-        camera.update();
     }
 
     /**
@@ -1172,5 +1159,23 @@ public class GameCanvas {
         local.rotate(180.0f*angle/(float)Math.PI);
         local.scale(sx,sy);
         local.translate(-ox,-oy);
+    }
+
+    /**
+     * updates camera to a given point (px, py) on screen.
+     * @param px nonnegative coordinate in bounds
+     * @param py nonnegative coordinate in bounds
+     */
+    public void translateCameraToPoint(float px, float py){
+        camera.translate(px - camera.position.x, py - camera.position.y);
+        camera.update();
+    }
+
+    public void setCameraDynamic(){
+        camera = dynamicCamera;
+    }
+
+    public void setCameraHUD(){
+        camera = hudCamera;
     }
 }
