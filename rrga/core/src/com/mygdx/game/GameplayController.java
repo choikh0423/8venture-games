@@ -444,7 +444,6 @@ public class GameplayController implements ContactListener {
             // Check for hazard collision
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
-                System.out.println("hazard");
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 int dam = h.getDamage();
                 if (avatar.getiFrames() == 0){
