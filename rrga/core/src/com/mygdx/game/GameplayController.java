@@ -634,5 +634,39 @@ public class GameplayController implements ContactListener {
         this.scale = scale;
     }
 
+    /**
+     *
+     * @return player x-coordinate on screen, -1 if no player is found.
+     * coordinates are non-negative.
+     */
+    public float getPlayerScreenX(){
 
+        return avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+    }
+
+    /**
+     *
+     * @return player y-coordinate on screen, -1 if no player is found.
+     * coordinates are non-negative.
+     */
+    public float getPlayerScreenY(){
+        return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+    }
+
+    /**
+     * This
+     * @return reference to player model
+     */
+    public PlayerModel getPlayer(){
+        return avatar;
+    }
+
+    /**
+     * set world bounds to be the given rectangle dimensions.
+     * This should be followed with a reset of the world.
+     * @param rect
+     */
+    public void setBounds(Rectangle rect){
+        this.bounds = new Rectangle(rect);
+    }
 }
