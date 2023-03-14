@@ -11,11 +11,11 @@ import java.util.Collections;
 
 public class BirdHazard extends HazardModel{
 
-    /** Attack speed of a bird */
-    private static final int ATTACK_SPEED = 20;
+    /** Attack speed of this bird */
+    private final int attackSpeed;
 
-    /** Damage of a bird */
-    private static final int BIRD_DAMAGE = 1;
+    /** Radius of a bird's sensor */
+    private final int sensorRadius;
 
     /** Identifier to allow us to track the sensor in ContactListener */
     private final String sensorName;
@@ -70,15 +70,17 @@ public class BirdHazard extends HazardModel{
         float moveY = ty - getY();
         move.set(moveX, moveY);
         move.nor();
-        move.scl(ATTACK_SPEED);
+        move.scl(attackSpeed);
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data) {
-        super(data, BIRD_DAMAGE);
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed) {
+        super(data, birdDamage);
         path = data.get("path").asFloatArray();
         moveSpeed = data.getInt("movespeed");
         patrol = data.getBoolean("patrol");
+        attackSpeed = birdAttackSpeed;
+        sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
         sensorName = "birdSensor";
         seesTarget = false;
@@ -97,7 +99,7 @@ public class BirdHazard extends HazardModel{
         sensorDef.density = 0;
         sensorDef.isSensor = true;
         sensorShape = new CircleShape();
-        sensorShape.setRadius(7);
+        sensorShape.setRadius(sensorRadius);
         //change radius to variable?
         sensorDef.shape = sensorShape;
         Fixture sensorFixture = body.createFixture( sensorDef );

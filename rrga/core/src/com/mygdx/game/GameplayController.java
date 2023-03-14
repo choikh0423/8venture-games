@@ -310,12 +310,18 @@ public class GameplayController implements ContactListener {
             addObject(obj);
         }
 
+        //create hazards
+        JsonValue hazardsjv = constants.get("hazards");
+
         //create birds
         String birdName = "bird";
-        JsonValue birdjv = constants.get("birds");
+        JsonValue birdjv = hazardsjv.get("birds");
+        int birdDamage = hazardsjv.getInt("birdDamage");
+        int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
+        int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii));
+            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed);
             obj.setDrawScale(scale);
             obj.setTexture(birdTexture);
             obj.setName(birdName + ii);
