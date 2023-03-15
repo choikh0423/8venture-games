@@ -20,6 +20,7 @@ import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
 
 import java.util.Iterator;
+import java.util.logging.Level;
 
 public class GameplayController implements ContactListener {
     /**
@@ -108,20 +109,8 @@ public class GameplayController implements ContactListener {
      */
     private TextureRegion birdTexture;
 
-    /**
-     * The jump sound.  We only want to play once.
-     */
-    private Sound jumpSound;
     private long jumpId = -1;
-    /**
-     * The weapon fire sound.  We only want to play once.
-     */
-    private Sound fireSound;
     private long fireId = -1;
-    /**
-     * The weapon pop sound.  We only want to play once.
-     */
-    private Sound plopSound;
     private long plopId = -1;
     /**
      * The default sound volume
@@ -168,18 +157,29 @@ public class GameplayController implements ContactListener {
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
     /**
+     * The level container for GameplayController
+    */
+    private LevelContainer levelContainer;
+
+    /**
+     * Currently selected level
+     */
+    private int currentLevel;
+
+    /**
      * Creates and initialize a new instance of the platformer game
      * <p>
      * The game has default gravity and other settings
      */
-    public GameplayController(Rectangle bounds, Vector2 gravity) {
+    public GameplayController(Rectangle bounds, Vector2 gravity, int level) {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
         this.scale = new Vector2(1, 1);
-        countdown = -1;
 
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
+
+        currentLevel = level;
     }
 
     /**
@@ -197,10 +197,6 @@ public class GameplayController implements ContactListener {
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
-
-        jumpSound = directory.getEntry("platform:jump", Sound.class);
-        fireSound = directory.getEntry("platform:pew", Sound.class);
-        plopSound = directory.getEntry("platform:plop", Sound.class);
 
         constants = directory.getEntry("platform:constants", JsonValue.class);
 
@@ -527,9 +523,14 @@ public class GameplayController implements ContactListener {
      * Pausing happens when we switch game modes.
      */
     public void pause() {
-        jumpSound.stop(jumpId);
-        plopSound.stop(plopId);
-        fireSound.stop(fireId);
+
+    }
+
+    /**
+     * Set current level
+     */
+    public void setLevel(int level){
+        currentLevel = level;
     }
 
     /**
