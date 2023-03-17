@@ -92,6 +92,10 @@ public class GameplayController implements ContactListener {
      */
     private TextureRegion avatarTexture;
     /**
+     * Texture asset for front-facing player
+     * */
+    private TextureRegion avatarFront;
+    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -165,7 +169,7 @@ public class GameplayController implements ContactListener {
     private BitmapFont avatarHealthFont;
     //cache for vector computations
     Vector2 cache = new Vector2();
-    //THESE FOUR ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
+    //THESE FIVE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
     //difference in initial position between umbrella and player
     private Vector2 diff = new Vector2();
     //center of the screen in canvas coordinates
@@ -175,6 +179,8 @@ public class GameplayController implements ContactListener {
     //current mouse position
     //should not be updated except when making the umbrella follow the mouse
     Vector2 mousePos = new Vector2();
+    //whether the mouse angle is allowed
+    private boolean angInBounds = true;
 
     /**
      * The set of all wind birds currently in the level
@@ -207,6 +213,7 @@ public class GameplayController implements ContactListener {
     public void gatherAssets(AssetDirectory directory) {
         platformTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
+        avatarFront = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
@@ -353,13 +360,18 @@ public class GameplayController implements ContactListener {
         // Check for whether the player toggled the umbrella being open/closed
         if (input.didToggle()) {
             umbrella.setOpen(!umbrella.isOpen());
-            if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
+            if (umbrella.isOpen()) {
+                umbrella.setTexture(umbrellaTexture);
+                //TODO: apply some force to the player so the floatiness comes back
+            }
             else {
                 umbrella.setTexture(closedTexture);
                 Body body = avatar.getBody();
                 body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
             }
         }
+        if (avatar.isGrounded() && avatar.getTexture() != avatarTexture) avatar.setTexture(avatarTexture);
+        else if (!avatar.isGrounded() && avatar.getTexture() != avatarFront) avatar.setTexture(avatarFront);
 
         //umbrella points towards mouse pointer
         mousePos.x = input.getMousePos().x;
@@ -375,7 +387,9 @@ public class GameplayController implements ContactListener {
         //compute new angle
         float mouseAng = (float) Math.acos(mousePos.dot(up));
         if (input.getMousePos().x > center.x) mouseAng*=-1;
-        umbrella.setAngle(mouseAng);
+        angInBounds = mouseAng <= (float) Math.PI/2 && mouseAng >= -(float) Math.PI/2;
+//        if (angInBounds)
+            umbrella.setAngle(mouseAng);
 
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();

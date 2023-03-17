@@ -12,6 +12,7 @@
         "shared:goal":   "shared/goaldoor.png",
         "platform:barrier": "platform/barrier.png",
         "placeholder:player": "placeholder/player.png",
+        "placeholder:front": "placeholder/player_front.png",
         "placeholder:umbrella": "placeholder/umbrella.png",
         "placeholder:closed": "placeholder/closed_umbrella.png"
     },
