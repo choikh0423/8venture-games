@@ -5,7 +5,7 @@
         "placeholder:wind" : "placeholder/wind.png",
         "placeholder:bird" : "placeholder/placeholder/environment_obstacle_moving.png",
         "shared:earth" : {
-            "file":  "shared/earthtile.png",
+            "file":  "placeholder/platform.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
