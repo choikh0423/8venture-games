@@ -78,6 +78,16 @@ public class GameplayController implements ContactListener {
     protected Vector2 scale;
 
     /**
+     * whether the player has won
+     */
+    private boolean completed;
+
+    /**
+     * whether the player has lost
+     */
+    private boolean failed;
+
+    /**
      * Countdown active for winning or losing
      */
     private int countdown;
@@ -168,6 +178,16 @@ public class GameplayController implements ContactListener {
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
     /**
+     * the delay after game is lost before we transition to new screen.
+     */
+    private static final int LOSE_COUNTDOWN_TIMER = 15;
+
+    /**
+     * the delay after game is won before we transition to new screen.
+     */
+    private static final int WIN_COUNTDOWN_TIMER = 30;
+
+    /**
      * Creates and initialize a new instance of the platformer game
      * <p>
      * The game has default gravity and other settings
@@ -205,7 +225,8 @@ public class GameplayController implements ContactListener {
         constants = directory.getEntry("platform:constants", JsonValue.class);
 
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
-        avatarHealthFont.setColor(Color.RED);
+        // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
+        // avatarHealthFont.setColor(Color.RED);
     }
 
     /**
@@ -225,6 +246,10 @@ public class GameplayController implements ContactListener {
 
         world = new World(gravity, false);
         world.setContactListener(this);
+        // game status reset
+        failed = false;
+        completed = false;
+        // load level
         populateLevel();
     }
 
@@ -238,8 +263,10 @@ public class GameplayController implements ContactListener {
 
         // Setting Gravity on World
         JsonValue defaults = constants.get("defaults");
-        world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
+        world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
+        //TODO: explicit walls do not exist, consider deleting.
+        // ============================================================================
         String wname = "wall";
         JsonValue walljv = constants.get("walls");
         for (int ii = 0; ii < walljv.size; ii++) {
@@ -254,6 +281,7 @@ public class GameplayController implements ContactListener {
             obj.setName(wname + ii);
             addObject(obj);
         }
+        // TODO maybe delete above =========================================================
 
         String pname = "platform";
         JsonValue platjv = constants.get("platforms");
@@ -277,6 +305,7 @@ public class GameplayController implements ContactListener {
         avatar = new PlayerModel(constants.get("player"), dwidth, dheight, constants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
+        avatar.setHpTexture(avatarTexture);
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
         scl = constants.get("umbrella").getFloat("texturescale");
@@ -297,6 +326,8 @@ public class GameplayController implements ContactListener {
         jointDef.localAnchorA.set(0, 0);
         jointDef.localAnchorB.set(0, constants.get("player").get("pos").getFloat(1) - constants.get("umbrella").get("pos").getFloat(1));
         world.createJoint(jointDef);
+
+       
 
         // Create wind gusts
         String windName = "wind";
@@ -324,6 +355,40 @@ public class GameplayController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
+
+        // Create invisible |_| shaped world boundaries so player is within bounds.
+        dwidth = bounds.width;
+        dheight = bounds.height;
+        String wallName = "barrier";
+
+        // TODO: create some loop, too much duplication.
+        // Create the left wall
+        BoxObstacle wall = new BoxObstacle(-0.5f, dheight/2f, 1, 2*dheight);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
+
+        // Create the right wall
+        wall = new BoxObstacle(dwidth-0.5f, dheight/2f, 1, 2*dheight);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
+
+        // Create the bottom wall
+        // TODO: if ground is y-level 0, the wall's y-position should be around [-0.5, -2].
+        wall = new BoxObstacle(dwidth/2f, -dheight/2f, dwidth, 1);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
     }
 
     /**
@@ -338,9 +403,17 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Process actions in object model
-        if (!inBounds(avatar)) {
-            reset();
+
+        // player dies if falling through void
+        if (!failed && avatar.getPosition().y <= -0.5f){
+            avatar.setHealth(0);
+            setFailed();
             return;
+        }
+
+        // decrement countdown towards rendering victory/fail screen
+        if (countdown > 0){
+            countdown--;
         }
 
         // Check for whether the player toggled the umbrella being open/closed
@@ -438,6 +511,13 @@ public class GameplayController implements ContactListener {
             // Check for hazard collision
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
+
+                // player should not be subject to more damage unless vulnerable
+                boolean immune = failed || completed;
+                if (immune){
+                    return;
+                }
+
                 System.out.println("hazard");
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 int dam = h.getDamage();
@@ -447,8 +527,9 @@ public class GameplayController implements ContactListener {
                       avatar.setiFrames(NUM_I_FRAMES);
                   }
                   else{
-                      //lose condition
-                      //restart?
+                      //player loses
+                      avatar.setHealth(0);
+                      setFailed();
                   }
                 }
             }
@@ -466,6 +547,7 @@ public class GameplayController implements ContactListener {
             // Check for win condition
             if ((bd1 == avatar && bd2 == goalDoor) ||
                     (bd1 == goalDoor && bd2 == avatar)) {
+                // player wins
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -654,7 +736,7 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * This
+     *
      * @return reference to player model
      */
     public PlayerModel getPlayer(){
@@ -663,10 +745,45 @@ public class GameplayController implements ContactListener {
 
     /**
      * set world bounds to be the given rectangle dimensions.
-     * This should be followed with a reset of the world.
-     * @param rect
+     * This should be followed with a reset of the game.
+     * @param rect the bounds
      */
     public void setBounds(Rectangle rect){
-        this.bounds = new Rectangle(rect);
+        this.bounds.set(rect.x, rect.y, rect.getWidth(), rect.getHeight());
+    }
+
+
+    /**
+     * player officially wins if they finished the level and
+     * a small countdown is over.
+     * @return whether player finished level
+     */
+    public boolean isCompleted(){
+        return completed && countdown <= 0;
+    }
+
+    /**
+     * player officially fails if they failed the level and
+     * a small countdown is over.
+     * @return whether player failed
+     */
+    public boolean isFailed(){
+        return failed && countdown <= 0;
+    }
+
+    /**
+     * set player level status to completed and start a countdown timer
+     */
+    private void setCompleted(){
+        completed = true;
+        countdown = WIN_COUNTDOWN_TIMER;
+    }
+
+    /**
+     * set player level status to failed and start a countdown timer
+     */
+    private void setFailed(){
+        failed = true;
+        countdown = LOSE_COUNTDOWN_TIMER;
     }
 }

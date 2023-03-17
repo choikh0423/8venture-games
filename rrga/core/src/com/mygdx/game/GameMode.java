@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -27,6 +29,15 @@ public class GameMode implements Screen {
 
     /** Exit code for quitting the game */
     public static final int EXIT_QUIT = 0;
+
+    /** Exit code for pausing the game */
+    public static final int EXIT_PAUSE = 1;
+
+    /** Exit code for victory screen */
+    public static final int EXIT_VICTORY = 2;
+
+    /** Exit code for fail screen */
+    public static final int EXIT_FAIL = 3;
 
     /** Current Width of the game world in Box2d units */
     private float physicsWidth;
@@ -64,11 +75,10 @@ public class GameMode implements Screen {
     /** Whether or not this is an active controller */
     private boolean active;
     /** Whether we have completed this level */
-    private boolean complete;
-    /** Whether we have failed at this world (and need a reset) */
-    private boolean failed;
-    /** Whether or not debug mode is active */
+
     private boolean debug;
+    /** Whether or not the game is paused */
+    private boolean paused;
 
     /**
      * Returns true if debug mode is active.
@@ -156,8 +166,6 @@ public class GameMode implements Screen {
      * @param gravity	The gravitational force on this Box2d world
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
-        complete = false;
-        failed = false;
         debug  = false;
         active = false;
         this.bounds = bounds;
@@ -172,11 +180,11 @@ public class GameMode implements Screen {
      * Dispose of all (non-static) resources allocated to this mode.
      */
     public void dispose() {
-        gameplayController.dispose();
         // Dispose Controllers
-        canvas = null;
+        gameplayController.dispose();
         inputController = null;
         gameplayController = null;
+
         bounds = null;
         scale  = null;
         canvas = null;
@@ -224,10 +232,23 @@ public class GameMode implements Screen {
      * @return whether to process the update loop
      */
     public boolean preUpdate(float dt) {
-        inputController.readInput(bounds, scale);
         if (listener == null) {
             return true;
         }
+
+        if (paused){
+            return false;
+        }
+
+        if (gameplayController.isCompleted()) {
+            listener.exitScreen(this, EXIT_VICTORY);
+            return false;
+        } else if (gameplayController.isFailed()) {
+            listener.exitScreen(this, EXIT_FAIL);
+            return false;
+        }
+
+        inputController.readInput(bounds, scale);
 
         // Toggle debug
         if (inputController.didDebug()) {
@@ -237,6 +258,7 @@ public class GameMode implements Screen {
         // Handle resets
         if (inputController.didReset()) {
             reset();
+            return true;
         }
 
         // Now it is time to maybe switch screens.
@@ -246,16 +268,23 @@ public class GameMode implements Screen {
             return false;
         }
 
+        // Pause button pressed, no changes to internal state of game world
+        if (inputController.didPause()) {
+            listener.exitScreen(this, EXIT_PAUSE);
+            return false;
+        }
+
         return true;
     }
 
     /**
      * The core gameplay loop of this world.
      *
-     * This method contains the specific update code for this mini-game. It does
-     * not handle collisions, as those are managed by the parent class WorldController.
-     * This method is called after input is read, but before collisions are resolved.
-     * The very last thing that it should do is apply forces to the appropriate objects.
+     * This method contains the specific update code. It does not handle collisions,
+     * as those are managed by gameplay controller through Box2D.
+     * This method is called after input is read, in which case a decision has been
+     * made about updating the game state. This method should be followed by a call
+     * to draw the elements of the world.
      *
      * @param dt	Number of seconds since last animation frame
      */
@@ -267,10 +296,8 @@ public class GameMode implements Screen {
     /**
      * Draw the physics objects to the canvas
      *
-     * For simple worlds, this method is enough by itself.  It will need
-     * to be overriden if the world needs fancy backgrounds or the like.
-     *
      * The method draws all objects in the order that they were added.
+     * Heads-up display (HUD) content is drawn on top of these physics objects.
      *
      * @param dt	Number of seconds since last animation frame
      */
@@ -285,22 +312,18 @@ public class GameMode implements Screen {
         canvas.translateCameraToPoint(px,py);
         canvas.begin();
 
-//        canvas.draw(backgroundTexture, Color.WHITE, 0, 0,
-//                bounds.getWidth() * scale.x, bounds.getHeight() * scale.y);
-
         // center a background on player
         // TODO: make sure to get the right rectangle of the full background.
         //  For efficiency, DO NOT render the entire background.
         //  ox and oy denotes the origin of the texture that we sample a rectangle from.
-        //  Currently, the
         canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
                 py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
 
-
+        // draw all game objects, these objects are "dynamic"
+        // a change in player's position should yield a different perspective.
         PooledList<Obstacle> objects = gameplayController.getObjects();
         for(Obstacle obj : gameplayController.getObjects()) {
             obj.draw(canvas);
-
         }
         canvas.end();
 
@@ -318,20 +341,6 @@ public class GameMode implements Screen {
         canvas.begin();
         p.drawInfo(canvas);
         canvas.end();
-
-        // Final message
-        if (complete && !failed) {
-            displayFont.setColor(Color.YELLOW);
-            canvas.begin(); // DO NOT SCALE
-            canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
-            canvas.end();
-        } else if (failed) {
-            displayFont.setColor(Color.RED);
-            canvas.begin(); // DO NOT SCALE
-            canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
-            canvas.end();
-        }
-
     }
 
 
@@ -413,7 +422,10 @@ public class GameMode implements Screen {
      * also paused before it is destroyed.
      */
     public void pause() {
-        // TODO Auto-generated method stub
+        // does nothing
+        // this only gets called when we minimize the application, we can switch to pause mode that way.
+        paused = true;
+        listener.exitScreen(this, GameMode.EXIT_PAUSE);
     }
 
     /**
@@ -422,7 +434,7 @@ public class GameMode implements Screen {
      * This is usually when it regains focus.
      */
     public void resume() {
-        // TODO Auto-generated method stub
+        // does nothing
     }
 
     /**
@@ -431,6 +443,7 @@ public class GameMode implements Screen {
     public void show() {
         // Useless if called in outside animation loop
         active = true;
+        paused = false;
     }
 
     /**
@@ -439,6 +452,7 @@ public class GameMode implements Screen {
     public void hide() {
         // Useless if called in outside animation loop
         active = false;
+        paused = true;
     }
 
     /**

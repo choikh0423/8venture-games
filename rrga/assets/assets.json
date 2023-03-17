@@ -13,7 +13,8 @@
         "platform:barrier": "platform/barrier.png",
         "placeholder:player": "placeholder/player.png",
         "placeholder:umbrella": "placeholder/umbrella.png",
-        "placeholder:closed": "placeholder/closed_umbrella.png"
+        "placeholder:closed": "placeholder/closed_umbrella.png",
+        "placeholder:goal": "placeholder/placeholder/marker_flag_blue.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json"
@@ -27,6 +28,10 @@
         "shared:retro": {
             "file": "shared/RetroGame.ttf",
             "size": 64
+        },
+        "shared:minecraft": {
+            "file": "shared/Minecraft.ttf",
+            "size": 20
         }
     }
 }

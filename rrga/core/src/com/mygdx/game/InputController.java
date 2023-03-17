@@ -59,6 +59,9 @@ public class InputController {
     private boolean exitPrevious;
     /** Whether the player toggled the umbrella open/closed */
     private boolean togglePressed;
+    /** Whether the pause button was pressed */
+    private boolean pausePressed;
+
     /** How much did we move horizontally? */
     private float horizontal;
     /** How much did the mouse move horizontally? */
@@ -129,6 +132,13 @@ public class InputController {
      * @return true if the open/closed toggle button was pressed
      */
     public boolean didToggle() { return togglePressed; }
+
+    /**
+     * Returns true if the pause button was toggled
+     * @return
+     */
+    public boolean didPause() { return pausePressed; }
+
 
     /**
      * Creates a new input controller
@@ -230,6 +240,9 @@ public class InputController {
         // E for toggling umbrella
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) togglePressed = true;
         else togglePressed = false;
+
+        // P for pausing game
+        pausePressed = Gdx.input.isKeyJustPressed(Input.Keys.P);
     }
 
     /**
