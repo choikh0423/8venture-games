@@ -20,7 +20,7 @@ public abstract class HazardModel extends PolygonObstacle {
     private int damage;
 
     /** The scale of this hazard's knockback */
-    private float knockbackScl;
+    private float knockback;
 
     /**
      * Returns this hazard's damage
@@ -35,10 +35,10 @@ public abstract class HazardModel extends PolygonObstacle {
      * @return This hazard's knockback scale
      */
     public float getKnockbackScl(){
-        return knockbackScl;
+        return knockback;
     }
 
-    public HazardModel(JsonValue data, int dam, float kbs) {
+    public HazardModel(JsonValue data, int dam, float kb) {
         super(data.get("points").asFloatArray(), data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
@@ -46,7 +46,7 @@ public abstract class HazardModel extends PolygonObstacle {
         setRestitution(0);
         this.data = data;
         this.damage = dam;
-        this.knockbackScl = kbs;
+        this.knockback = kb;
     }
 
     /**

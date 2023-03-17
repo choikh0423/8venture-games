@@ -8,13 +8,14 @@ public class StaticHazard extends HazardModel{
     /** Damage of a static hazard */
     private static final int STATIC_DAMAGE = 1;
 
-    private static final float STATIC_KNOCKBACK_SCL = 1;
+    /** Knockback of a static hazard */
+    private static final float STATIC_KNOCKBACK = 3;
     public StaticHazard(JsonValue data) {
-        super(data, STATIC_DAMAGE, STATIC_KNOCKBACK_SCL);
+        super(data, STATIC_DAMAGE, STATIC_KNOCKBACK);
     }
 
     @Override
     public Vector2 getKnockbackForce() {
-        return new Vector2(0,0);
+        return new Vector2(0,1);
     }
 }

@@ -99,9 +99,13 @@ public class BirdHazard extends HazardModel {
     /**
      * Sets the direction of the target using the targets x and y coordinates
      */
-    public void setTargetDir(float tx, float ty) {
-        float moveX = tx - getX();
-        float moveY = ty - getY();
+    public void setTargetDir(float tx, float ty, float tvx, float tvy) {
+        //Right now using euler's method to determine target direction
+        //In the future might want to switch to tracking player's location up to a certain point
+        //and incrementally adjusting direction.
+        float timestep = (float) sensorRadius / attackSpeed;
+        float moveX = tx - getX() + (tvx * timestep);
+        float moveY = ty - getY() + (tvy * timestep);
         move.set(moveX, moveY);
         move.nor();
         move.scl(attackSpeed);
@@ -202,7 +206,7 @@ public class BirdHazard extends HazardModel {
 
     @Override
     public Vector2 getKnockbackForce() {
-        return new Vector2(moveDir.x, moveDir.y).nor();
+        return new Vector2(moveDir.x, Math.abs(moveDir.x)).nor();
     }
 
     /**
@@ -211,8 +215,8 @@ public class BirdHazard extends HazardModel {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), effect * 1, 1);
+        //float effect = faceRight ? 1.0f : -1.0f;
+        canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
     }
 
     /**

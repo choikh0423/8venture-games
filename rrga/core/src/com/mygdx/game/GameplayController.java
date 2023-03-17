@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import com.mygdx.game.hazard.BirdHazard;
 import com.mygdx.game.hazard.HazardModel;
+import com.mygdx.game.hazard.LightningHazard;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -109,6 +110,11 @@ public class GameplayController implements ContactListener {
     private TextureRegion birdTexture;
 
     /**
+     * Texture asset for lightning
+     */
+    private TextureRegion lightningTexture;
+
+    /**
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
@@ -163,9 +169,15 @@ public class GameplayController implements ContactListener {
     private BitmapFont avatarHealthFont;
 
     /**
-     * The set of all wind birds currently in the level
+     * The set of all birds currently in the level
      */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+
+    /**
+     * The set of all lightning currently in the level
+     */
+    private ObjectSet<LightningHazard> lightning = new ObjectSet<>();
+
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -196,6 +208,7 @@ public class GameplayController implements ContactListener {
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
 
         jumpSound = directory.getEntry("platform:jump", Sound.class);
@@ -330,6 +343,18 @@ public class GameplayController implements ContactListener {
             birds.add(obj);
         }
 
+        String lightningName = "lightning";
+        JsonValue lightningjv = hazardsjv.get("lightning");
+        for (int ii = 0; ii < lightningjv.size; ii++) {
+            LightningHazard obj;
+            obj = new LightningHazard(lightningjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(lightningTexture);
+            obj.setName(lightningName + ii);
+            addObject(obj);
+            lightning.add(obj);
+        }
+
         volume = constants.getFloat("volume", 1.0f);
     }
 
@@ -406,6 +431,11 @@ public class GameplayController implements ContactListener {
         for (BirdHazard b : birds) {
             b.move();
         }
+
+        //update the lightnings
+        for (LightningHazard l : lightning){
+            l.strike();
+        }
     }
 
     /**
@@ -426,9 +456,6 @@ public class GameplayController implements ContactListener {
 
         Object fd1 = fix1.getUserData();
         Object fd2 = fix2.getUserData();
-
-        Vector2 normal = contact.getWorldManifold().getNormal();
-        //going to need for static hazard collision
 
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
@@ -454,17 +481,20 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                int dam = h.getDamage();
-                if (avatar.getiFrames() == 0){
-                  if (avatar.getHealth() - dam > 0 ){
-                      avatar.getBody().applyLinearImpulse(h.getKnockbackForce().scl(h.getKnockbackScl()), avatar.getPosition(), true);
-                      avatar.setHealth(avatar.getHealth() - dam);
-                      avatar.setiFrames(NUM_I_FRAMES);
-                  }
-                  else{
-                      //lose condition
-                      //restart?
-                  }
+                if(h.isActive()) {
+                    int dam = h.getDamage();
+                    if (avatar.getiFrames() == 0) {
+                        if (avatar.getHealth() - dam > 0) {
+                            Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
+                            System.out.println(knockback.toString());
+                            avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                            avatar.setHealth(avatar.getHealth() - dam);
+                            avatar.setiFrames(NUM_I_FRAMES);
+                        } else {
+                            //lose condition
+                            //restart?
+                        }
+                    }
                 }
             }
 
@@ -474,7 +504,7 @@ public class GameplayController implements ContactListener {
                 BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
                 if (!bird.seesTarget) {
                     bird.seesTarget = true;
-                    bird.setTargetDir(avatar.getX(), avatar.getY());
+                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                 }
             }
 
