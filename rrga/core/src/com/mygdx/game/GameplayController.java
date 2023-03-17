@@ -48,7 +48,7 @@ public class GameplayController implements ContactListener {
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
-    public static final int NUM_I_FRAMES = 30;
+    public static final int NUM_I_FRAMES = 120;
 
 
     /**
@@ -319,9 +319,10 @@ public class GameplayController implements ContactListener {
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
         int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
+        float birdKnockback = hazardsjv.getInt("birdKnockback");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed);
+            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(birdTexture);
             obj.setName(birdName + ii);
@@ -385,9 +386,12 @@ public class GameplayController implements ContactListener {
         } else if (!touching_wind && umbrella.isOpen()) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation();
-            int scl = 10;
-            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+            float angle = umbrella.getRotation() % ((float) Math.PI * 2);
+            if (angle < Math.PI) {
+                int sclx = 6;
+                int scly = 4;
+                avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
+            }
         }
 
         // Flip umbrella if player turned
@@ -423,6 +427,9 @@ public class GameplayController implements ContactListener {
         Object fd1 = fix1.getUserData();
         Object fd2 = fix2.getUserData();
 
+        Vector2 normal = contact.getWorldManifold().getNormal();
+        //going to need for static hazard collision
+
         try {
             Obstacle bd1 = (Obstacle) body1.getUserData();
             Obstacle bd2 = (Obstacle) body2.getUserData();
@@ -442,12 +449,15 @@ public class GameplayController implements ContactListener {
             }
 
             // Check for hazard collision
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
+            // Is there any way to add fixture data to all fixtures in a polygon obstacle without changing the
+            // implementation? If so, want to change to fd1 == "damage"
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 int dam = h.getDamage();
                 if (avatar.getiFrames() == 0){
                   if (avatar.getHealth() - dam > 0 ){
+                      avatar.getBody().applyLinearImpulse(h.getKnockbackForce().scl(h.getKnockbackScl()), avatar.getPosition(), true);
                       avatar.setHealth(avatar.getHealth() - dam);
                       avatar.setiFrames(NUM_I_FRAMES);
                   }

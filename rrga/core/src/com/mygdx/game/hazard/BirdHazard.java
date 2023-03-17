@@ -44,6 +44,12 @@ public class BirdHazard extends HazardModel {
     private int currentPathIndex;
 
     /**
+     * If loop is true, bird will go from last point in path to first.
+     * If loop is false, bird will turn around after last point and reverse its path
+     */
+    private boolean loop;
+
+    /**
      * Move speed of this bird
      */
     private int moveSpeed;
@@ -77,6 +83,11 @@ public class BirdHazard extends HazardModel {
     private Vector2 targetDir = new Vector2();
 
     /**
+     * Direction of the birds movement
+     */
+    private Vector2 moveDir = new Vector2();
+
+    /**
      * Returns the name of this bird's sensor
      *
      * @return the name of this bird's sensor
@@ -97,17 +108,19 @@ public class BirdHazard extends HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed) {
-        super(data, birdDamage);
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
+        super(data, birdDamage, birdKnockback);
         path = data.get("path").asFloatArray();
         moveSpeed = data.getInt("movespeed");
         attack = data.getBoolean("attack");
+        loop = data.getBoolean("loop");
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
         sensorName = "birdSensor";
         seesTarget = false;
         faceRight = true;
+        fixture.isSensor = true;
     }
 
     public boolean activatePhysics(World world) {
@@ -116,23 +129,23 @@ public class BirdHazard extends HazardModel {
             return false;
         }
 
-        //create sensor
-        Vector2 sensorCenter = new Vector2(0, 0);
-        FixtureDef sensorDef = new FixtureDef();
-        sensorDef.density = 0;
-        sensorDef.isSensor = true;
-        sensorShape = new CircleShape();
-        sensorShape.setRadius(sensorRadius);
-        //change radius to variable?
-        sensorDef.shape = sensorShape;
-        Fixture sensorFixture = body.createFixture(sensorDef);
-        sensorFixture.setUserData(getSensorName());
-        return true;
+        //create sensor if attacker
+        if(attack) {
+            FixtureDef sensorDef = new FixtureDef();
+            sensorDef.density = 0;
+            sensorDef.isSensor = true;
+            sensorShape = new CircleShape();
+            sensorShape.setRadius(sensorRadius);
+            sensorDef.shape = sensorShape;
+            Fixture sensorFixture = body.createFixture(sensorDef);
+            sensorFixture.setUserData(getSensorName());
+        }
+            return true;
     }
 
     public void move() {
         //if target not seen
-        if (!seesTarget || attack==false) {
+        if (!seesTarget) {
             float pathX = path[currentPathIndex];
             float pathY = path[currentPathIndex + 1];
             float moveX = pathX - getX();
@@ -143,6 +156,7 @@ public class BirdHazard extends HazardModel {
                 if (Math.abs(moveX) < .001 && Math.abs(moveY) < .001) {
                     //if at end of path
                     if (currentPathIndex == path.length - 2) {
+                        if(!loop){
                         for (int i = 0; i < path.length / 2; i += 2) {
                             float temp1 = path[i];
                             float temp2 = path[i + 1];
@@ -150,6 +164,7 @@ public class BirdHazard extends HazardModel {
                             path[i + 1] = path[path.length - i - 1];
                             path[path.length - i - 2] = temp1;
                             path[path.length - i - 1] = temp2;
+                        }
                         }
                         currentPathIndex = 0;
                     }
@@ -163,26 +178,31 @@ public class BirdHazard extends HazardModel {
                     move.set(moveX, moveY);
                     move.nor();
                     move.scl(moveSpeed);
-                    if (Math.abs((move.x / 100)) > Math.abs(pathX - getX())) setX(pathX);
+                    if (Math.abs((move.x / 100)) > Math.abs(moveX)) setX(pathX);
                     else setX(getX() + (move.x / 100));
-                    if (Math.abs((move.y / 100)) > Math.abs(pathY - getY())) setY(pathY);
+                    if (Math.abs((move.y / 100)) > Math.abs(moveY)) setY(pathY);
                     else setY(getY() + (move.y / 100));
                     if (move.x > 0) faceRight = true;
                     else faceRight = false;
                 }
             }
             //else path is 1 point
-            else{
-                //no movement
-            }
+            //no movement
+            moveDir.set(moveX, moveY);
         }
         //else target is seen
         else {
             //move in direction of targetCoords until offscreen
             setX(getX() + (targetDir.x / 100));
             setY(getY() + (targetDir.y / 100));
+            moveDir.set(targetDir);
             //Need some way to delete when offscreen, should be handled by gamecontroller
         }
+    }
+
+    @Override
+    public Vector2 getKnockbackForce() {
+        return new Vector2(moveDir.x, moveDir.y).nor();
     }
 
     /**
@@ -204,8 +224,8 @@ public class BirdHazard extends HazardModel {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
+        if(attack) {
+            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
+        }
     }
-
-
 }

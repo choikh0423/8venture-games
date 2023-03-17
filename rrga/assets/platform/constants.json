@@ -74,12 +74,14 @@
 		"birdDamage": 1,
 		"birdSensorRadius": 7,
 		"birdAttackSpeed": 20,
+		"birdKnockback": 15,
 		"birds":[
 			{
 				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
 				"x": 0.0,
 				"y": 15.0,
 				"path": [10.0, 15.0, 25.0, 15.0],
+				"loop": false,
 				"movespeed": 6,
 				"attack": true
 			},
@@ -88,6 +90,7 @@
 				"x": 30.0,
 				"y": 10.0,
 				"path": [30.0, 10.0],
+				"loop": false,
 				"movespeed": 0,
 				"attack": true
 			},
@@ -96,6 +99,7 @@
 				"x": 20.0,
 				"y": 10.0,
 				"path": [20.0, 10.0, 15.0, 10.0],
+				"loop": false,
 				"movespeed": 4,
 				"attack": false
 			}
