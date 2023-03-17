@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -160,7 +161,20 @@ public class GameplayController implements ContactListener {
      * The set of all wind bodies that umbrella in contact with
      */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+    //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
+    //cache for vector computations
+    Vector2 cache = new Vector2();
+    //THESE FOUR ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
+    //difference in initial position between umbrella and player
+    private Vector2 diff = new Vector2();
+    //center of the screen in canvas coordinates
+    public Vector2 center = new Vector2();
+    //the upward-pointing unit vector
+    private Vector2 up = new Vector2(0,1);
+    //current mouse position
+    //should not be updated except when making the umbrella follow the mouse
+    Vector2 mousePos = new Vector2();
 
     /**
      * The set of all wind birds currently in the level
@@ -286,17 +300,10 @@ public class GameplayController implements ContactListener {
         umbrella.setDrawScale(scale);
         umbrella.setTexture(umbrellaTexture);
         umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setPosition(constants.get("umbrella").get("pos").getFloat(0), constants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
-        RevoluteJointDef jointDef = new RevoluteJointDef();
-        jointDef.collideConnected = false;
-        jointDef.enableLimit = true;
-        jointDef.lowerAngle = (float) (-Math.PI);
-        jointDef.upperAngle = (float) (Math.PI);
-        jointDef.bodyA = avatar.getBody();
-        jointDef.bodyB = umbrella.getBody();
-        jointDef.localAnchorA.set(0, 0);
-        jointDef.localAnchorB.set(0, constants.get("player").get("pos").getFloat(1) - constants.get("umbrella").get("pos").getFloat(1));
-        world.createJoint(jointDef);
+        diff.x = umbrella.getX()-avatar.getX();
+        diff.y = umbrella.getY()-avatar.getY();
 
         // Create wind gusts
         String windName = "wind";
@@ -354,6 +361,22 @@ public class GameplayController implements ContactListener {
             }
         }
 
+        //umbrella points towards mouse pointer
+        mousePos.x = input.getMousePos().x;
+        mousePos.y = input.getMousePos().y;
+        //convert from screen coordinates to canvas coordinates
+        mousePos.y=2*center.y-mousePos.y;
+        //convert to player coordinates
+        mousePos.sub(center);
+        //normalize manually because Vector2.nor() is less accurate
+        float l = mousePos.len();
+        mousePos.x/=l;
+        mousePos.y/=l;
+        //compute new angle
+        float mouseAng = (float) Math.acos(mousePos.dot(up));
+        if (input.getMousePos().x > center.x) mouseAng*=-1;
+        umbrella.setAngle(mouseAng);
+
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
@@ -368,10 +391,6 @@ public class GameplayController implements ContactListener {
         }
         contactWindBod.clear();
 
-        //Commented this out since it looks like this is handled below
-        //avatar.setMovement(input.getHorizontal() *avatar.getForce());
-        //umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
-
         // Process actions in object model
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
@@ -384,13 +403,9 @@ public class GameplayController implements ContactListener {
             avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
         }
 
-        // Flip umbrella if player turned
-        boolean right = umbrella.faceRight;
-        umbrella.faceRight = avatar.isFacingRight();
-        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle() * -1);
-
-        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
-        umbrella.applyForce();
+        // enable this and put it in a conditional statement if we decide to still have an arrow key mode
+//        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
+//        umbrella.applyForce();
 
         //move the birds
         for (BirdHazard b : birds) {
@@ -587,6 +602,11 @@ public class GameplayController implements ContactListener {
 
         // Turn the physics engine crank.
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+        //make umbrella follow player position. since it is a static body, we update
+        //its position after the world step so that it smoothly follows the player
+        cache.x = avatar.getX()+mousePos.x*diff.len();
+        cache.y = avatar.getY()+mousePos.y*diff.len();
+        umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
