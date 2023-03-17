@@ -51,6 +51,11 @@ public class GameplayController implements ContactListener {
 
     public static final int NUM_I_FRAMES = 30;
 
+    /**
+     * JSONvalue storing all level data
+     */
+    private JsonValue levels;
+
 
     /**
      * All the objects in the world.
@@ -77,12 +82,25 @@ public class GameplayController implements ContactListener {
      * The world scale
      */
     protected Vector2 scale;
+    /** Current Width of the game world in Box2d units */
+    private float physicsWidth;
+
+    /** Current Height of the game world in Box2d units */
+    private float physicsHeight;
+
+    /** Current Width of the canvas in Box2d units */
+    private float displayWidth;
+
+    /** Current Height of the canvas in Box2d units */
+    private float displayHeight;
 
     /**
      * Countdown active for winning or losing
      */
     private int countdown;
 
+    /** Texture asset for background image */
+    private TextureRegion backgroundTexture;
     /**
      * The texture for walls and platforms
      */
@@ -119,9 +137,13 @@ public class GameplayController implements ContactListener {
 
     // Physics objects for the game
     /**
-     * Physics constants for initialization
+     * Physics constants for current level
      */
-    private JsonValue constants;
+    private JsonValue levelConstants;
+    /**
+     * Assets for current level
+     */
+    private JsonValue levelAssets;
     /**
      * Reference to the character avatar
      */
@@ -164,7 +186,7 @@ public class GameplayController implements ContactListener {
     /**
      * Currently selected level
      */
-    private int currentLevel;
+    private int currentLevel = 0;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -191,14 +213,27 @@ public class GameplayController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
+        // Setting up Constant/Asset Path for different levels
+        String constantPath = "level" + this.currentLevel + ":constants";
+        String assetPath = "level" + this.currentLevel + ":assets";
+
+        levelConstants = directory.getEntry(constantPath, JsonValue.class);
+        // Level Assets to be implemented
+        // levelAssets = directory.getEntry(assetPath, JsonValue.class);
+
+        backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
+
+        physicsWidth = levelConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
+        physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
+        displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
+        displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
+
         platformTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
-
-        constants = directory.getEntry("platform:constants", JsonValue.class);
 
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
         avatarHealthFont.setColor(Color.RED);
@@ -233,11 +268,11 @@ public class GameplayController implements ContactListener {
         float dheight = platformTile.getRegionHeight() / scale.y;
 
         // Setting Gravity on World
-        JsonValue defaults = constants.get("defaults");
+        JsonValue defaults = levelConstants.get("defaults");
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
         String wname = "wall";
-        JsonValue walljv = constants.get("walls");
+        JsonValue walljv = levelConstants.get("walls");
         for (int ii = 0; ii < walljv.size; ii++) {
             PolygonObstacle obj;
             obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
@@ -252,7 +287,7 @@ public class GameplayController implements ContactListener {
         }
 
         String pname = "platform";
-        JsonValue platjv = constants.get("platforms");
+        JsonValue platjv = levelConstants.get("platforms");
         for (int ii = 0; ii < platjv.size; ii++) {
             PolygonObstacle obj;
             obj = new PolygonObstacle(platjv.get(ii).asFloatArray(), 0, 0);
@@ -267,21 +302,21 @@ public class GameplayController implements ContactListener {
         }
 
         // Create player
-        float scl = constants.get("player").getFloat("texturescale");
+        float scl = levelConstants.get("player").getFloat("texturescale");
         dwidth = avatarTexture.getRegionWidth() / scale.x * scl;
         dheight = avatarTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(constants.get("player"), dwidth, dheight, constants.get("player").getInt("maxhealth"));
+        avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
-        scl = constants.get("umbrella").getFloat("texturescale");
+        scl = levelConstants.get("umbrella").getFloat("texturescale");
         dwidth = umbrellaTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(constants.get("umbrella"), dwidth, dheight);
+        umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setTexture(umbrellaTexture);
-        umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
         RevoluteJointDef jointDef = new RevoluteJointDef();
         jointDef.collideConnected = false;
@@ -291,12 +326,12 @@ public class GameplayController implements ContactListener {
         jointDef.bodyA = avatar.getBody();
         jointDef.bodyB = umbrella.getBody();
         jointDef.localAnchorA.set(0, 0);
-        jointDef.localAnchorB.set(0, constants.get("player").get("pos").getFloat(1) - constants.get("umbrella").get("pos").getFloat(1));
+        jointDef.localAnchorB.set(0, levelConstants.get("player").get("pos").getFloat(1) - levelConstants.get("umbrella").get("pos").getFloat(1));
         world.createJoint(jointDef);
 
         // Create wind gusts
         String windName = "wind";
-        JsonValue windjv = constants.get("wind");
+        JsonValue windjv = levelConstants.get("wind");
         for (int ii = 0; ii < windjv.size; ii++) {
             WindModel obj;
             obj = new WindModel(windjv.get(ii));
@@ -308,7 +343,7 @@ public class GameplayController implements ContactListener {
 
         //create birds
         String birdName = "bird";
-        JsonValue birdjv = constants.get("birds");
+        JsonValue birdjv = levelConstants.get("birds");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
             obj = new BirdHazard(birdjv.get(ii));
@@ -319,7 +354,7 @@ public class GameplayController implements ContactListener {
             birds.add(obj);
         }
 
-        volume = constants.getFloat("volume", 1.0f);
+        volume = levelConstants.getFloat("volume", 1.0f);
     }
 
     /**
@@ -527,7 +562,7 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Set current level
+     * Sets current level of the game
      */
     public void setLevel(int level){
         currentLevel = level;
@@ -669,5 +704,33 @@ public class GameplayController implements ContactListener {
      */
     public void setBounds(Rectangle rect){
         this.bounds = new Rectangle(rect);
+    }
+
+    /**
+     * Get Background Texture
+     * @return Background Texture
+     */
+    public TextureRegion getBackgroundTexture() { return this.backgroundTexture; }
+
+    /**
+     * Get physics dimensions of the world
+     * @return physicsDim - [physicsWidth, physicsHeight]
+     */
+    public float[] getPhysicsDims() {
+        float[] physicsDim = new float[2];
+        physicsDim[0] = this.physicsWidth;
+        physicsDim[1] = this.physicsHeight;
+        return physicsDim;
+    }
+
+    /**
+     * Get physics dimensions of the world
+     * @return physicsDim - [physicsWidth, physicsHeight]
+     */
+    public float[] getDisplayDims() {
+        float[] DisplayDim = new float[2];
+        DisplayDim[0] = this.displayWidth;
+        DisplayDim[1] = this.displayHeight;
+        return DisplayDim;
     }
 }

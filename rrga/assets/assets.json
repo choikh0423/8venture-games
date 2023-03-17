@@ -16,7 +16,9 @@
         "placeholder:closed": "placeholder/closed_umbrella.png"
     },
     "jsons"  : {
-        "platform:constants": "platform/constants.json"
+        "platform:constants": "platform/constants.json",
+        "level0:constants" :"level0/constants.json",
+        "level0:assets" : "level0/assets.json"
     },
     "sounds" : {
         "platform:jump" : "platform/jump.mp3",

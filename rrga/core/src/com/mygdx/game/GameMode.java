@@ -192,13 +192,17 @@ public class GameMode implements Screen {
      */
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
-        backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
-        JsonValue data = directory.getEntry( "platform:constants", JsonValue.class ).get("world");
-        physicsWidth = data.getFloat("max_width", DEFAULT_WIDTH);
-        physicsHeight = data.getFloat("max_height", DEFAULT_HEIGHT);
-        displayWidth = data.getFloat("width", DEFAULT_WIDTH);
-        displayHeight = data.getFloat("height", DEFAULT_HEIGHT);
         gameplayController.gatherAssets(directory);
+
+        this.backgroundTexture = gameplayController.getBackgroundTexture();
+
+        float[] physicsDim = gameplayController.getPhysicsDims();
+        this.physicsWidth = physicsDim[0];
+        this.physicsHeight = physicsDim[1];
+
+        float[] displayDim = gameplayController.getDisplayDims();
+        this.displayWidth = displayDim[0];
+        this.displayHeight = displayDim[1];
     }
 
     /**
@@ -449,6 +453,7 @@ public class GameMode implements Screen {
     public void setScreenListener(ScreenListener listener) {
         this.listener = listener;
     }
+
 
 
 }
