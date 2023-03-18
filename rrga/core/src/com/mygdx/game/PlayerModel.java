@@ -11,7 +11,9 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -69,6 +71,9 @@ public class PlayerModel extends CapsuleObstacle {
 	 * The number i-frames the player currently has
 	 */
 	private int iFrames;
+
+	/** health point texture */
+	private TextureRegion hpTexture;
 
 	/** The number of updates before the texture is switched when I-Frames are active */
 	private int iFrameCountdown = 7;
@@ -259,6 +264,11 @@ public class PlayerModel extends CapsuleObstacle {
 		iFrames = f;
 	}
 
+
+	public void setHpTexture(TextureRegion texture){
+		this.hpTexture = texture;
+	}
+
 	/**
 	 * Creates a new player avatar with the given physics data
 	 *
@@ -441,10 +451,21 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Draws player HP information on screen and
 	 * TODO: possibly other status information
-	 * @param canvas
+	 * @param canvas the game canvas
 	 */
 	public void drawInfo(GameCanvas canvas){
-		canvas.drawText("HP: " + getHealth(), healthFont, 25, canvas.getHeight()-25);
+		//healthFont.setColor(Color.RED);
+		//canvas.drawTextCentered("HP: " + getHealth(), healthFont, -canvas.getHeight()/3f);
+		if (hpTexture == null){
+			return;
+		}
+		float height = hpTexture.getRegionHeight();
+		float width = hpTexture.getRegionWidth();
+		for (int i = 0; i < health; i++){
+			canvas.draw(texture,Color.NAVY,width/2f,height/2f, (i+1)*drawScale.x,
+					canvas.getHeight() - drawScale.y,0,textureScale,textureScale);
+		}
+
 	}
 	
 	/**
