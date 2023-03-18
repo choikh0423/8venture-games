@@ -481,12 +481,10 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                if(h.isActive()) {
                     int dam = h.getDamage();
                     if (avatar.getiFrames() == 0) {
                         if (avatar.getHealth() - dam > 0) {
                             Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
-                            System.out.println(knockback.toString());
                             avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
                             avatar.setHealth(avatar.getHealth() - dam);
                             avatar.setiFrames(NUM_I_FRAMES);
@@ -495,7 +493,6 @@ public class GameplayController implements ContactListener {
                             //restart?
                         }
                     }
-                }
             }
 
             // check for bird sensor collision

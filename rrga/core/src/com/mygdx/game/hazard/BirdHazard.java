@@ -206,7 +206,7 @@ public class BirdHazard extends HazardModel {
 
     @Override
     public Vector2 getKnockbackForce() {
-        return new Vector2(moveDir.x, Math.abs(moveDir.x)).nor();
+        return new Vector2(moveDir.x, moveDir.y).nor();
     }
 
     /**
