@@ -52,7 +52,7 @@ public class LoseScreen extends MenuScreen{
         bigFont.setColor(Color.RED);
         canvas.drawTextCentered("Game Over!", bigFont, 0);
         smallFont.setColor(Color.WHITE);
-        canvas.drawTextCentered("Press R to Try Again", smallFont, -canvas.getHeight()/5f);
+        canvas.drawTextCentered("Press  R  to  Try  Again", smallFont, -canvas.getHeight()/5f);
         canvas.end();
 
         // transition

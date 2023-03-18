@@ -67,6 +67,9 @@ public class GameCanvas {
     /** Rendering context for the debug outlines */
     private ShapeRenderer debugRender;
 
+    /** Rendering context for the shapes */
+    private ShapeRenderer shapeRender;
+
     /** Track whether or not we are active (for error checking) */
     private DrawPass active;
 
@@ -277,7 +280,10 @@ public class GameCanvas {
      */
     public void resize() {
         // Resizing screws up the spriteBatch projection matrix
+        System.out.println("yes");
         spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
+
+        // TA Vineet
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
 
     }

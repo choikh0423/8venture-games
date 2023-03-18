@@ -236,6 +236,8 @@ public class GameMode implements Screen {
             return true;
         }
 
+        // TODO: maybe this field is unnecessary since GameMode's update() and draw() are public.
+        //  screen modes that use GameMode as background can just avoid render()...
         if (paused){
             return false;
         }

@@ -16,6 +16,9 @@ public class VictoryScreen extends MenuScreen{
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
+    /** The Screen to draw underneath the victory screen*/
+    private GameMode gameScreen;
+
     /** overlay texture */
     private TextureRegion foregroundTexture;
 
@@ -35,6 +38,7 @@ public class VictoryScreen extends MenuScreen{
 
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
+        overlayTint = new Color(0,0,0,0.8f);
         currentExitCode = Integer.MIN_VALUE;
     }
 
@@ -45,14 +49,15 @@ public class VictoryScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
-        canvas.clear();
+        gameScreen.update(delta);
+        gameScreen.draw(delta);
         canvas.setCameraHUD();
         canvas.begin();
-        canvas.draw(foregroundTexture, Color.BLACK, 0, 0, canvas.getWidth(), canvas.getHeight());
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
         bigFont.setColor(Color.YELLOW);
         canvas.drawTextCentered("Victory!", bigFont, 0);
         smallFont.setColor(Color.WHITE);
-        canvas.drawTextCentered("Press R to Play Again", smallFont, -canvas.getHeight()/5f);
+        canvas.drawTextCentered("Press  R  to  Try  Again", smallFont, -canvas.getHeight()/5f);
         canvas.end();
 
         // transition
@@ -65,6 +70,7 @@ public class VictoryScreen extends MenuScreen{
     @Override
     public void dispose() {
         listener = null;
+        gameScreen = null;
         canvas = null;
         foregroundTexture = null;
         bigFont = null;
@@ -96,6 +102,10 @@ public class VictoryScreen extends MenuScreen{
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
+    }
+
+    public void setBackgroundScreen(GameMode gameScreen){
+        this.gameScreen = gameScreen;
     }
 
     @Override

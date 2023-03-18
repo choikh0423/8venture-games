@@ -19,7 +19,7 @@ public class PauseMode extends MenuScreen {
     private ScreenListener listener;
 
     /** The Screen to draw underneath the pause screen*/
-    private Screen background;
+    private GameMode gameScreen;
 
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
@@ -69,9 +69,10 @@ public class PauseMode extends MenuScreen {
      * @param delta The time in seconds since the last render.
      */
     public void render(float delta) {
-        if (background != null){
-            background.render(delta);
-        }
+//        if (background != null){
+//            background.render(delta);
+//        }
+        gameScreen.draw(delta);
         draw(delta);
         if (currentExitCode >= 0){
             listener.exitScreen(this, currentExitCode);
@@ -98,7 +99,7 @@ public class PauseMode extends MenuScreen {
 
     public void dispose() {
         listener = null;
-        background = null;
+        gameScreen = null;
         canvas = null;
         foregroundTexture = null;
         overlayTint = null;
@@ -126,12 +127,12 @@ public class PauseMode extends MenuScreen {
         this.listener = listener;
     }
 
-    public void setBackgroundScreen(Screen backgroundScreen){
-        this.background = backgroundScreen;
+    public void setBackgroundScreen(GameMode gameScreen){
+        this.gameScreen = gameScreen;
     }
 
-    public Screen getBackgroundScreen(){
-        return this.background;
+    public GameMode getBackgroundScreen(){
+        return this.gameScreen;
     }
 }
 

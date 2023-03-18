@@ -9,7 +9,6 @@
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:goal":   "shared/goaldoor.png",
         "platform:barrier": "platform/barrier.png",
         "placeholder:player": "placeholder/player.png",
         "placeholder:umbrella": "placeholder/umbrella.png",

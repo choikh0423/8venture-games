@@ -119,6 +119,11 @@ public class GameplayController implements ContactListener {
     private TextureRegion birdTexture;
 
     /**
+     * Texture asset for goal
+     */
+    private TextureRegion goalTexture;
+
+    /**
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
@@ -217,6 +222,7 @@ public class GameplayController implements ContactListener {
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
+        goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
 
         jumpSound = directory.getEntry("platform:jump", Sound.class);
         fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -258,8 +264,24 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
-        float dwidth = platformTile.getRegionWidth() / scale.x;
-        float dheight = platformTile.getRegionHeight() / scale.y;
+        JsonValue goal =  constants.get("goal");
+        JsonValue goalpos = goal.get("pos");
+        float dwidth = goal.getFloat("width");
+        float dheight = goal.getFloat("height");
+        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1),dwidth, dheight);
+        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+        goalDoor.setDensity(goal.getFloat("density", 0));
+        goalDoor.setFriction(goal.getFloat("friction", 0));
+        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+        goalDoor.setSensor(true);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTexture);
+        // doing so fits the texture onto the specified size of the object
+        goalDoor.setTextureScale(
+                dwidth * scale.x/goalTexture.getRegionWidth(),
+                dheight * scale.y/goalTexture.getRegionHeight());
+        goalDoor.setName("goal");
+        addObject(goalDoor);
 
         // Setting Gravity on World
         JsonValue defaults = constants.get("defaults");
@@ -548,6 +570,9 @@ public class GameplayController implements ContactListener {
             if ((bd1 == avatar && bd2 == goalDoor) ||
                     (bd1 == goalDoor && bd2 == avatar)) {
                 // player wins
+                if (!failed && !completed){
+                    setCompleted();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
