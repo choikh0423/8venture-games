@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -25,6 +27,18 @@ public class GameMode implements Screen {
 
     /** Exit code for quitting the game */
     public static final int EXIT_QUIT = 0;
+
+    /** Current Width of the game world in Box2d units */
+    private float physicsWidth;
+
+    /** Current Height of the game world in Box2d units */
+    private float physicsHeight;
+
+    /** Current Width of the canvas in Box2d units */
+    private float displayWidth;
+
+    /** Current Height of the canvas in Box2d units */
+    private float displayHeight;
 
     /** Width of the game world in Box2d units */
     protected static final float DEFAULT_WIDTH  = 32.0f;
@@ -99,9 +113,8 @@ public class GameMode implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
-        this.scale.x = canvas.getWidth()/bounds.getWidth();
-        this.scale.y = canvas.getHeight()/bounds.getHeight();
-
+        this.scale.x = canvas.getWidth()/displayWidth;
+        this.scale.y = canvas.getHeight()/displayHeight;
         gameplayController.setScale(this.scale);
     }
 
@@ -180,6 +193,11 @@ public class GameMode implements Screen {
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
         backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
+        JsonValue data = directory.getEntry( "platform:constants", JsonValue.class ).get("world");
+        physicsWidth = data.getFloat("max_width", DEFAULT_WIDTH);
+        physicsHeight = data.getFloat("max_height", DEFAULT_HEIGHT);
+        displayWidth = data.getFloat("width", DEFAULT_WIDTH);
+        displayHeight = data.getFloat("height", DEFAULT_HEIGHT);
         gameplayController.gatherAssets(directory);
     }
 
@@ -189,6 +207,8 @@ public class GameMode implements Screen {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        this.bounds.set(0,0, physicsWidth, physicsHeight);
+        gameplayController.setBounds(this.bounds);
         gameplayController.reset();
     };
 
@@ -225,6 +245,7 @@ public class GameMode implements Screen {
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
+
         return true;
     }
 
@@ -256,13 +277,30 @@ public class GameMode implements Screen {
     public void draw(float dt) {
         canvas.clear();
 
+        // focus camera on player
+        float px = gameplayController.getPlayerScreenX();
+        float py = gameplayController.getPlayerScreenY();
+
+        canvas.setCameraDynamic();
+        canvas.translateCameraToPoint(px,py);
         canvas.begin();
-        canvas.draw(backgroundTexture, Color.WHITE, 0, 0,canvas.getWidth(),canvas.getHeight());
+
+//        canvas.draw(backgroundTexture, Color.WHITE, 0, 0,
+//                bounds.getWidth() * scale.x, bounds.getHeight() * scale.y);
+
+        // center a background on player
+        // TODO: make sure to get the right rectangle of the full background.
+        //  For efficiency, DO NOT render the entire background.
+        //  ox and oy denotes the origin of the texture that we sample a rectangle from.
+        //  Currently, the
+        canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
+                py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+
 
         PooledList<Obstacle> objects = gameplayController.getObjects();
-
         for(Obstacle obj : gameplayController.getObjects()) {
             obj.draw(canvas);
+
         }
         canvas.end();
 
@@ -273,6 +311,13 @@ public class GameMode implements Screen {
             }
             canvas.endDebug();
         }
+
+        // Draw all HUD content
+        canvas.setCameraHUD();
+        PlayerModel p = gameplayController.getPlayer();
+        canvas.begin();
+        p.drawInfo(canvas);
+        canvas.end();
 
         // Final message
         if (complete && !failed) {
@@ -286,6 +331,7 @@ public class GameMode implements Screen {
             canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
             canvas.end();
         }
+
     }
 
 

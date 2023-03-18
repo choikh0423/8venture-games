@@ -436,6 +436,14 @@ public class PlayerModel extends CapsuleObstacle {
 		else{
 			canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
 		}
+	}
+
+	/**
+	 * Draws player HP information on screen and
+	 * TODO: possibly other status information
+	 * @param canvas
+	 */
+	public void drawInfo(GameCanvas canvas){
 		canvas.drawText("HP: " + getHealth(), healthFont, 25, canvas.getHeight()-25);
 	}
 	
