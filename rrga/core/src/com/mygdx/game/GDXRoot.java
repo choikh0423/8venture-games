@@ -24,6 +24,15 @@ public class GDXRoot extends Game implements ScreenListener {
 	/** Player mode for the game play (CONTROLLER CLASS) */
 	private GameMode playing;
 
+	/** Player mode for pausing the game (CONTROLLER CLASS) */
+	private PauseMode pausing;
+
+	/** Screen mode for transitioning between levels */
+	private VictoryScreen victory;
+
+	/** Screen mode for transitioning between levels */
+	private LoseScreen defeat;
+
 	/**
 	 * Creates a new game from the configuration settings.
 	 *
@@ -42,8 +51,14 @@ public class GDXRoot extends Game implements ScreenListener {
 		canvas  = new GameCanvas();
 		loading = new LoadingMode("assets.json",canvas,1);
 		playing = new GameMode();
+		pausing = new PauseMode(canvas);
+		victory = new VictoryScreen(canvas);
+		defeat = new LoseScreen(canvas);
 
 		loading.setScreenListener(this);
+		pausing.setScreenListener(this);
+		victory.setScreenListener(this);
+		defeat.setScreenListener(this);
 		setScreen(loading);
 	}
 
@@ -58,12 +73,15 @@ public class GDXRoot extends Game implements ScreenListener {
 
 		canvas.dispose();
 		canvas = null;
-//		loading.dispose();
-//		loading = null;
 		playing.dispose();
 		playing = null;
+		pausing.dispose();
+		pausing = null;
+		victory.dispose();
+		victory = null;
+		defeat.dispose();
+		defeat = null;
 
-		// Unload all of the resources
 		// Unload all of the resources
 		if (directory != null) {
 			directory.unloadAssets();
@@ -97,17 +115,59 @@ public class GDXRoot extends Game implements ScreenListener {
 	 */
 	public void exitScreen(Screen screen, int exitCode) {
 		if (screen == loading) {
+			// finish loading assets, let all other controllers gather necessary assets
 			directory = loading.getAssets();
 			playing.gatherAssets(directory);
 			playing.setScreenListener(this);
 			playing.setCanvas(canvas);
 			playing.reset();
-			setScreen(playing);
 
+			pausing.gatherAssets(directory);
+			victory.gatherAssets(directory);
+			defeat.gatherAssets(directory);
+
+			// transition to gameplay screen.
+			setScreen(playing);
 			loading.dispose();
 			loading = null;
-		} else if (exitCode == playing.EXIT_QUIT) {
-			Gdx.app.exit();
+		} else if (screen == pausing){
+			switch (exitCode){
+				case PauseMode.EXIT_RESUME:
+					setScreen(pausing.getBackgroundScreen());
+					break;
+				case PauseMode.EXIT_RESTART:
+					playing.reset();
+					setScreen(playing);
+					break;
+				default:
+					Gdx.app.exit();
+			}
+
+		} else if (screen == playing) {
+			switch (exitCode){
+				case GameMode.EXIT_VICTORY:
+					victory.setBackgroundScreen(playing);
+					setScreen(victory);
+					break;
+				case GameMode.EXIT_FAIL:
+					setScreen(defeat);
+					break;
+				case GameMode.EXIT_PAUSE:
+					pausing.setBackgroundScreen(playing);
+					setScreen(pausing);
+					break;
+				case GameMode.EXIT_QUIT:
+					Gdx.app.exit();
+				default:
+					break;
+			}
+		} else if (screen == victory && exitCode == VictoryScreen.EXIT_RESTART){
+			playing.reset();
+			setScreen(playing);
+		} else if (screen == defeat && exitCode == LoseScreen.EXIT_RESTART){
+			playing.reset();
+			setScreen(playing);
 		}
+
 	}
 }
