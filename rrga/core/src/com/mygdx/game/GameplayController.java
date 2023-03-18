@@ -114,10 +114,6 @@ public class GameplayController implements ContactListener {
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
     /**
-     * The texture for walls and platforms
-     */
-    protected TextureRegion platformTile;
-    /**
      * Texture asset for character avatar
      */
     private TextureRegion avatarTexture;
@@ -125,10 +121,6 @@ public class GameplayController implements ContactListener {
      * Texture asset for front-facing player
      * */
     private TextureRegion avatarFront;
-    /**
-     * Texture asset for the wind gust
-     */
-    private TextureRegion windTexture;
     /**
      * Texture asset for umbrella
      */
@@ -138,20 +130,6 @@ public class GameplayController implements ContactListener {
      */
     private TextureRegion closedTexture;
 
-    /**
-     * Texture asset for a bird
-     */
-    private TextureRegion birdTexture;
-
-    /**
-     * Texture asset for goal
-     */
-    private TextureRegion goalTexture;
-    
-    /**
-     * Texture asset for lightning
-     */
-    private TextureRegion lightningTexture;
 
     private long jumpId = -1;
     private long fireId = -1;
@@ -166,10 +144,6 @@ public class GameplayController implements ContactListener {
      * Physics constants for current level
      */
     private JsonValue levelConstants;
-    /**
-     * Assets for current level
-     */
-    private JsonValue levelAssets;
     /**
      * Reference to the character avatar
      */
@@ -260,10 +234,11 @@ public class GameplayController implements ContactListener {
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
 
-        levelContainer = new LevelContainer(this.scale, level);
-        goalDoor = levelContainer.getGoalDoor();
+        // Set current level
         currentLevel = level;
 
+        // Initialize level container
+        levelContainer = new LevelContainer(world, this.bounds, this.scale, level);
     }
 
     /**
@@ -280,33 +255,27 @@ public class GameplayController implements ContactListener {
         String assetPath = "level" + this.currentLevel + ":assets";
 
         levelConstants = directory.getEntry(constantPath, JsonValue.class);
-        // Level Assets to be implemented
-        // levelAssets = directory.getEntry(assetPath, JsonValue.class);
 
+        // Level container gather assets
         levelContainer.gatherAssets(directory);
-
         backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
 
+        // Constants for Window/World scale
         physicsWidth = levelConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
         physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
         displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
         displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
 
-        platformTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
+        // Common texture throughout game - Can we associate this with avatar(PlayerModel) instead?
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
         avatarFront = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
-        windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
-        birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
-        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
-        goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
 
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
         // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
         // avatarHealthFont.setColor(Color.RED);
     }
-
     /**
      * Resets the status of the game so that we can play again.
      * <p>
@@ -320,6 +289,8 @@ public class GameplayController implements ContactListener {
             obj.deactivatePhysics(world);
         }
 
+        levelContainer.setObjects(objects);
+
         world.dispose();
         world = new World(gravity, false);
         world.setContactListener(this);
@@ -327,14 +298,22 @@ public class GameplayController implements ContactListener {
         // game status reset
         failed = false;
         completed = false;
-        // load level
 
-        // NEED TO LOAD DIFFERENTLY
-        levelContainer.dispose();
-        levelContainer = new LevelContainer(this.scale, this.currentLevel);
+        // Reset LevelContainer
+        levelContainer.reset();
+        levelContainer.setWorld(world);
+
+        // Populate LevelContainer w/ same level
+        levelContainer.populateLevel();
+        world = levelContainer.getWorld();
         goalDoor = levelContainer.getGoalDoor();
 
-        // Add populate level
+        // Calculate Diff for Umbrella Position
+        avatar = levelContainer.getAvatar();
+        umbrella = levelContainer.getUmbrella();
+
+        diff.x = umbrella.getX()-avatar.getX();
+        diff.y = umbrella.getY()-avatar.getY();
     }
 
 
@@ -349,10 +328,13 @@ public class GameplayController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void update(InputController input, float dt) {
-        avatar = levelContainer.getAvatar();
-        umbrella = levelContainer.getUmbrella();
-        birds = levelContainer.getBirds();
-        lightnings = levelContainer.getLightenings();
+        // Get objects from level container
+        this.avatar = levelContainer.getAvatar();
+        this.umbrella = levelContainer.getUmbrella();
+        this.birds = levelContainer.getBirds();
+        this.lightnings = levelContainer.getLightenings();
+        this.world = levelContainer.getWorld();
+        this.objects = levelContainer.getObjects();
 
         // Process actions in object model
 
@@ -497,6 +479,14 @@ public class GameplayController implements ContactListener {
                 obj.update(dt);
             }
         }
+
+        // Set objects from level container
+        levelContainer.setWorld(world);
+        levelContainer.setAvatar(avatar);
+        levelContainer.setObjects(objects);
+        levelContainer.setUmbrella(umbrella);
+        levelContainer.setLightnings(lightnings);
+        levelContainer.setBirds(birds);
     }
 
     /**

@@ -18,12 +18,14 @@ import com.mygdx.game.obstacle.BoxObstacle;
 import com.mygdx.game.obstacle.Obstacle;
 import com.mygdx.game.obstacle.PolygonObstacle;
 import com.mygdx.game.util.PooledList;
+import org.w3c.dom.css.Rect;
 
 public class LevelContainer{
     /**
      * The default value of gravity (going down)
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
+
 
     /**
      * The Box2D world
@@ -73,8 +75,6 @@ public class LevelContainer{
 
 
 
-    /** Texture asset for background image */
-    private TextureRegion backgroundTexture;
     /**
      * The texture for walls and platforms
      */
@@ -84,10 +84,6 @@ public class LevelContainer{
      */
     private TextureRegion avatarTexture;
     /**
-     * Texture asset for front-facing player
-     * */
-    private TextureRegion avatarFront;
-    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -95,10 +91,6 @@ public class LevelContainer{
      * Texture asset for umbrella
      */
     private TextureRegion umbrellaTexture;
-    /**
-     * Texture asset for closed umbrella
-     */
-    private TextureRegion closedTexture;
     /**
      * Texture asset for a bird
      */
@@ -121,10 +113,6 @@ public class LevelContainer{
      */
     private JsonValue levelConstants;
     /**
-     * Assets for current level
-     */
-    private JsonValue levelAssets;
-    /**
      * Reference to the character avatar
      */
     private PlayerModel avatar;
@@ -136,13 +124,6 @@ public class LevelContainer{
      * Reference to the goalDoor (for collision detection)
      */
     private BoxObstacle goalDoor;
-    /**
-     * The default sound volume
-     */
-    private float volume;
-    //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
-    //difference in initial position between umbrella and player
-    private Vector2 diff = new Vector2();
 
 
     /**
@@ -156,8 +137,12 @@ public class LevelContainer{
      * <p>
      * The game has default gravity and other settings
      */
-    public LevelContainer(Vector2 scale, int level) {
+    public LevelContainer(World world, Rectangle bounds, Vector2 scale, int level) {
         this.currentLevel = level;
+
+        this.world = world;
+        this.bounds = bounds;
+        this.scale = scale;
 
         sensorFixtures = new ObjectSet<Fixture>();
     }
@@ -182,34 +167,31 @@ public class LevelContainer{
         levelConstants = directory.getEntry(constantPath, JsonValue.class);
         // Level Assets to be implemented
         // levelAssets = directory.getEntry(assetPath, JsonValue.class);
-        platformTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
+        platformTile = new TextureRegion(directory.getEntry("placeholder:newplatform", Texture.class));
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
-        avatarFront = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
-        closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
 
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
         // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
         // avatarHealthFont.setColor(Color.RED);
     }
-
+    /**
+     * Resets the level container
+     */
     public void reset() {
-
         objects.clear();
         addQueue.clear();
 
-        // load level
-        populateLevel();
     }
 
     /**
      * Lays out the game geography.
      */
-    private void populateLevel() {
+    public void populateLevel() {
         // Add level goal
         JsonValue goal = levelConstants.get("goal");
         JsonValue goalpos = goal.get("pos");
@@ -286,9 +268,6 @@ public class LevelContainer{
         umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
         umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
-        diff.x = umbrella.getX()-avatar.getX();
-        diff.y = umbrella.getY()-avatar.getY();
-
 
 
         // Create wind gusts
@@ -334,8 +313,6 @@ public class LevelContainer{
             addObject(obj);
             lightnings.add(obj);
         }
-
-        volume = levelConstants.getFloat("volume", 1.0f);
 
         // Create invisible |_| shaped world boundaries so player is within bounds.
         dwidth = bounds.width;
@@ -398,7 +375,7 @@ public class LevelContainer{
     }
 
     /**
-     * Dispose of all (non-static) resources allocated to this mode.
+     * Dispose of all (non-static) resources allocated to this container
      */
     public void dispose() {
         for (Obstacle obj : objects) {
@@ -406,47 +383,101 @@ public class LevelContainer{
         }
         objects.clear();
         addQueue.clear();
-        world.dispose();
         objects = null;
         addQueue = null;
         bounds = null;
         scale = null;
         world = null;
     }
-
-
+    /**
+     * Get world object
+     * @return world
+     */
+    public World getWorld() {
+        return world;
+    }
+    /**
+     * Get player object
+     * @return avatar
+     */
     public PlayerModel getAvatar() {
         return avatar;
     }
-
+    /**
+     * Get umbrella object
+     * @return umbrella
+     */
     public UmbrellaModel getUmbrella() {
         return umbrella;
     }
+    /**
+     * Get goalDoor object
+     * @return goalDoor
+     */
     public BoxObstacle getGoalDoor() {
         return goalDoor;
     }
+    /**
+     * Get objects
+     * @return objects
+     */
     public PooledList<Obstacle> getObjects() {
         return objects;
     }
+    /**
+     * Get birds
+     * @return birds
+     */
     public ObjectSet<BirdHazard> getBirds() {
         return birds;
     }
+    /**
+     * Get lightnings
+     * @return lightnings
+     */
     public ObjectSet<LightningHazard> getLightenings() {
         return lightnings;
     }
 
-
+    /**
+     * Set world
+     * @return world
+     */
+    public void setWorld(World worldObj) { world = worldObj; }
+    /**
+     * Set player object
+     * @return avatar
+     */
     public void setAvatar(PlayerModel avatarObj) {
         avatar = avatarObj;
     }
-
+    /**
+     * Set umbrella object
+     * @return umbrella
+     */
     public void setUmbrella(UmbrellaModel umbrellaObj) {
         umbrella = umbrellaObj;
     }
-
+    /**
+     * Set objects
+     * @return objects
+     */
     public void setObjects(PooledList<Obstacle> allObjects) {
         objects = allObjects;
     }
-
+    /**
+     * Set birds
+     * @return birds
+     */
+    public void setBirds(ObjectSet<BirdHazard> birdsObj) {
+        birds = birdsObj;
+    }
+    /**
+     * Set lightnings
+     * @return lightnings
+     */
+    public void setLightnings(ObjectSet<LightningHazard> lightningsObj) {
+        lightnings = lightningsObj;
+    }
 
 }
