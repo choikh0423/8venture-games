@@ -215,8 +215,10 @@ public class BirdHazard extends HazardModel {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        //float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+        //float effect = faceRight ? -1.0f : 1.0f;
+        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(),  .15f, .15f);
+        System.out.println(origin.x + ", " + origin.y);
+
     }
 
     /**

@@ -256,7 +256,7 @@ public class GameplayController implements ContactListener {
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
-        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("placeholder:lightning", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
 
