@@ -114,5 +114,11 @@
 			}
 		],
 		"static": []
-	}
+	},
+    "world": {
+        "max_width": 40.0,
+        "max_height": 36.0,
+        "width": 32.0,
+        "height": 18.0
+    }
 }
