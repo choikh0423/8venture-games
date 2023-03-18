@@ -35,6 +35,7 @@ public class UmbrellaModel extends BoxObstacle {
         setGravityScale(0);
         //makes sure the umbrella doesn't collide with platforms
         setSensor(true);
+        setBodyType(BodyDef.BodyType.StaticBody);
 
         force = data.getFloat("force", 0);
         textureScale = data.getFloat("texturescale", 1.0f);
