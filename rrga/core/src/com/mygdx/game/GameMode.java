@@ -454,6 +454,11 @@ public class GameMode implements Screen {
         this.listener = listener;
     }
 
-
+    /**
+     * Sets current level of the game
+     */
+    public void setLevel(int level){
+        gameplayController.setLevel(level);
+    }
 
 }
