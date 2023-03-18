@@ -471,13 +471,13 @@ public class GameplayController implements ContactListener {
 //        umbrella.applyForce();
 
         //move the birds
-        for (BirdHazard b : birds) {
-            b.move();
+        for (BirdHazard bird : birds) {
+            bird.move();
         }
 
         //update the lightnings
-        for (LightningHazard l : lightning){
-            l.strike();
+        for (LightningHazard light : lightning){
+            light.strike();
         }
     }
 
