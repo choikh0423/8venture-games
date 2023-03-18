@@ -550,13 +550,13 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyInputForce();
-        } else if (!touching_wind && umbrella.isOpen()) {
+        } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation() % ((float) Math.PI * 2);
             if (angle < Math.PI) {
                 int sclx = 6;
-                int scly = 4;
+                int scly = 5;
                 avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
             }
         }
