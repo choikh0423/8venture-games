@@ -34,6 +34,9 @@ public class BoxObstacle extends SimpleObstacle {
 	private Fixture geometry;
 	/** Cache of the polygon vertices (for resizing) */
 	private float[] vertices;
+
+	/** Cache of scale factors for texture when drawing */
+	private Vector2 textureScale;
 	
 	/** 
 	 * Returns the dimensions of this box
@@ -144,7 +147,9 @@ public class BoxObstacle extends SimpleObstacle {
 		geometry = null;
 		
 		// Initialize
-		resize(width, height);	
+		resize(width, height);
+
+		textureScale = new Vector2(1,1);
 	}
 	
 	/**
@@ -205,5 +210,28 @@ public class BoxObstacle extends SimpleObstacle {
 		canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
 
+	/**
+	 * Draws the physics object with scaling.
+	 *
+	 * @param canvas Drawing context
+	 */
+	public void draw(GameCanvas canvas) {
+		if (texture != null) {
+			canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,
+					getY()*drawScale.x,getAngle(),textureScale.x,textureScale.y);
+		}
+	}
 
+	/**
+	 * Copies given scale factors
+	 * @param textureScale
+	 */
+	public void setTextureScale(Vector2 textureScale) {
+		setTextureScale(textureScale.x, textureScale.y);
+	}
+
+	public void setTextureScale(float sx, float sy) {
+		this.textureScale.x = sx;
+		this.textureScale.y = sy;
+	}
 }

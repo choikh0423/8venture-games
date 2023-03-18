@@ -1,6 +1,4 @@
 # 8venture-games
-**Note for Professor White and TAs:** For our first sprint, we were unsuccessful of merging different branches due to build files. Therefore, our contributors on the github may be inaccurate. Please refer to the status report for accurate contribution information! Thank you, and we appologize for any inconveniences.
-
 ## Game Description
 Rain, Rain, Go Away is a puzzle platformer in which the player's primary mechanism of movement is parachute physics represented by an umbrella catching gusts of wind. By aiming their umbrella in the right position at the right time, the player is able to propel themselves from platform to platform. They must also be aware of hazards that can inhibit their progress or damage the umbrella.
 

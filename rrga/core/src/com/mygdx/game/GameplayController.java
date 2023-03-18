@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import com.mygdx.game.hazard.BirdHazard;
 import com.mygdx.game.hazard.HazardModel;
+import com.mygdx.game.hazard.LightningHazard;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -49,7 +51,7 @@ public class GameplayController implements ContactListener {
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
-    public static final int NUM_I_FRAMES = 30;
+    public static final int NUM_I_FRAMES = 120;
 
     /**
      * JSONvalue storing all level data
@@ -95,6 +97,16 @@ public class GameplayController implements ContactListener {
     private float displayHeight;
 
     /**
+     * whether the player has won
+     */
+    private boolean completed;
+
+    /**
+     * whether the player has lost
+     */
+    private boolean failed;
+
+    /**
      * Countdown active for winning or losing
      */
     private int countdown;
@@ -109,6 +121,10 @@ public class GameplayController implements ContactListener {
      * Texture asset for character avatar
      */
     private TextureRegion avatarTexture;
+    /**
+     * Texture asset for front-facing player
+     * */
+    private TextureRegion avatarFront;
     /**
      * Texture asset for the wind gust
      */
@@ -126,6 +142,16 @@ public class GameplayController implements ContactListener {
      * Texture asset for a bird
      */
     private TextureRegion birdTexture;
+
+    /**
+     * Texture asset for goal
+     */
+    private TextureRegion goalTexture;
+    
+    /**
+     * Texture asset for lightning
+     */
+    private TextureRegion lightningTexture;
 
     private long jumpId = -1;
     private long fireId = -1;
@@ -171,12 +197,45 @@ public class GameplayController implements ContactListener {
      * The set of all wind bodies that umbrella in contact with
      */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+    //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
+    //cache for vector computations
+    Vector2 cache = new Vector2();
+    //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
+    //difference in initial position between umbrella and player
+    private Vector2 diff = new Vector2();
+    //center of the screen in canvas coordinates
+    public Vector2 center = new Vector2();
+    //the upward-pointing unit vector
+    private Vector2 up = new Vector2(0,1);
+    //current mouse position
+    //should not be updated except when making the umbrella follow the mouse
+    private Vector2 mousePos = new Vector2();
+    //umbrella's last valid angle
+    private float lastValidAng;
+    //whether the mouse angle is allowed
+    private boolean angInBounds = true;
 
     /**
-     * The set of all wind birds currently in the level
+     * The set of all birds currently in the level
      */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+
+    /**
+     * The set of all lightning currently in the level
+     */
+    private ObjectSet<LightningHazard> lightning = new ObjectSet<>();
+
+
+    /**
+     * the delay after game is lost before we transition to new screen.
+     */
+    private static final int LOSE_COUNTDOWN_TIMER = 15;
+
+    /**
+     * the delay after game is won before we transition to new screen.
+     */
+    private static final int WIN_COUNTDOWN_TIMER = 30;
 
     /**
      * The level container for GameplayController
@@ -230,13 +289,17 @@ public class GameplayController implements ContactListener {
 
         platformTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
         avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
+        avatarFront = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
+        goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
 
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
-        avatarHealthFont.setColor(Color.RED);
+        // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
+        // avatarHealthFont.setColor(Color.RED);
     }
 
     /**
@@ -256,6 +319,10 @@ public class GameplayController implements ContactListener {
 
         world = new World(gravity, false);
         world.setContactListener(this);
+        // game status reset
+        failed = false;
+        completed = false;
+        // load level
         populateLevel();
     }
 
@@ -264,13 +331,31 @@ public class GameplayController implements ContactListener {
      */
     private void populateLevel() {
         // Add level goal
-        float dwidth = platformTile.getRegionWidth() / scale.x;
-        float dheight = platformTile.getRegionHeight() / scale.y;
+        JsonValue goal =  constants.get("goal");
+        JsonValue goalpos = goal.get("pos");
+        float dwidth = goal.getFloat("width");
+        float dheight = goal.getFloat("height");
+        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1),dwidth, dheight);
+        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+        goalDoor.setDensity(goal.getFloat("density", 0));
+        goalDoor.setFriction(goal.getFloat("friction", 0));
+        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+        goalDoor.setSensor(true);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTexture);
+        // doing so fits the texture onto the specified size of the object
+        goalDoor.setTextureScale(
+                dwidth * scale.x/goalTexture.getRegionWidth(),
+                dheight * scale.y/goalTexture.getRegionHeight());
+        goalDoor.setName("goal");
+        addObject(goalDoor);
 
         // Setting Gravity on World
-        JsonValue defaults = levelConstants.get("defaults");
-        world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
+        JsonValue defaults = constants.get("defaults");
+        world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
+        //TODO: explicit walls do not exist, consider deleting.
+        // ============================================================================
         String wname = "wall";
         JsonValue walljv = levelConstants.get("walls");
         for (int ii = 0; ii < walljv.size; ii++) {
@@ -285,6 +370,7 @@ public class GameplayController implements ContactListener {
             obj.setName(wname + ii);
             addObject(obj);
         }
+        // TODO maybe delete above =========================================================
 
         String pname = "platform";
         JsonValue platjv = levelConstants.get("platforms");
@@ -308,6 +394,7 @@ public class GameplayController implements ContactListener {
         avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
+        avatar.setHpTexture(avatarTexture);
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
         scl = levelConstants.get("umbrella").getFloat("texturescale");
@@ -316,18 +403,13 @@ public class GameplayController implements ContactListener {
         umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setTexture(umbrellaTexture);
-        umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setPosition(constants.get("umbrella").get("pos").getFloat(0), constants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
-        RevoluteJointDef jointDef = new RevoluteJointDef();
-        jointDef.collideConnected = false;
-        jointDef.enableLimit = true;
-        jointDef.lowerAngle = (float) (-Math.PI);
-        jointDef.upperAngle = (float) (Math.PI);
-        jointDef.bodyA = avatar.getBody();
-        jointDef.bodyB = umbrella.getBody();
-        jointDef.localAnchorA.set(0, 0);
-        jointDef.localAnchorB.set(0, levelConstants.get("player").get("pos").getFloat(1) - levelConstants.get("umbrella").get("pos").getFloat(1));
-        world.createJoint(jointDef);
+        diff.x = umbrella.getX()-avatar.getX();
+        diff.y = umbrella.getY()-avatar.getY();
+
+       
 
         // Create wind gusts
         String windName = "wind";
@@ -341,12 +423,19 @@ public class GameplayController implements ContactListener {
             addObject(obj);
         }
 
+        //create hazards
+        JsonValue hazardsjv = levelConstants.get("hazards");
+
         //create birds
         String birdName = "bird";
-        JsonValue birdjv = levelConstants.get("birds");
+        JsonValue birdjv = hazardsjv.get("birds");
+        int birdDamage = hazardsjv.getInt("birdDamage");
+        int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
+        int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
+        float birdKnockback = hazardsjv.getInt("birdKnockback");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii));
+            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(birdTexture);
             obj.setName(birdName + ii);
@@ -354,7 +443,53 @@ public class GameplayController implements ContactListener {
             birds.add(obj);
         }
 
-        volume = levelConstants.getFloat("volume", 1.0f);
+        String lightningName = "lightning";
+        JsonValue lightningjv = hazardsjv.get("lightning");
+        for (int ii = 0; ii < lightningjv.size; ii++) {
+            LightningHazard obj;
+            obj = new LightningHazard(lightningjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(lightningTexture);
+            obj.setName(lightningName + ii);
+            addObject(obj);
+            lightning.add(obj);
+        }
+
+        volume = constants.getFloat("volume", 1.0f);
+
+        // Create invisible |_| shaped world boundaries so player is within bounds.
+        dwidth = bounds.width;
+        dheight = bounds.height;
+        String wallName = "barrier";
+
+        // TODO: create some loop, too much duplication.
+        // Create the left wall
+        BoxObstacle wall = new BoxObstacle(-0.5f, dheight/2f, 1, 2*dheight);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
+
+        // Create the right wall
+        wall = new BoxObstacle(dwidth-0.5f, dheight/2f, 1, 2*dheight);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
+
+        // Create the bottom wall
+        // TODO: if ground is y-level 0, the wall's y-position should be around [-0.5, -2].
+        wall = new BoxObstacle(dwidth/2f, -dheight/2f, dwidth, 1);
+        wall.setDensity(0);
+        wall.setFriction(0);
+        wall.setBodyType(BodyDef.BodyType.StaticBody);
+        wall.setName(wallName);
+        wall.setDrawScale(scale);
+        addObject(wall);
     }
 
     /**
@@ -369,20 +504,63 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Process actions in object model
-        if (!inBounds(avatar)) {
-            reset();
+
+        // player dies if falling through void
+        if (!failed && avatar.getPosition().y <= -0.5f){
+            avatar.setHealth(0);
+            setFailed();
             return;
+        }
+
+        // decrement countdown towards rendering victory/fail screen
+        if (countdown > 0){
+            countdown--;
         }
 
         // Check for whether the player toggled the umbrella being open/closed
         if (input.didToggle()) {
             umbrella.setOpen(!umbrella.isOpen());
-            if (umbrella.isOpen()) umbrella.setTexture(umbrellaTexture);
+            if (umbrella.isOpen()) {
+                umbrella.setTexture(umbrellaTexture);
+                //TODO: apply some force to the player so the floatiness comes back
+            }
             else {
                 umbrella.setTexture(closedTexture);
                 Body body = avatar.getBody();
                 body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
             }
+        }
+        //make player face forward in air
+        if (avatar.isGrounded() && avatar.getTexture() != avatarTexture) avatar.setTexture(avatarTexture);
+        else if (!avatar.isGrounded() && avatar.getTexture() != avatarFront) avatar.setTexture(avatarFront);
+
+        //umbrella points towards mouse pointer
+        mousePos.x = input.getMousePos().x;
+        mousePos.y = input.getMousePos().y;
+        //convert from screen coordinates to canvas coordinates
+        mousePos.y=2*center.y-mousePos.y;
+        //convert to player coordinates
+        mousePos.sub(center);
+        //normalize manually because Vector2.nor() is less accurate
+        float l = mousePos.len();
+        mousePos.x/=l;
+        mousePos.y/=l;
+        //compute new angle
+        float mouseAng = (float) Math.acos(mousePos.dot(up));
+        if (input.getMousePos().x > center.x) mouseAng*=-1;
+        angInBounds = mouseAng <= (float) Math.PI/2 && mouseAng >= -(float) Math.PI/2;
+        if (angInBounds){
+            umbrella.setAngle(mouseAng);
+            lastValidAng = mouseAng;
+        } else if (lastValidAng >= 0) {
+            umbrella.setAngle((float) Math.PI/2);
+            mousePos.x = -1;
+            mousePos.y = 0;
+        }
+        else {
+            umbrella.setAngle(-(float) Math.PI/2);
+            mousePos.x = 1;
+            mousePos.y = 0;
         }
 
         boolean touching_wind = contactWindFix.size > 0;
@@ -399,10 +577,6 @@ public class GameplayController implements ContactListener {
         }
         contactWindBod.clear();
 
-        //Commented this out since it looks like this is handled below
-        //avatar.setMovement(input.getHorizontal() *avatar.getForce());
-        //umbrella.setTurning(input.getMouseMovement() *umbrella.getForce());
-
         // Process actions in object model
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
@@ -410,22 +584,26 @@ public class GameplayController implements ContactListener {
         } else if (!touching_wind && umbrella.isOpen()) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation();
-            int scl = 10;
-            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+            float angle = umbrella.getRotation() % ((float) Math.PI * 2);
+            if (angle < Math.PI) {
+                int sclx = 6;
+                int scly = 4;
+                avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
+            }
         }
 
-        // Flip umbrella if player turned
-        boolean right = umbrella.faceRight;
-        umbrella.faceRight = avatar.isFacingRight();
-        if (right != umbrella.faceRight) umbrella.setAngle(umbrella.getAngle() * -1);
-
-        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
-        umbrella.applyForce();
+        // enable this and put it in a conditional statement if we decide to still have an arrow key mode
+//        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
+//        umbrella.applyForce();
 
         //move the birds
-        for (BirdHazard b : birds) {
-            b.move();
+        for (BirdHazard bird : birds) {
+            bird.move();
+        }
+
+        //update the lightnings
+        for (LightningHazard light : lightning){
+            light.strike();
         }
     }
 
@@ -467,21 +645,23 @@ public class GameplayController implements ContactListener {
             }
 
             // Check for hazard collision
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
-                System.out.println("hazard");
+            // Is there any way to add fixture data to all fixtures in a polygon obstacle without changing the
+            // implementation? If so, want to change to fd1 == "damage"
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                int dam = h.getDamage();
-                if (avatar.getiFrames() == 0){
-                  if (avatar.getHealth() - dam > 0 ){
-                      avatar.setHealth(avatar.getHealth() - dam);
-                      avatar.setiFrames(NUM_I_FRAMES);
-                  }
-                  else{
-                      //lose condition
-                      //restart?
-                  }
-                }
+                    int dam = h.getDamage();
+                    if (avatar.getiFrames() == 0) {
+                        if (avatar.getHealth() - dam > 0) {
+                            Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
+                            avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                            avatar.setHealth(avatar.getHealth() - dam);
+                            avatar.setiFrames(NUM_I_FRAMES);
+                        } else {
+                          avatar.setHealth(0);
+                          setFailed();
+                        }
+                    }
             }
 
             // check for bird sensor collision
@@ -490,13 +670,17 @@ public class GameplayController implements ContactListener {
                 BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
                 if (!bird.seesTarget) {
                     bird.seesTarget = true;
-                    bird.setTargetDir(avatar.getX(), avatar.getY());
+                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                 }
             }
 
             // Check for win condition
             if ((bd1 == avatar && bd2 == goalDoor) ||
                     (bd1 == goalDoor && bd2 == avatar)) {
+                // player wins
+                if (!failed && !completed){
+                    setCompleted();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -623,6 +807,11 @@ public class GameplayController implements ContactListener {
 
         // Turn the physics engine crank.
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+        //make umbrella follow player position. since it is a static body, we update
+        //its position after the world step so that it properly follows the player
+        cache.x = avatar.getX()+mousePos.x*diff.len();
+        cache.y = avatar.getY()+mousePos.y*diff.len();
+        umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
@@ -690,7 +879,7 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * This
+     *
      * @return reference to player model
      */
     public PlayerModel getPlayer(){
@@ -699,11 +888,46 @@ public class GameplayController implements ContactListener {
 
     /**
      * set world bounds to be the given rectangle dimensions.
-     * This should be followed with a reset of the world.
-     * @param rect
+     * This should be followed with a reset of the game.
+     * @param rect the bounds
      */
     public void setBounds(Rectangle rect){
-        this.bounds = new Rectangle(rect);
+        this.bounds.set(rect.x, rect.y, rect.getWidth(), rect.getHeight());
+    }
+
+
+    /**
+     * player officially wins if they finished the level and
+     * a small countdown is over.
+     * @return whether player finished level
+     */
+    public boolean isCompleted(){
+        return completed && countdown <= 0;
+    }
+
+    /**
+     * player officially fails if they failed the level and
+     * a small countdown is over.
+     * @return whether player failed
+     */
+    public boolean isFailed(){
+        return failed && countdown <= 0;
+    }
+
+    /**
+     * set player level status to completed and start a countdown timer
+     */
+    private void setCompleted(){
+        completed = true;
+        countdown = WIN_COUNTDOWN_TIMER;
+    }
+
+    /**
+     * set player level status to failed and start a countdown timer
+     */
+    private void setFailed(){
+        failed = true;
+        countdown = LOSE_COUNTDOWN_TIMER;
     }
 
     /**
