@@ -31,7 +31,6 @@ import com.badlogic.gdx.Screen;
  * This interface is almost always implemented by the root Game class.
  */
 public interface ScreenListener {
-	
 	/**
 	 * The given screen has made a request to exit its player mode.
 	 *

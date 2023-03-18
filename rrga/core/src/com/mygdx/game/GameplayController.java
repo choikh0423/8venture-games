@@ -224,7 +224,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all lightning currently in the level
      */
-    private ObjectSet<LightningHazard> lightning = new ObjectSet<>();
+    private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
 
 
     /**
@@ -260,7 +260,10 @@ public class GameplayController implements ContactListener {
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
 
+        levelContainer = new LevelContainer(this.scale, level);
+        goalDoor = levelContainer.getGoalDoor();
         currentLevel = level;
+
     }
 
     /**
@@ -279,6 +282,8 @@ public class GameplayController implements ContactListener {
         levelConstants = directory.getEntry(constantPath, JsonValue.class);
         // Level Assets to be implemented
         // levelAssets = directory.getEntry(assetPath, JsonValue.class);
+
+        levelContainer.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
 
@@ -309,188 +314,29 @@ public class GameplayController implements ContactListener {
      */
     public void reset() {
         Vector2 gravity = new Vector2(world.getGravity());
+        objects = levelContainer.getObjects();
 
         for (Obstacle obj : objects) {
             obj.deactivatePhysics(world);
         }
-        objects.clear();
-        addQueue.clear();
-        world.dispose();
 
+        world.dispose();
         world = new World(gravity, false);
         world.setContactListener(this);
+
         // game status reset
         failed = false;
         completed = false;
         // load level
-        populateLevel();
+
+        // NEED TO LOAD DIFFERENTLY
+        levelContainer.dispose();
+        levelContainer = new LevelContainer(this.scale, this.currentLevel);
+        goalDoor = levelContainer.getGoalDoor();
+
+        // Add populate level
     }
 
-    /**
-     * Lays out the game geography.
-     */
-    private void populateLevel() {
-        // Add level goal
-        JsonValue goal =  constants.get("goal");
-        JsonValue goalpos = goal.get("pos");
-        float dwidth = goal.getFloat("width");
-        float dheight = goal.getFloat("height");
-        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1),dwidth, dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
-        goalDoor.setDrawScale(scale);
-        goalDoor.setTexture(goalTexture);
-        // doing so fits the texture onto the specified size of the object
-        goalDoor.setTextureScale(
-                dwidth * scale.x/goalTexture.getRegionWidth(),
-                dheight * scale.y/goalTexture.getRegionHeight());
-        goalDoor.setName("goal");
-        addObject(goalDoor);
-
-        // Setting Gravity on World
-        JsonValue defaults = constants.get("defaults");
-        world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
-
-        //TODO: explicit walls do not exist, consider deleting.
-        // ============================================================================
-        String wname = "wall";
-        JsonValue walljv = levelConstants.get("walls");
-        for (int ii = 0; ii < walljv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            obj.setName(wname + ii);
-            addObject(obj);
-        }
-        // TODO maybe delete above =========================================================
-
-        String pname = "platform";
-        JsonValue platjv = levelConstants.get("platforms");
-        for (int ii = 0; ii < platjv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(platjv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            obj.setName(pname + ii);
-            addObject(obj);
-        }
-
-        // Create player
-        float scl = levelConstants.get("player").getFloat("texturescale");
-        dwidth = avatarTexture.getRegionWidth() / scale.x * scl;
-        dheight = avatarTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
-        avatar.setDrawScale(scale);
-        avatar.setTexture(avatarTexture);
-        avatar.setHpTexture(avatarTexture);
-        avatar.healthFont = avatarHealthFont;
-        addObject(avatar);
-        scl = levelConstants.get("umbrella").getFloat("texturescale");
-        dwidth = umbrellaTexture.getRegionWidth() / scale.x * scl;
-        dheight = umbrellaTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
-        umbrella.setDrawScale(scale);
-        umbrella.setTexture(umbrellaTexture);
-        umbrella.setClosedMomentum(constants.get("umbrella").getFloat("closedmomentum"));
-        umbrella.setPosition(constants.get("umbrella").get("pos").getFloat(0), constants.get("umbrella").get("pos").getFloat(1));
-        addObject(umbrella);
-        diff.x = umbrella.getX()-avatar.getX();
-        diff.y = umbrella.getY()-avatar.getY();
-
-       
-
-        // Create wind gusts
-        String windName = "wind";
-        JsonValue windjv = levelConstants.get("wind");
-        for (int ii = 0; ii < windjv.size; ii++) {
-            WindModel obj;
-            obj = new WindModel(windjv.get(ii));
-            obj.setDrawScale(scale);
-            obj.setTexture(windTexture);
-            obj.setName(windName + ii);
-            addObject(obj);
-        }
-
-        //create hazards
-        JsonValue hazardsjv = levelConstants.get("hazards");
-
-        //create birds
-        String birdName = "bird";
-        JsonValue birdjv = hazardsjv.get("birds");
-        int birdDamage = hazardsjv.getInt("birdDamage");
-        int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
-        int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
-        float birdKnockback = hazardsjv.getInt("birdKnockback");
-        for (int ii = 0; ii < birdjv.size; ii++) {
-            BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
-            obj.setDrawScale(scale);
-            obj.setTexture(birdTexture);
-            obj.setName(birdName + ii);
-            addObject(obj);
-            birds.add(obj);
-        }
-
-        String lightningName = "lightning";
-        JsonValue lightningjv = hazardsjv.get("lightning");
-        for (int ii = 0; ii < lightningjv.size; ii++) {
-            LightningHazard obj;
-            obj = new LightningHazard(lightningjv.get(ii));
-            obj.setDrawScale(scale);
-            obj.setTexture(lightningTexture);
-            obj.setName(lightningName + ii);
-            addObject(obj);
-            lightning.add(obj);
-        }
-
-        volume = constants.getFloat("volume", 1.0f);
-
-        // Create invisible |_| shaped world boundaries so player is within bounds.
-        dwidth = bounds.width;
-        dheight = bounds.height;
-        String wallName = "barrier";
-
-        // TODO: create some loop, too much duplication.
-        // Create the left wall
-        BoxObstacle wall = new BoxObstacle(-0.5f, dheight/2f, 1, 2*dheight);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-
-        // Create the right wall
-        wall = new BoxObstacle(dwidth-0.5f, dheight/2f, 1, 2*dheight);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-
-        // Create the bottom wall
-        // TODO: if ground is y-level 0, the wall's y-position should be around [-0.5, -2].
-        wall = new BoxObstacle(dwidth/2f, -dheight/2f, dwidth, 1);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-    }
 
     /**
      * The core gameplay loop of this world.
@@ -503,6 +349,11 @@ public class GameplayController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void update(InputController input, float dt) {
+        avatar = levelContainer.getAvatar();
+        umbrella = levelContainer.getUmbrella();
+        birds = levelContainer.getBirds();
+        lightnings = levelContainer.getLightenings();
+
         // Process actions in object model
 
         // player dies if falling through void
@@ -602,8 +453,49 @@ public class GameplayController implements ContactListener {
         }
 
         //update the lightnings
-        for (LightningHazard light : lightning){
+        for (LightningHazard light : lightnings){
             light.strike();
+        }
+    }
+
+    /**
+     * Processes physics
+     * <p>
+     * Once the update phase is over, but before we draw, we are ready to handle
+     * physics.  The primary method is the step() method in world.  This implementation
+     * works for all applications and should not need to be overwritten.
+     *
+     * @param dt Number of seconds since last animation frame
+     */
+    public void postUpdate(float dt) {
+        // Add any objects created by actions
+        while (!addQueue.isEmpty()) {
+            addObject(addQueue.poll());
+        }
+
+        // Turn the physics engine crank.
+        world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+        //make umbrella follow player position. since it is a static body, we update
+        //its position after the world step so that it properly follows the player
+        cache.x = avatar.getX()+mousePos.x*diff.len();
+        cache.y = avatar.getY()+mousePos.y*diff.len();
+        umbrella.setPosition(cache.x, cache.y);
+
+        // Garbage collect the deleted objects.
+        // Note how we use the linked list nodes to delete O(1) in place.
+        // This is O(n) without copying.
+        Iterator<PooledList<Obstacle>.Entry> iterator = objects.entryIterator();
+        while (iterator.hasNext()) {
+            PooledList<Obstacle>.Entry entry = iterator.next();
+            Obstacle obj = entry.getValue();
+            if (obj.isRemoved()) {
+                obj.deactivatePhysics(world);
+                entry.remove();
+                if (obj.getClass() == BirdHazard.class) birds.remove((BirdHazard) obj);
+            } else {
+                // Note that update is called last!
+                obj.update(dt);
+            }
         }
     }
 
@@ -791,50 +683,11 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Processes physics
-     * <p>
-     * Once the update phase is over, but before we draw, we are ready to handle
-     * physics.  The primary method is the step() method in world.  This implementation
-     * works for all applications and should not need to be overwritten.
-     *
-     * @param dt Number of seconds since last animation frame
-     */
-    public void postUpdate(float dt) {
-        // Add any objects created by actions
-        while (!addQueue.isEmpty()) {
-            addObject(addQueue.poll());
-        }
-
-        // Turn the physics engine crank.
-        world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
-        //make umbrella follow player position. since it is a static body, we update
-        //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX()+mousePos.x*diff.len();
-        cache.y = avatar.getY()+mousePos.y*diff.len();
-        umbrella.setPosition(cache.x, cache.y);
-
-        // Garbage collect the deleted objects.
-        // Note how we use the linked list nodes to delete O(1) in place.
-        // This is O(n) without copying.
-        Iterator<PooledList<Obstacle>.Entry> iterator = objects.entryIterator();
-        while (iterator.hasNext()) {
-            PooledList<Obstacle>.Entry entry = iterator.next();
-            Obstacle obj = entry.getValue();
-            if (obj.isRemoved()) {
-                obj.deactivatePhysics(world);
-                entry.remove();
-                if (obj.getClass() == BirdHazard.class) birds.remove((BirdHazard) obj);
-            } else {
-                // Note that update is called last!
-                obj.update(dt);
-            }
-        }
-    }
-
-    /**
      * Dispose of all (non-static) resources allocated to this mode.
      */
     public void dispose() {
+        levelContainer.dispose();
+
         for (Obstacle obj : objects) {
             obj.deactivatePhysics(world);
         }
@@ -857,6 +710,7 @@ public class GameplayController implements ContactListener {
 
     public void setScale(Vector2 scale) {
         this.scale = scale;
+        levelContainer.setScale(scale);
     }
 
     /**
