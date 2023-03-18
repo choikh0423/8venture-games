@@ -126,6 +126,8 @@ public class GameMode implements Screen {
         this.scale.x = canvas.getWidth()/displayWidth;
         this.scale.y = canvas.getHeight()/displayHeight;
         gameplayController.setScale(this.scale);
+        gameplayController.center.x = canvas.getWidth()/2;
+        gameplayController.center.y = canvas.getHeight()/2;
     }
 
     /**
@@ -174,6 +176,8 @@ public class GameMode implements Screen {
         // Create the controllers.
         inputController = new InputController();
         gameplayController = new GameplayController(bounds, gravity);
+        gameplayController.center.x = displayWidth/2;
+        gameplayController.center.y = displayHeight/2;
     }
 
     /**
@@ -218,6 +222,8 @@ public class GameMode implements Screen {
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
+        gameplayController.center.x = canvas.getWidth()/2;
+        gameplayController.center.y = canvas.getHeight()/2;
     };
 
     /**
@@ -291,6 +297,8 @@ public class GameMode implements Screen {
      * @param dt	Number of seconds since last animation frame
      */
     public void update(float dt) {
+        gameplayController.center.x = canvas.getWidth()/2;
+        gameplayController.center.y = canvas.getHeight()/2;
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
     };
@@ -400,6 +408,8 @@ public class GameMode implements Screen {
      */
     public void resize(int width, int height) {
         // IGNORE FOR NOW
+        gameplayController.center.x = canvas.getWidth()/2;
+        gameplayController.center.y = canvas.getHeight()/2;
     }
 
     /**

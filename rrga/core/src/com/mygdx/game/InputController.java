@@ -75,6 +75,8 @@ public class InputController {
 
     /** An X-Box controller (if it is connected) */
     XBoxController xbox;
+    private Vector2 mousePos = new Vector2();
+    public Vector2 getMousePos() { return mousePos;}
 
     /**
      * Returns the amount of sideways movement.
@@ -230,14 +232,18 @@ public class InputController {
             horizontal -= 1.0f;
         }
 
-        // Mouse/arrow keys for moving umbrella
-        if (Gdx.input.getDeltaX() < -minDeltaX || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            mouseMovement = 1.0f;
-        } else if (Gdx.input.getDeltaX() > minDeltaX || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            mouseMovement = -1.0f;
-        } else mouseMovement = 0;
+        // arrow keys for moving umbrella
+        // enable this and put it in a conditional statement if we decide to still have an arrow key mode
+//        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+//            mouseMovement = 1.0f;
+//        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+//            mouseMovement = -1.0f;
+//        } else mouseMovement = 0;
 
-        // E for toggling umbrella
+        mousePos.x = Gdx.input.getX();
+        mousePos.y = Gdx.input.getY();
+
+        // E for toggling umbrella open/closed
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) togglePressed = true;
         else togglePressed = false;
 
