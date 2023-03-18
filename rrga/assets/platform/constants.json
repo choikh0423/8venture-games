@@ -70,20 +70,49 @@
 						[ 4.0,12.0,12.0,12.0,12.0,11.5, 4.0,11.5],
 						[20.0, 8.0,28.0, 8.0,28.0, 7.5,20.0, 7.5]
 					],
-	"birds": [
-		{
-			"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
-			"x": 0.0,
-			"y": 15.0,
-			"path": [10.0, 15.0, 25.0, 15.0],
-			"movespeed": 6,
-			"patrol": true
-		}
-	],
-	"world": {
-		"max_width": 40.0,
-		"max_height": 36.0,
-		"width": 32.0,
-		"height": 18.0
+	"hazards": {
+		"birdDamage": 1,
+		"birdSensorRadius": 7,
+		"birdAttackSpeed": 20,
+		"birdKnockback": 5,
+		"birds":[
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 0.0,
+				"y": 15.0,
+				"path": [10.0, 15.0, 25.0, 15.0],
+				"loop": false,
+				"movespeed": 6,
+				"attack": true
+			},
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 30.0,
+				"y": 10.0,
+				"path": [30.0, 10.0],
+				"loop": false,
+				"movespeed": 0,
+				"attack": true
+			},
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 20.0,
+				"y": 10.0,
+				"path": [20.0, 10.0, 15.0, 10.0],
+				"loop": false,
+				"movespeed": 4,
+				"attack": false
+			}
+		],
+		"lightning": [
+			{
+				"points": [0.0, 0.0, 5.0, 6.0, 3.0, 6.0, 4.0, 11.0, 2.0, 11.0, 0.0, 5.0, 2.0, 5.0],
+				"x": 15.0,
+				"y": 10.0,
+				"strike_timer": 500,
+				"strike_timer_offset": 0
+			}
+		],
+		"static": []
 	}
 }

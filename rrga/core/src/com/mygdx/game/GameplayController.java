@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import com.mygdx.game.hazard.BirdHazard;
 import com.mygdx.game.hazard.HazardModel;
+import com.mygdx.game.hazard.LightningHazard;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
@@ -48,7 +49,7 @@ public class GameplayController implements ContactListener {
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
-    public static final int NUM_I_FRAMES = 30;
+    public static final int NUM_I_FRAMES = 120;
 
 
     /**
@@ -109,6 +110,11 @@ public class GameplayController implements ContactListener {
     private TextureRegion birdTexture;
 
     /**
+     * Texture asset for lightning
+     */
+    private TextureRegion lightningTexture;
+
+    /**
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
@@ -163,9 +169,15 @@ public class GameplayController implements ContactListener {
     private BitmapFont avatarHealthFont;
 
     /**
-     * The set of all wind birds currently in the level
+     * The set of all birds currently in the level
      */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+
+    /**
+     * The set of all lightning currently in the level
+     */
+    private ObjectSet<LightningHazard> lightning = new ObjectSet<>();
+
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -196,6 +208,7 @@ public class GameplayController implements ContactListener {
         umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
         closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
 
         jumpSound = directory.getEntry("platform:jump", Sound.class);
@@ -310,17 +323,36 @@ public class GameplayController implements ContactListener {
             addObject(obj);
         }
 
+        //create hazards
+        JsonValue hazardsjv = constants.get("hazards");
+
         //create birds
         String birdName = "bird";
-        JsonValue birdjv = constants.get("birds");
+        JsonValue birdjv = hazardsjv.get("birds");
+        int birdDamage = hazardsjv.getInt("birdDamage");
+        int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
+        int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
+        float birdKnockback = hazardsjv.getInt("birdKnockback");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii));
+            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(birdTexture);
             obj.setName(birdName + ii);
             addObject(obj);
             birds.add(obj);
+        }
+
+        String lightningName = "lightning";
+        JsonValue lightningjv = hazardsjv.get("lightning");
+        for (int ii = 0; ii < lightningjv.size; ii++) {
+            LightningHazard obj;
+            obj = new LightningHazard(lightningjv.get(ii));
+            obj.setDrawScale(scale);
+            obj.setTexture(lightningTexture);
+            obj.setName(lightningName + ii);
+            addObject(obj);
+            lightning.add(obj);
         }
 
         volume = constants.getFloat("volume", 1.0f);
@@ -379,9 +411,12 @@ public class GameplayController implements ContactListener {
         } else if (!touching_wind && umbrella.isOpen()) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation();
-            int scl = 10;
-            avatar.applyExternalForce(scl * (float) Math.cos(angle), 0);
+            float angle = umbrella.getRotation() % ((float) Math.PI * 2);
+            if (angle < Math.PI) {
+                int sclx = 6;
+                int scly = 4;
+                avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
+            }
         }
 
         // Flip umbrella if player turned
@@ -395,6 +430,11 @@ public class GameplayController implements ContactListener {
         //move the birds
         for (BirdHazard b : birds) {
             b.move();
+        }
+
+        //update the lightnings
+        for (LightningHazard l : lightning){
+            l.strike();
         }
     }
 
@@ -436,21 +476,23 @@ public class GameplayController implements ContactListener {
             }
 
             // Check for hazard collision
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !fix1.isSensor())) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !fix2.isSensor()))) {
-                System.out.println("hazard");
+            // Is there any way to add fixture data to all fixtures in a polygon obstacle without changing the
+            // implementation? If so, want to change to fd1 == "damage"
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                int dam = h.getDamage();
-                if (avatar.getiFrames() == 0){
-                  if (avatar.getHealth() - dam > 0 ){
-                      avatar.setHealth(avatar.getHealth() - dam);
-                      avatar.setiFrames(NUM_I_FRAMES);
-                  }
-                  else{
-                      //lose condition
-                      //restart?
-                  }
-                }
+                    int dam = h.getDamage();
+                    if (avatar.getiFrames() == 0) {
+                        if (avatar.getHealth() - dam > 0) {
+                            Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
+                            avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                            avatar.setHealth(avatar.getHealth() - dam);
+                            avatar.setiFrames(NUM_I_FRAMES);
+                        } else {
+                            //lose condition
+                            //restart?
+                        }
+                    }
             }
 
             // check for bird sensor collision
@@ -459,7 +501,7 @@ public class GameplayController implements ContactListener {
                 BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
                 if (!bird.seesTarget) {
                     bird.seesTarget = true;
-                    bird.setTargetDir(avatar.getX(), avatar.getY());
+                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                 }
             }
 
