@@ -169,7 +169,7 @@ public class GameplayController implements ContactListener {
     private BitmapFont avatarHealthFont;
     //cache for vector computations
     Vector2 cache = new Vector2();
-    //THESE FIVE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
+    //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
     //difference in initial position between umbrella and player
     private Vector2 diff = new Vector2();
     //center of the screen in canvas coordinates
@@ -178,7 +178,9 @@ public class GameplayController implements ContactListener {
     private Vector2 up = new Vector2(0,1);
     //current mouse position
     //should not be updated except when making the umbrella follow the mouse
-    Vector2 mousePos = new Vector2();
+    private Vector2 mousePos = new Vector2();
+    //umbrella's last valid angle
+    private float lastValidAng;
     //whether the mouse angle is allowed
     private boolean angInBounds = true;
 
@@ -370,6 +372,7 @@ public class GameplayController implements ContactListener {
                 body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
             }
         }
+        //make player face forward in air
         if (avatar.isGrounded() && avatar.getTexture() != avatarTexture) avatar.setTexture(avatarTexture);
         else if (!avatar.isGrounded() && avatar.getTexture() != avatarFront) avatar.setTexture(avatarFront);
 
@@ -388,8 +391,19 @@ public class GameplayController implements ContactListener {
         float mouseAng = (float) Math.acos(mousePos.dot(up));
         if (input.getMousePos().x > center.x) mouseAng*=-1;
         angInBounds = mouseAng <= (float) Math.PI/2 && mouseAng >= -(float) Math.PI/2;
-//        if (angInBounds)
+        if (angInBounds){
             umbrella.setAngle(mouseAng);
+            lastValidAng = mouseAng;
+        } else if (lastValidAng >= 0) {
+            umbrella.setAngle((float) Math.PI/2);
+            mousePos.x = -1;
+            mousePos.y = 0;
+        }
+        else {
+            umbrella.setAngle(-(float) Math.PI/2);
+            mousePos.x = 1;
+            mousePos.y = 0;
+        }
 
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
@@ -617,7 +631,7 @@ public class GameplayController implements ContactListener {
         // Turn the physics engine crank.
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
-        //its position after the world step so that it smoothly follows the player
+        //its position after the world step so that it properly follows the player
         cache.x = avatar.getX()+mousePos.x*diff.len();
         cache.y = avatar.getY()+mousePos.y*diff.len();
         umbrella.setPosition(cache.x, cache.y);
