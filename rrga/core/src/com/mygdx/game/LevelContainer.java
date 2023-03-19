@@ -18,7 +18,6 @@ import com.mygdx.game.obstacle.BoxObstacle;
 import com.mygdx.game.obstacle.Obstacle;
 import com.mygdx.game.obstacle.PolygonObstacle;
 import com.mygdx.game.util.PooledList;
-import org.w3c.dom.css.Rect;
 
 public class LevelContainer{
     /**
