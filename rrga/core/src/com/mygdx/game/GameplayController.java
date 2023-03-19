@@ -1,19 +1,15 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
-
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-
 import com.mygdx.game.hazard.BirdHazard;
 import com.mygdx.game.hazard.HazardModel;
 import com.mygdx.game.hazard.LightningHazard;
@@ -25,65 +21,39 @@ import java.util.Iterator;
 import java.util.logging.Level;
 
 public class GameplayController implements ContactListener {
-    /**
-     * The amount of time for a physics engine step.
-     */
+    /** The amount of time for a physics engine step. */
     public static final float WORLD_STEP = 1 / 60.0f;
-    /**
-     * Number of velocity iterations for the constrain solvers
-     */
+
+    /** Number of velocity iterations for the constrain solvers */
     public static final int WORLD_VELOC = 6;
-    /**
-     * Number of position iterations for the constrain solvers
-     */
+
+    /** Number of position iterations for the constrain solvers s*/
     public static final int WORLD_POSIT = 2;
 
-    /**
-     * Width of the game world in Box2d units
-     */
+    /** Width of the game world in Box2d units */
     protected static final float DEFAULT_WIDTH = 32.0f;
-    /**
-     * Height of the game world in Box2d units
-     */
-    protected static final float DEFAULT_HEIGHT = 18.0f;
-    /**
-     * The default value of gravity (going down)
-     */
-    protected static final float DEFAULT_GRAVITY = -4.9f;
 
+    /** Height of the game world in Box2d units */
+    protected static final float DEFAULT_HEIGHT = 18.0f;
+
+    /** the iframes effect duration */
     public static final int NUM_I_FRAMES = 120;
 
-    /**
-     * JSONvalue storing all level data
-     */
-    private JsonValue levels;
-
-
-    /**
-     * All the objects in the world.
-     */
+    /** All the objects in the world. */
     protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
-    /**
-     * Queue for adding objects
-     */
-    protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
-    /**
-     * Listener that will update the player mode when we are done
-     */
-    private ScreenListener listener;
 
-    /**
-     * The Box2D world
-     */
+    /** Queue for adding objects */
+    protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
+
+    /** The Box2D world */
     protected World world;
-    /**
-     * The boundary of the world
-     */
+
+    /** The boundary of the world */
     protected Rectangle bounds;
-    /**
-     * The world scale
-     */
+
+    /** The world draw scale (world coordinates to screen coordinates) */
     protected Vector2 scale;
+
     /** Current Width of the game world in Box2d units */
     private float physicsWidth;
 
@@ -96,120 +66,80 @@ public class GameplayController implements ContactListener {
     /** Current Height of the canvas in Box2d units */
     private float displayHeight;
 
-    /**
-     * whether the player has won
-     */
+    /** whether the player has won */
     private boolean completed;
 
-    /**
-     * whether the player has lost
-     */
+    /** whether the player has lost */
     private boolean failed;
 
-    /**
-     * Countdown active for winning or losing
-     */
+    /** Countdown active for winning or losing */
     private int countdown;
+
+    /** the delay after game is lost before we transition to new screen. */
+    private static final int LOSE_COUNTDOWN_TIMER = 15;
+
+    /** the delay after game is won before we transition to new screen. */
+    private static final int WIN_COUNTDOWN_TIMER = 30;
 
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
-    /**
-     * Texture asset for character avatar
-     */
-    private TextureRegion avatarTexture;
-    /**
-     * Texture asset for front-facing player
-     * */
-    private TextureRegion avatarFront;
-    /**
-     * Texture asset for umbrella
-     */
-    private TextureRegion umbrellaTexture;
-    /**
-     * Texture asset for closed umbrella
-     */
-    private TextureRegion closedTexture;
 
 
-    private long jumpId = -1;
-    private long fireId = -1;
-    private long plopId = -1;
-    /**
-     * The default sound volume
-     */
-    private float volume;
-
-    // Physics objects for the game
-    /**
-     * Physics constants for current level
-     */
+    // <=============================== Physics objects for the game BEGINS here ===============================>
+    /** Physics constants for current level */
     private JsonValue levelConstants;
-    /**
-     * Reference to the character avatar
-     */
+
+    /** Reference to the character avatar */
     private PlayerModel avatar;
-    /**
-     * Reference to the umbrella
-     */
+
+    /** Reference to the umbrella */
     private UmbrellaModel umbrella;
-    /**
-     * Reference to the goalDoor (for collision detection)
-     */
+
+    /** Reference to the goalDoor (for collision detection) */
     private BoxObstacle goalDoor;
 
-    /**
-     * Mark set to handle more sophisticated collision callbacks
-     */
+    /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    /**
-     * The set of all wind fixtures that umbrella in contact with
-     */
+    /** The set of all wind fixtures that umbrella in contact with */
     protected ObjectSet<Fixture> contactWindFix = new ObjectSet<>();
 
-    /**
-     * The set of all wind bodies that umbrella in contact with
-     */
+    /** The set of all wind bodies that umbrella in contact with */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
-    //font for writing player health. temporary solution until a proper health asset is added
-    private BitmapFont avatarHealthFont;
-    //cache for vector computations
-    Vector2 cache = new Vector2();
-    //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
-    //difference in initial position between umbrella and player
-    private Vector2 diff = new Vector2();
-    //center of the screen in canvas coordinates
-    public Vector2 center = new Vector2();
-    //the upward-pointing unit vector
-    private Vector2 up = new Vector2(0,1);
-    //current mouse position
-    //should not be updated except when making the umbrella follow the mouse
-    private Vector2 mousePos = new Vector2();
-    //umbrella's last valid angle
-    private float lastValidAng;
-    //whether the mouse angle is allowed
-    private boolean angInBounds = true;
 
-    /**
-     * The set of all birds currently in the level
-     */
+    /** The set of all birds currently in the level */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
-    /**
-     * The set of all lightning currently in the level
-     */
+    /** The set of all lightning currently in the level */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
 
+    // <=============================== Physics objects for the game ENDS here ===============================>
 
-    /**
-     * the delay after game is lost before we transition to new screen.
-     */
-    private static final int LOSE_COUNTDOWN_TIMER = 15;
+    /** cache for vector computations */
+    Vector2 cache = new Vector2();
 
-    /**
-     * the delay after game is won before we transition to new screen.
+    //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
+
+    /** difference in initial position between umbrella and player */
+    private final Vector2 diff = new Vector2();
+
+    /** center of the screen in canvas coordinates */
+    private Vector2 center = new Vector2();
+
+    /** the upward-pointing unit vector */
+    private final Vector2 up = new Vector2(0,1);
+
+    /** current mouse position
+     * <br>
+     * should not be updated except when making the umbrella follow the mouse
      */
-    private static final int WIN_COUNTDOWN_TIMER = 30;
+    private final Vector2 mousePos = new Vector2();
+
+    /** umbrella's last valid angle */
+    private float lastValidAng;
+
+    /** whether the mouse angle is allowed */
+    private boolean angInBounds = true;
 
     /**
      * The level container for GameplayController
@@ -220,6 +150,26 @@ public class GameplayController implements ContactListener {
      * Currently selected level
      */
     private int currentLevel = 0;
+
+    // TODO: ====================== BEGIN CURRENTLY UNUSED FIELDS =============================
+
+    /** Listener that will update the player mode when we are done. */
+    private ScreenListener listener;
+
+    /** JSON value storing all level data */
+    private JsonValue levels;
+
+    /** The default value of gravity (going down) */
+    protected static final float DEFAULT_GRAVITY = -4.9f;
+
+    private long jumpId = -1;
+    private long fireId = -1;
+    private long plopId = -1;
+
+    /** The default sound volume */
+    private float volume;
+    // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
+
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -243,7 +193,7 @@ public class GameplayController implements ContactListener {
 
     /**
      * Gather the assets for this controller.
-     * <p>
+     * <br>
      * This method extracts the asset variables from the given asset directory. It
      * should only be called after the asset directory is completed.
      *
@@ -265,17 +215,8 @@ public class GameplayController implements ContactListener {
         physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
         displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
         displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
-
-        // Common texture throughout game - Can we associate this with avatar(PlayerModel) instead?
-        avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
-        avatarFront = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
-        umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
-        closedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
-
-        avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
-        // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
-        // avatarHealthFont.setColor(Color.RED);
     }
+
     /**
      * Resets the status of the game so that we can play again.
      * <p>
@@ -289,6 +230,7 @@ public class GameplayController implements ContactListener {
             obj.deactivatePhysics(world);
         }
 
+        // TODO: (review) remove, objects after deactivating physics is still the same set of objects.
         levelContainer.setObjects(objects);
 
         world.dispose();
@@ -299,12 +241,13 @@ public class GameplayController implements ContactListener {
         failed = false;
         completed = false;
 
-        // Reset LevelContainer
+        // empty LevelContainer and update its world.
         levelContainer.reset();
         levelContainer.setWorld(world);
 
         // Populate LevelContainer w/ same level
         levelContainer.populateLevel();
+        // TODO: (review) remove next line, world is still the same object.
         world = levelContainer.getWorld();
         goalDoor = levelContainer.getGoalDoor();
 
@@ -354,24 +297,26 @@ public class GameplayController implements ContactListener {
         if (input.didToggle()) {
             umbrella.setOpen(!umbrella.isOpen());
             if (umbrella.isOpen()) {
-                umbrella.setTexture(umbrellaTexture);
+                umbrella.useOpenedTexture();
                 //TODO: apply some force to the player so the floatiness comes back
             }
             else {
-                umbrella.setTexture(closedTexture);
+                umbrella.useClosedTexture();
                 Body body = avatar.getBody();
                 body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
             }
         }
         //make player face forward in air
-        if (avatar.isGrounded() && avatar.getTexture() != avatarTexture) avatar.setTexture(avatarTexture);
-        else if (!avatar.isGrounded() && avatar.getTexture() != avatarFront) avatar.setTexture(avatarFront);
+        if (avatar.isGrounded()) avatar.useSideTexture();
+        else avatar.useFrontTexture();
 
         //umbrella points towards mouse pointer
+        center.x = Gdx.graphics.getWidth()/2f;
+        center.y = Gdx.graphics.getHeight()/2f;
         mousePos.x = input.getMousePos().x;
         mousePos.y = input.getMousePos().y;
         //convert from screen coordinates to canvas coordinates
-        mousePos.y=2*center.y-mousePos.y;
+        mousePos.y= 2* center.y-mousePos.y;
         //convert to player coordinates
         mousePos.sub(center);
         //normalize manually because Vector2.nor() is less accurate
@@ -414,18 +359,18 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyInputForce();
-        } else if (!touching_wind && umbrella.isOpen()) {
+        } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation() % ((float) Math.PI * 2);
             if (angle < Math.PI) {
                 int sclx = 6;
-                int scly = 4;
+                int scly = 5;
                 avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
             }
         }
 
-        // enable this and put it in a conditional statement if we decide to still have an arrow key mode
+        // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 //        umbrella.applyForce();
 
@@ -451,8 +396,8 @@ public class GameplayController implements ContactListener {
      */
     public void postUpdate(float dt) {
         // Add any objects created by actions
-        while (!addQueue.isEmpty()) {
-            addObject(addQueue.poll());
+        while (!levelContainer.addQueue.isEmpty()) {
+             levelContainer.addObject(levelContainer.addQueue.poll());
         }
 
         // Turn the physics engine crank.
@@ -481,6 +426,7 @@ public class GameplayController implements ContactListener {
         }
 
         // Set objects from level container
+        // TODO: (review) Delete the following, object properties are changed but references are not.
         levelContainer.setWorld(world);
         levelContainer.setAvatar(avatar);
         levelContainer.setObjects(objects);
@@ -649,41 +595,18 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Immediately adds the object to the physics world
-     * <p>
-     * param obj The object to add
-     */
-    protected void addObject(Obstacle obj) {
-        assert inBounds(obj) : "Object is not in bounds";
-        objects.add(obj);
-        obj.activatePhysics(world);
-    }
-
-    /**
-     * Adds a physics object in to the insertion queue.
-     * <p>
-     * Objects on the queue are added just before collision processing.  We do this to
-     * control object creation.
-     * <p>
-     * param obj The object to add
-     */
-    public void addQueuedObject(Obstacle obj) {
-        assert inBounds(obj) : "Object is not in bounds";
-        addQueue.add(obj);
-    }
-
-    /**
      * Dispose of all (non-static) resources allocated to this mode.
      */
     public void dispose() {
-        levelContainer.dispose();
-
+        // deactivate physics from remaining live objects
         for (Obstacle obj : objects) {
             obj.deactivatePhysics(world);
         }
-        objects.clear();
-        addQueue.clear();
+        // empty out of level container and world
+        levelContainer.dispose();
         world.dispose();
+
+        levelContainer = null;
         objects = null;
         addQueue = null;
         bounds = null;
@@ -695,7 +618,7 @@ public class GameplayController implements ContactListener {
      * Gets all the objects in objects
      */
     public PooledList<Obstacle> getObjects() {
-        return objects;
+        return levelContainer.getObjects();
     }
 
     public void setScale(Vector2 scale) {

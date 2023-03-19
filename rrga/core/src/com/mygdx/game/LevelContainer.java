@@ -26,7 +26,6 @@ public class LevelContainer{
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
-
     /**
      * The Box2D world
      */
@@ -40,39 +39,28 @@ public class LevelContainer{
      */
     protected Vector2 scale;
 
-
-
     /**
      * All the objects in the world.
      */
-    protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> objects;
     /**
      * Queue for adding objects
      */
-    protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> addQueue;
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
-    /**
-     * The set of all wind fixtures that umbrella in contact with
-     */
-    protected ObjectSet<Fixture> contactWindFix = new ObjectSet<>();
 
-    /**
-     * The set of all wind bodies that umbrella in contact with
-     */
-    protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
     /**
      * The set of all birds currently in the level
      */
-    private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+    private ObjectSet<BirdHazard> birds;
 
     /**
      * The set of all lightning currently in the level
      */
-    private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
-
+    private ObjectSet<LightningHazard> lightnings;
 
 
     /**
@@ -80,17 +68,25 @@ public class LevelContainer{
      */
     protected TextureRegion platformTile;
     /**
-     * Texture asset for character avatar
+     * Texture asset for character front avatar
      */
-    private TextureRegion avatarTexture;
+    private TextureRegion avatarFrontTexture;
+    /**
+     * Texture asset for character side avatar
+     */
+    private TextureRegion avatarSideTexture;
     /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
     /**
-     * Texture asset for umbrella
+     * Texture asset for opened umbrella
      */
-    private TextureRegion umbrellaTexture;
+    private TextureRegion umbrellaOpenTexture;
+    /**
+     * Texture asset for closed umbrella
+     */
+    private TextureRegion umbrellaClosedTexture;
     /**
      * Texture asset for a bird
      */
@@ -145,6 +141,11 @@ public class LevelContainer{
         this.scale = scale;
 
         sensorFixtures = new ObjectSet<Fixture>();
+        birds = new ObjectSet<>();
+        lightnings = new ObjectSet<>();
+
+        objects = new PooledList<Obstacle>();
+        addQueue = new PooledList<Obstacle>();
     }
 
     public void setScale(Vector2 scale) {
@@ -168,19 +169,19 @@ public class LevelContainer{
         // Level Assets to be implemented
         // levelAssets = directory.getEntry(assetPath, JsonValue.class);
         platformTile = new TextureRegion(directory.getEntry("placeholder:newplatform", Texture.class));
-        avatarTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
-        umbrellaTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
+        avatarSideTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
+        avatarFrontTexture = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
+        umbrellaOpenTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
+        umbrellaClosedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
         birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
-        lightningTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("placeholder:lightning", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
-
+        // fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
-        // NO (at least in this context, there is no gain in doing so because the cache font is accessible from all classes that load this entry.
-        // avatarHealthFont.setColor(Color.RED);
     }
     /**
-     * Resets the level container
+     * Resets the level container (emptying the container)
      */
     public void reset() {
         objects.clear();
@@ -251,20 +252,30 @@ public class LevelContainer{
 
         // Create player
         float scl = levelConstants.get("player").getFloat("texturescale");
-        dwidth = avatarTexture.getRegionWidth() / scale.x * scl;
-        dheight = avatarTexture.getRegionHeight() / scale.y * scl;
+        // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
+        dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
+        dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
         avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
-        avatar.setTexture(avatarTexture);
-        avatar.setHpTexture(avatarTexture);
+        avatar.setFrontTexture(avatarFrontTexture);
+        avatar.setSideTexture(avatarSideTexture);
+        avatar.useSideTexture();
+        // TODO: (technical) load an HP texture and set texture here
+        avatar.setHpTexture(avatarSideTexture);
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
+
+        // Create the umbrella
         scl = levelConstants.get("umbrella").getFloat("texturescale");
-        dwidth = umbrellaTexture.getRegionWidth() / scale.x * scl;
-        dheight = umbrellaTexture.getRegionHeight() / scale.y * scl;
+        // TODO: (technical) specify umbrella size WITHOUT dependency on view
+        dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
+        dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
         umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
         umbrella.setDrawScale(scale);
-        umbrella.setTexture(umbrellaTexture);
+        umbrella.setOpenTexture(umbrellaOpenTexture);
+        umbrella.setClosedTexture(umbrellaClosedTexture);
+        // TODO: (design) maybe default to closed umbrella at initial state
+        umbrella.useOpenedTexture();
         umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
         umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
@@ -361,6 +372,19 @@ public class LevelContainer{
     }
 
     /**
+     * Adds a physics object in to the insertion queue.
+     * <p>
+     * Objects on the queue are added just before collision processing.  We do this to
+     * control object creation.
+     * <p>
+     * param obj The object to add
+     */
+    public void addQueuedObject(Obstacle obj) {
+        assert inBounds(obj) : "Object is not in bounds";
+        addQueue.add(obj);
+    }
+
+    /**
      * Returns true if the object is in bounds.
      * <p>
      * This assertion is useful for debugging the physics.
@@ -376,18 +400,22 @@ public class LevelContainer{
 
     /**
      * Dispose of all (non-static) resources allocated to this container
+     *
+     * empties all game objects.
      */
     public void dispose() {
-        for (Obstacle obj : objects) {
-            obj.deactivatePhysics(world);
-        }
         objects.clear();
         addQueue.clear();
+        birds.clear();
+        lightnings.clear();
+
         objects = null;
         addQueue = null;
         bounds = null;
         scale = null;
         world = null;
+        birds = null;
+        lightnings = null;
     }
     /**
      * Get world object

@@ -75,6 +75,12 @@ public class PlayerModel extends CapsuleObstacle {
 	/** health point texture */
 	private TextureRegion hpTexture;
 
+	/** The player's front view texture (this is the main texture for air) */
+	private TextureRegion frontTexture;
+
+	/** The player's side view texture (this is the main texture for platform) */
+	private TextureRegion sideTexture;
+
 	/** The number of updates before the texture is switched when I-Frames are active */
 	private int iFrameCountdown = 7;
 
@@ -265,8 +271,51 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 
+	/**
+	 * sets the player's HP texture.
+	 * @param texture the HP texture
+	 */
 	public void setHpTexture(TextureRegion texture){
 		this.hpTexture = texture;
+	}
+
+
+	/**
+	 * sets the player's in-air texture.
+	 * @param texture front view texture
+	 */
+	public void setFrontTexture(TextureRegion texture){
+		this.frontTexture = texture;
+	}
+
+	/**
+	 * sets the player's platform/ground texture.
+	 * @param texture side view texture
+	 */
+	public void setSideTexture(TextureRegion texture){
+		this.sideTexture = texture;
+	}
+
+	/**
+	 * sets the texture to be frontal view for drawing purposes.
+	 *
+	 * No update occurs if the current texture is already the front view texture.
+	 */
+	public void useFrontTexture(){
+		if (texture != frontTexture){
+			setTexture(frontTexture);
+		}
+	}
+
+	/**
+	 * sets the texture to be side view for drawing purposes.
+	 *
+	 * No update occurs if the current texture is already the side view texture
+	 */
+	public void useSideTexture(){
+		if (texture != sideTexture){
+			setTexture(sideTexture);
+		}
 	}
 
 	/**
@@ -421,6 +470,17 @@ public class PlayerModel extends CapsuleObstacle {
 		super.update(dt);
 	}
 
+	/**
+	 * auxillary method to simplify draw method below.
+	 */
+	private void drawAux(GameCanvas canvas, Color tint){
+		// mirror left or right (if player is facing left, this should be -1)
+		float effect = faceRight ? 1.0f : -1.0f;
+		canvas.draw(texture, tint, origin.x, origin.y,
+				getX()*drawScale.x,getY()*drawScale.y, getAngle(),
+				effect*textureScale, textureScale
+		);
+	}
 
 	/**
 	 * Draws the physics object.
@@ -428,23 +488,23 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		float effect = faceRight ? 1.0f : -1.0f;
+
 		if(iFrames>0){
 			if (iFrameCountdown == 0){
 				iFrameCountdown = 7;
 				drawIFrameTexture = !drawIFrameTexture;
 			}
 			if(drawIFrameTexture){
-				canvas.draw(texture,Color.BLACK,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+				drawAux(canvas, Color.BLACK);
 				iFrameCountdown--;
 			}
 			else{
-				canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+				drawAux(canvas, Color.WHITE);
 				iFrameCountdown--;
 			}
 		}
 		else{
-			canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+			drawAux(canvas, Color.WHITE);
 		}
 	}
 
@@ -454,8 +514,6 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param canvas the game canvas
 	 */
 	public void drawInfo(GameCanvas canvas){
-		//healthFont.setColor(Color.RED);
-		//canvas.drawTextCentered("HP: " + getHealth(), healthFont, -canvas.getHeight()/3f);
 		if (hpTexture == null){
 			return;
 		}
@@ -479,4 +537,6 @@ public class PlayerModel extends CapsuleObstacle {
 		super.drawDebug(canvas);
 		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
+
+
 }

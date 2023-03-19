@@ -1,25 +1,15 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
-import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
-
-import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.*;
 import com.mygdx.game.util.*;
 import com.mygdx.game.assets.*;
-
-import java.util.Iterator;
 
 public class GameMode implements Screen {
     /** Texture asset for background image */
@@ -126,8 +116,6 @@ public class GameMode implements Screen {
         this.scale.x = canvas.getWidth()/displayWidth;
         this.scale.y = canvas.getHeight()/displayHeight;
         gameplayController.setScale(this.scale);
-        gameplayController.center.x = canvas.getWidth()/2;
-        gameplayController.center.y = canvas.getHeight()/2;
     }
 
     /**
@@ -176,8 +164,6 @@ public class GameMode implements Screen {
         // Create the controllers.
         inputController = new InputController();
         gameplayController = new GameplayController(bounds, gravity, 0);
-        gameplayController.center.x = displayWidth/2;
-        gameplayController.center.y = displayHeight/2;
     }
 
     /**
@@ -226,8 +212,6 @@ public class GameMode implements Screen {
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
-        gameplayController.center.x = canvas.getWidth()/2;
-        gameplayController.center.y = canvas.getHeight()/2;
     };
 
     /**
@@ -301,8 +285,6 @@ public class GameMode implements Screen {
      * @param dt	Number of seconds since last animation frame
      */
     public void update(float dt) {
-        gameplayController.center.x = canvas.getWidth()/2;
-        gameplayController.center.y = canvas.getHeight()/2;
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
     };
@@ -412,8 +394,6 @@ public class GameMode implements Screen {
      */
     public void resize(int width, int height) {
         // IGNORE FOR NOW
-        gameplayController.center.x = canvas.getWidth()/2;
-        gameplayController.center.y = canvas.getHeight()/2;
     }
 
     /**

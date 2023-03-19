@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.BoxObstacle;
@@ -22,6 +23,12 @@ public class UmbrellaModel extends BoxObstacle {
     private float textureScale;
     /** Ratio of horizontal speed to conserve when closing the umbrella */
     private float closedMomentum = 0;
+
+    /** texture asset for open umbrella */
+    private TextureRegion openTexture;
+
+    /** texture asset for closed umbrella */
+    private TextureRegion closedTexture;
 
     public UmbrellaModel(JsonValue data, float width, float height) {
         super(	data.get("pos").getFloat(0),
@@ -87,5 +94,43 @@ public class UmbrellaModel extends BoxObstacle {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
         canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+    }
+
+    /**
+     * sets the texture used to draw an opened umbrella
+     * @param openTexture texture asset for open umbrella
+     */
+    public void setOpenTexture(TextureRegion openTexture) {
+        this.openTexture = openTexture;
+    }
+
+    /**
+     * sets the texture used to draw a closed umbrella
+     * @param closedTexture texture asset for closed umbrella
+     */
+    public void setClosedTexture(TextureRegion closedTexture) {
+        this.closedTexture = closedTexture;
+    }
+
+    /**
+     * sets the texture to be opened umbrella for drawing purposes.
+     *
+     * No update occurs if the current texture is already the opened texture.
+     */
+    public void useOpenedTexture(){
+        if (texture != openTexture){
+            setTexture(openTexture);
+        }
+    }
+
+    /**
+     * sets the texture to be closed umbrella for drawing purposes.
+     *
+     * No update occurs if the current texture is already the closed texture
+     */
+    public void useClosedTexture(){
+        if (texture != closedTexture){
+            setTexture(closedTexture);
+        }
     }
 }

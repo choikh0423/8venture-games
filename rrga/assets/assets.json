@@ -3,7 +3,8 @@
         "placeholder:background" : "placeholder/background.png",
         "placeholder:platform" : "placeholder/small_platform.png",
         "placeholder:wind" : "placeholder/wind.png",
-        "placeholder:bird" : "placeholder/placeholder/environment_obstacle_moving.png",
+        "placeholder:bird" : "placeholder/placeholder/hazard_bird_red.png",
+        "placeholder:lightning" : "placeholder/placeholder/environment_obstacle_moving.png",
         "placeholder:newplatform" : {
             "file":  "placeholder/platform.png",
             "wrapU": "repeated",

@@ -1,0 +1,133 @@
+{
+	"defaults" : {
+		"gravity" : -5.5,
+		"friction": 0.4,
+		"density" : 0.0,
+		"restitution": 0.1,
+		"volume": 0.8
+	},
+	"goal" : {
+		"pos": [26.0, 17.0],
+		"density": 0.0,
+		"friction": 0.0,
+		"restitution": 0.0,
+		"width": 2.0,
+		"height": 2.0
+	},
+	"player": {
+		"pos": [7.0, 3.0],
+		"shrink": [0.7, 0.95],
+		"force": 40.0,
+		"damping": 10.0,
+		"density": 1.0,
+		"friction": 0.0,
+		"maxspeed_x": 5.0,
+		"maxspeed_y": 7.0,
+		"sensor": {
+			"shrink" : 0.6,
+			"height" : 0.05
+		},
+		"texturescale": 0.08333,
+		"maxhealth": 3
+	},
+	"umbrella" : {
+		"pos": [7.0, 3.26666],
+		"shrink": [0.7, 0.95],
+		"force": 9.0,
+		"damping": 10.0,
+		"density": 1.0,
+		"friction": 0.0,
+		"maxspeed": 5.0,
+		"sensor": {
+			"shrink" : 0.6,
+			"height" : 0.05
+		},
+		"texturescale": 0.08333,
+		"closedmomentum": 0.1
+	},
+
+	"wind": [
+		{
+			"pos": [1.0, 3.0],
+			"dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
+			"magnitude": 70.0,
+			"direction": 1.57079632679
+		},
+		{
+			"pos": [9.5, 5.0],
+			"dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
+			"magnitude": 15.0,
+			"direction": 0.78539816339
+		},
+		{
+			"pos": [22.0, 8.0],
+			"dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
+			"magnitude": 15.0,
+			"direction": 2.35619449019
+		},
+		{
+			"pos": [7.0, 13.0],
+			"dimensions": [ 0.0, 0.0, 1.5, 0.0, 1.5, 2.5, 0.0, 2.5],
+			"magnitude": 50.0,
+			"direction": 1.0471975512
+		}
+	],
+	"walls": 		[],
+	"platforms":	[
+		[ 0.0, 3.0,32.0, 3.0,32.0, 2.5, 0.0, 2.5],
+		[ 4.0,12.0,12.0,12.0,12.0,11.5, 4.0,11.5],
+		[20.0, 8.0,28.0, 8.0,28.0, 7.5,20.0, 7.5],
+		[20.0, 15.0,25.0, 16.0,28.0, 16.0, 28.0, 14.5, 25.0, 14.5, 20.0, 14.5]
+	],
+	"hazards": {
+		"birdDamage": 1,
+		"birdSensorRadius": 7,
+		"birdAttackSpeed": 20,
+		"birdKnockback": 5,
+		"birds":[
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 0.0,
+				"y": 15.0,
+				"path": [10.0, 15.0, 25.0, 15.0],
+				"loop": false,
+				"movespeed": 6,
+				"attack": true
+			},
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 30.0,
+				"y": 10.0,
+				"path": [30.0, 10.0],
+				"loop": false,
+				"movespeed": 0,
+				"attack": true
+			},
+			{
+				"points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
+				"x": 20.0,
+				"y": 10.0,
+				"path": [20.0, 10.0, 10.0, 10.0],
+				"loop": false,
+				"movespeed": 4,
+				"attack": false
+			}
+		],
+		"lightning": [
+			{
+				"points": [0.0, 0.0, 5.0, 6.0, 3.0, 6.0, 4.0, 11.0, 2.0, 11.0, 0.0, 5.0, 2.0, 5.0],
+				"x": 15.0,
+				"y": 10.0,
+				"strike_timer": 500,
+				"strike_timer_offset": 0
+			}
+		],
+		"static": []
+	},
+	"world": {
+		"max_width": 50.0,
+		"max_height": 40.0,
+		"width": 32.0,
+		"height": 18.0
+	}
+}
