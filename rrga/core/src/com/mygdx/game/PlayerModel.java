@@ -488,7 +488,6 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-
 		if(iFrames>0){
 			if (iFrameCountdown == 0){
 				iFrameCountdown = 7;
@@ -519,9 +518,10 @@ public class PlayerModel extends CapsuleObstacle {
 		}
 		float height = hpTexture.getRegionHeight();
 		float width = hpTexture.getRegionWidth();
+		float effect = faceRight ? 1.0f : -1.0f;
 		for (int i = 0; i < health; i++){
 			canvas.draw(texture,Color.NAVY,width/2f,height/2f, (i+1)*drawScale.x,
-					canvas.getHeight() - drawScale.y,0,textureScale,textureScale);
+					canvas.getHeight() - drawScale.y,0,effect*textureScale,textureScale);
 		}
 
 	}

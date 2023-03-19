@@ -28,7 +28,9 @@
       "height" : 0.05
     },
     "texturescale": 0.08333,
-    "maxhealth": 3
+    "maxhealth": 3,
+    "drag_x" : 3,
+    "drag_y" : 5
   },
   "umbrella" : {
     "pos": [7.0, 3.26666],

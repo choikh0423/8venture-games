@@ -66,6 +66,9 @@ public class GameplayController implements ContactListener {
     /** Current Height of the canvas in Box2d units */
     private float displayHeight;
 
+    /** scaling factors for drag force */
+    private Vector2 dragScale;
+
     /** whether the player has won */
     private boolean completed;
 
@@ -76,10 +79,10 @@ public class GameplayController implements ContactListener {
     private int countdown;
 
     /** the delay after game is lost before we transition to new screen. */
-    private static final int LOSE_COUNTDOWN_TIMER = 15;
+    private static final int LOSE_COUNTDOWN_TIMER = 60;
 
     /** the delay after game is won before we transition to new screen. */
-    private static final int WIN_COUNTDOWN_TIMER = 30;
+    private static final int WIN_COUNTDOWN_TIMER = 20;
 
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
@@ -180,6 +183,7 @@ public class GameplayController implements ContactListener {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
         this.scale = new Vector2(1, 1);
+        this.dragScale = new Vector2(1,1 );
 
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
@@ -215,6 +219,8 @@ public class GameplayController implements ContactListener {
         physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
         displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
         displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
+        dragScale.x = levelConstants.get("player").getFloat("drag_x", 1);
+        dragScale.y = levelConstants.get("player").getFloat("drag_y", 1);
     }
 
     /**
@@ -282,8 +288,9 @@ public class GameplayController implements ContactListener {
         // Process actions in object model
 
         // player dies if falling through void
-        if (!failed && avatar.getPosition().y <= -0.5f){
+        if (!failed && avatar.getPosition().y <= -0.01f){
             avatar.setHealth(0);
+            avatar.setiFrames(NUM_I_FRAMES);
             setFailed();
             return;
         }
@@ -364,9 +371,10 @@ public class GameplayController implements ContactListener {
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation() % ((float) Math.PI * 2);
             if (angle < Math.PI) {
-                int sclx = 6;
-                int scly = 5;
-                avatar.applyExternalForce(sclx * (float) Math.sin(2 * angle), scly * (float) Math.sin(angle));
+                avatar.applyExternalForce(
+                        dragScale.x * (float) Math.sin(2 * angle),
+                        dragScale.y * (float) Math.sin(angle)
+                );
             }
         }
 
@@ -479,7 +487,10 @@ public class GameplayController implements ContactListener {
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                     int dam = h.getDamage();
-                    if (avatar.getiFrames() == 0) {
+
+                    // player is only vulnerable to further damage and effects if the level is still ongoing
+                    boolean vulnerable = !failed && !completed;
+                    if (avatar.getiFrames() == 0 && vulnerable) {
                         if (avatar.getHealth() - dam > 0) {
                             Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
                             avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
@@ -487,6 +498,8 @@ public class GameplayController implements ContactListener {
                             avatar.setiFrames(NUM_I_FRAMES);
                         } else {
                           avatar.setHealth(0);
+                          // start iframes even when we die, otherwise player being damaged is not so apparent.
+                          avatar.setiFrames(NUM_I_FRAMES);
                           setFailed();
                         }
                     }
@@ -612,6 +625,7 @@ public class GameplayController implements ContactListener {
         bounds = null;
         scale = null;
         world = null;
+        dragScale = null;
     }
 
     /**

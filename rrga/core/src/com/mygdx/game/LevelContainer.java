@@ -250,35 +250,6 @@ public class LevelContainer{
             addObject(obj);
         }
 
-        // Create player
-        float scl = levelConstants.get("player").getFloat("texturescale");
-        // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
-        dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
-        dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
-        avatar.setDrawScale(scale);
-        avatar.setFrontTexture(avatarFrontTexture);
-        avatar.setSideTexture(avatarSideTexture);
-        avatar.useSideTexture();
-        // TODO: (technical) load an HP texture and set texture here
-        avatar.setHpTexture(avatarSideTexture);
-        avatar.healthFont = avatarHealthFont;
-        addObject(avatar);
-
-        // Create the umbrella
-        scl = levelConstants.get("umbrella").getFloat("texturescale");
-        // TODO: (technical) specify umbrella size WITHOUT dependency on view
-        dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
-        dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
-        umbrella.setDrawScale(scale);
-        umbrella.setOpenTexture(umbrellaOpenTexture);
-        umbrella.setClosedTexture(umbrellaClosedTexture);
-        // TODO: (design) maybe default to closed umbrella at initial state
-        umbrella.useOpenedTexture();
-        umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
-        umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
-        addObject(umbrella);
 
 
         // Create wind gusts
@@ -358,6 +329,36 @@ public class LevelContainer{
         wall.setName(wallName);
         wall.setDrawScale(scale);
         addObject(wall);
+
+        // Create player
+        float scl = levelConstants.get("player").getFloat("texturescale");
+        // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
+        dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
+        dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
+        avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
+        avatar.setDrawScale(scale);
+        avatar.setFrontTexture(avatarFrontTexture);
+        avatar.setSideTexture(avatarSideTexture);
+        avatar.useSideTexture();
+        // TODO: (technical) load an HP texture and set texture here
+        avatar.setHpTexture(avatarSideTexture);
+        avatar.healthFont = avatarHealthFont;
+        addObject(avatar);
+
+        // Create the umbrella
+        scl = levelConstants.get("umbrella").getFloat("texturescale");
+        // TODO: (technical) specify umbrella size WITHOUT dependency on view
+        dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
+        dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
+        umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
+        umbrella.setDrawScale(scale);
+        umbrella.setOpenTexture(umbrellaOpenTexture);
+        umbrella.setClosedTexture(umbrellaClosedTexture);
+        // TODO: (design) maybe default to closed umbrella at initial state
+        umbrella.useOpenedTexture();
+        umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
+        addObject(umbrella);
     }
 
     /**

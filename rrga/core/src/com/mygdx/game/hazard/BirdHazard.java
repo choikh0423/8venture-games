@@ -161,14 +161,14 @@ public class BirdHazard extends HazardModel {
                     //if at end of path
                     if (currentPathIndex == path.length - 2) {
                         if(!loop){
-                        for (int i = 0; i < path.length / 2; i += 2) {
-                            float temp1 = path[i];
-                            float temp2 = path[i + 1];
-                            path[i] = path[path.length - i - 2];
-                            path[i + 1] = path[path.length - i - 1];
-                            path[path.length - i - 2] = temp1;
-                            path[path.length - i - 1] = temp2;
-                        }
+                            for (int i = 0; i < path.length / 2; i += 2) {
+                                float temp1 = path[i];
+                                float temp2 = path[i + 1];
+                                path[i] = path[path.length - i - 2];
+                                path[i + 1] = path[path.length - i - 1];
+                                path[path.length - i - 2] = temp1;
+                                path[path.length - i - 1] = temp2;
+                            }
                         }
                         currentPathIndex = 0;
                     }
@@ -200,6 +200,9 @@ public class BirdHazard extends HazardModel {
             setX(getX() + (targetDir.x / 100));
             setY(getY() + (targetDir.y / 100));
             moveDir.set(targetDir);
+            // targetDir is the direction of target relative to bird's location
+            if (targetDir.x > 0) faceRight = true;
+            else faceRight = false;
             //Need some way to delete when offscreen, should be handled by gamecontroller
         }
     }
@@ -216,8 +219,10 @@ public class BirdHazard extends HazardModel {
      */
     public void draw(GameCanvas canvas) {
         // TODO: birds should also be mirrored when facing opposite directions
-        //float effect = faceRight ? -1.0f : 1.0f;
-        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(),  .15f, .15f);
+        float effect = faceRight ? -1.0f : 1.0f;
+        canvas.draw(texture, Color.WHITE, origin.x, origin.y,
+                getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                effect * .15f, .15f);
     }
 
     /**
