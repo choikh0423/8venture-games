@@ -79,7 +79,7 @@ public class GameplayController implements ContactListener {
     private int countdown;
 
     /** the delay after game is lost before we transition to new screen. */
-    private static final int LOSE_COUNTDOWN_TIMER = 60;
+    private static final int LOSE_COUNTDOWN_TIMER = 40;
 
     /** the delay after game is won before we transition to new screen. */
     private static final int WIN_COUNTDOWN_TIMER = 20;

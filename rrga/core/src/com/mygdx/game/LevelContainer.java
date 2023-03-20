@@ -88,9 +88,19 @@ public class LevelContainer{
      */
     private TextureRegion umbrellaClosedTexture;
     /**
-     * Texture asset for a bird
+     * Texture asset for a red bird
      */
-    private TextureRegion birdTexture;
+    private TextureRegion redBirdTexture;
+
+    /**
+     * Texture asset for a red bird
+     */
+    private TextureRegion blueBirdTexture;
+
+    /**
+     * Texture asset for a red bird
+     */
+    private TextureRegion brownBirdTexture;
     /**
      * Texture asset for goal
      */
@@ -153,6 +163,20 @@ public class LevelContainer{
     }
 
     /**
+     * Note: Null texture is returned when color is invalid.
+     * @param color the color of the bird
+     * @return texture of bird for the given value color.
+     */
+    private TextureRegion getBirdTexture(String color){
+        switch(color){
+            case "red": return redBirdTexture;
+            case "blue": return blueBirdTexture;
+            case "brown": return brownBirdTexture;
+            default: return null;
+        }
+    }
+
+    /**
      * Gather the assets for this controller.
      * <p>
      * This method extracts the asset variables from the given asset directory. It
@@ -174,7 +198,12 @@ public class LevelContainer{
         umbrellaOpenTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
         umbrellaClosedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
-        birdTexture = new TextureRegion(directory.getEntry("placeholder:bird", Texture.class));
+
+        // get all bird textures
+        redBirdTexture = new TextureRegion(directory.getEntry("placeholder:red_bird", Texture.class));
+        blueBirdTexture = new TextureRegion(directory.getEntry("placeholder:blue_bird", Texture.class));
+        brownBirdTexture = new TextureRegion(directory.getEntry("placeholder:brown_bird", Texture.class));
+
         lightningTexture = new TextureRegion(directory.getEntry("placeholder:lightning", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
         // fonts
@@ -276,9 +305,10 @@ public class LevelContainer{
         float birdKnockback = hazardsjv.getInt("birdKnockback");
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
-            obj = new BirdHazard(birdjv.get(ii), birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
+            JsonValue jv = birdjv.get(ii);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
-            obj.setTexture(birdTexture);
+            obj.setTexture(getBirdTexture(jv.getString("color", "red")));
             obj.setName(birdName + ii);
             addObject(obj);
             birds.add(obj);
@@ -409,6 +439,7 @@ public class LevelContainer{
         addQueue.clear();
         birds.clear();
         lightnings.clear();
+
 
         objects = null;
         addQueue = null;
