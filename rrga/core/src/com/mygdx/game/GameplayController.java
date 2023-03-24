@@ -356,7 +356,7 @@ public class GameplayController implements ContactListener {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
             if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
-                avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
+                avatar.applyWindForce(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
@@ -365,18 +365,22 @@ public class GameplayController implements ContactListener {
         // Process actions in object model
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
-            avatar.applyInputForce();
+            avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation() % ((float) Math.PI * 2);
             if (angle < Math.PI) {
-                avatar.applyExternalForce(
-                        dragScale.x * (float) Math.sin(2 * angle),
-                        dragScale.y * (float) Math.sin(angle)
-                );
+                avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
+                if(avatar.getVY() < avatar.getMaxSpeedDownOpen()){
+                    avatar.setVY(avatar.getMaxSpeedDownOpen());
+                }
             }
         }
+        if(!umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownClosed()){
+            avatar.setVY(avatar.getMaxSpeedDownClosed());
+        }
+        //System.out.println(avatar.getVX() + ", " + avatar.getVY());
 
         // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());

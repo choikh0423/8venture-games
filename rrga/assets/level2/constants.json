@@ -21,19 +21,15 @@
     "damping": 10.0,
     "density": 1.0,
     "friction": 0.0,
-    "maxspeed_x_ground": 5.0,
-    "maxspeed_x_air_wind": 10.0,
-    "maxspeed_x_air_drag": 4.0,
-    "maxspeed_up": 10.0,
-    "maxspeed_down_open": -2.0,
-    "maxspeed_down_closed": -8.0,
+    "maxspeed_x": 5.0,
+    "maxspeed_y": 7.0,
     "sensor": {
       "shrink" : 0.6,
       "height" : 0.05
     },
     "texturescale": 0.08333,
     "maxhealth": 3,
-    "drag_x" : 10,
+    "drag_x" : 3,
     "drag_y" : 5
   },
   "umbrella" : {
@@ -85,54 +81,6 @@
     [20.0, 8.0,28.0, 8.0,28.0, 7.5,20.0, 7.5],
     [20.0, 15.0,25.0, 16.0,28.0, 16.0, 28.0, 14.5, 25.0, 14.5, 20.0, 14.5]
   ],
-  "hazards": {
-    "birdDamage": 1,
-    "birdSensorRadius": 7,
-    "birdAttackSpeed": 20,
-    "birdKnockback": 5,
-    "birds":[
-      {
-        "points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
-        "x": 0.0,
-        "y": 15.0,
-        "path": [10.0, 15.0, 25.0, 15.0],
-        "loop": false,
-        "movespeed": 6,
-        "attack": true,
-        "color": "brown"
-      },
-      {
-        "points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
-        "x": 30.0,
-        "y": 10.0,
-        "path": [30.0, 10.0],
-        "loop": false,
-        "movespeed": 0,
-        "attack": true,
-        "color": "red"
-      },
-      {
-        "points": [0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5],
-        "x": 20.0,
-        "y": 10.0,
-        "path": [20.0, 10.0, 10.0, 10.0],
-        "loop": false,
-        "movespeed": 4,
-        "attack": false,
-        "color": "blue"
-      }
-    ],
-    "lightning": [
-      {
-        "points": [0.0, 0.0, 5.0, 6.0, 3.0, 6.0, 4.0, 11.0, 2.0, 11.0, 0.0, 5.0, 2.0, 5.0],
-        "x": 15.0,
-        "y": 10.0,
-        "strike_timer": 500,
-        "strike_timer_offset": 0
-      }
-    ],
-    "static": []
-  },
   "world": {
     "max_width": 50.0,
     "max_height": 40.0,

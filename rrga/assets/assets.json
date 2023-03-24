@@ -19,7 +19,9 @@
         "placeholder:goal": "placeholder/placeholder/marker_flag_blue.png"
     },
     "jsons"  : {
-        "level0:constants" :"level0/constants.json"
+        "level0:constants" :"level0/constants.json",
+        "level1:constants" :"level1/constants.json",
+        "level2:constants" :"level2/constants.json"
     },
     "sounds" : {
     },
