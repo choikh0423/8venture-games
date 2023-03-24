@@ -489,7 +489,7 @@ public class PlayerModel extends CapsuleObstacle {
 		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
 				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
 			forceCache.set(fx, 0);
-			float scl = Math.signum(fx) == -Math.signum(getVX()) ? 3.0f : 1.0f;
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2+1 : 1.0f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
 		}

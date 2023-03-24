@@ -23,7 +23,7 @@
     "friction": 0.0,
     "maxspeed_x_ground": 5.0,
     "maxspeed_x_air_wind": 10.0,
-    "maxspeed_x_air_drag": 4.0,
+    "maxspeed_x_air_drag": 3.0,
     "maxspeed_up": 10.0,
     "maxspeed_down_open": -2.0,
     "maxspeed_down_closed": -10.0,
