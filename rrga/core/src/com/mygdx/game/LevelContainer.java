@@ -278,8 +278,6 @@ public class LevelContainer{
             addObject(obj);
         }
 
-
-
         // Create wind gusts
         String windName = "wind";
         JsonValue windjv = levelConstants.get("wind");
