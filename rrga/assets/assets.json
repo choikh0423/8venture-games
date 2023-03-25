@@ -1,25 +1,27 @@
 {
 	"textures": {
-        "placeholder:background" : "placeholder/background.png",
-        "placeholder:platform" : "placeholder/small_platform.png",
-        "placeholder:wind" : "placeholder/wind.png",
-        "placeholder:red_bird" : "placeholder/placeholder/hazard_bird_red.png",
-        "placeholder:blue_bird" : "placeholder/placeholder/hazard_bird_blue.png",
-        "placeholder:brown_bird" : "placeholder/placeholder/hazard_bird_brown.png",
-        "placeholder:lightning" : "placeholder/placeholder/environment_obstacle_moving.png",
-        "placeholder:newplatform" : {
-            "file":  "placeholder/platform.png",
+        "game:background" : "game/background.png",
+        "game:platform" : "game/small_platform.png",
+        "game:wind" : "game/wind.png",
+        "game:red_bird" : "game/hazard/hazard_bird_red.png",
+        "game:blue_bird" : "game/hazard/hazard_bird_blue.png",
+        "game:brown_bird" : "game/hazard/hazard_bird_brown.png",
+        "game:lightning" : "game/hazard/environment_obstacle_moving.png",
+        "game:newplatform" : {
+            "file":  "game/platform.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "placeholder:player": "placeholder/player.png",
-        "placeholder:front": "placeholder/player_front.png",
-        "placeholder:umbrella": "placeholder/umbrella.png",
-        "placeholder:closed": "placeholder/closed_umbrella.png",
-        "placeholder:goal": "placeholder/placeholder/marker_flag_blue.png"
+        "game:player": "game/player.png",
+        "game:front": "game/player_front.png",
+        "game:umbrella": "game/umbrella.png",
+        "game:closed": "game/closed_umbrella.png",
+        "game:goal": "game/goal.png"
     },
     "jsons"  : {
-        "level0:constants" :"level0/constants.json"
+        "global:constants" :"globalconstants.json",
+        "level0:constants" :"levelconstants/level0.json",
+        "level1:constants" :"levelconstants/level1.json"
     },
     "sounds" : {
     },

@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
@@ -10,15 +9,22 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.hazard.BirdHazard;
-import com.mygdx.game.hazard.HazardModel;
-import com.mygdx.game.hazard.LightningHazard;
-import com.mygdx.game.obstacle.*;
-import com.mygdx.game.util.*;
-import com.mygdx.game.assets.*;
+import com.mygdx.game.model.hazard.BirdHazard;
+import com.mygdx.game.model.hazard.HazardModel;
+import com.mygdx.game.model.hazard.LightningHazard;
+import com.mygdx.game.model.PlayerModel;
+import com.mygdx.game.model.UmbrellaModel;
+import com.mygdx.game.model.WindModel;
+import com.mygdx.game.utility.obstacle.*;
+import com.mygdx.game.utility.util.*;
+import com.mygdx.game.utility.assets.*;
+import com.mygdx.game.utility.assets.AssetDirectory;
+import com.mygdx.game.utility.obstacle.BoxObstacle;
+import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.PooledList;
+import com.mygdx.game.utility.util.ScreenListener;
 
 import java.util.Iterator;
-import java.util.logging.Level;
 
 public class GameplayController implements ContactListener {
     /** The amount of time for a physics engine step. */
@@ -89,8 +95,8 @@ public class GameplayController implements ContactListener {
 
 
     // <=============================== Physics objects for the game BEGINS here ===============================>
-    /** Physics constants for current level */
-    private JsonValue levelConstants;
+    /** Physics constants for global */
+    private JsonValue globalConstants;
 
     /** Reference to the character avatar */
     private PlayerModel avatar;
@@ -205,22 +211,21 @@ public class GameplayController implements ContactListener {
      */
     public void gatherAssets(AssetDirectory directory) {
         // Setting up Constant/Asset Path for different levels
-        String constantPath = "level" + this.currentLevel + ":constants";
-        String assetPath = "level" + this.currentLevel + ":assets";
+        String constantPath = "global:constants";
 
-        levelConstants = directory.getEntry(constantPath, JsonValue.class);
+        globalConstants = directory.getEntry(constantPath, JsonValue.class);
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
-        backgroundTexture = new TextureRegion(directory.getEntry( "placeholder:background", Texture.class ));
+        backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
 
         // Constants for Window/World scale
-        physicsWidth = levelConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
-        physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
-        displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
-        displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
-        dragScale.x = levelConstants.get("player").getFloat("drag_x", 1);
-        dragScale.y = levelConstants.get("player").getFloat("drag_y", 1);
+        physicsWidth = globalConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
+        physicsHeight = globalConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
+        displayWidth = globalConstants.get("world").getFloat("width", DEFAULT_WIDTH);
+        displayHeight = globalConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
+        dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
+        dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
     }
 
     /**
