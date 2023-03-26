@@ -6,18 +6,20 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
-import com.mygdx.game.assets.AssetDirectory;
-import com.mygdx.game.hazard.BirdHazard;
-import com.mygdx.game.hazard.LightningHazard;
-import com.mygdx.game.obstacle.BoxObstacle;
-import com.mygdx.game.obstacle.Obstacle;
-import com.mygdx.game.obstacle.PolygonObstacle;
-import com.mygdx.game.util.PooledList;
+import com.mygdx.game.utility.assets.AssetDirectory;
+import com.mygdx.game.model.hazard.BirdHazard;
+import com.mygdx.game.model.hazard.LightningHazard;
+import com.mygdx.game.model.PlayerModel;
+import com.mygdx.game.model.UmbrellaModel;
+import com.mygdx.game.model.WindModel;
+import com.mygdx.game.utility.obstacle.BoxObstacle;
+import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.utility.util.PooledList;
 
 public class LevelContainer{
     /**
@@ -113,9 +115,10 @@ public class LevelContainer{
 
 
     // Physics objects for the game
-    /**
-     * Physics constants for current level
-     */
+    /** Physics constants for global */
+    private JsonValue globalConstants;
+
+    /** Physics constants for current level */
     private JsonValue levelConstants;
     /**
      * Reference to the character avatar
@@ -185,26 +188,27 @@ public class LevelContainer{
      */
     public void gatherAssets(AssetDirectory directory) {
         // Setting up Constant/Asset Path for different levels
-        String constantPath = "level" + this.currentLevel + ":constants";
+        String levelConstantPath = "level" + this.currentLevel + ":constants";
+        String constantPath = "global:constants";
         String assetPath = "level" + this.currentLevel + ":assets";
 
-        levelConstants = directory.getEntry(constantPath, JsonValue.class);
-        // Level Assets to be implemented
-        // levelAssets = directory.getEntry(assetPath, JsonValue.class);
-        platformTile = new TextureRegion(directory.getEntry("placeholder:newplatform", Texture.class));
-        avatarSideTexture = new TextureRegion(directory.getEntry("placeholder:player", Texture.class));
-        avatarFrontTexture = new TextureRegion(directory.getEntry("placeholder:front", Texture.class));
-        umbrellaOpenTexture = new TextureRegion(directory.getEntry("placeholder:umbrella", Texture.class));
-        umbrellaClosedTexture = new TextureRegion(directory.getEntry("placeholder:closed", Texture.class));
-        windTexture = new TextureRegion(directory.getEntry("placeholder:wind", Texture.class));
+        levelConstants = directory.getEntry(levelConstantPath, JsonValue.class);
+        globalConstants = directory.getEntry(constantPath, JsonValue.class);
+
+        platformTile = new TextureRegion(directory.getEntry("game:newplatform", Texture.class));
+        avatarSideTexture = new TextureRegion(directory.getEntry("game:player", Texture.class));
+        avatarFrontTexture = new TextureRegion(directory.getEntry("game:front", Texture.class));
+        umbrellaOpenTexture = new TextureRegion(directory.getEntry("game:umbrella", Texture.class));
+        umbrellaClosedTexture = new TextureRegion(directory.getEntry("game:closed", Texture.class));
+        windTexture = new TextureRegion(directory.getEntry("game:wind", Texture.class));
 
         // get all bird textures
-        redBirdTexture = new TextureRegion(directory.getEntry("placeholder:red_bird", Texture.class));
-        blueBirdTexture = new TextureRegion(directory.getEntry("placeholder:blue_bird", Texture.class));
-        brownBirdTexture = new TextureRegion(directory.getEntry("placeholder:brown_bird", Texture.class));
+        redBirdTexture = new TextureRegion(directory.getEntry("game:red_bird", Texture.class));
+        blueBirdTexture = new TextureRegion(directory.getEntry("game:blue_bird", Texture.class));
+        brownBirdTexture = new TextureRegion(directory.getEntry("game:brown_bird", Texture.class));
 
-        lightningTexture = new TextureRegion(directory.getEntry("placeholder:lightning", Texture.class));
-        goalTexture = new TextureRegion(directory.getEntry("placeholder:goal", Texture.class));
+        lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
+        goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         // fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
@@ -223,14 +227,16 @@ public class LevelContainer{
     public void populateLevel() {
         // Add level goal
         JsonValue goal = levelConstants.get("goal");
+        JsonValue goalconst = globalConstants.get("goal");
+
         JsonValue goalpos = goal.get("pos");
-        float dwidth = goal.getFloat("width");
-        float dheight = goal.getFloat("height");
+        float dwidth = goalconst.getFloat("width");
+        float dheight = goalconst.getFloat("height");
         goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1),dwidth, dheight);
         goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+        goalDoor.setDensity(goalconst.getFloat("density", 0));
+        goalDoor.setFriction(goalconst.getFloat("friction", 0));
+        goalDoor.setRestitution(goalconst.getFloat("restitution", 0));
         goalDoor.setSensor(true);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
@@ -242,7 +248,7 @@ public class LevelContainer{
         addObject(goalDoor);
 
         // Setting Gravity on World
-        JsonValue defaults = levelConstants.get("defaults");
+        JsonValue defaults = globalConstants.get("defaults");
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
         //TODO: explicit walls do not exist, consider deleting.
@@ -360,11 +366,11 @@ public class LevelContainer{
         addObject(wall);
 
         // Create player
-        float scl = levelConstants.get("player").getFloat("texturescale");
+        float scl = globalConstants.get("player").getFloat("texturescale");
         // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
         dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
         dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(levelConstants.get("player"), dwidth, dheight, levelConstants.get("player").getInt("maxhealth"));
+        avatar = new PlayerModel(globalConstants.get("player"), levelConstants.get("player").get("pos"), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
         avatar.setSideTexture(avatarSideTexture);
@@ -375,17 +381,17 @@ public class LevelContainer{
         addObject(avatar);
 
         // Create the umbrella
-        scl = levelConstants.get("umbrella").getFloat("texturescale");
+        scl = globalConstants.get("umbrella").getFloat("texturescale");
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
         dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(levelConstants.get("umbrella"), dwidth, dheight);
+        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), levelConstants.get("umbrella").get("pos"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
         // TODO: (design) maybe default to closed umbrella at initial state
         umbrella.useOpenedTexture();
-        umbrella.setClosedMomentum(levelConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
     }

@@ -16,9 +16,8 @@ package com.mygdx.game;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.math.*;
 
-import com.badlogic.gdx.utils.Array;
-
-import com.mygdx.game.util.*;
+import com.mygdx.game.utility.util.*;
+import com.mygdx.game.utility.util.XBoxController;
 
 /**
  * Class for reading player input. 

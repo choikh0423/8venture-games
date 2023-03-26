@@ -7,9 +7,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.obstacle.*;
-import com.mygdx.game.util.*;
-import com.mygdx.game.assets.*;
+import com.mygdx.game.model.PlayerModel;
+import com.mygdx.game.utility.obstacle.*;
+import com.mygdx.game.utility.util.*;
+import com.mygdx.game.utility.assets.*;
+import com.mygdx.game.utility.assets.AssetDirectory;
+import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.PooledList;
+import com.mygdx.game.utility.util.ScreenListener;
 
 public class GameMode implements Screen {
     /** Texture asset for background image */

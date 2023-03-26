@@ -1,17 +1,14 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.mygdx.game.util.ScreenListener;
-
-import com.mygdx.game.util.*;
-import com.mygdx.game.assets.*;
-import com.mygdx.game.*;
+import com.mygdx.game.mode.LoadingMode;
+import com.mygdx.game.mode.PauseMode;
+import com.mygdx.game.screen.LoseScreen;
+import com.mygdx.game.screen.VictoryScreen;
+import com.mygdx.game.utility.assets.AssetDirectory;
+import com.mygdx.game.utility.util.ScreenListener;
 
 
 public class GDXRoot extends Game implements ScreenListener {
