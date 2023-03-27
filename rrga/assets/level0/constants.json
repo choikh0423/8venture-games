@@ -45,7 +45,7 @@
       "height" : 0.05
     },
     "texturescale": 0.08333,
-    "closedmomentum": 0.1
+    "closedmomentum": 0.5
   },
 
   "wind": [

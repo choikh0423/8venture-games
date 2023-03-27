@@ -667,6 +667,10 @@ public class GameplayController implements ContactListener {
         return avatar;
     }
 
+    public UmbrellaModel getUmbrella(){
+        return umbrella;
+    }
+
     /**
      * set world bounds to be the given rectangle dimensions.
      * This should be followed with a reset of the game.
