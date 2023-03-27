@@ -190,7 +190,6 @@ public class LevelContainer{
         // Setting up Constant/Asset Path for different levels
         String levelConstantPath = "level" + this.currentLevel + ":constants";
         String constantPath = "global:constants";
-        String assetPath = "level" + this.currentLevel + ":assets";
 
         levelConstants = directory.getEntry(levelConstantPath, JsonValue.class);
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
