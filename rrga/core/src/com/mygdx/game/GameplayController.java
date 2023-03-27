@@ -185,6 +185,11 @@ public class GameplayController implements ContactListener {
      */
     Vector2 cache = new Vector2();
 
+    /**
+     * cache for wind force computations
+     */
+    Vector2 windForce = new Vector2();
+
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
 
     /**
@@ -429,19 +434,26 @@ public class GameplayController implements ContactListener {
             mousePos.y = 0;
         }
 
+        //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
+        int count = 0;
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
             if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
-                avatar.applyWindForce(umbrellaX * f, umbrellaY * f);
+                count++;
+                windForce.add(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
+        if(count!=0){
+            avatar.applyWindForce(windForce.x/count, windForce.y/count);
+        }
         contactWindBod.clear();
+        windForce.set(0,0);
 
         // Process actions in object model
         if (avatar.isGrounded()) {
@@ -560,8 +572,8 @@ public class GameplayController implements ContactListener {
             }
 
             // See if umbrella touches wind
-            if ((umbrella == bd2 && (bd1.getClass() == WindModel.class)) ||
-                    (umbrella == bd1 && (bd2.getClass() == WindModel.class))) {
+            if ((fd2 == "umbrellaSensor" && (bd1.getClass() == WindModel.class)) ||
+                    (fd1 == "umbrellaSensor" && (bd2.getClass() == WindModel.class))) {
                 Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
                 contactWindFix.add(windFix);
             }

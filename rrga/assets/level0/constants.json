@@ -98,7 +98,6 @@
         "path": [10.0, 15.0, 25.0, 15.0],
         "loop": false,
         "movespeed": 6,
-        "attack": true,
         "color": "brown"
       },
       {
@@ -108,7 +107,6 @@
         "path": [30.0, 10.0],
         "loop": false,
         "movespeed": 0,
-        "attack": true,
         "color": "red"
       },
       {
@@ -118,7 +116,6 @@
         "path": [20.0, 10.0, 10.0, 10.0],
         "loop": false,
         "movespeed": 4,
-        "attack": false,
         "color": "blue"
       }
     ],

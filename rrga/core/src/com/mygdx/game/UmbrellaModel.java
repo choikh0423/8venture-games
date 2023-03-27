@@ -2,7 +2,8 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.BoxObstacle;
 
@@ -13,6 +14,7 @@ public class UmbrellaModel extends BoxObstacle {
     private final float force;
     /** Identifier to allow us to track the sensor in ContactListener */
     private String sensorName;
+    private PolygonShape sensorShape;
     /** Which direction is the umbrella facing */
     public boolean faceRight;
     /** Whether the umbrella is open or closed */
@@ -46,11 +48,29 @@ public class UmbrellaModel extends BoxObstacle {
 
         force = data.getFloat("force", 0);
         textureScale = data.getFloat("texturescale", 1.0f);
-        sensorName = "UmbrellaSensor";
+        sensorName = "umbrellaSensor";
         this.data = data;
         faceRight = true;
         setName("umbrella");
         open = true;
+    }
+
+    public boolean activatePhysics(World world) {
+        // create the box from our superclass
+        if (!super.activatePhysics(world)) {
+            return false;
+        }
+
+        FixtureDef sensorDef = new FixtureDef();
+        Vector2 sensorCenter = new Vector2(0, 6*getHeight()/16);
+        sensorDef.density = 0;
+        sensorDef.isSensor = true;
+        sensorShape = new PolygonShape();
+        sensorShape.setAsBox(getWidth()/2, getHeight()/8, sensorCenter, 0.0f);
+        sensorDef.shape = sensorShape;
+        Fixture sensorFixture = body.createFixture(sensorDef);
+        sensorFixture.setUserData(sensorName);
+        return true;
     }
 
     /** Returns the angle away from the x-axis of the umbrella in radians.
@@ -94,6 +114,16 @@ public class UmbrellaModel extends BoxObstacle {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
         canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+    }
+
+    /**
+     * Draws the outline of the umbrella.
+     *
+     * @param canvas Drawing context
+     */
+    public void drawDebug(GameCanvas canvas) {
+        super.drawDebug(canvas);
+        canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
     }
 
     /**

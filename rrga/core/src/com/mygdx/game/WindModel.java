@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
@@ -55,7 +56,6 @@ public class WindModel extends PolygonObstacle {
         }
         magnitude = set_mag;
         magnitude = data.getFloat("magnitude", 0);*/
-        setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.DynamicBody);
         setGravityScale(0);
         setDensity(0);
@@ -80,5 +80,18 @@ public class WindModel extends PolygonObstacle {
         else return dot*magnitude;
     }
 
+    /**
+     * Draws the wind object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        if (region != null) {
+            canvas.draw(region, Color.WHITE,0,0,getX()*drawScale.x,getY()*drawScale.y,
+                    getAngle(),1,1);
+            //direction-((float) Math.PI/2)
+            //need sprite to match direction
+        }
+    }
 
 }

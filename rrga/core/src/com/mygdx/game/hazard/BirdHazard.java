@@ -50,6 +50,15 @@ public class BirdHazard extends HazardModel {
     private boolean loop;
 
     /**
+     * The color of this bird. Determines the bird's behavior.
+     * Red: Stationary, then attacks.
+     * Blue: Patrols, doesn't attacks.
+     * Brown: Patrols, then attacks.
+     * Invariant: Must be one of "red", "blue", or "brown"
+     */
+    private String color;
+
+    /**
      * Move speed of this bird
      */
     private int moveSpeed;
@@ -63,12 +72,6 @@ public class BirdHazard extends HazardModel {
      * Which direction is the bird facing
      */
     private boolean faceRight;
-
-    /**
-     * If attack is true, bird will charge at the player upon collision with its sensor.
-     * If false, bird will always stay on its path
-     */
-    private boolean attack;
 
     /**
      * Whether this bird sees its target.
@@ -116,8 +119,8 @@ public class BirdHazard extends HazardModel {
         super(data, birdDamage, birdKnockback);
         path = data.get("path").asFloatArray();
         moveSpeed = data.getInt("movespeed");
-        attack = data.getBoolean("attack");
         loop = data.getBoolean("loop");
+        color = data.getString("color");
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
@@ -134,7 +137,7 @@ public class BirdHazard extends HazardModel {
         }
 
         //create sensor if attacker
-        if(attack) {
+        if(color.equals("red") || color.equals("brown")) {
             FixtureDef sensorDef = new FixtureDef();
             sensorDef.density = 0;
             sensorDef.isSensor = true;
@@ -150,49 +153,51 @@ public class BirdHazard extends HazardModel {
     public void move() {
         //if target not seen
         if (!seesTarget) {
-            float pathX = path[currentPathIndex];
-            float pathY = path[currentPathIndex + 1];
-            float moveX = pathX - getX();
-            float moveY = pathY - getY();
-            //if bird's path is > 1 point
-            if (path.length > 2) {
-                //if at next point in path
-                if (Math.abs(moveX) < .001 && Math.abs(moveY) < .001) {
-                    //if at end of path
-                    if (currentPathIndex == path.length - 2) {
-                        if(!loop){
-                            for (int i = 0; i < path.length / 2; i += 2) {
-                                float temp1 = path[i];
-                                float temp2 = path[i + 1];
-                                path[i] = path[path.length - i - 2];
-                                path[i + 1] = path[path.length - i - 1];
-                                path[path.length - i - 2] = temp1;
-                                path[path.length - i - 1] = temp2;
+            if(color.equals("blue") || color.equals("brown")) {
+                float pathX = path[currentPathIndex];
+                float pathY = path[currentPathIndex + 1];
+                float moveX = pathX - getX();
+                float moveY = pathY - getY();
+                //if bird's path is > 1 point
+                if (path.length > 2) {
+                    //if at next point in path
+                    if (Math.abs(moveX) < .001 && Math.abs(moveY) < .001) {
+                        //if at end of path
+                        if (currentPathIndex == path.length - 2) {
+                            if (!loop) {
+                                for (int i = 0; i < path.length / 2; i += 2) {
+                                    float temp1 = path[i];
+                                    float temp2 = path[i + 1];
+                                    path[i] = path[path.length - i - 2];
+                                    path[i + 1] = path[path.length - i - 1];
+                                    path[path.length - i - 2] = temp1;
+                                    path[path.length - i - 1] = temp2;
+                                }
                             }
+                            currentPathIndex = 0;
                         }
-                        currentPathIndex = 0;
+                        //else not at end of path
+                        else {
+                            currentPathIndex += 2;
+                        }
                     }
-                    //else not at end of path
+                    //else not yet at next point in path
                     else {
-                        currentPathIndex += 2;
+                        move.set(moveX, moveY);
+                        move.nor();
+                        move.scl(moveSpeed);
+                        if (Math.abs((move.x / 100)) > Math.abs(moveX)) setX(pathX);
+                        else setX(getX() + (move.x / 100));
+                        if (Math.abs((move.y / 100)) > Math.abs(moveY)) setY(pathY);
+                        else setY(getY() + (move.y / 100));
+                        if (move.x > 0) faceRight = true;
+                        else faceRight = false;
                     }
                 }
-                //else not yet at next point in path
-                else {
-                    move.set(moveX, moveY);
-                    move.nor();
-                    move.scl(moveSpeed);
-                    if (Math.abs((move.x / 100)) > Math.abs(moveX)) setX(pathX);
-                    else setX(getX() + (move.x / 100));
-                    if (Math.abs((move.y / 100)) > Math.abs(moveY)) setY(pathY);
-                    else setY(getY() + (move.y / 100));
-                    if (move.x > 0) faceRight = true;
-                    else faceRight = false;
-                }
+                //else path is 1 point
+                //no movement
+                moveDir.set(moveX, moveY);
             }
-            //else path is 1 point
-            //no movement
-            moveDir.set(moveX, moveY);
         }
         //else target is seen
         else {
@@ -234,7 +239,7 @@ public class BirdHazard extends HazardModel {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if(attack) {
+        if(color.equals("red") || color.equals("brown")) {
             canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
         }
     }
