@@ -17,6 +17,8 @@ public class GDXRoot extends Game implements ScreenListener {
 	private GameCanvas canvas;
 	/** Player mode for the asset loading screen (CONTROLLER CLASS) */
 	private LoadingMode loading;
+	/** Player mode for the main menu screen (CONTROLLER CLASS) */
+	private MenuMode menu;
 	/** Player mode for the game play (CONTROLLER CLASS) */
 	private GameMode playing;
 
@@ -46,6 +48,7 @@ public class GDXRoot extends Game implements ScreenListener {
 	public void create() {
 		canvas  = new GameCanvas();
 		loading = new LoadingMode("assets.json",canvas,1);
+		menu = new MenuMode(canvas);
 		playing = new GameMode();
 		pausing = new PauseMode(canvas);
 		victory = new VictoryScreen(canvas);
@@ -69,6 +72,8 @@ public class GDXRoot extends Game implements ScreenListener {
 
 		canvas.dispose();
 		canvas = null;
+		menu.dispose();
+		menu = null;
 		playing.dispose();
 		playing = null;
 		pausing.dispose();
@@ -114,18 +119,32 @@ public class GDXRoot extends Game implements ScreenListener {
 			// finish loading assets, let all other controllers gather necessary assets
 			directory = loading.getAssets();
 			playing.gatherAssets(directory);
-			playing.setScreenListener(this);
-			playing.setCanvas(canvas);
-			playing.reset();
-
+			menu.gatherAssets(directory);
 			pausing.gatherAssets(directory);
 			victory.gatherAssets(directory);
 			defeat.gatherAssets(directory);
 
 			// transition to gameplay screen.
-			setScreen(playing);
+			menu.setScreenListener(this);
+			setScreen(menu);
 			loading.dispose();
 			loading = null;
+		} else if (screen == menu) {
+			switch (exitCode){
+				case MenuMode.EXIT_QUIT:
+					Gdx.app.exit();
+
+				case MenuMode.EXIT_PLAY:
+					playing.setScreenListener(this);
+					playing.setCanvas(canvas);
+					playing.reset();
+					setScreen(playing);
+
+//				case MenuMode.EXIT_SETTINGS:
+
+			}
+			// Transition might need to change
+			menu.dispose();
 		} else if (screen == pausing){
 			switch (exitCode){
 				case PauseMode.EXIT_RESUME:

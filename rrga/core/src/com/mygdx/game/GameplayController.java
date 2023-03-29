@@ -227,7 +227,6 @@ public class GameplayController implements ContactListener {
         levelContainer.gatherAssets(directory);
         backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
         backgroundMusic = directory.getEntry("music:level0", Music.class);
-        System.out.println(backgroundMusic);
 
         // Constants for Window/World scale
         physicsWidth = levelConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
