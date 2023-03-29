@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.utility.assets.AssetDirectory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,19 +50,39 @@ public class LevelParser {
 
     private Vector2 temp = new Vector2();
 
-    private JsonValue redBirdTemplate;
-    private JsonValue blueBirdTemplate;
-    private JsonValue brownBirdTemplate;
+    /** default values for colored birds*/
+    private JsonValue redBirdDefaults;
+    private JsonValue blueBirdDefaults;
+    private JsonValue brownBirdDefaults;
 
-    // add more templates
+    /** the default JSON of path point. */
+    private JsonValue pointDefault;
 
-    public LevelParser(JsonValue constants, JsonValue assets){
-        globalConstants = constants;
-        globalAssets = assets;
-        // TODO: ideally load the templates here... for now, we will hard code.
-        blueBirdTemplate = new JsonValue(JsonValue.ValueType.object);
-        redBirdTemplate = new JsonValue(JsonValue.ValueType.object);
-        brownBirdTemplate = new JsonValue(JsonValue.ValueType.object);
+    // add more template defaults
+
+    // TODO: add getter/setters
+
+    /**
+     * @return processed bird data that is ready for consumption
+     */
+    public JsonValue[] getBirdData() {
+        return birdData;
+    }
+
+    public LevelParser(AssetDirectory directory){
+        globalConstants = directory.getEntry("global:constants", JsonValue.class);
+        // TODO: assets?
+        globalAssets = null;
+
+        JsonValue redBirdTemplate = directory.getEntry("red_bird:constants", JsonValue.class);
+        JsonValue blueBirdTemplate = directory.getEntry("blue_bird:constants", JsonValue.class);
+        JsonValue brownBirdTemplate = directory.getEntry("brown_bird:constants", JsonValue.class);
+        JsonValue pathPointTemplate = directory.getEntry("path_point:constants", JsonValue.class);
+
+        redBirdDefaults = redBirdTemplate.get("object").get("properties");
+        blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
+        brownBirdDefaults = brownBirdTemplate.get("object").get("properties");
+        pointDefault = pathPointTemplate.get("object").get("properties");
     }
 
     /**
@@ -98,7 +119,7 @@ public class LevelParser {
             if (layerName.equals("objectgroup")){
                 parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData);
             }
-            else if (layerName.equals("PLACEHOLDER")){
+            else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
             }
             else {
@@ -123,13 +144,13 @@ public class LevelParser {
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
-            if (obj.getString("template").contains("bird.tx")) {
+            if (obj.getString("template").contains("bird.json")) {
                 birdRawData.add(obj);
             } else if (obj.getString("template").contains("platform.tx")) {
                 platformRawData.add(obj);
             } else if (obj.getString("template").contains("lightning.tx")) {
                 lightningRawData.add(obj);
-            } else if (obj.getString("template").contains("path_point.tx")) {
+            } else if (obj.getString("template").contains("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
             } else if (obj.getString("template").contains("spawn.tx")) {
                 playerPos.x = obj.getFloat("x");
@@ -168,20 +189,21 @@ public class LevelParser {
             pathJson.addChild(new JsonValue(temp.x));
             pathJson.addChild(new JsonValue(temp.y));
 
-            if (variant.equals("blue_bird.tx") || variant.equals("brown_bird.tx")){
-                // using custom properties to find rest of path
-                JsonValue properties = b.get("properties");
-                // custom properties should exist for patrolling birds
-                // if not, then grab default values
-                if (properties == null) {
-                    properties = getBirdDefaults(color, "properties");
-                }
+            JsonValue properties = b.get("properties");
+            JsonValue defaults = getBirdDefaults(color);
+            // add whether facing right
+            data.addChild("facing_right", getFromProperties(properties, "facing_right", defaults));
 
+            if (variant.equals("blue_bird.json") || variant.equals("brown_bird.json")){
+                // add whether to loop
+                data.addChild("loop", getFromProperties(properties, "loop", defaults));
+                // using custom properties to find rest of path
                 HashSet<Integer> seen = new HashSet<>();
-                JsonValue jsonId = getFromProperties(properties, "starting_point");
-                // (null) maybe the bird wasn't linked to a starting point, use defaults for safety.
-                int next = jsonId == null ? getBirdDefaults(color, "starting_point").asInt() : jsonId.asInt();
+                // this takes either the bird's next point along its path or take from default (which should be 0)
+                JsonValue jsonId = getFromProperties(properties, "path", defaults);
+                int next = jsonId.asInt();
                 while (next != 0 && !seen.contains(next) && trajectory.get(next) != null) {
+                    System.out.println("reading path");
                     seen.add(next);
                     JsonValue nodeData = trajectory.get(next);
                     // put path point (x,y) into vector cache and perform conversion
@@ -190,8 +212,9 @@ public class LevelParser {
                     pathJson.addChild(new JsonValue(temp.x));
                     pathJson.addChild(new JsonValue(temp.y));
                     // get next
-                    jsonId = getFromProperties(nodeData.get("properties"), "next_trajectory");
-                    next = jsonId == null ? 0 : jsonId.asInt();
+                    nodeData = nodeData.get("properties");
+                    jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
+                    next = jsonId.asInt();
                 }
             }
             data.addChild("path", pathJson);
@@ -221,6 +244,7 @@ public class LevelParser {
 
     /**
      * loads into p an (x,y) pair that are direct properties of the given JsonValue into vector cache
+     * Note: this pair (x,y) is still raw data and is not game coordinates.
      * @param v JSON of format {... "x": float, "y":float }
      * @param p cache vector
      */
@@ -258,6 +282,30 @@ public class LevelParser {
         pos.y = worldSize.y - pos.y;
     }
 
+    /**
+     * returns the value associated with the unique key from within an array of properties.
+     * This method, when given the correct corresponding default properties Json, will guarantee non-Null returns.
+     * @param properties an array JsonValue consisting of JsonValues in which the requested key can be found.
+     * @param key property key
+     * @return the results of the query (non-NULL)
+     */
+    private JsonValue getFromProperties(JsonValue properties, String key, JsonValue defaultProperties){
+        JsonValue queryResult = null;
+        if (properties != null){
+            queryResult = getFromProperties(properties, key);
+        }
+        if (queryResult == null){
+            return getFromProperties(defaultProperties, key);
+        }
+        return queryResult;
+    }
+
+    /**
+     * returns the value associated with the unique key from within an array of properties.
+     * @param properties an array JsonValue consisting of JsonValues in which the requested key can be found.
+     * @param key property key
+     * @return the results of the query, possibly NULL
+     */
     private JsonValue getFromProperties(JsonValue properties, String key){
         JsonValue v = null;
         for (JsonValue jv : properties){
@@ -275,11 +323,11 @@ public class LevelParser {
      */
     private String computeColor(String variant){
         switch (variant){
-            case "blue_bird.tx":
+            case "blue_bird.json":
                 return "blue";
-            case "brown_bird.tx":
+            case "brown_bird.json":
                 return "brown";
-            case "red_bird.tx":
+            case "red_bird.json":
                 return "red";
             default:
                 return "UNKNOWN";
@@ -287,30 +335,20 @@ public class LevelParser {
     }
 
     /**
-     * returns a default value (custom properties)
+     * returns the defaults (the entire custom properties)
      * @param color the color of the bird
-     * @param key the requested valid property
-     * @return default JsonValue for the requested property and the given bird variant
+     * @return default JsonValue for the given bird variant
      */
-    private JsonValue getBirdDefaults(String color, String key){
-        JsonValue properties = null;
+    private JsonValue getBirdDefaults(String color){
         switch (color){
             case "blue":
-                properties = blueBirdTemplate.get("properties");
-                break;
+                return blueBirdDefaults;
             case "brown":
-                properties = brownBirdTemplate.get("properties");
-                break;
+                return brownBirdDefaults;
             default:
                 // should be red
-                properties = redBirdTemplate.get("properties");
-                break;
+                return redBirdDefaults;
         }
-        // whether the entire collection of default properties or a specific one?
-        if (key.equals("properties")){
-            return properties;
-        }
-        return getFromProperties(properties, key);
     }
 }
 

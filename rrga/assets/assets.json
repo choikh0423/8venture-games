@@ -21,7 +21,12 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "level0:constants" :"levelconstants/level0.json",
-        "level1:constants" :"levelconstants/level1.json"
+        "level1:constants" :"levelconstants/level1.json",
+        "tiled:level1" : "levelconstants/tiled1.json",
+        "red_bird:constants": "shared/red_bird.json",
+        "blue_bird:constants": "shared/blue_bird.json",
+        "brown_bird:constants": "shared/brown_bird.json",
+        "path_point:constants": "shared/path_point.json"
     },
     "sounds" : {
     },

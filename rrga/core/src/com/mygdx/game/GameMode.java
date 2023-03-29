@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.util.*;
@@ -206,6 +207,13 @@ public class GameMode implements Screen {
         float[] displayDim = gameplayController.getDisplayDims();
         this.displayWidth = displayDim[0];
         this.displayHeight = displayDim[1];
+
+        // TESTING
+        LevelParser parser = new LevelParser(directory);
+        parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
+        for (JsonValue jv : parser.getBirdData()){
+            System.out.println(jv);
+        }
     }
 
     /**

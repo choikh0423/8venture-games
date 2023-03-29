@@ -1,0 +1,19 @@
+{ "object":
+{
+  "height":0,
+  "id":210,
+  "name":"path_point",
+  "point":true,
+  "properties":[
+    {
+      "name":"next_trajectory",
+      "type":"object",
+      "value":0
+    }],
+  "rotation":0,
+  "type":"trajectory",
+  "visible":true,
+  "width":0
+},
+  "type":"template"
+}

@@ -1,0 +1,29 @@
+{ "object":
+{
+  "height":0,
+  "id":208,
+  "name":"brown_bird",
+  "point":true,
+  "properties":[
+    {
+      "name":"facing_right",
+      "type":"bool",
+      "value":false
+    },
+    {
+      "name":"loop",
+      "type":"bool",
+      "value":false
+    },
+    {
+      "name":"path",
+      "type":"object",
+      "value":0
+    }],
+  "rotation":0,
+  "type":"bird",
+  "visible":true,
+  "width":0
+},
+  "type":"template"
+}
