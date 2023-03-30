@@ -51,12 +51,15 @@ public class LevelParser {
     private Vector2 temp = new Vector2();
 
     /** default values for colored birds*/
-    private JsonValue redBirdDefaults;
-    private JsonValue blueBirdDefaults;
-    private JsonValue brownBirdDefaults;
+    private final JsonValue redBirdDefaults;
+    private final JsonValue blueBirdDefaults;
+    private final JsonValue brownBirdDefaults;
 
     /** the default JSON of path point. */
-    private JsonValue pointDefault;
+    private final JsonValue pointDefault;
+
+    /** the default JSON of lightning object */
+    //private final JsonValue lightningDefault;
 
     // add more template defaults
 
@@ -69,20 +72,24 @@ public class LevelParser {
         return birdData;
     }
 
+
+
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
         // TODO: assets?
         globalAssets = null;
 
-        JsonValue redBirdTemplate = directory.getEntry("red_bird:constants", JsonValue.class);
-        JsonValue blueBirdTemplate = directory.getEntry("blue_bird:constants", JsonValue.class);
-        JsonValue brownBirdTemplate = directory.getEntry("brown_bird:constants", JsonValue.class);
-        JsonValue pathPointTemplate = directory.getEntry("path_point:constants", JsonValue.class);
+        JsonValue redBirdTemplate = directory.getEntry("red_bird:template", JsonValue.class);
+        JsonValue blueBirdTemplate = directory.getEntry("blue_bird:template", JsonValue.class);
+        JsonValue brownBirdTemplate = directory.getEntry("brown_bird:template", JsonValue.class);
+        JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
+        JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object").get("properties");
         blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
         brownBirdDefaults = brownBirdTemplate.get("object").get("properties");
         pointDefault = pathPointTemplate.get("object").get("properties");
+        //lightningDefault = lightningTemplate.get("object").get("properties");
     }
 
     /**
@@ -153,18 +160,16 @@ public class LevelParser {
             } else if (obj.getString("template").contains("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
             } else if (obj.getString("template").contains("spawn.tx")) {
-                playerPos.x = obj.getFloat("x");
-                playerPos.y = obj.getFloat("y");
+                readPositionAndConvert(obj, playerPos);
             } else if (obj.getString("template").contains("goal.tx")) {
-                goalPos.x = obj.getFloat("x");
-                goalPos.y = obj.getFloat("y");
+                readPositionAndConvert(obj, goalPos);
             }
             //TODO: get wind and put into windRawData
         }
     }
 
     /**
-     * Convert raw bird JSON into level-container expected JSON format.
+     * Convert raw bird JSON into game-expected JSON format.
      * @param rawData the unprocessed bird object data
      * @param trajectory map of path node Ids to raw JSON
      */
@@ -203,7 +208,6 @@ public class LevelParser {
                 JsonValue jsonId = getFromProperties(properties, "path", defaults);
                 int next = jsonId.asInt();
                 while (next != 0 && !seen.contains(next) && trajectory.get(next) != null) {
-                    System.out.println("reading path");
                     seen.add(next);
                     JsonValue nodeData = trajectory.get(next);
                     // put path point (x,y) into vector cache and perform conversion
@@ -224,17 +228,15 @@ public class LevelParser {
 
     private void processLightning(ArrayList<JsonValue> rawData){
         lightningData = new JsonValue[rawData.size()];
-        for (JsonValue l : rawData) {
-            //TODO: process lightning and put in this.lightnings
+        for (int ii = 0; ii < lightningData.length; ii++) {
+            //TODO: process lightning
         }
     }
 
     private void processPlatforms(ArrayList<JsonValue> rawData){
         platformData = new JsonValue[rawData.size()];
-        for (JsonValue p : rawData) {
-            //TODO: process platforms and put in this.objects
-            // DO THIS ONE
-            JsonValue j = new JsonValue(JsonValue.ValueType.object);
+        for (int ii = 0; ii < platformData.length; ii++) {
+            //TODO: process platforms
         }
     }
 
