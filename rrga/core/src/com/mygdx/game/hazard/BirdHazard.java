@@ -147,7 +147,7 @@ public class BirdHazard extends HazardModel {
             Fixture sensorFixture = body.createFixture(sensorDef);
             sensorFixture.setUserData(getSensorName());
         }
-            return true;
+        return true;
     }
 
     public void move() {
