@@ -27,7 +27,7 @@
     },
     "texturescale": 0.08333,
     "maxhealth": 3,
-    "drag_x" : 3,
+    "drag_x" : 10,
     "drag_y" : 5
   },
   "umbrella" : {
@@ -42,6 +42,6 @@
       "height" : 0.05
     },
     "texturescale": 0.08333,
-    "closedmomentum": 0.1
+    "closedmomentum": 0.5
   }
 }
