@@ -27,7 +27,8 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "level0:constants" :"levelconstants/level0.json",
-        "level1:constants" :"levelconstants/level1.json"
+        "level1:constants" :"levelconstants/level1.json",
+        "level2:constants" :"level2/constants.json"
     },
     "sounds" : {
     },

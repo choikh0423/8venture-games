@@ -38,10 +38,15 @@ public class PlayerModel extends CapsuleObstacle {
 	private final float force;
 	/** The amount to slow the character down */
 	private final float damping;
-	/** The maximum character horizontal speed */
-	private final float maxspeed_x;
+	/** The maximum character horizontal speed in the air */
+	private final float maxspeed_x_air_wind;
+	private final float maxspeed_x_air_drag;
+	/** The maximum character horizontal speed on the ground */
+	private final float maxspeed_x_ground;
 	/** The maximum character vertical speed */
-	private final float maxspeed_y;
+	private final float maxspeed_up;
+	private final float maxspeed_down_open;
+	private final float maxspeed_down_closed;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
 
@@ -182,19 +187,33 @@ public class PlayerModel extends CapsuleObstacle {
 	 *
 	 * @return the upper limit on player left-right movement.
 	 */
-	public float getMaxSpeedX() {
-		return maxspeed_x;
+	public float getMaxSpeedXAirWind() {
+		return maxspeed_x_air_wind;
+	}
+
+	public float getMaxSpeedXAirDrag() {
+		return maxspeed_x_air_drag;
+	}
+
+	public float getMaxSpeedXGround() {
+		return maxspeed_x_ground;
 	}
 
 	/**
-	 * Returns the upper limit on player vertical movement.
+	 * Returns the upper limit on player upwards movement.
 	 *
-	 * This does NOT apply to vertical movement.
+	 * This does NOT apply to horizontal movement.
 	 *
-	 * @return the upper limit on player left-right movement.
+	 * @return the upper limit on player upwards movement.
 	 */
-	public float getMaxSpeedY() {
-		return maxspeed_y;
+	public float getMaxSpeedUp() {
+		return maxspeed_up;
+	}
+	public float getMaxSpeedDownOpen() {
+		return maxspeed_down_open;
+	}
+	public float getMaxSpeedDownClosed() {
+		return maxspeed_down_closed;
 	}
 
 	/**
@@ -340,8 +359,12 @@ public class PlayerModel extends CapsuleObstacle {
 		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
 
-		maxspeed_x = data.getFloat("maxspeed_x", 0);
-		maxspeed_y = data.getFloat("maxspeed_y", 0);
+		maxspeed_x_ground = data.getFloat("maxspeed_x_ground", 0);
+		maxspeed_x_air_wind = data.getFloat("maxspeed_x_air_wind", 0);
+		maxspeed_x_air_drag = data.getFloat("maxspeed_x_air_drag", 0);
+		maxspeed_up = data.getFloat("maxspeed_up", 0);
+		maxspeed_down_open = data.getFloat("maxspeed_down_open", 0);
+		maxspeed_down_closed = data.getFloat("maxspeed_down_closed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
@@ -405,7 +428,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 *
 	 * This method should be called after the movement attribute is set.
 	 */
-	public void applyInputForce() {
+	public void applyWalkingForce() {
 		if (!isActive()) {
 			return;
 		}
@@ -416,8 +439,8 @@ public class PlayerModel extends CapsuleObstacle {
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
-		if (Math.abs(getVX()) >= getMaxSpeedX()) {
-			setVX(Math.signum(getVX())*getMaxSpeedX());
+		if (Math.abs(getVX()) >= getMaxSpeedXGround()) {
+			setVX(Math.signum(getVX())*getMaxSpeedXGround());
 		}{
 			forceCache.set(getMovement(),0);
 			body.applyForce(forceCache,getPosition(),true);
@@ -431,32 +454,48 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 	/**
-	 * Applies some external force to the body of this player.
+	 * Applies wind force to the body of this player.
 	 *
 	 * Horizontal component of force is ignored if player has reached horizontal maximum speed.
 	 *
 	 */
-	public void applyExternalForce(float fx, float fy) {
+	public void applyWindForce(float fx, float fy) {
 		if (!isActive()) {
 			return;
 		}
-		if (Math.abs(getVX()) >= getMaxSpeedX()) {
-			setVX(Math.signum(getVX())*getMaxSpeedX());
+
+		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
 		}
 		else {
 			forceCache.set(fx,0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
-		if (Math.abs(getVY()) >= getMaxSpeedY()) {
-			setVY(Math.signum(getVY())*getMaxSpeedY());
+		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+			setVY(Math.signum(getVY())*getMaxSpeedUp());
 		} else {
 			forceCache.set(0,fy);
 			body.applyForce(forceCache, getPosition(), true);
 		}
-
 	}
-	
+
+	/**
+	 * Applies drag force to the body of this player.
+	 */
+	public void applyDragForce(float fx) {
+		if (!isActive()) {
+			return;
+		}
+		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
+				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
+			forceCache.set(fx, 0);
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2+1 : 1.0f;
+			forceCache.scl(scl);
+			body.applyForce(forceCache, getPosition(), true);
+		}
+	}
+
 	/**
 	 * Updates the object's physics state (NOT GAME LOGIC).
 	 *
