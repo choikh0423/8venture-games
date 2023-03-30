@@ -3,16 +3,7 @@
     "pos": [26.0, 17.0]
   },
   "player": {
-    "pos": [7.0, 3.0],
-    "maxspeed_x_ground": 5.0,
-    "maxspeed_x_air_wind": 10.0,
-    "maxspeed_x_air_drag": 3.0,
-    "maxspeed_up": 10.0,
-    "maxspeed_down_open": -2.0,
-    "maxspeed_down_closed": -10.0
-  },
-  "umbrella" : {
-    "pos": [7.0, 3.26666]
+    "pos": [7.0, 3.0]
   },
   "wind": [
     {

@@ -382,14 +382,14 @@ public class LevelContainer{
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
         dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), levelConstants.get("umbrella").get("pos"), dwidth, dheight);
+        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), levelConstants.get("player").get("pos"), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
         // TODO: (design) maybe default to closed umbrella at initial state
         umbrella.useOpenedTexture();
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
-        umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
+        umbrella.setPosition(levelConstants.get("player").get("pos").getFloat(0), levelConstants.get("player").get("pos").getFloat(1) + 0.26666f);
         addObject(umbrella);
     }
 

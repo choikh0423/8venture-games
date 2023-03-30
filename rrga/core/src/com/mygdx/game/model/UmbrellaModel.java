@@ -35,7 +35,7 @@ public class UmbrellaModel extends BoxObstacle {
 
     public UmbrellaModel(JsonValue data, JsonValue pos, float width, float height) {
         super(	pos.getFloat(0),
-                pos.getFloat(1),
+                pos.getFloat(1) + 0.26666f,
                 width*data.get("shrink").getFloat( 0 ),
                 height*data.get("shrink").getFloat( 1 ));
         setDensity(data.getFloat("density", 0));

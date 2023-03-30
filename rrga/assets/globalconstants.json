@@ -19,8 +19,12 @@
     "damping": 10.0,
     "density": 1.0,
     "friction": 0.0,
-    "maxspeed_x": 5.0,
-    "maxspeed_y": 7.0,
+    "maxspeed_x_ground": 5.0,
+    "maxspeed_x_air_wind": 10.0,
+    "maxspeed_x_air_drag": 3.0,
+    "maxspeed_up": 10.0,
+    "maxspeed_down_open": -2.0,
+    "maxspeed_down_closed": -10.0,
     "sensor": {
       "shrink" : 0.6,
       "height" : 0.05

@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.GameCanvas;
 
 import java.util.Arrays;
 
