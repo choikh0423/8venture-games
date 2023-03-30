@@ -1,10 +1,13 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.obstacle.*;
+
+import java.util.Arrays;
 
 
 /**
@@ -87,8 +90,36 @@ public class WindModel extends PolygonObstacle {
      */
     public void draw(GameCanvas canvas) {
         if (region != null) {
-            canvas.draw(region, Color.WHITE,0,0,getX()*drawScale.x,getY()*drawScale.y,
-                    getAngle(),1,1);
+            float angle = -direction+((float) Math.PI/2);
+            float[] verts = new float[region.getVertices().length];
+            for(int i = 0; i<region.getVertices().length; i+=2){
+                float rotatedX = (float) Math.cos(angle) * region.getVertices()[i]
+                        - (float) Math.sin(angle) * region.getVertices()[i+1];
+                float rotatedY = (float) Math.sin(angle) * region.getVertices()[i]
+                        + (float) Math.cos(angle) * region.getVertices()[i+1];
+                verts[i] = rotatedX;
+                verts[i+1] = rotatedY;
+            }
+            float xOffset = 0 ; float yOffset = 0;
+            for(int i = 0; i<verts.length; i++){
+                if(i%2==0 && verts[i]<xOffset){
+                    xOffset = verts[i];
+                }
+                if(i%2==1 && verts[i]<yOffset){
+                    yOffset = verts[i];
+                }
+            }
+            for(int i = 0; i<verts.length; i++){
+                if(i%2==0){
+                    verts[i] -= xOffset;
+                }
+                if(i%2==1){
+                    verts[i] -= yOffset;
+                }
+            }
+            PolygonRegion drawRegion = new PolygonRegion(texture, verts, region.getTriangles());
+            canvas.draw(drawRegion, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
+                    direction-((float) Math.PI/2),1,1);
             //direction-((float) Math.PI/2)
             //need sprite to match direction
         }
