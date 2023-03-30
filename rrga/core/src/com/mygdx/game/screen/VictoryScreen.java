@@ -116,6 +116,7 @@ public class VictoryScreen extends MenuScreen{
             currentExitCode = VictoryScreen.EXIT_RESTART;
             return true;
         }
+
         return false;
     }
 }

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.audio.Music;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.HazardModel;
 import com.mygdx.game.model.hazard.LightningHazard;
@@ -92,11 +93,15 @@ public class GameplayController implements ContactListener {
 
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
+    /** Background music */
+    private Music backgroundMusic;
 
 
     // <=============================== Physics objects for the game BEGINS here ===============================>
     /** Physics constants for global */
     private JsonValue globalConstants;
+    /** Physics constants for current level */
+    private JsonValue levelConstants;
 
     /** Reference to the character avatar */
     private PlayerModel avatar;
@@ -212,18 +217,22 @@ public class GameplayController implements ContactListener {
     public void gatherAssets(AssetDirectory directory) {
         // Setting up Constant/Asset Path for different levels
         String constantPath = "global:constants";
+        String levelPath = "level" + this.currentLevel + ":constants";
 
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
+        levelConstants = directory.getEntry(levelPath, JsonValue.class);
+
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
         backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
+        backgroundMusic = directory.getEntry("music:level0", Music.class);
 
         // Constants for Window/World scale
-        physicsWidth = globalConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
-        physicsHeight = globalConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
-        displayWidth = globalConstants.get("world").getFloat("width", DEFAULT_WIDTH);
-        displayHeight = globalConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
+        physicsWidth = levelConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
+        physicsHeight = levelConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
+        displayWidth = levelConstants.get("world").getFloat("width", DEFAULT_WIDTH);
+        displayHeight = levelConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
     }
@@ -268,6 +277,10 @@ public class GameplayController implements ContactListener {
 
         diff.x = umbrella.getX()-avatar.getX();
         diff.y = umbrella.getY()-avatar.getY();
+
+        backgroundMusic.stop();
+        backgroundMusic.play();
+        backgroundMusic.setLooping(true);
     }
 
 
