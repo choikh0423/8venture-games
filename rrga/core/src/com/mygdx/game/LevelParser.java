@@ -58,9 +58,11 @@ public class LevelParser {
     /** the default JSON of path point. */
     private final JsonValue pointDefault;
 
-    /** the default JSON of lightning object */
-    //private final JsonValue lightningDefault;
+    /** the default JSON properties of lightning object */
+    private final JsonValue lightningDefault;
 
+    /** the default JSON polygon of lightning object */
+    private final JsonValue lightningDefaultPoly;
     // add more template defaults
 
     // TODO: add getter/setters
@@ -72,7 +74,12 @@ public class LevelParser {
         return birdData;
     }
 
-
+    /**
+     * @return processed lightning data that is ready for consumption
+     */
+    public JsonValue[] getLightningData() {
+        return lightningData;
+    }
 
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
@@ -89,7 +96,8 @@ public class LevelParser {
         blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
         brownBirdDefaults = brownBirdTemplate.get("object").get("properties");
         pointDefault = pathPointTemplate.get("object").get("properties");
-        //lightningDefault = lightningTemplate.get("object").get("properties");
+        lightningDefault = lightningTemplate.get("object").get("properties");
+        lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
     }
 
     /**
@@ -187,7 +195,7 @@ public class LevelParser {
             data.addChild("attack", new JsonValue(color.equals("brown") || color.equals("red")));
             // set position data
             readPositionAndConvert(b, temp);
-            addPosition(data, temp );
+            addPosition(data, temp);
             // the resulting path should be stored as a list of floats which is Json array of Json floats.
             JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
             // implicitly, the bird's location is the FIRST point on their path.
@@ -229,7 +237,18 @@ public class LevelParser {
     private void processLightning(ArrayList<JsonValue> rawData){
         lightningData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < lightningData.length; ii++) {
-            //TODO: process lightning
+            //data we pass in to lightning constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //lightning raw data
+            JsonValue l = rawData.get(ii);
+            // set position data
+            readPositionAndConvert(l, temp);
+            addPosition(data, temp);
+            JsonValue props = l.get("properties");
+            data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
+            data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
+            data.addChild("strike_timer_offset", new JsonValue(getFromProperties(props, "strike_timer_offset", lightningDefault).asInt()));
+            lightningData[ii] = data;
         }
     }
 
@@ -352,5 +371,38 @@ public class LevelParser {
                 return redBirdDefaults;
         }
     }
-}
 
+    /**
+     * returns a JsonValue containing the list of points (in game coordinates) that make up a polygon
+     * @param polygon the polygon to get points for
+     * @param defaultPoly the default polygon for this object
+     * @return a JsonValue of type array containing the list of points that make up this polygon
+     *         (in the format used in PolygonObstacle, etc.)
+     */
+    private JsonValue polyPoints(JsonValue polygon, JsonValue defaultPoly){
+        JsonValue points = null;
+        if (polygon != null){
+            points = polyPoints(polygon);
+        }
+        if (points == null){
+            return polyPoints(defaultPoly);
+        }
+        return points;
+    }
+
+    /**
+     * returns a JsonValue containing the list of points (in game coordinates) that make up a polygon
+     * @param polygon the polygon to get points for
+     * @return a JsonValue of type array containing the list of points that make up this polygon
+     *         (in the format used in SimpleObstacle, etc.)
+     */
+    private JsonValue polyPoints(JsonValue polygon){
+        JsonValue points = new JsonValue(JsonValue.ValueType.array);
+        for (JsonValue j : polygon){
+            readPositionAndConvert(j,temp);
+            points.addChild(new JsonValue(temp.x));
+            points.addChild(new JsonValue(temp.y));
+        }
+        return points;
+    }
+}

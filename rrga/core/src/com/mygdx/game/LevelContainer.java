@@ -271,9 +271,11 @@ public class LevelContainer{
 
         String pname = "platform";
         JsonValue platjv = levelConstants.get("platforms");
+        JsonValue cur;
         for (int ii = 0; ii < platjv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(platjv.get(ii).asFloatArray(), 0, 0);
+            cur = platjv.get(ii);
+            PolygonObstacle obj = new PolygonObstacle(cur.get("points").asFloatArray(),
+                    cur.getFloat("x"), cur.getFloat("y"));
             obj.setBodyType(BodyDef.BodyType.StaticBody);
             obj.setDensity(defaults.getFloat("density", 0.0f));
             obj.setFriction(defaults.getFloat("friction", 0.0f));
