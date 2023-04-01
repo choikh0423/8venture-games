@@ -521,11 +521,11 @@ public class LevelParser {
      * @return a JsonValue of type doubleValue containing this wind's direction
      */
     private JsonValue computeWindDirection(JsonValue wind, HashMap<Integer, JsonValue> windDirs){
-        JsonValue dir;
         int key = getFromProperties(wind, "dir", windDefault).asInt();
         int defKey = getFromProperties(windDefault, "dir").asInt();
+        float ang = windDirDefault;
         if (key != defKey){
-            float ang = windDirs.get(key).getFloat("rotation", windDirDefault);
+            ang = windDirs.get(key).getFloat("rotation", windDirDefault);
             //only convert if ang isn't zero since zero will get converted to 2pi
             if (ang != 0.0f){
                 //subtract from 360 since tiled gives clockwise rotation but WindModel expects counterclockwise
@@ -533,10 +533,10 @@ public class LevelParser {
                 //convert from deg to rad
                 ang *= (float) (Math.PI/180);
             }
-            dir = new JsonValue(ang);
-        } else {
-            dir = new JsonValue(windDirDefault);
         }
-        return dir;
+        //convert to being in rads from right instead of rads from top
+        ang += (float) (Math.PI/2);
+        if (ang >= Math.PI*2) ang -= Math.PI*2;
+        return new JsonValue(ang);
     }
 }
