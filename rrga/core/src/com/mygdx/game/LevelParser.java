@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.assets.AssetDirectory;
 
@@ -41,6 +43,11 @@ public class LevelParser {
      */
     private JsonValue[] staticHazardData;
 
+    /** wind json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue windData;
+
     /** vector position cache for player */
     private Vector2 playerPos = new Vector2();
 
@@ -74,6 +81,16 @@ public class LevelParser {
 
     /** the default JSON polygon of a static hazard */
     private final JsonValue staticHazardDefaultPoly;
+
+    /** the default JSON properties of a wind object */
+    private final JsonValue windDefault;
+
+    /** the default JSON polygon of a wind object */
+    private final JsonValue windDefaultPoly;
+
+    /** the default direction of a wind object */
+    private final float windDirDefault = 0;
+
     // add more template defaults
 
     // TODO: add getter/setters
@@ -106,6 +123,13 @@ public class LevelParser {
         return staticHazardData;
     }
 
+    /**
+     * @return processed wind data that is ready for consumption
+     */
+    public JsonValue getWindData(){
+        return windData;
+    }
+
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
         // TODO: assets?
@@ -118,6 +142,7 @@ public class LevelParser {
         JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
+        JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object").get("properties");
         blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
@@ -127,6 +152,8 @@ public class LevelParser {
         lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
         platformDefaultPoly = platformTemplate.get("object").get("polygon");
         staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
+        windDefault = windTemplate.get("object").get("properties");
+        windDefaultPoly = windTemplate.get("object").get("polygon");
     }
 
     /**
@@ -153,6 +180,7 @@ public class LevelParser {
         ArrayList<JsonValue> platformRawData = new ArrayList<>();
         ArrayList<JsonValue> lightningRawData = new ArrayList<>();
         ArrayList<JsonValue> windRawData = new ArrayList<>();
+        HashMap<Integer, JsonValue> windDirs = new HashMap<>();
         ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
 
         JsonValue layers = levelData.get("layers");
@@ -162,7 +190,7 @@ public class LevelParser {
         for (JsonValue layer : layers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, staticHazardRawData);
+                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, staticHazardRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -177,6 +205,7 @@ public class LevelParser {
         processLightning(lightningRawData);
         processPlatforms(platformRawData);
         processStaticHazards(staticHazardRawData);
+        processWind(windRawData, windDirs);
     }
 
     /**
@@ -187,6 +216,7 @@ public class LevelParser {
                                   ArrayList<JsonValue> lightningRawData,
                                   ArrayList<JsonValue> platformRawData,
                                   ArrayList<JsonValue> windRawData,
+                                  HashMap<Integer, JsonValue> windDirs,
                                   ArrayList<JsonValue> staticHazardRawData)
     {
         JsonValue objs = layer.get("objects");
@@ -205,8 +235,11 @@ public class LevelParser {
                 readPositionAndConvert(obj, goalPos);
             } else if (obj.getString("template").contains("static_hazard.json")){
                 staticHazardRawData.add(obj);
+            } else if (obj.getString("template").contains("wind.json")){
+                windRawData.add(obj);
+            } else if (obj.getString("template").contains("wind_dir.json")){
+                windDirs.put(obj.getInt("id"), obj);
             }
-            //TODO: get wind and put into windRawData
         }
     }
 
@@ -313,6 +346,29 @@ public class LevelParser {
             addPosition(data, temp);
             data.addChild("points", polyPoints(sh.get("polygon"), staticHazardDefaultPoly));
             platformData[ii] = data;
+        }
+    }
+
+    private void processWind(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> windDirs){
+        windData = new JsonValue(JsonValue.ValueType.array);
+        for (int ii = 0; ii < rawData.size(); ii++){
+            //data of this wind
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //wind raw data
+            JsonValue w = rawData.get(ii);
+            //position
+            readPositionAndConvert(w, temp);
+            JsonValue pos = new JsonValue(JsonValue.ValueType.array);
+            pos.addChild(new JsonValue(temp.x));
+            pos.addChild(new JsonValue(temp.x));
+            data.addChild("pos", pos);
+            //points
+            data.addChild("dimensions", polyPoints(w.get("polygon"), windDefaultPoly));
+            //magnitude and direction
+            JsonValue props = w.get("properties");
+            data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
+            data.addChild("direction", computeWindDirection(props, windDirs));
+            windData.addChild(data);
         }
     }
 
@@ -450,11 +506,37 @@ public class LevelParser {
     private JsonValue polyPoints(JsonValue polygon){
         JsonValue points = new JsonValue(JsonValue.ValueType.array);
         for (JsonValue j : polygon){
-            temp.x = j.getFloat("x", 0);
-            temp.y = -j.getFloat("y", 0);
+            temp.x = j.getFloat("x", 0)/tileScale.x;
+            temp.y = -j.getFloat("y", 0)/tileScale.y;
             points.addChild(new JsonValue(temp.x));
             points.addChild(new JsonValue(temp.y));
         }
         return points;
+    }
+
+    /**
+     * returns a JsonValue containing the direction that the given wind blows in
+     * @param wind the wind to find the angle of
+     * @param windDirs the set of wind direction objects (so we can find the one the wind points to)
+     * @return a JsonValue of type doubleValue containing this wind's direction
+     */
+    private JsonValue computeWindDirection(JsonValue wind, HashMap<Integer, JsonValue> windDirs){
+        JsonValue dir;
+        int key = getFromProperties(wind, "dir", windDefault).asInt();
+        int defKey = getFromProperties(windDefault, "dir").asInt();
+        if (key != defKey){
+            float ang = windDirs.get(key).getFloat("rotation", windDirDefault);
+            //only convert if ang isn't zero since zero will get converted to 2pi
+            if (ang != 0.0f){
+                //subtract from 360 since tiled gives clockwise rotation but WindModel expects counterclockwise
+                ang = 360-ang;
+                //convert from deg to rad
+                ang *= (float) (Math.PI/180);
+            }
+            dir = new JsonValue(ang);
+        } else {
+            dir = new JsonValue(windDirDefault);
+        }
+        return dir;
     }
 }

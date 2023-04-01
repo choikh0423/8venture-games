@@ -29,7 +29,8 @@
         "path_point:template": "shared/path_point.json",
         "lightning:template": "shared/lightning.json",
         "platform:template": "shared/platform.json",
-        "static_hazard:template": "shared/static_hazard.json"
+        "static_hazard:template": "shared/static_hazard.json",
+        "wind:template": "shared/wind.json"
     },
     "sounds" : {
     },
