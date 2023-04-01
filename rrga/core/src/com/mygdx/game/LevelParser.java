@@ -526,13 +526,10 @@ public class LevelParser {
         float ang = windDirDefault;
         if (key != defKey){
             ang = windDirs.get(key).getFloat("rotation", windDirDefault);
-            //only convert if ang isn't zero since zero will get converted to 2pi
-            if (ang != 0.0f){
-                //subtract from 360 since tiled gives clockwise rotation but WindModel expects counterclockwise
-                ang = 360-ang;
-                //convert from deg to rad
-                ang *= (float) (Math.PI/180);
-            }
+            //subtract from 360 since tiled gives clockwise rotation but WindModel expects counterclockwise
+            ang = 360-ang;
+            //convert from deg to rad
+            ang *= (float) (Math.PI/180);
         }
         //convert to being in rads from right instead of rads from top
         ang += (float) (Math.PI/2);
