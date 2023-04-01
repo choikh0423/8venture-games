@@ -63,6 +63,9 @@ public class LevelParser {
 
     /** the default JSON polygon of lightning object */
     private final JsonValue lightningDefaultPoly;
+
+    /** the default JSON polygon of a platform */
+    private final JsonValue platformDefaultPoly;
     // add more template defaults
 
     // TODO: add getter/setters
@@ -81,6 +84,13 @@ public class LevelParser {
         return lightningData;
     }
 
+    /**
+     * @return processed platform data that is ready for consumption
+     */
+    public JsonValue[] getPlatformData() {
+        return platformData;
+    }
+
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
         // TODO: assets?
@@ -91,6 +101,7 @@ public class LevelParser {
         JsonValue brownBirdTemplate = directory.getEntry("brown_bird:template", JsonValue.class);
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
         JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
+        JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object").get("properties");
         blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
@@ -98,6 +109,7 @@ public class LevelParser {
         pointDefault = pathPointTemplate.get("object").get("properties");
         lightningDefault = lightningTemplate.get("object").get("properties");
         lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
+        platformDefaultPoly = platformTemplate.get("object").get("polygon");
     }
 
     /**
@@ -161,9 +173,9 @@ public class LevelParser {
         for (JsonValue obj : objs) {
             if (obj.getString("template").contains("bird.json")) {
                 birdRawData.add(obj);
-            } else if (obj.getString("template").contains("platform.tx")) {
+            } else if (obj.getString("template").contains("platform.json")) {
                 platformRawData.add(obj);
-            } else if (obj.getString("template").contains("lightning.tx")) {
+            } else if (obj.getString("template").contains("lightning.json")) {
                 lightningRawData.add(obj);
             } else if (obj.getString("template").contains("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
@@ -205,9 +217,9 @@ public class LevelParser {
             JsonValue properties = b.get("properties");
             JsonValue defaults = getBirdDefaults(color);
             // add whether facing right
-            data.addChild("facing_right", getFromProperties(properties, "facing_right", defaults));
+            data.addChild("facing_right", new JsonValue(getFromProperties(properties, "facing_right", defaults).asBoolean()));
 
-            if (variant.equals("blue_bird.json") || variant.equals("brown_bird.json")){
+            if (color.equals("blue") || color.equals("brown")){
                 // add whether to loop
                 data.addChild("loop", getFromProperties(properties, "loop", defaults));
                 // using custom properties to find rest of path
@@ -255,7 +267,15 @@ public class LevelParser {
     private void processPlatforms(ArrayList<JsonValue> rawData){
         platformData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < platformData.length; ii++) {
-            //TODO: process platforms
+            //data we pass in to platform constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //platform raw data
+            JsonValue p = rawData.get(ii);
+            // set position data
+            readPositionAndConvert(p, temp);
+            addPosition(data, temp);
+            data.addChild("points", polyPoints(p.get("polygon"), platformDefaultPoly));
+            platformData[ii] = data;
         }
     }
 
@@ -343,16 +363,10 @@ public class LevelParser {
      * @return the bird's color
      */
     private String computeColor(String variant){
-        switch (variant){
-            case "blue_bird.json":
-                return "blue";
-            case "brown_bird.json":
-                return "brown";
-            case "red_bird.json":
-                return "red";
-            default:
-                return "UNKNOWN";
-        }
+        if (variant.contains("blue_bird.json")) return "blue";
+        else if (variant.contains("brown_bird.json")) return "brown";
+        else if (variant.contains("red_bird.json")) return "red";
+        else return "UNKNOWN";
     }
 
     /**
@@ -399,7 +413,8 @@ public class LevelParser {
     private JsonValue polyPoints(JsonValue polygon){
         JsonValue points = new JsonValue(JsonValue.ValueType.array);
         for (JsonValue j : polygon){
-            readPositionAndConvert(j,temp);
+            temp.x = j.getFloat("x", 0);
+            temp.y = -j.getFloat("y", 0);
             points.addChild(new JsonValue(temp.x));
             points.addChild(new JsonValue(temp.y));
         }

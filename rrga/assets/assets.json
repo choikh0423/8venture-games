@@ -27,7 +27,8 @@
         "blue_bird:template": "shared/blue_bird.json",
         "brown_bird:template": "shared/brown_bird.json",
         "path_point:template": "shared/path_point.json",
-        "lightning:template": "shared/lightning.json"
+        "lightning:template": "shared/lightning.json",
+        "platform:template": "shared/platform.json"
     },
     "sounds" : {
     },
