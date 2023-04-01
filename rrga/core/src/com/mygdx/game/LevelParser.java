@@ -36,6 +36,11 @@ public class LevelParser {
      */
     private JsonValue[] platformData;
 
+    /** list of static hazard json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue[] staticHazardData;
+
     /** vector position cache for player */
     private Vector2 playerPos = new Vector2();
 
@@ -66,6 +71,9 @@ public class LevelParser {
 
     /** the default JSON polygon of a platform */
     private final JsonValue platformDefaultPoly;
+
+    /** the default JSON polygon of a static hazard */
+    private final JsonValue staticHazardDefaultPoly;
     // add more template defaults
 
     // TODO: add getter/setters
@@ -91,6 +99,13 @@ public class LevelParser {
         return platformData;
     }
 
+    /**
+     * @return processed static hazard data that is ready for consumption
+     */
+    public JsonValue[] getStaticHazardData() {
+        return staticHazardData;
+    }
+
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
         // TODO: assets?
@@ -102,6 +117,7 @@ public class LevelParser {
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
         JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
+        JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object").get("properties");
         blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
@@ -110,6 +126,7 @@ public class LevelParser {
         lightningDefault = lightningTemplate.get("object").get("properties");
         lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
         platformDefaultPoly = platformTemplate.get("object").get("polygon");
+        staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
     }
 
     /**
@@ -136,6 +153,7 @@ public class LevelParser {
         ArrayList<JsonValue> platformRawData = new ArrayList<>();
         ArrayList<JsonValue> lightningRawData = new ArrayList<>();
         ArrayList<JsonValue> windRawData = new ArrayList<>();
+        ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
 
         JsonValue layers = levelData.get("layers");
         // flatten all layers (all object layers are put together)
@@ -144,7 +162,7 @@ public class LevelParser {
         for (JsonValue layer : layers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData);
+                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, staticHazardRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -158,6 +176,7 @@ public class LevelParser {
         processBirds(birdRawData, trajectory);
         processLightning(lightningRawData);
         processPlatforms(platformRawData);
+        processStaticHazards(staticHazardRawData);
     }
 
     /**
@@ -167,7 +186,8 @@ public class LevelParser {
                                   ArrayList<JsonValue> birdRawData,
                                   ArrayList<JsonValue> lightningRawData,
                                   ArrayList<JsonValue> platformRawData,
-                                  ArrayList<JsonValue> windRawData)
+                                  ArrayList<JsonValue> windRawData,
+                                  ArrayList<JsonValue> staticHazardRawData)
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
@@ -179,10 +199,12 @@ public class LevelParser {
                 lightningRawData.add(obj);
             } else if (obj.getString("template").contains("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
-            } else if (obj.getString("template").contains("spawn.tx")) {
+            } else if (obj.getString("template").contains("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
-            } else if (obj.getString("template").contains("goal.tx")) {
+            } else if (obj.getString("template").contains("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
+            } else if (obj.getString("template").contains("static_hazard.json")){
+                staticHazardRawData.add(obj);
             }
             //TODO: get wind and put into windRawData
         }
@@ -275,6 +297,21 @@ public class LevelParser {
             readPositionAndConvert(p, temp);
             addPosition(data, temp);
             data.addChild("points", polyPoints(p.get("polygon"), platformDefaultPoly));
+            platformData[ii] = data;
+        }
+    }
+
+    private void processStaticHazards(ArrayList<JsonValue> rawData){
+        staticHazardData = new JsonValue[rawData.size()];
+        for (int ii = 0; ii < staticHazardData.length; ii++) {
+            //data we pass in to static hazard constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //static hazard raw data
+            JsonValue sh = rawData.get(ii);
+            // set position data
+            readPositionAndConvert(sh, temp);
+            addPosition(data, temp);
+            data.addChild("points", polyPoints(sh.get("polygon"), staticHazardDefaultPoly));
             platformData[ii] = data;
         }
     }
