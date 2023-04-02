@@ -91,6 +91,8 @@ public class LevelParser {
     /** the default direction of a wind object */
     private final float windDirDefault = 0;
 
+    private JsonValue birdPoints = new JsonValue(JsonValue.ValueType.array);
+
     // add more template defaults
 
     // TODO: add getter/setters
@@ -129,6 +131,12 @@ public class LevelParser {
     public JsonValue getWindData(){
         return windData;
     }
+    public Vector2 getGoalPos() {
+        return goalPos;
+    }
+    public Vector2 getPlayerPos() {
+        return playerPos;
+    }
 
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
@@ -154,6 +162,16 @@ public class LevelParser {
         staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
+
+        //temporarily made every bird have the same hitbox
+        birdPoints.addChild(new JsonValue(0.0f));
+        birdPoints.addChild(new JsonValue(0.0f));
+        birdPoints.addChild(new JsonValue(0.5f));
+        birdPoints.addChild(new JsonValue(0.0f));
+        birdPoints.addChild(new JsonValue(0.5f));
+        birdPoints.addChild(new JsonValue(0.5f));
+        birdPoints.addChild(new JsonValue(0.0f));
+        birdPoints.addChild(new JsonValue(0.5f));
     }
 
     /**
@@ -297,6 +315,7 @@ public class LevelParser {
                 }
             }
             data.addChild("path", pathJson);
+            data.addChild("points", birdPoints);
             birdData[ii] = data;
         }
     }
@@ -345,7 +364,7 @@ public class LevelParser {
             readPositionAndConvert(sh, temp);
             addPosition(data, temp);
             data.addChild("points", polyPoints(sh.get("polygon"), staticHazardDefaultPoly));
-            platformData[ii] = data;
+            staticHazardData[ii] = data;
         }
     }
 
@@ -360,7 +379,7 @@ public class LevelParser {
             readPositionAndConvert(w, temp);
             JsonValue pos = new JsonValue(JsonValue.ValueType.array);
             pos.addChild(new JsonValue(temp.x));
-            pos.addChild(new JsonValue(temp.x));
+            pos.addChild(new JsonValue(temp.y));
             data.addChild("pos", pos);
             //points
             data.addChild("dimensions", polyPoints(w.get("polygon"), windDefaultPoly));

@@ -196,6 +196,7 @@ public class GameMode implements Screen {
      */
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
+        gameplayController.setLevelParser(new LevelParser(directory));
         gameplayController.gatherAssets(directory);
 
         this.backgroundTexture = gameplayController.getBackgroundTexture();
@@ -209,11 +210,11 @@ public class GameMode implements Screen {
         this.displayHeight = displayDim[1];
 
         // TESTING
-        LevelParser parser = new LevelParser(directory);
-        parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
-        for (JsonValue jv : parser.getBirdData()){
-            System.out.println(jv);
-        }
+//        LevelParser parser = new LevelParser(directory);
+//        parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
+//        for (JsonValue jv : parser.getBirdData()){
+//            System.out.println(jv);
+//        }
     }
 
     /**

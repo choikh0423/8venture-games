@@ -56,7 +56,7 @@ public class WindModel extends PolygonObstacle {
         }
         magnitude = set_mag;
         magnitude = data.getFloat("magnitude", 0);*/
-        setAngle(direction-((float) Math.PI/2));
+        //setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.DynamicBody);
         setGravityScale(0);
         setDensity(0);

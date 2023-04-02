@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.LightningHazard;
@@ -139,6 +140,8 @@ public class LevelContainer{
      */
     private int currentLevel = 0;
 
+    public void setLevel(int level){currentLevel=level;}
+
 
     /**
      * Creates and initialize a new instance of Level Container
@@ -224,15 +227,16 @@ public class LevelContainer{
     /**
      * Lays out the game geography.
      */
-    public void populateLevel() {
+    public void populateLevel(LevelParser parser) {
         // Add level goal
         JsonValue goal = levelConstants.get("goal");
         JsonValue goalconst = globalConstants.get("goal");
 
         JsonValue goalpos = goal.get("pos");
+        Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
-        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1),dwidth, dheight);
+        goalDoor = new BoxObstacle(goalPos.x, goalPos.y+dheight/2,dwidth, dheight);
         goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
         goalDoor.setDensity(goalconst.getFloat("density", 0));
         goalDoor.setFriction(goalconst.getFloat("friction", 0));
@@ -271,9 +275,10 @@ public class LevelContainer{
 
         String pname = "platform";
         JsonValue platjv = levelConstants.get("platforms");
+        JsonValue[] plats = parser.getPlatformData();
         JsonValue cur;
-        for (int ii = 0; ii < platjv.size; ii++) {
-            cur = platjv.get(ii);
+        for (int ii = 0; ii < plats.length; ii++) {
+            cur = plats[ii];
             PolygonObstacle obj = new PolygonObstacle(cur.get("points").asFloatArray(),
                     cur.getFloat("x"), cur.getFloat("y"));
             obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -290,7 +295,7 @@ public class LevelContainer{
 
         // Create wind gusts
         String windName = "wind";
-        JsonValue windjv = levelConstants.get("wind");
+        JsonValue windjv = parser.getWindData();
         for (int ii = 0; ii < windjv.size; ii++) {
             WindModel obj;
             obj = new WindModel(windjv.get(ii));
@@ -302,17 +307,29 @@ public class LevelContainer{
 
         //create hazards
         JsonValue hazardsjv = levelConstants.get("hazards");
+        JsonValue[] hazardData = parser.getStaticHazardData();
+        for(int ii = 0; ii < hazardData.length; ii++){
+            StaticHazard obj;
+            JsonValue jv = hazardData[ii];
+            obj = new StaticHazard(jv);
+            obj.setDrawScale(scale);
+            //temporary texture - just like with platforms, we will have to get this from parsing
+            obj.setTexture(lightningTexture);
+            obj.setName("static_hazard"+ii);
+            addObject(obj);
+        }
 
         //create birds
         String birdName = "bird";
         JsonValue birdjv = hazardsjv.get("birds");
+        JsonValue[] birdData = parser.getBirdData();
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
         int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
         float birdKnockback = hazardsjv.getInt("birdKnockback");
-        for (int ii = 0; ii < birdjv.size; ii++) {
+        for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
-            JsonValue jv = birdjv.get(ii);
+            JsonValue jv = birdData[ii];
             obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(getBirdTexture(jv.getString("color", "red")));
@@ -323,9 +340,10 @@ public class LevelContainer{
 
         String lightningName = "lightning";
         JsonValue lightningjv = hazardsjv.get("lightning");
-        for (int ii = 0; ii < lightningjv.size; ii++) {
+        JsonValue[] lightningData = parser.getLightningData();
+        for (int ii = 0; ii < lightningData.length; ii++) {
             LightningHazard obj;
-            obj = new LightningHazard(lightningjv.get(ii));
+            obj = new LightningHazard(lightningData[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(lightningTexture);
             obj.setName(lightningName + ii);
@@ -372,7 +390,7 @@ public class LevelContainer{
         // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
         dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
         dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
-        avatar = new PlayerModel(globalConstants.get("player"), levelConstants.get("player").get("pos"), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
+        avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
         avatar.setSideTexture(avatarSideTexture);
@@ -387,14 +405,15 @@ public class LevelContainer{
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
         dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), levelConstants.get("umbrella").get("pos"), dwidth, dheight);
+        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), new Vector2(parser.getPlayerPos()).add(0,.2666f), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
         // TODO: (design) maybe default to closed umbrella at initial state
         umbrella.useOpenedTexture();
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
-        umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
+        //TODO: remove? why are we setting position after we set it when initializing?
+        //umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
     }
 
@@ -502,7 +521,7 @@ public class LevelContainer{
      * Get lightnings
      * @return lightnings
      */
-    public ObjectSet<LightningHazard> getLightenings() {
+    public ObjectSet<LightningHazard> getLightnings() {
         return lightnings;
     }
 

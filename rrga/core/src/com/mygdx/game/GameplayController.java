@@ -160,6 +160,12 @@ public class GameplayController implements ContactListener {
      */
     private int currentLevel = 0;
 
+    /** the level parser */
+    private LevelParser parser;
+
+    /** set the level parser */
+    public void setLevelParser(LevelParser p){parser = p;}
+
     // TODO: ====================== BEGIN CURRENTLY UNUSED FIELDS =============================
 
     /** Listener that will update the player mode when we are done. */
@@ -214,6 +220,7 @@ public class GameplayController implements ContactListener {
         String constantPath = "global:constants";
 
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
+        parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
@@ -257,7 +264,7 @@ public class GameplayController implements ContactListener {
         levelContainer.setWorld(world);
 
         // Populate LevelContainer w/ same level
-        levelContainer.populateLevel();
+        levelContainer.populateLevel(parser);
         // TODO: (review) remove next line, world is still the same object.
         world = levelContainer.getWorld();
         goalDoor = levelContainer.getGoalDoor();
@@ -286,7 +293,7 @@ public class GameplayController implements ContactListener {
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
-        this.lightnings = levelContainer.getLightenings();
+        this.lightnings = levelContainer.getLightnings();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
 
@@ -596,6 +603,7 @@ public class GameplayController implements ContactListener {
      */
     public void setLevel(int level){
         currentLevel = level;
+        levelContainer.setLevel(level);
     }
 
     /**

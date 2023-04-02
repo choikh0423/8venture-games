@@ -112,9 +112,11 @@ public class BirdHazard extends HazardModel {
     public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
         super(data, birdDamage, birdKnockback);
         path = data.get("path").asFloatArray();
-        moveSpeed = data.getInt("movespeed");
+        //temporary value - will need to change this to account for whatever we do to set the speed
+        moveSpeed = 4;
         attack = data.getBoolean("attack");
-        loop = data.getBoolean("loop");
+        if (data.getString("color").equals("red")) loop = false;
+        else loop = data.getBoolean("loop");
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;

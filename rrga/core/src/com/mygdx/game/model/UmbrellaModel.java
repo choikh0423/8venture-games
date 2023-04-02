@@ -2,6 +2,7 @@ package com.mygdx.game.model;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
@@ -31,9 +32,9 @@ public class UmbrellaModel extends BoxObstacle {
     /** texture asset for closed umbrella */
     private TextureRegion closedTexture;
 
-    public UmbrellaModel(JsonValue data, JsonValue pos, float width, float height) {
-        super(	pos.getFloat(0),
-                pos.getFloat(1),
+    public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
+        super(	pos.x,
+                pos.y,
                 width*data.get("shrink").getFloat( 0 ),
                 height*data.get("shrink").getFloat( 1 ));
         setDensity(data.getFloat("density", 0));
