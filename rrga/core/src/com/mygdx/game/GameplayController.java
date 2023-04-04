@@ -227,6 +227,8 @@ public class GameplayController implements ContactListener {
         backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
 
         // Constants for Window/World scale
+        //TODO: the world size shouldn't be global, it should be obtained on a per-level
+        // basis from the parser
         physicsWidth = globalConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
         physicsHeight = globalConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
         displayWidth = globalConstants.get("world").getFloat("width", DEFAULT_WIDTH);

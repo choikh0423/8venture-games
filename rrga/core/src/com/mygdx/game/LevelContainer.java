@@ -229,10 +229,8 @@ public class LevelContainer{
      */
     public void populateLevel(LevelParser parser) {
         // Add level goal
-        JsonValue goal = levelConstants.get("goal");
         JsonValue goalconst = globalConstants.get("goal");
 
-        JsonValue goalpos = goal.get("pos");
         Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
@@ -274,7 +272,6 @@ public class LevelContainer{
         // TODO maybe delete above =========================================================
 
         String pname = "platform";
-        JsonValue platjv = levelConstants.get("platforms");
         JsonValue[] plats = parser.getPlatformData();
         JsonValue cur;
         for (int ii = 0; ii < plats.length; ii++) {
@@ -291,14 +288,12 @@ public class LevelContainer{
             addObject(obj);
         }
 
-
-
         // Create wind gusts
         String windName = "wind";
-        JsonValue windjv = parser.getWindData();
-        for (int ii = 0; ii < windjv.size; ii++) {
+        JsonValue[] windjv = parser.getWindData();
+        for (int ii = 0; ii < windjv.length; ii++) {
             WindModel obj;
-            obj = new WindModel(windjv.get(ii));
+            obj = new WindModel(windjv[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(windTexture);
             obj.setName(windName + ii);
@@ -306,6 +301,8 @@ public class LevelContainer{
         }
 
         //create hazards
+        //TODO: only using hazardsjv for bird damage, knockback, attack speed, and sensor radius.
+        // maybe make them global constants instead so we can get rid of levelConstants entirely
         JsonValue hazardsjv = levelConstants.get("hazards");
         JsonValue[] hazardData = parser.getStaticHazardData();
         for(int ii = 0; ii < hazardData.length; ii++){
@@ -321,7 +318,6 @@ public class LevelContainer{
 
         //create birds
         String birdName = "bird";
-        JsonValue birdjv = hazardsjv.get("birds");
         JsonValue[] birdData = parser.getBirdData();
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
@@ -339,7 +335,6 @@ public class LevelContainer{
         }
 
         String lightningName = "lightning";
-        JsonValue lightningjv = hazardsjv.get("lightning");
         JsonValue[] lightningData = parser.getLightningData();
         for (int ii = 0; ii < lightningData.length; ii++) {
             LightningHazard obj;
@@ -405,7 +400,8 @@ public class LevelContainer{
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
         dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
-        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), new Vector2(parser.getPlayerPos()).add(0,.2666f), dwidth, dheight);
+        float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
+        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), new Vector2(parser.getPlayerPos()).add(offset[0], offset[1]), dwidth, dheight);
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);

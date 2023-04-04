@@ -43,10 +43,10 @@ public class LevelParser {
      */
     private JsonValue[] staticHazardData;
 
-    /** wind json data
+    /** list of wind json data
      * Invariant: JSON is in the format used by level-container
      */
-    private JsonValue windData;
+    private JsonValue[] windData;
 
     /** vector position cache for player */
     private Vector2 playerPos = new Vector2();
@@ -128,7 +128,7 @@ public class LevelParser {
     /**
      * @return processed wind data that is ready for consumption
      */
-    public JsonValue getWindData(){
+    public JsonValue[] getWindData(){
         return windData;
     }
     public Vector2 getGoalPos() {
@@ -369,7 +369,7 @@ public class LevelParser {
     }
 
     private void processWind(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> windDirs){
-        windData = new JsonValue(JsonValue.ValueType.array);
+        windData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < rawData.size(); ii++){
             //data of this wind
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
@@ -387,7 +387,7 @@ public class LevelParser {
             JsonValue props = w.get("properties");
             data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
             data.addChild("direction", computeWindDirection(props, windDirs));
-            windData.addChild(data);
+            windData[ii] = data;
         }
     }
 
