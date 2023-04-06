@@ -477,10 +477,12 @@ public class PlayerModel extends CapsuleObstacle {
 	private void drawAux(GameCanvas canvas, Color tint){
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? 1.0f : -1.0f;
+		//canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
 		canvas.draw(texture, tint, origin.x, origin.y,
 				getX()*drawScale.x,getY()*drawScale.y, getAngle(),
 				effect*textureScale, textureScale
 		);
+		canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
 	}
 
 	/**

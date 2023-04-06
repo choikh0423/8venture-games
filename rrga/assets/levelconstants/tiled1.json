@@ -382,19 +382,6 @@
  "tileheight":32,
  "tilesets":[
         {
-         "columns":16,
-         "firstgid":1,
-         "image":"..\/..\/..\/..\/..\/..\/Downloads\/3152-9-design-repository-main\/3152-9-design-repository-main\/asset\/placeholder\/placeholder_assets\/tile_background.png",
-         "imageheight":512,
-         "imagewidth":512,
-         "margin":0,
-         "name":"cloud",
-         "spacing":0,
-         "tilecount":256,
-         "tileheight":32,
-         "tilewidth":32
-        }, 
-        {
          "firstgid":257,
          "source":"thunder.tsx"
         }, 

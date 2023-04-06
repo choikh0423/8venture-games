@@ -1,0 +1,18 @@
+{ "object":
+    {
+     "gid":4,
+     "height":512,
+     "id":22,
+     "name":"goal",
+     "rotation":0,
+     "type":"goal",
+     "visible":true,
+     "width":512
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/tilesets\/objs.json"
+    },
+ "type":"template"
+}

@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
@@ -7,6 +9,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.assets.AssetDirectory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -18,10 +21,7 @@ public class LevelParser {
     private JsonValue prevParsed;
 
     /** reference to game global default values */
-    private JsonValue globalConstants;
-
-    /** something we will use*/
-    private JsonValue globalAssets;
+    private final JsonValue globalConstants;
 
     /** list of bird json data.
      * Invariant: JSON is in the format used by level-container
@@ -47,6 +47,11 @@ public class LevelParser {
      * Invariant: JSON is in the format used by level-container
      */
     private JsonValue[] windData;
+
+    /** the texture data of the tile layers
+     * Invariant: front layers are stored last in list
+     */
+    private ArrayList<TextureRegion[]> layers;
 
     /** vector position cache for player */
     private Vector2 playerPos = new Vector2();
@@ -93,9 +98,66 @@ public class LevelParser {
 
     private JsonValue birdPoints = new JsonValue(JsonValue.ValueType.array);
 
+    private HashMap<String, Texture> textureMap;
+
+    private HashMap<String, JsonValue> tileSetJsonMap;
+
+    private ArrayList<TileSetMaker> tileSetMakers;
+
+    /**
+     * A TileSetMaker produces texture regions upon request.
+     */
+    private class TileSetMaker {
+
+        /** the tile ID assigned to the FIRST tile in this set*/
+        public int minId;
+        /** the tile ID assigned to the LAST tile in this set*/
+        public int maxId;
+
+        private int columns;
+
+        private Texture texture;
+
+        private int width;
+
+        private int height;
+
+        TileSetMaker(JsonValue tileSetJson, int firstGid){
+            if (tileSetJson == null){
+                return;
+            }
+            minId = firstGid;
+            maxId = tileSetJson.getInt("tilecount") - 1 + minId;
+            texture = textureMap.get(tileSetJson.getString("name"));
+            width = tileSetJson.getInt("tilewidth");
+            height = tileSetJson.getInt("tileheight");
+            columns = tileSetJson.getInt("columns");
+        }
+
+        /**
+         * cuts out a region of the texture tileset
+         * @param id the associated Id of the desired Tile, where minId <= id <= maxId
+         * @return a region of the entire texture corresponding to the given Id
+         */
+        TextureRegion getRegionFromId(int id){
+            int index = id - minId;
+            int row = index / columns;
+            int col = index % columns;
+            return new TextureRegion(texture, col * width, row * height, width, height);
+        }
+    }
+
     // add more template defaults
 
     // TODO: add getter/setters
+
+
+    /**
+     * @return tile texture layers
+     */
+    public ArrayList<TextureRegion[]> getLayers() {
+        return layers;
+    }
 
     /**
      * @return processed bird data that is ready for consumption
@@ -140,8 +202,6 @@ public class LevelParser {
 
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
-        // TODO: assets?
-        globalAssets = null;
 
         JsonValue redBirdTemplate = directory.getEntry("red_bird:template", JsonValue.class);
         JsonValue blueBirdTemplate = directory.getEntry("blue_bird:template", JsonValue.class);
@@ -172,6 +232,16 @@ public class LevelParser {
         birdPoints.addChild(new JsonValue(0.5f));
         birdPoints.addChild(new JsonValue(0.0f));
         birdPoints.addChild(new JsonValue(0.5f));
+
+        // save tileset textures and their corresponding JSON tileset data
+        textureMap = new HashMap<>();
+        tileSetJsonMap = new HashMap<>();
+        textureMap.put("bushes", directory.getEntry( "tileset:bushes", Texture.class ));
+        textureMap.put("trees", directory.getEntry( "tileset:trees", Texture.class ));
+        textureMap.put("cliffs", directory.getEntry( "tileset:cliffs", Texture.class ));
+        tileSetJsonMap.put("bushes", directory.getEntry("data:bushes", JsonValue.class));
+        tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
+        tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
     }
 
     /**
@@ -192,6 +262,17 @@ public class LevelParser {
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
 
+        layers = new ArrayList<>();
+        // prepare texture/tileset parsing, get all tilesets used by current level
+        // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
+        tileSetMakers = new ArrayList<>();
+        JsonValue tileSets = levelData.get("tilesets");
+        for (JsonValue ts : tileSets){
+            tileSetMakers.add(
+                    new TileSetMaker(getTileSetJson(ts.getString("source")), ts.getInt("firstgid"))
+            );
+        }
+
         // containers for unprocessed JSON data
         HashMap<Integer, JsonValue> trajectory = new HashMap<>();
         ArrayList<JsonValue> birdRawData = new ArrayList<>();
@@ -201,11 +282,11 @@ public class LevelParser {
         HashMap<Integer, JsonValue> windDirs = new HashMap<>();
         ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
 
-        JsonValue layers = levelData.get("layers");
+        JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together)
         // - hazards and obstacle data are placed into their respective containers
         // - processing begins after all data is collected.
-        for (JsonValue layer : layers) {
+        for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
                 parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, staticHazardRawData);
@@ -218,7 +299,7 @@ public class LevelParser {
             }
         }
 
-        // begin processing
+        // begin object processing
         processBirds(birdRawData, trajectory);
         processLightning(lightningRawData);
         processPlatforms(platformRawData);
@@ -391,10 +472,6 @@ public class LevelParser {
         }
     }
 
-    private void parseTileLayer(JsonValue layer){
-        //TODO: parse tiles/tilesets
-    }
-
     /**
      * loads into p an (x,y) pair that are direct properties of the given JsonValue into vector cache
      * Note: this pair (x,y) is still raw data and is not game coordinates.
@@ -555,4 +632,47 @@ public class LevelParser {
         if (ang >= Math.PI*2) ang -= Math.PI*2;
         return new JsonValue(ang);
     }
+
+    // ============================= BEGIN TILED LAYER PARSING HELPERS =============================
+    private void parseTileLayer(JsonValue layer){
+        // loop over array data and make texture regions
+        JsonValue data = layer.get("data");
+        TextureRegion[] textures = new TextureRegion[data.size];
+        for (int i = 0; i < textures.length; i++){
+            int id = data.get(i).asInt();
+            if (id == 0){
+                continue;
+            }
+            // this loop should be fast with small number of tilesets
+            for (TileSetMaker tsm : tileSetMakers) {
+                if (id <= tsm.maxId && id >= tsm.minId) {
+                    textures[i] = tsm.getRegionFromId(id);
+                    break;
+                }
+            }
+        }
+        layers.add(textures);
+    }
+
+    /**
+     * Given the source name of a tileset, which is a relative path, find the Json Data that corresponds to the tileset
+     * used. Example: level data contains "source":"tilesets\/bushes.json" so bushes JSON is returned.
+     * @param name the source path of a tileset
+     * @return the tileset JSON
+     */
+    private JsonValue getTileSetJson(String name){
+        if (name.contains("bushes")){
+            return tileSetJsonMap.get("bushes");
+        }
+        else if (name.contains("trees")){
+            tileSetJsonMap.get("trees");
+        }
+        else if (name.contains("cliffs")){
+            tileSetJsonMap.get("cliffs");
+        }
+        return null;
+    }
+
+
+    // ========================================== END ==============================================
 }

@@ -16,21 +16,27 @@
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
-        "game:goal": "game/goal.png"
+        "game:goal": "game/goal.png",
+        "tileset:bushes": "levels/tilesets/bushes.png",
+        "tileset:trees": "levels/tilesets/trees.png",
+        "tileset:cliffs": "levels/tilesets/cliffs.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "level0:constants" :"levelconstants/level0.json",
         "level1:constants" :"levelconstants/level1.json",
         "tiled:level1" : "levelconstants/tiled1.json",
-        "red_bird:template": "shared/red_bird.json",
-        "blue_bird:template": "shared/blue_bird.json",
-        "brown_bird:template": "shared/brown_bird.json",
-        "path_point:template": "shared/path_point.json",
-        "lightning:template": "shared/lightning.json",
-        "platform:template": "shared/platform.json",
-        "static_hazard:template": "shared/static_hazard.json",
-        "wind:template": "shared/wind.json"
+        "red_bird:template": "levels/templates/red_bird.json",
+        "blue_bird:template": "levels/templates/blue_bird.json",
+        "brown_bird:template": "levels/templates/brown_bird.json",
+        "path_point:template": "levels/templates/path_point.json",
+        "lightning:template": "levels/templates/lightning.json",
+        "platform:template": "levels/templates/platform.json",
+        "static_hazard:template": "levels/templates/static_hazard.json",
+        "wind:template": "levels/templates/wind.json",
+        "data:bushes": "levels/tilesets/bushes.json",
+        "data:trees": "levels/tilesets/trees.json",
+        "data:cliffs": "levels/tilesets/cliffs.json"
     },
     "sounds" : {
     },
