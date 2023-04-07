@@ -320,23 +320,27 @@ public class LevelParser {
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
-            if (obj.getString("template").contains("bird.json")) {
+            String template = obj.getString("template", "IGNORE");
+            if (template.equals("IGNORE")){
+                continue;
+            }
+            if (template.contains("bird.json")) {
                 birdRawData.add(obj);
-            } else if (obj.getString("template").contains("platform.json")) {
+            } else if (template.contains("platform.json")) {
                 platformRawData.add(obj);
-            } else if (obj.getString("template").contains("lightning.json")) {
+            } else if (template.contains("lightning.json")) {
                 lightningRawData.add(obj);
-            } else if (obj.getString("template").contains("path_point.json")) {
+            } else if (template.contains("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
-            } else if (obj.getString("template").contains("spawn.json")) {
+            } else if (template.contains("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
-            } else if (obj.getString("template").contains("goal.json")) {
+            } else if (template.contains("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
-            } else if (obj.getString("template").contains("static_hazard.json")){
+            } else if (template.contains("static_hazard.json")){
                 staticHazardRawData.add(obj);
-            } else if (obj.getString("template").contains("wind.json")){
+            } else if (template.contains("wind.json")){
                 windRawData.add(obj);
-            } else if (obj.getString("template").contains("wind_dir.json")){
+            } else if (template.contains("wind_dir.json")){
                 windDirs.put(obj.getInt("id"), obj);
             }
         }

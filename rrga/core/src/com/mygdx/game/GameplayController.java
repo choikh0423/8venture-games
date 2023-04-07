@@ -84,26 +84,6 @@ public class GameplayController implements ContactListener {
     protected Vector2 scale;
 
     /**
-     * Current Width of the game world in Box2d units
-     */
-    private float physicsWidth;
-
-    /**
-     * Current Height of the game world in Box2d units
-     */
-    private float physicsHeight;
-
-    /**
-     * Current Width of the canvas in Box2d units
-     */
-    private float displayWidth;
-
-    /**
-     * Current Height of the canvas in Box2d units
-     */
-    private float displayHeight;
-
-    /**
      * scaling factors for drag force
      */
     private Vector2 dragScale;
@@ -133,10 +113,6 @@ public class GameplayController implements ContactListener {
      */
     private static final int WIN_COUNTDOWN_TIMER = 20;
 
-    /**
-     * Texture asset for background image
-     */
-    private TextureRegion backgroundTexture;
     /** Background music */
     private Music backgroundMusic;
 
@@ -144,9 +120,6 @@ public class GameplayController implements ContactListener {
     // <=============================== Physics objects for the game BEGINS here ===============================>
     /** Physics constants for global */
     private JsonValue globalConstants;
-    
-    /** Physics constants for current level */
-    private JsonValue levelConstants;
 
     /**
      * Reference to the character avatar
@@ -239,17 +212,6 @@ public class GameplayController implements ContactListener {
      */
     private LevelContainer levelContainer;
 
-    /**
-     * Currently selected level
-     */
-    private int currentLevel = 0;
-
-    /** the level parser */
-    private LevelParser parser;
-
-    /** set the level parser */
-    public void setLevelParser(LevelParser p){parser = p;}
-
     // TODO: ====================== BEGIN CURRENTLY UNUSED FIELDS =============================
 
     /**
@@ -292,11 +254,8 @@ public class GameplayController implements ContactListener {
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
 
-        // Set current level
-        currentLevel = level;
-
         // Initialize level container
-        levelContainer = new LevelContainer(world, this.bounds, this.scale, level);
+        levelContainer = new LevelContainer(world, this.bounds, this.scale);
     }
 
     /**
@@ -310,26 +269,12 @@ public class GameplayController implements ContactListener {
     public void gatherAssets(AssetDirectory directory) {
         // Setting up Constant/Asset Path for different levels
         String constantPath = "global:constants";
-        String levelPath = "level" + this.currentLevel + ":constants";
 
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
 
-        parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
-
-        levelConstants = directory.getEntry(levelPath, JsonValue.class);
-
         // Level container gather assets
         levelContainer.gatherAssets(directory);
-        backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
         backgroundMusic = directory.getEntry("music:level0", Music.class);
-
-        // Constants for Window/World scale
-        //TODO: the world size shouldn't be global, it should be obtained on a per-level
-        // basis from the parser
-        physicsWidth = globalConstants.get("world").getFloat("max_width", DEFAULT_WIDTH);
-        physicsHeight = globalConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
-        displayWidth = globalConstants.get("world").getFloat("width", DEFAULT_WIDTH);
-        displayHeight = globalConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -348,9 +293,6 @@ public class GameplayController implements ContactListener {
             obj.deactivatePhysics(world);
         }
 
-        // TODO: (review) remove, objects after deactivating physics is still the same set of objects.
-        levelContainer.setObjects(objects);
-
         world.dispose();
         world = new World(gravity, false);
         world.setContactListener(this);
@@ -364,9 +306,7 @@ public class GameplayController implements ContactListener {
         levelContainer.setWorld(world);
 
         // Populate LevelContainer w/ same level
-        levelContainer.populateLevel(parser);
-        // TODO: (review) remove next line, world is still the same object.
-        world = levelContainer.getWorld();
+        levelContainer.populateLevel();
         goalDoor = levelContainer.getGoalDoor();
 
         // Calculate Diff for Umbrella Position
@@ -713,14 +653,6 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Sets current level of the game
-     */
-    public void setLevel(int level) {
-        currentLevel = level;
-        levelContainer.setLevel(level);
-    }
-
-    /**
      * Returns true if the object is in bounds.
      * <p>
      * This assertion is useful for debugging the physics.
@@ -765,6 +697,13 @@ public class GameplayController implements ContactListener {
     public void setScale(Vector2 scale) {
         this.scale = scale;
         levelContainer.setScale(scale);
+    }
+
+    /**
+     * @return game object container
+     */
+    public LevelContainer getLevelContainer() {
+        return levelContainer;
     }
 
     /**
@@ -836,38 +775,5 @@ public class GameplayController implements ContactListener {
     private void setFailed() {
         failed = true;
         countdown = LOSE_COUNTDOWN_TIMER;
-    }
-
-    /**
-     * Get Background Texture
-     *
-     * @return Background Texture
-     */
-    public TextureRegion getBackgroundTexture() {
-        return this.backgroundTexture;
-    }
-
-    /**
-     * Get physics dimensions of the world
-     *
-     * @return physicsDim - [physicsWidth, physicsHeight]
-     */
-    public float[] getPhysicsDims() {
-        float[] physicsDim = new float[2];
-        physicsDim[0] = this.physicsWidth;
-        physicsDim[1] = this.physicsHeight;
-        return physicsDim;
-    }
-
-    /**
-     * Get physics dimensions of the world
-     *
-     * @return physicsDim - [physicsWidth, physicsHeight]
-     */
-    public float[] getDisplayDims() {
-        float[] DisplayDim = new float[2];
-        DisplayDim[0] = this.displayWidth;
-        DisplayDim[1] = this.displayHeight;
-        return DisplayDim;
     }
 }

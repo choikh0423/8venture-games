@@ -137,9 +137,12 @@ public class GDXRoot extends Game implements ScreenListener {
 				case MenuMode.EXIT_PLAY:
 					playing.setScreenListener(this);
 					playing.setCanvas(canvas);
+					// TODO: use exit codes to determine level.
+					//  reserve exit codes 1 to 30 for levels.
+					playing.setLevel(1);
 					playing.reset();
 					setScreen(playing);
-
+					break;
 //				case MenuMode.EXIT_SETTINGS:
 
 			}

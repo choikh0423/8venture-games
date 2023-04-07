@@ -115,12 +115,9 @@ public class LevelContainer{
     private BitmapFont avatarHealthFont;
 
 
-    // Physics objects for the game
-    /** Physics constants for global */
+    /** Global Physics constants */
     private JsonValue globalConstants;
 
-    /** Physics constants for current level */
-    private JsonValue levelConstants;
     /**
      * Reference to the character avatar
      */
@@ -134,13 +131,8 @@ public class LevelContainer{
      */
     private BoxObstacle goalDoor;
 
-
-    /**
-     * Currently selected level
-     */
-    private int currentLevel = 0;
-
-    public void setLevel(int level){currentLevel=level;}
+    /** reference to the JSON parser */
+    private LevelParser parser;
 
 
     /**
@@ -148,9 +140,7 @@ public class LevelContainer{
      * <p>
      * The game has default gravity and other settings
      */
-    public LevelContainer(World world, Rectangle bounds, Vector2 scale, int level) {
-        this.currentLevel = level;
-
+    public LevelContainer(World world, Rectangle bounds, Vector2 scale) {
         this.world = world;
         this.bounds = bounds;
         this.scale = scale;
@@ -190,12 +180,7 @@ public class LevelContainer{
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        // Setting up Constant/Asset Path for different levels
-        String levelConstantPath = "level" + this.currentLevel + ":constants";
-        String constantPath = "global:constants";
-
-        levelConstants = directory.getEntry(levelConstantPath, JsonValue.class);
-        globalConstants = directory.getEntry(constantPath, JsonValue.class);
+        globalConstants = directory.getEntry( "global:constants", JsonValue.class);
 
         platformTile = new TextureRegion(directory.getEntry("game:newplatform", Texture.class));
         avatarSideTexture = new TextureRegion(directory.getEntry("game:player", Texture.class));
@@ -220,13 +205,14 @@ public class LevelContainer{
     public void reset() {
         objects.clear();
         addQueue.clear();
-
+        birds.clear();
+        lightnings.clear();
     }
 
     /**
      * Lays out the game geography.
      */
-    public void populateLevel(LevelParser parser) {
+    public void populateLevel() {
         // Add level goal
         JsonValue goalconst = globalConstants.get("goal");
 
@@ -251,24 +237,6 @@ public class LevelContainer{
         // Setting Gravity on World
         JsonValue defaults = globalConstants.get("defaults");
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
-
-        //TODO: explicit walls do not exist, consider deleting.
-        // ============================================================================
-        String wname = "wall";
-        JsonValue walljv = levelConstants.get("walls");
-        for (int ii = 0; ii < walljv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
-            obj.setName(wname + ii);
-            addObject(obj);
-        }
-        // TODO maybe delete above =========================================================
 
         String pname = "platform";
         JsonValue[] plats = parser.getPlatformData();
@@ -299,10 +267,9 @@ public class LevelContainer{
             addObject(obj);
         }
 
+        JsonValue hazardsjv = globalConstants.get("hazards");
+
         //create hazards
-        //TODO: only using hazardsjv for bird damage, knockback, attack speed, and sensor radius.
-        // maybe make them global constants instead so we can get rid of levelConstants entirely
-        JsonValue hazardsjv = levelConstants.get("hazards");
         JsonValue[] hazardData = parser.getStaticHazardData();
         for(int ii = 0; ii < hazardData.length; ii++){
             StaticHazard obj;
@@ -310,6 +277,7 @@ public class LevelContainer{
             obj = new StaticHazard(jv);
             obj.setDrawScale(scale);
             //temporary texture - just like with platforms, we will have to get this from parsing
+            // TODO: get texture for static hazards
             obj.setTexture(lightningTexture);
             obj.setName("static_hazard"+ii);
             addObject(obj);
@@ -521,42 +489,38 @@ public class LevelContainer{
         return lightnings;
     }
 
+    public void setParser(LevelParser parser) { this.parser = parser; }
+
     /**
      * Set world
-     * @return world
      */
     public void setWorld(World worldObj) { world = worldObj; }
     /**
      * Set player object
-     * @return avatar
      */
     public void setAvatar(PlayerModel avatarObj) {
         avatar = avatarObj;
     }
     /**
      * Set umbrella object
-     * @return umbrella
      */
     public void setUmbrella(UmbrellaModel umbrellaObj) {
         umbrella = umbrellaObj;
     }
     /**
      * Set objects
-     * @return objects
      */
     public void setObjects(PooledList<Obstacle> allObjects) {
         objects = allObjects;
     }
     /**
      * Set birds
-     * @return birds
      */
     public void setBirds(ObjectSet<BirdHazard> birdsObj) {
         birds = birdsObj;
     }
     /**
      * Set lightnings
-     * @return lightnings
      */
     public void setLightnings(ObjectSet<LightningHazard> lightningsObj) {
         lightnings = lightningsObj;

@@ -29,9 +29,7 @@
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
-        "level0:constants" :"levelconstants/level0.json",
-        "level1:constants" :"levelconstants/level1.json",
-        "tiled:level1" : "levelconstants/tiled1.json",
+        "tiled:level1" : "levels/level1.json",
         "red_bird:template": "levels/templates/red_bird.json",
         "blue_bird:template": "levels/templates/blue_bird.json",
         "brown_bird:template": "levels/templates/brown_bird.json",

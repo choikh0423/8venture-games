@@ -12,8 +12,8 @@
             }, 
             {
              "name":"loop",
-             "type":"color",
-             "value":""
+             "type":"bool",
+             "value":false
             }, 
             {
              "name":"move_speed",

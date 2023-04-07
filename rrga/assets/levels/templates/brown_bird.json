@@ -24,7 +24,12 @@
              "name":"path",
              "type":"object",
              "value":0
-            }],
+            },
+            {
+               "name":"loop",
+               "type":"bool",
+               "value":false
+             }],
      "rotation":0,
      "type":"bird",
      "visible":true,

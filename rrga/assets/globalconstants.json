@@ -54,5 +54,11 @@
     "max_height": 40.0,
     "width": 32.0,
     "height": 18.0
+  },
+  "hazards": {
+    "birdDamage": 1,
+    "birdSensorRadius": 7,
+    "birdAttackSpeed": 20,
+    "birdKnockback": 5
   }
 }
