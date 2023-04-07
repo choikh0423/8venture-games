@@ -1,10 +1,16 @@
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.GameCanvas;
+
+import java.util.Arrays;
 
 
 /**
@@ -33,6 +39,10 @@ public class WindModel extends PolygonObstacle {
      */
     private float direction;
 
+    private PolygonRegion drawRegion;
+    private float xOffset;
+    private float yOffset;
+
     public WindModel(JsonValue data) {
         super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
         direction = data.getFloat("direction", 0);
@@ -56,6 +66,7 @@ public class WindModel extends PolygonObstacle {
         }
         magnitude = set_mag;
         magnitude = data.getFloat("magnitude", 0);*/
+
         //setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.DynamicBody);
         setGravityScale(0);
@@ -64,6 +75,42 @@ public class WindModel extends PolygonObstacle {
         setRestitution(0);
         fixture.isSensor = true;
         this.data = data;
+    }
+
+    public boolean activatePhysics(World world) {
+        // create the box from our superclass
+        if (!super.activatePhysics(world)) {
+            return false;
+        }
+
+        float angle = -direction+((float) Math.PI/2);
+        float[] verts = new float[region.getVertices().length];
+        for(int i = 0; i<region.getVertices().length; i+=2){
+            float rotatedX = (float) Math.cos(angle) * region.getVertices()[i]
+                    - (float) Math.sin(angle) * region.getVertices()[i+1];
+            float rotatedY = (float) Math.sin(angle) * region.getVertices()[i]
+                    + (float) Math.cos(angle) * region.getVertices()[i+1];
+            verts[i] = rotatedX;
+            verts[i+1] = rotatedY;
+        }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0 && verts[i]<xOffset){
+                xOffset = verts[i];
+            }
+            if(i%2==1 && verts[i]<yOffset){
+                yOffset = verts[i];
+            }
+        }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0){
+                verts[i] -= xOffset;
+            }
+            if(i%2==1){
+                verts[i] -= yOffset;
+            }
+        }
+        drawRegion = new PolygonRegion(texture, verts, region.getTriangles());
+        return true;
     }
 
     /**
@@ -81,5 +128,17 @@ public class WindModel extends PolygonObstacle {
         else return dot*magnitude;
     }
 
+    /**
+     * Draws the wind object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        if (region != null) {
+            canvas.draw(drawRegion, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
+                    direction-((float) Math.PI/2),1,1);
+            //direction-((float) Math.PI/2)
+        }
+    }
 
 }

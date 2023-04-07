@@ -2,29 +2,34 @@
   "goal" : {
     "pos": [26.0, 17.0]
   },
+
+  "player": {
+    "pos": [7.0, 3.0]
+  },
+
   "wind": [
     {
       "pos": [1.0, 3.0],
       "dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
-      "magnitude": 70.0,
+      "magnitude": 20.0,
       "direction": 1.57079632679
     },
     {
-      "pos": [9.5, 5.0],
-      "dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
+      "pos": [9.5, 3.0],
+      "dimensions": [ 0.0, 0.0, 4.0, 3.0, 4.0, 6.0, 0.0, 3.0],
       "magnitude": 15.0,
       "direction": 0.78539816339
     },
     {
       "pos": [22.0, 8.0],
-      "dimensions": [ 0.0, 0.0, 3.0, 0.0, 3.0, 5.0, 0.0, 5.0],
+      "dimensions": [ 0.0, 0.0, 3.0, 2.0, -3.0, 7.0, -5.0, 5.0],
       "magnitude": 15.0,
       "direction": 2.35619449019
     },
     {
       "pos": [7.0, 13.0],
       "dimensions": [ 0.0, 0.0, 1.5, 0.0, 1.5, 2.5, 0.0, 2.5],
-      "magnitude": 50.0,
+      "magnitude": 25.0,
       "direction": 1.0471975512
     }
   ],
@@ -63,7 +68,6 @@
         "path": [10.0, 15.0, 25.0, 15.0],
         "loop": false,
         "movespeed": 6,
-        "attack": true,
         "color": "brown"
       },
       {
@@ -73,7 +77,6 @@
         "path": [30.0, 10.0],
         "loop": false,
         "movespeed": 0,
-        "attack": true,
         "color": "red"
       },
       {
@@ -83,7 +86,6 @@
         "path": [20.0, 10.0, 10.0, 10.0],
         "loop": false,
         "movespeed": 4,
-        "attack": false,
         "color": "blue"
       }
     ],

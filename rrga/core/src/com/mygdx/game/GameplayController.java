@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.audio.Music;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.HazardModel;
 import com.mygdx.game.model.hazard.LightningHazard;
@@ -27,132 +28,215 @@ import com.mygdx.game.utility.util.ScreenListener;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
-    /** The amount of time for a physics engine step. */
+    /**
+     * The amount of time for a physics engine step.
+     */
     public static final float WORLD_STEP = 1 / 60.0f;
 
-    /** Number of velocity iterations for the constrain solvers */
+    /**
+     * Number of velocity iterations for the constrain solvers
+     */
     public static final int WORLD_VELOC = 6;
 
-    /** Number of position iterations for the constrain solvers s*/
+    /**
+     * Number of position iterations for the constrain solvers s
+     */
     public static final int WORLD_POSIT = 2;
 
-    /** Width of the game world in Box2d units */
+    /**
+     * Width of the game world in Box2d units
+     */
     protected static final float DEFAULT_WIDTH = 32.0f;
 
-    /** Height of the game world in Box2d units */
+    /**
+     * Height of the game world in Box2d units
+     */
     protected static final float DEFAULT_HEIGHT = 18.0f;
 
-    /** the iframes effect duration */
+    /**
+     * the iframes effect duration
+     */
     public static final int NUM_I_FRAMES = 120;
 
-    /** All the objects in the world. */
+    /**
+     * All the objects in the world.
+     */
     protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
 
-    /** Queue for adding objects */
+    /**
+     * Queue for adding objects
+     */
     protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
 
-    /** The Box2D world */
+    /**
+     * The Box2D world
+     */
     protected World world;
 
-    /** The boundary of the world */
+    /**
+     * The boundary of the world
+     */
     protected Rectangle bounds;
 
-    /** The world draw scale (world coordinates to screen coordinates) */
+    /**
+     * The world draw scale (world coordinates to screen coordinates)
+     */
     protected Vector2 scale;
 
-    /** Current Width of the game world in Box2d units */
+    /**
+     * Current Width of the game world in Box2d units
+     */
     private float physicsWidth;
 
-    /** Current Height of the game world in Box2d units */
+    /**
+     * Current Height of the game world in Box2d units
+     */
     private float physicsHeight;
 
-    /** Current Width of the canvas in Box2d units */
+    /**
+     * Current Width of the canvas in Box2d units
+     */
     private float displayWidth;
 
-    /** Current Height of the canvas in Box2d units */
+    /**
+     * Current Height of the canvas in Box2d units
+     */
     private float displayHeight;
 
-    /** scaling factors for drag force */
+    /**
+     * scaling factors for drag force
+     */
     private Vector2 dragScale;
 
-    /** whether the player has won */
+    /**
+     * whether the player has won
+     */
     private boolean completed;
 
-    /** whether the player has lost */
+    /**
+     * whether the player has lost
+     */
     private boolean failed;
 
-    /** Countdown active for winning or losing */
+    /**
+     * Countdown active for winning or losing
+     */
     private int countdown;
 
-    /** the delay after game is lost before we transition to new screen. */
+    /**
+     * the delay after game is lost before we transition to new screen.
+     */
     private static final int LOSE_COUNTDOWN_TIMER = 40;
 
-    /** the delay after game is won before we transition to new screen. */
+    /**
+     * the delay after game is won before we transition to new screen.
+     */
     private static final int WIN_COUNTDOWN_TIMER = 20;
 
-    /** Texture asset for background image */
+    /**
+     * Texture asset for background image
+     */
     private TextureRegion backgroundTexture;
+    /** Background music */
+    private Music backgroundMusic;
 
 
     // <=============================== Physics objects for the game BEGINS here ===============================>
     /** Physics constants for global */
     private JsonValue globalConstants;
+    
+    /** Physics constants for current level */
+    private JsonValue levelConstants;
 
-    /** Reference to the character avatar */
+    /**
+     * Reference to the character avatar
+     */
     private PlayerModel avatar;
 
-    /** Reference to the umbrella */
+    /**
+     * Reference to the umbrella
+     */
     private UmbrellaModel umbrella;
 
-    /** Reference to the goalDoor (for collision detection) */
+    /**
+     * Reference to the goalDoor (for collision detection)
+     */
     private BoxObstacle goalDoor;
 
-    /** Mark set to handle more sophisticated collision callbacks */
+    /**
+     * Mark set to handle more sophisticated collision callbacks
+     */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    /** The set of all wind fixtures that umbrella in contact with */
+    /**
+     * The set of all wind fixtures that umbrella in contact with
+     */
     protected ObjectSet<Fixture> contactWindFix = new ObjectSet<>();
 
-    /** The set of all wind bodies that umbrella in contact with */
+    /**
+     * The set of all wind bodies that umbrella in contact with
+     */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
 
-    /** The set of all birds currently in the level */
+    /**
+     * The set of all birds currently in the level
+     */
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
-    /** The set of all lightning currently in the level */
+    /**
+     * The set of all lightning currently in the level
+     */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
 
     // <=============================== Physics objects for the game ENDS here ===============================>
 
-    /** cache for vector computations */
+    /**
+     * cache for vector computations
+     */
     Vector2 cache = new Vector2();
+
+    /**
+     * cache for wind force computations
+     */
+    Vector2 windForce = new Vector2();
 
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
 
-    /** difference in initial position between umbrella and player */
+    /**
+     * difference in initial position between umbrella and player
+     */
     private final Vector2 diff = new Vector2();
 
-    /** center of the screen in canvas coordinates */
+    /**
+     * center of the screen in canvas coordinates
+     */
     private Vector2 center = new Vector2();
 
-    /** the upward-pointing unit vector */
-    private final Vector2 up = new Vector2(0,1);
+    /**
+     * the upward-pointing unit vector
+     */
+    private final Vector2 up = new Vector2(0, 1);
 
-    /** current mouse position
+    /**
+     * current mouse position
      * <br>
      * should not be updated except when making the umbrella follow the mouse
      */
     private final Vector2 mousePos = new Vector2();
 
-    /** umbrella's last valid angle */
+    /**
+     * umbrella's last valid angle
+     */
     private float lastValidAng;
 
-    /** whether the mouse angle is allowed */
+    /**
+     * whether the mouse angle is allowed
+     */
     private boolean angInBounds = true;
 
     /**
      * The level container for GameplayController
-    */
+     */
     private LevelContainer levelContainer;
 
     /**
@@ -168,20 +252,28 @@ public class GameplayController implements ContactListener {
 
     // TODO: ====================== BEGIN CURRENTLY UNUSED FIELDS =============================
 
-    /** Listener that will update the player mode when we are done. */
+    /**
+     * Listener that will update the player mode when we are done.
+     */
     private ScreenListener listener;
 
-    /** JSON value storing all level data */
+    /**
+     * JSON value storing all level data
+     */
     private JsonValue levels;
 
-    /** The default value of gravity (going down) */
+    /**
+     * The default value of gravity (going down)
+     */
     protected static final float DEFAULT_GRAVITY = -4.9f;
 
     private long jumpId = -1;
     private long fireId = -1;
     private long plopId = -1;
 
-    /** The default sound volume */
+    /**
+     * The default sound volume
+     */
     private float volume;
     // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
 
@@ -195,7 +287,7 @@ public class GameplayController implements ContactListener {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
         this.scale = new Vector2(1, 1);
-        this.dragScale = new Vector2(1,1 );
+        this.dragScale = new Vector2(1, 1);
 
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
@@ -218,13 +310,18 @@ public class GameplayController implements ContactListener {
     public void gatherAssets(AssetDirectory directory) {
         // Setting up Constant/Asset Path for different levels
         String constantPath = "global:constants";
+        String levelPath = "level" + this.currentLevel + ":constants";
 
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
+
         parser.parseLevel(directory.getEntry("tiled:level1", JsonValue.class));
+
+        levelConstants = directory.getEntry(levelPath, JsonValue.class);
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
         backgroundTexture = new TextureRegion(directory.getEntry( "game:background", Texture.class ));
+        backgroundMusic = directory.getEntry("music:level0", Music.class);
 
         // Constants for Window/World scale
         //TODO: the world size shouldn't be global, it should be obtained on a per-level
@@ -233,6 +330,7 @@ public class GameplayController implements ContactListener {
         physicsHeight = globalConstants.get("world").getFloat("max_height", DEFAULT_HEIGHT);
         displayWidth = globalConstants.get("world").getFloat("width", DEFAULT_WIDTH);
         displayHeight = globalConstants.get("world").getFloat("height", DEFAULT_HEIGHT);
+
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
     }
@@ -277,6 +375,10 @@ public class GameplayController implements ContactListener {
 
         diff.x = umbrella.getX()-avatar.getX();
         diff.y = umbrella.getY()-avatar.getY();
+
+        backgroundMusic.stop();
+        backgroundMusic.play();
+        backgroundMusic.setLooping(true);
     }
 
 
@@ -302,7 +404,7 @@ public class GameplayController implements ContactListener {
         // Process actions in object model
 
         // player dies if falling through void
-        if (!failed && avatar.getPosition().y <= -0.01f){
+        if (!failed && avatar.getPosition().y <= -0.01f) {
             avatar.setHealth(0);
             avatar.setiFrames(NUM_I_FRAMES);
             setFailed();
@@ -310,7 +412,7 @@ public class GameplayController implements ContactListener {
         }
 
         // decrement countdown towards rendering victory/fail screen
-        if (countdown > 0){
+        if (countdown > 0) {
             countdown--;
         }
 
@@ -320,11 +422,10 @@ public class GameplayController implements ContactListener {
             if (umbrella.isOpen()) {
                 umbrella.useOpenedTexture();
                 //TODO: apply some force to the player so the floatiness comes back
-            }
-            else {
+            } else {
                 umbrella.useClosedTexture();
                 Body body = avatar.getBody();
-                body.setLinearVelocity(body.getLinearVelocity().x*umbrella.getClosedMomentum(), body.getLinearVelocity().y);
+                body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y);
             }
         }
         //make player face forward in air
@@ -332,65 +433,76 @@ public class GameplayController implements ContactListener {
         else avatar.useFrontTexture();
 
         //umbrella points towards mouse pointer
-        center.x = Gdx.graphics.getWidth()/2f;
-        center.y = Gdx.graphics.getHeight()/2f;
+        center.x = Gdx.graphics.getWidth() / 2f;
+        center.y = Gdx.graphics.getHeight() / 2f;
         mousePos.x = input.getMousePos().x;
         mousePos.y = input.getMousePos().y;
         //convert from screen coordinates to canvas coordinates
-        mousePos.y= 2* center.y-mousePos.y;
+        mousePos.y = 2 * center.y - mousePos.y;
         //convert to player coordinates
         mousePos.sub(center);
         //normalize manually because Vector2.nor() is less accurate
         float l = mousePos.len();
-        mousePos.x/=l;
-        mousePos.y/=l;
+        mousePos.x /= l;
+        mousePos.y /= l;
         //compute new angle
         float mouseAng = (float) Math.acos(mousePos.dot(up));
-        if (input.getMousePos().x > center.x) mouseAng*=-1;
-        angInBounds = mouseAng <= (float) Math.PI/2 && mouseAng >= -(float) Math.PI/2;
-        if (angInBounds){
+        if (input.getMousePos().x > center.x) mouseAng *= -1;
+        angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
+        if (angInBounds) {
             umbrella.setAngle(mouseAng);
             lastValidAng = mouseAng;
         } else if (lastValidAng >= 0) {
-            umbrella.setAngle((float) Math.PI/2);
+            umbrella.setAngle((float) Math.PI / 2);
             mousePos.x = -1;
             mousePos.y = 0;
-        }
-        else {
-            umbrella.setAngle(-(float) Math.PI/2);
+        } else {
+            umbrella.setAngle(-(float) Math.PI / 2);
             mousePos.x = 1;
             mousePos.y = 0;
         }
 
+        //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
+        int count = 0;
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
             if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
-                avatar.applyExternalForce(umbrellaX * f, umbrellaY * f);
+                count++;
+                windForce.add(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
+        if(count!=0){
+            avatar.applyWindForce(windForce.x/count, windForce.y/count);
+        }
         contactWindBod.clear();
+        windForce.set(0,0);
 
         // Process actions in object model
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
-            avatar.applyInputForce();
+            avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             float angle = umbrella.getRotation() % ((float) Math.PI * 2);
             if (angle < Math.PI) {
-                avatar.applyExternalForce(
-                        dragScale.x * (float) Math.sin(2 * angle),
-                        dragScale.y * (float) Math.sin(angle)
-                );
+                avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
             }
         }
+        if (umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
+            avatar.setVY(avatar.getMaxSpeedDownOpen());
+        }
+        if (!umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
+            avatar.setVY(avatar.getMaxSpeedDownClosed());
+        }
+
+        //System.out.println(avatar.getVX() + ", " + avatar.getVY());
 
         // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
@@ -402,7 +514,7 @@ public class GameplayController implements ContactListener {
         }
 
         //update the lightnings
-        for (LightningHazard light : lightnings){
+        for (LightningHazard light : lightnings) {
             light.strike();
         }
     }
@@ -419,15 +531,15 @@ public class GameplayController implements ContactListener {
     public void postUpdate(float dt) {
         // Add any objects created by actions
         while (!levelContainer.addQueue.isEmpty()) {
-             levelContainer.addObject(levelContainer.addQueue.poll());
+            levelContainer.addObject(levelContainer.addQueue.poll());
         }
 
         // Turn the physics engine crank.
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX()+mousePos.x*diff.len();
-        cache.y = avatar.getY()+mousePos.y*diff.len();
+        cache.x = avatar.getX() + mousePos.x * diff.len();
+        cache.y = avatar.getY() + mousePos.y * diff.len();
         umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.
@@ -488,8 +600,8 @@ public class GameplayController implements ContactListener {
             }
 
             // See if umbrella touches wind
-            if ((umbrella == bd2 && (bd1.getClass() == WindModel.class)) ||
-                    (umbrella == bd1 && (bd2.getClass() == WindModel.class))) {
+            if ((fd2 == "umbrellaSensor" && (bd1.getClass() == WindModel.class)) ||
+                    (fd1 == "umbrellaSensor" && (bd2.getClass() == WindModel.class))) {
                 Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
                 contactWindFix.add(windFix);
             }
@@ -500,23 +612,23 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                    int dam = h.getDamage();
+                int dam = h.getDamage();
 
-                    // player is only vulnerable to further damage and effects if the level is still ongoing
-                    boolean vulnerable = !failed && !completed;
-                    if (avatar.getiFrames() == 0 && vulnerable) {
-                        if (avatar.getHealth() - dam > 0) {
-                            Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
-                            avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
-                            avatar.setHealth(avatar.getHealth() - dam);
-                            avatar.setiFrames(NUM_I_FRAMES);
-                        } else {
-                          avatar.setHealth(0);
-                          // start iframes even when we die, otherwise player being damaged is not so apparent.
-                          avatar.setiFrames(NUM_I_FRAMES);
-                          setFailed();
-                        }
+                // player is only vulnerable to further damage and effects if the level is still ongoing
+                boolean vulnerable = !failed && !completed;
+                if (avatar.getiFrames() == 0 && vulnerable) {
+                    if (avatar.getHealth() - dam > 0) {
+                        Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
+                        avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                        avatar.setHealth(avatar.getHealth() - dam);
+                        avatar.setiFrames(NUM_I_FRAMES);
+                    } else {
+                        avatar.setHealth(0);
+                        // start iframes even when we die, otherwise player being damaged is not so apparent.
+                        avatar.setiFrames(NUM_I_FRAMES);
+                        setFailed();
                     }
+                }
             }
 
             // check for bird sensor collision
@@ -533,7 +645,7 @@ public class GameplayController implements ContactListener {
             if ((bd1 == avatar && bd2 == goalDoor) ||
                     (bd1 == goalDoor && bd2 == avatar)) {
                 // player wins
-                if (!failed && !completed){
+                if (!failed && !completed) {
                     setCompleted();
                 }
             }
@@ -603,7 +715,7 @@ public class GameplayController implements ContactListener {
     /**
      * Sets current level of the game
      */
-    public void setLevel(int level){
+    public void setLevel(int level) {
         currentLevel = level;
         levelContainer.setLevel(level);
     }
@@ -656,38 +768,36 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     *
      * @return player x-coordinate on screen, -1 if no player is found.
      * coordinates are non-negative.
      */
-    public float getPlayerScreenX(){
+    public float getPlayerScreenX() {
 
         return avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
     }
 
     /**
-     *
      * @return player y-coordinate on screen, -1 if no player is found.
      * coordinates are non-negative.
      */
-    public float getPlayerScreenY(){
+    public float getPlayerScreenY() {
         return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
     }
 
     /**
-     *
      * @return reference to player model
      */
-    public PlayerModel getPlayer(){
+    public PlayerModel getPlayer() {
         return avatar;
     }
 
     /**
      * set world bounds to be the given rectangle dimensions.
      * This should be followed with a reset of the game.
+     *
      * @param rect the bounds
      */
-    public void setBounds(Rectangle rect){
+    public void setBounds(Rectangle rect) {
         this.bounds.set(rect.x, rect.y, rect.getWidth(), rect.getHeight());
     }
 
@@ -695,25 +805,27 @@ public class GameplayController implements ContactListener {
     /**
      * player officially wins if they finished the level and
      * a small countdown is over.
+     *
      * @return whether player finished level
      */
-    public boolean isCompleted(){
+    public boolean isCompleted() {
         return completed && countdown <= 0;
     }
 
     /**
      * player officially fails if they failed the level and
      * a small countdown is over.
+     *
      * @return whether player failed
      */
-    public boolean isFailed(){
+    public boolean isFailed() {
         return failed && countdown <= 0;
     }
 
     /**
      * set player level status to completed and start a countdown timer
      */
-    private void setCompleted(){
+    private void setCompleted() {
         completed = true;
         countdown = WIN_COUNTDOWN_TIMER;
     }
@@ -721,19 +833,23 @@ public class GameplayController implements ContactListener {
     /**
      * set player level status to failed and start a countdown timer
      */
-    private void setFailed(){
+    private void setFailed() {
         failed = true;
         countdown = LOSE_COUNTDOWN_TIMER;
     }
 
     /**
      * Get Background Texture
+     *
      * @return Background Texture
      */
-    public TextureRegion getBackgroundTexture() { return this.backgroundTexture; }
+    public TextureRegion getBackgroundTexture() {
+        return this.backgroundTexture;
+    }
 
     /**
      * Get physics dimensions of the world
+     *
      * @return physicsDim - [physicsWidth, physicsHeight]
      */
     public float[] getPhysicsDims() {
@@ -745,6 +861,7 @@ public class GameplayController implements ContactListener {
 
     /**
      * Get physics dimensions of the world
+     *
      * @return physicsDim - [physicsWidth, physicsHeight]
      */
     public float[] getDisplayDims() {

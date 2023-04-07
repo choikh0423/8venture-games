@@ -193,7 +193,6 @@ public class LevelContainer{
         // Setting up Constant/Asset Path for different levels
         String levelConstantPath = "level" + this.currentLevel + ":constants";
         String constantPath = "global:constants";
-        String assetPath = "level" + this.currentLevel + ":assets";
 
         levelConstants = directory.getEntry(levelConstantPath, JsonValue.class);
         globalConstants = directory.getEntry(constantPath, JsonValue.class);
@@ -401,7 +400,10 @@ public class LevelContainer{
         dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
         dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
         float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
-        umbrella = new UmbrellaModel(globalConstants.get("umbrella"), new Vector2(parser.getPlayerPos()).add(offset[0], offset[1]), dwidth, dheight);
+        umbrella = new UmbrellaModel(
+                globalConstants.get("umbrella"),
+                new Vector2(parser.getPlayerPos()).add(offset[0], offset[1]), dwidth, dheight
+        );
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
