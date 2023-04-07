@@ -122,12 +122,11 @@ public class LevelParser {
 
         TileSetMaker(JsonValue tileSetJson, int firstGid){
             if (tileSetJson == null){
-                System.out.println("uh oh");
+                System.err.println("Unrecognized Tileset");
                 return;
             }
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
-            System.out.println("min id: " + minId + ", max id: " + maxId);
             texture = textureMap.get(tileSetJson.getString("name"));
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
@@ -670,7 +669,6 @@ public class LevelParser {
                     int row = (int) (worldSize.y -  i / worldSize.x);
                     int idx = row * (int) worldSize.x + col;
                     textures[idx] = tsm.getRegionFromId(id);
-                    System.out.println(idx);
                     break;
                 }
             }
@@ -685,7 +683,6 @@ public class LevelParser {
      * @return the tileset JSON
      */
     private JsonValue getTileSetJson(String name){
-        System.out.println(name);
         if (name.contains("bushes")){
             return tileSetJsonMap.get("bushes");
         }
