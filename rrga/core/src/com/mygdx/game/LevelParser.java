@@ -54,18 +54,18 @@ public class LevelParser {
     private ArrayList<TextureRegion[]> layers;
 
     /** vector position cache for player */
-    private Vector2 playerPos = new Vector2();
+    private final Vector2 playerPos = new Vector2();
 
     /** vector position cache for goal */
-    private Vector2 goalPos = new Vector2();
+    private final Vector2 goalPos = new Vector2();
 
     /** vector cache for world size (width, height) */
-    private Vector2 worldSize = new Vector2();
+    private final Vector2 worldSize = new Vector2();
 
     /** vector cache for tile scaling (x_scale, y_scale) */
-    private Vector2 tileScale = new Vector2();
+    private final Vector2 tileScale = new Vector2();
 
-    private Vector2 temp = new Vector2();
+    private final Vector2 temp = new Vector2();
 
     /** default values for colored birds*/
     private final JsonValue redBirdDefaults;
@@ -98,14 +98,16 @@ public class LevelParser {
 
     private JsonValue birdPoints = new JsonValue(JsonValue.ValueType.array);
 
-    private HashMap<String, Texture> textureMap;
+    private final HashMap<String, Texture> textureMap;
 
-    private HashMap<String, JsonValue> tileSetJsonMap;
+    private final HashMap<String, JsonValue> tileSetJsonMap;
 
     private ArrayList<TileSetMaker> tileSetMakers;
 
     /**
      * A TileSetMaker produces texture regions upon request.
+     *
+     * This class is useful when converting Tile IDs into textures.
      */
     private class TileSetMaker {
 
@@ -113,13 +115,9 @@ public class LevelParser {
         public int minId;
         /** the tile ID assigned to the LAST tile in this set*/
         public int maxId;
-
         private int columns;
-
         private Texture texture;
-
         private int width;
-
         private int height;
 
         TileSetMaker(JsonValue tileSetJson, int firstGid){
@@ -199,6 +197,8 @@ public class LevelParser {
     public Vector2 getPlayerPos() {
         return playerPos;
     }
+
+    public Vector2 getWorldSize(){ return worldSize; }
 
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
@@ -370,12 +370,16 @@ public class LevelParser {
 
             JsonValue properties = b.get("properties");
             JsonValue defaults = getBirdDefaults(color);
+            boolean loop = false;
+            float movespeed = 0;
+            float atkspeed = 0;
             // add whether facing right
             data.addChild("facing_right", new JsonValue(getFromProperties(properties, "facing_right", defaults).asBoolean()));
 
             if (color.equals("blue") || color.equals("brown")){
-                // add whether to loop
-                data.addChild("loop", getFromProperties(properties, "loop", defaults));
+                // update properties
+                loop = getFromProperties(properties, "loop", defaults).asBoolean();
+                movespeed = getFromProperties(properties, "move_speed", defaults).asFloat();
                 // using custom properties to find rest of path
                 HashSet<Integer> seen = new HashSet<>();
                 // this takes either the bird's next point along its path or take from default (which should be 0)
@@ -395,8 +399,14 @@ public class LevelParser {
                     next = jsonId.asInt();
                 }
             }
+            if (color.equals("brown") || color.equals("red")){
+                atkspeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
+            }
             data.addChild("path", pathJson);
             data.addChild("points", birdPoints);
+            data.addChild("loop", new JsonValue(loop));
+            data.addChild("movespeed", new JsonValue(movespeed));
+            data.addChild("atkspeed", new JsonValue(atkspeed));
             birdData[ii] = data;
         }
     }

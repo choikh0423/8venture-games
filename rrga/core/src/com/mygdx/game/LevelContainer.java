@@ -410,8 +410,6 @@ public class LevelContainer{
         // TODO: (design) maybe default to closed umbrella at initial state
         umbrella.useOpenedTexture();
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
-        //TODO: remove? why are we setting position after we set it when initializing?
-        //umbrella.setPosition(levelConstants.get("umbrella").get("pos").getFloat(0), levelConstants.get("umbrella").get("pos").getFloat(1));
         addObject(umbrella);
     }
 
