@@ -334,11 +334,36 @@ public class GameMode implements Screen {
         canvas.begin();
 
         // center a background on player
-        // TODO: make sure to get the right rectangle of the full background.
-        //  For efficiency, DO NOT render the entire background.
-        //  ox and oy denotes the origin of the texture that we sample a rectangle from.
+        // TODO: replace with repeating background?
         canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
                 py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+
+        PlayerModel avatar = gameplayController.getPlayer();
+        // draw texture tiles
+        int centerTileX = (int) (avatar.getX());
+        // invert y because tilesets are stored top down rather than bottom up
+        int centerTileY = (int) avatar.getY();
+        int minX = (int) Math.max(0, centerTileX - displayWidth/2);
+        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2);
+        int minY = (int) Math.max(0, centerTileY - displayHeight/2);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileX + displayWidth/2);
+        // texture tiles are stored row-major order in an array
+        for (TextureRegion[] tiles : parser.getLayers()){
+            // get grid around the player's tile
+            // O(dw * dh)
+            for (int j = minY; j <= maxY; j++){
+                for (int i = minX; i <= maxX; i++){
+                    int idx = j * (int) physicsWidth + i;
+                    if (tiles[idx] != null){
+                        canvas.draw(tiles[idx], Color.WHITE, 0, 0,
+                                 i * scale.x,  j * scale.y,
+                                scale.x,scale.y
+                        );
+                    }
+                }
+            }
+        }
+
 
         // draw all game objects, these objects are "dynamic"
         // a change in player's position should yield a different perspective.

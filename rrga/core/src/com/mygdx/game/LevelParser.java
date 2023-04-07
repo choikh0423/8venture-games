@@ -122,10 +122,12 @@ public class LevelParser {
 
         TileSetMaker(JsonValue tileSetJson, int firstGid){
             if (tileSetJson == null){
+                System.out.println("uh oh");
                 return;
             }
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
+            System.out.println("min id: " + minId + ", max id: " + maxId);
             texture = textureMap.get(tileSetJson.getString("name"));
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
@@ -268,8 +270,12 @@ public class LevelParser {
         tileSetMakers = new ArrayList<>();
         JsonValue tileSets = levelData.get("tilesets");
         for (JsonValue ts : tileSets){
+            String source = ts.getString("source");
+            if (source.contains("objs.json")){
+                continue;
+            }
             tileSetMakers.add(
-                    new TileSetMaker(getTileSetJson(ts.getString("source")), ts.getInt("firstgid"))
+                    new TileSetMaker(getTileSetJson(source), ts.getInt("firstgid"))
             );
         }
 
@@ -660,7 +666,11 @@ public class LevelParser {
             // this loop should be fast with small number of tilesets
             for (TileSetMaker tsm : tileSetMakers) {
                 if (id <= tsm.maxId && id >= tsm.minId) {
-                    textures[i] = tsm.getRegionFromId(id);
+                    int col = i % (int) worldSize.x;
+                    int row = (int) (worldSize.y -  i / worldSize.x);
+                    int idx = row * (int) worldSize.x + col;
+                    textures[idx] = tsm.getRegionFromId(id);
+                    System.out.println(idx);
                     break;
                 }
             }
@@ -675,14 +685,15 @@ public class LevelParser {
      * @return the tileset JSON
      */
     private JsonValue getTileSetJson(String name){
+        System.out.println(name);
         if (name.contains("bushes")){
             return tileSetJsonMap.get("bushes");
         }
         else if (name.contains("trees")){
-            tileSetJsonMap.get("trees");
+            return tileSetJsonMap.get("trees");
         }
         else if (name.contains("cliffs")){
-            tileSetJsonMap.get("cliffs");
+            return tileSetJsonMap.get("cliffs");
         }
         return null;
     }

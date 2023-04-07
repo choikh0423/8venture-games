@@ -219,7 +219,7 @@ public class LevelContainer{
         Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
-        goalDoor = new BoxObstacle(goalPos.x, goalPos.y+dheight/2,dwidth, dheight);
+        goalDoor = new BoxObstacle(goalPos.x, goalPos.y,dwidth, dheight);
         goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
         goalDoor.setDensity(goalconst.getFloat("density", 0));
         goalDoor.setFriction(goalconst.getFloat("friction", 0));
