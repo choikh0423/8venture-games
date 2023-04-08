@@ -346,7 +346,7 @@ public class GameMode implements Screen {
         int minX = (int) Math.max(0, centerTileX - displayWidth/2);
         int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2);
         int minY = (int) Math.max(0, centerTileY - displayHeight/2);
-        int maxY = (int) Math.min(physicsHeight - 1, centerTileX + displayWidth/2);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2);
         // texture tiles are stored row-major order in an array
         for (TextureRegion[] tiles : parser.getLayers()){
             // get grid around the player's tile

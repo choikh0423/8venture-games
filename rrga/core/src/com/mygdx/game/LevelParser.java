@@ -128,6 +128,8 @@ public class LevelParser {
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             texture = textureMap.get(tileSetJson.getString("name"));
+            // removes flickering on square tiles
+            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
             columns = tileSetJson.getInt("columns");
@@ -666,7 +668,7 @@ public class LevelParser {
             for (TileSetMaker tsm : tileSetMakers) {
                 if (id <= tsm.maxId && id >= tsm.minId) {
                     int col = i % (int) worldSize.x;
-                    int row = (int) (worldSize.y -  i / worldSize.x);
+                    int row = (int) (worldSize.y - 1 -  i / worldSize.x);
                     int idx = row * (int) worldSize.x + col;
                     textures[idx] = tsm.getRegionFromId(id);
                     break;

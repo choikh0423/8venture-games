@@ -15,7 +15,11 @@
         "game:red_bird" : "game/hazard/hazard_bird_red.png",
         "game:blue_bird" : "game/hazard/hazard_bird_blue.png",
         "game:brown_bird" : "game/hazard/hazard_bird_brown.png",
-        "game:lightning" : "game/hazard/environment_obstacle_moving.png",
+        "game:lightning" : {
+          "file":  "game/hazard/lightning_fill.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
         "game:newplatform" : {
             "file":  "game/platform.png",
             "wrapU": "repeated",

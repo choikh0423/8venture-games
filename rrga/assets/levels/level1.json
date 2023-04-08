@@ -34,9 +34,9 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":30,
-         "id":1,
+         "id":6,
          "locked":true,
-         "name":"foreground",
+         "name":"background",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -131,6 +131,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"objects",
          "objects":[
                 {
@@ -491,7 +492,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
+ "nextlayerid":7,
  "nextobjectid":65,
  "orientation":"orthogonal",
  "renderorder":"right-down",
