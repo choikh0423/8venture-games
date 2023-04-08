@@ -143,11 +143,8 @@ public class GDXRoot extends Game implements ScreenListener {
 					playing.reset();
 					setScreen(playing);
 					break;
-//				case MenuMode.EXIT_SETTINGS:
-
 			}
-			// Transition might need to change
-			// menu.dispose();
+			 menu.dispose();
 		} else if (screen == pausing){
 			switch (exitCode){
 				case PauseMode.EXIT_RESUME:
