@@ -10,11 +10,6 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
  */
 public abstract class HazardModel extends PolygonObstacle {
     /**
-     * The initializing data (to avoid magic numbers)
-     */
-    private final JsonValue data;
-
-    /**
      * The damage done to the player when colliding with this hazard
      */
     private int damage;
@@ -38,13 +33,21 @@ public abstract class HazardModel extends PolygonObstacle {
         return knockback;
     }
 
+    public HazardModel(float[] points, float x, float y, int dam, float kb) {
+        super(points, x, y);
+        setBodyType(BodyDef.BodyType.StaticBody);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
+        this.damage = dam;
+        this.knockback = kb;
+    }
     public HazardModel(JsonValue data, int dam, float kb) {
         super(data.get("points").asFloatArray(), data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
         setFriction(0);
         setRestitution(0);
-        this.data = data;
         this.damage = dam;
         this.knockback = kb;
     }

@@ -112,12 +112,13 @@ public class BirdHazard extends HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
-        super(data, birdDamage, birdKnockback);
-        path = data.get("path").asFloatArray();
-        moveSpeed = data.getInt("movespeed");
-        loop = data.getBoolean("loop");
-        color = data.getString("color");
+    public BirdHazard(float[] shape, JsonValue birdData, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
+        super(shape, birdData.get("path").asFloatArray()[0], birdData.get("path").asFloatArray()[1],
+                birdDamage, birdKnockback);
+        path = birdData.get("path").asFloatArray();
+        moveSpeed = birdData.getInt("movespeed");
+        loop = birdData.getBoolean("loop");
+        color = birdData.getString("color");
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;

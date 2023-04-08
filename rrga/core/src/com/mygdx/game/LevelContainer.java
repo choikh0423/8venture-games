@@ -308,9 +308,10 @@ public class LevelContainer{
         for (int ii = 0; ii < birdjv.size; ii++) {
             BirdHazard obj;
             JsonValue jv = birdjv.get(ii);
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
+            obj = new BirdHazard(globalConstants.get("hazards").get("bird_shape").asFloatArray(), jv, birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(getBirdTexture(jv.getString("color", "red")));
+            obj.setOriginCenter();
             obj.setName(birdName + ii);
             addObject(obj);
             birds.add(obj);
