@@ -64,7 +64,7 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	/** Background texture for start-up */
 	private Texture background;
 	/** Play button to display when done */
-	private Texture playButton;
+	private TextureRegion playButton;
 	/** Texture atlas to support a progress bar */
 	private final Texture statusBar;
 	
@@ -93,7 +93,7 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	/** Ration of the bar height to the screen */
 	private static float BAR_HEIGHT_RATIO = 0.25f;	
 	/** Height of the progress bar */
-	private static float BUTTON_SCALE  = 0.75f;
+	private static float BUTTON_SCALE  = 1.2f;
 	
 	/** Reference to GameCanvas created by the root */
 	private GameCanvas canvas;
@@ -260,7 +260,7 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 			this.progress = assets.getProgress();
 			if (progress >= 1.0f) {
 				this.progress = 1.0f;
-				playButton = internal.getEntry("play",Texture.class);
+				playButton = new TextureRegion(internal.getEntry("play",Texture.class));
 			}
 		}
 	}
@@ -279,7 +279,7 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 			drawProgress(canvas);
 		} else {
 			Color tint = (pressState == 1 ? Color.GRAY: Color.WHITE);
-			canvas.draw(playButton, tint, playButton.getWidth()/2, playButton.getHeight()/2, 
+			canvas.draw(playButton, tint, playButton.getRegionWidth()/2, playButton.getRegionHeight()/2,
 						centerX, centerY, 0, BUTTON_SCALE*scale, BUTTON_SCALE*scale);
 		}
 		canvas.end();
@@ -425,17 +425,28 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		
 		// Flip to match graphics coordinates
 		screenY = heightY-screenY;
-		
-		// TODO: Fix scaling
-		// Play button is a circle.
-		float radius = BUTTON_SCALE*scale*playButton.getWidth()/2.0f;
-		float dist = (screenX-centerX)*(screenX-centerX)+(screenY-centerY)*(screenY-centerY);
-		if (dist < radius*radius) {
+
+		if (checkClicked(screenX, screenY, centerX, centerY, playButton)) {
 			pressState = 1;
 		}
 		return false;
 	}
-	
+
+	/**
+	 * Checks if click was in bound for buttons
+	 *
+	 * @return boolean for whether button is pressed
+	 */
+	private boolean checkClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button) {
+		boolean buttonPressedX = buttonX - BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenX &&
+				screenX <= buttonX + BUTTON_SCALE*scale*button.getRegionWidth()/2;
+		boolean buttonPressedY = buttonY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenY &&
+				screenY <= buttonY + BUTTON_SCALE*scale*button.getRegionHeight()/2;
+
+		return buttonPressedX && buttonPressedY;
+	}
+
+
 	/** 
 	 * Called when a finger was lifted or a mouse button was released.
 	 *
