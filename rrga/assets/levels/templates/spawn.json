@@ -1,0 +1,18 @@
+{ "object":
+    {
+     "gid":3,
+     "height":176,
+     "id":20,
+     "name":"spawn",
+     "rotation":0,
+     "type":"spawn",
+     "visible":true,
+     "width":82
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/tilesets\/objs.json"
+    },
+ "type":"template"
+}

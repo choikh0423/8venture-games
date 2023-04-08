@@ -1,0 +1,13 @@
+{ "object":
+    {
+     "height":0,
+     "id":233,
+     "name":"goal",
+     "point":true,
+     "rotation":0,
+     "type":"goal",
+     "visible":true,
+     "width":0
+    },
+ "type":"template"
+}

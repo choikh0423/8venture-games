@@ -349,10 +349,10 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public PlayerModel(JsonValue data, JsonValue pos, float width, float height, int maxHp) {
+	public PlayerModel(JsonValue data, Vector2 pos, float width, float height, int maxHp) {
 		// The shrink factors fit the image to a tigher hitbox
-		super(	pos.getFloat(0),
-				pos.getFloat(1),
+		super(	pos.x,
+				pos.y,
 				width*data.get("shrink").getFloat( 0 ),
 				height*data.get("shrink").getFloat( 1 ));
         setDensity(data.getFloat("density", 0));
@@ -516,10 +516,12 @@ public class PlayerModel extends CapsuleObstacle {
 	private void drawAux(GameCanvas canvas, Color tint){
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? 1.0f : -1.0f;
+		//canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
 		canvas.draw(texture, tint, origin.x, origin.y,
 				getX()*drawScale.x,getY()*drawScale.y, getAngle(),
 				effect*textureScale, textureScale
 		);
+		canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
 	}
 
 	/**

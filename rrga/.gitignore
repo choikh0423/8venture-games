@@ -12,3 +12,7 @@ rrga/desktop/out/
 rrga/core/resources/
 
 /.idea/
+
+# TILED Related
+*.tiled-project
+*.tiled-session

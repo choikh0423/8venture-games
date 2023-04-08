@@ -1,0 +1,19 @@
+{ "object":
+{
+  "height":0,
+  "id":207,
+  "name":"red_bird",
+  "point":true,
+  "properties":[
+    {
+      "name":"facing_right",
+      "type":"bool",
+      "value":false
+    }],
+  "rotation":0,
+  "type":"bird",
+  "visible":true,
+  "width":0
+},
+  "type":"template"
+}

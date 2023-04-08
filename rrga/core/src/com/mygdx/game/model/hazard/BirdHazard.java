@@ -115,6 +115,9 @@ public class BirdHazard extends HazardModel {
     public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
         super(data, birdDamage, birdKnockback);
         path = data.get("path").asFloatArray();
+
+        // TODO: use this boolean instead of comparing colors to determine whether bird attacks
+        boolean attack = data.getBoolean("attack");
         moveSpeed = data.getInt("movespeed");
         loop = data.getBoolean("loop");
         color = data.getString("color");
