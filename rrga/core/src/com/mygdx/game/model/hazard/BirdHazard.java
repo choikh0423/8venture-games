@@ -9,6 +9,8 @@ import com.mygdx.game.GameCanvas;
 
 public class BirdHazard extends HazardModel {
 
+    private final int ATTACK_WAIT_TIME = 50;
+
     /**
      * Attack speed of this bird
      */
@@ -69,7 +71,7 @@ public class BirdHazard extends HazardModel {
     /**
      * Which direction is the bird facing
      */
-    private boolean faceRight;
+    public boolean faceRight;
 
     private boolean attack;
 
@@ -83,6 +85,7 @@ public class BirdHazard extends HazardModel {
      */
     public boolean seesTarget;
 
+    public int attackWait;
     /**
      * Direction of the target
      */
@@ -146,6 +149,7 @@ public class BirdHazard extends HazardModel {
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
+        attackWait = ATTACK_WAIT_TIME;
         sensorName = "birdSensor";
         seesTarget = false;
         fixture.isSensor = true;
@@ -222,14 +226,16 @@ public class BirdHazard extends HazardModel {
         }
         //else target is seen
         else {
-            //move in direction of targetCoords until offscreen
-            setX(getX() + (targetDir.x / 100));
-            setY(getY() + (targetDir.y / 100));
-            moveDir.set(targetDir);
-            // targetDir is the direction of target relative to bird's location
-            if (targetDir.x > 0) faceRight = true;
-            else faceRight = false;
-            //Need some way to delete when offscreen, should be handled by gamecontroller
+            if(attackWait == -1) {
+                //move in direction of targetCoords until offscreen
+                setX(getX() + (targetDir.x / 100));
+                setY(getY() + (targetDir.y / 100));
+                moveDir.set(targetDir);
+                // targetDir is the direction of target relative to bird's location
+                if (targetDir.x > 0) faceRight = true;
+                else faceRight = false;
+                //Need some way to delete when offscreen, should be handled by gamecontroller
+            }
         }
     }
 

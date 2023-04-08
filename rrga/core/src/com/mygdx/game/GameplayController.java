@@ -470,15 +470,29 @@ public class GameplayController implements ContactListener {
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 //        umbrella.applyForce();
 
-        //move the birds
+        //Bird Updates
         float birdSensorRadius = 7;
-        float birdRays = 30;
+        float birdRays = 40;
         float mindist;
         Vector2 pos = new Vector2();
         Vector2 targ = new Vector2();
         BirdRayCastCallback rccb = new BirdRayCastCallback();
         for (BirdHazard bird : birds) {
+            //If sees target, wait before attacking
+            if(bird.seesTarget){
+                if(bird.attackWait == 0){
+                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
+                    bird.attackWait--;
+                }
+                else if(bird.attackWait > 0){
+                    bird.attackWait--;
+                }
+            }
+
+            //move the birds
             bird.move();
+
+            //send out rays and check for collisions with player
             if(bird.getAttack()) {
                 float x = bird.getX()+bird.getWidth()/2;
                 float y = bird.getY()+bird.getHeight()/2;
@@ -498,7 +512,8 @@ public class GameplayController implements ContactListener {
                             if(Math.abs((Float) e.value - mindist) < .001){
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
-                                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
+                                    boolean right = !(avatar.getX() - bird.getX() < 0);
+                                    bird.faceRight = right;
                                 }
                             }
                         }
