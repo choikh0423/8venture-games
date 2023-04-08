@@ -59,6 +59,7 @@
     "birdDamage": 1,
     "birdSensorRadius": 7,
     "birdAttackSpeed": 20,
-    "birdKnockback": 5
+    "birdKnockback": 5,
+    "birdShape" : [0.0, 0.0, 1.0, 0.0, 1.0, 0.5, 0.0, 0.5]
   }
 }

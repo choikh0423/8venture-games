@@ -9,10 +9,6 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
  * A model for hazard objects.
  */
 public abstract class HazardModel extends PolygonObstacle {
-    /**
-     * The initializing data (to avoid magic numbers)
-     */
-    private final JsonValue data;
 
     /**
      * The damage done to the player when colliding with this hazard
@@ -44,7 +40,17 @@ public abstract class HazardModel extends PolygonObstacle {
         setDensity(0);
         setFriction(0);
         setRestitution(0);
-        this.data = data;
+        this.damage = dam;
+        this.knockback = kb;
+    }
+
+    //constructor used for birds
+    public HazardModel(JsonValue data, float[] points, int dam, float kb) {
+        super(points, data.getFloat("x"), data.getFloat("y"));
+        setBodyType(BodyDef.BodyType.StaticBody);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
         this.damage = dam;
         this.knockback = kb;
     }

@@ -70,6 +70,11 @@ public class BirdHazard extends HazardModel {
      */
     private boolean faceRight;
 
+    private boolean attack;
+
+    private float width;
+    private float height;
+
     /**
      * Whether this bird sees its target.
      * If true, moves in a straight line towards initial sighting position.
@@ -112,12 +117,15 @@ public class BirdHazard extends HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
-        super(data, birdDamage, birdKnockback);
-        path = data.get("path").asFloatArray();
+    public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
+        super(data, shape, birdDamage, birdKnockback);
 
-        // TODO: use this boolean instead of comparing colors to determine whether bird attacks
-        boolean attack = data.getBoolean("attack");
+        //may need to change depending on shape of bird
+        width = shape[4] - shape[0];
+        height = shape[5] - shape[1];
+
+        path = data.get("path").asFloatArray();
+        attack = data.getBoolean("attack");
         moveSpeed = data.getInt("movespeed");
         loop = data.getBoolean("loop");
         color = data.getString("color");
@@ -137,7 +145,7 @@ public class BirdHazard extends HazardModel {
         }
 
         //create sensor if attacker
-        if(color.equals("red") || color.equals("brown")) {
+        if(attack) {
             FixtureDef sensorDef = new FixtureDef();
             sensorDef.density = 0;
             sensorDef.isSensor = true;
@@ -225,9 +233,10 @@ public class BirdHazard extends HazardModel {
     public void draw(GameCanvas canvas) {
         // TODO: birds should also be mirrored when facing opposite directions
         float effect = faceRight ? -1.0f : 1.0f;
+        float birdScale = .15f;
         canvas.draw(texture, Color.WHITE, origin.x, origin.y,
-                getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                effect * .15f, .15f);
+                (getX() + width/2) * drawScale.x, (getY() + height/2) * drawScale.y,
+                getAngle(), effect * birdScale, birdScale);
     }
 
     /**
@@ -239,7 +248,7 @@ public class BirdHazard extends HazardModel {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if(color.equals("red") || color.equals("brown")) {
+        if(attack) {
             canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
         }
     }
