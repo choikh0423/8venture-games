@@ -1,8 +1,11 @@
 {
 	"textures": {
         "menu:background" : "menu/background.png",
+        "menu:background2" : "menu/background2.png",
+        "menu:back_button" : "menu/back_button.png",
         "menu:exit_button" : "menu/exit_button.png",
         "menu:settings_button": "menu/settings_button.png",
+        "menu:start_button" : "menu/start_button.png",
         "menu:level_select_button": "menu/level_select_button.png",
         "menu:level1_button": "menu/level1_button.png",
         "menu:level2_button": "menu/level2_button.png",
@@ -19,6 +22,7 @@
             "wrapV": "repeated"
         },
         "game:player": "game/player.png",
+        "game:player_walk": "game/player_walk.png",
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
@@ -27,7 +31,7 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "level0:constants" :"levelconstants/level0.json",
-        "level1:constants" :"levelconstants/level1.json",
+        "level1:constants" :"levelconstants/level1.json"
     },
     "sounds" : {
     },
