@@ -68,6 +68,8 @@ public class PlayerModel extends CapsuleObstacle {
 	private PolygonShape sensorShape;
 	/** The scale to multiply the texture by for drawing */
 	private float textureScale;
+	/** Player Mass */
+	private float FINAL_MASS = 1.8f;
 	/** Max player hp */
 	private int MAX_HEALTH;
 	/** Player hp */
@@ -404,7 +406,9 @@ public class PlayerModel extends CapsuleObstacle {
 				pos.y,
 				width*data.get("shrink").getFloat( 0 ),
 				height*data.get("shrink").getFloat( 1 ));
-        setDensity(data.getFloat("density", 0));
+
+		float density = FINAL_MASS / (width * height);
+		setDensity(density);
 		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
 
