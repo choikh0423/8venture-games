@@ -414,10 +414,10 @@ public class LevelParser {
                 atkspeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
             }
             data.addChild("path", pathJson);
-            data.addChild("points", birdPoints);
             data.addChild("loop", new JsonValue(loop));
             data.addChild("movespeed", new JsonValue(movespeed));
             data.addChild("atkspeed", new JsonValue(atkspeed));
+            data.addChild("points", birdPoints);
             birdData[ii] = data;
         }
     }
