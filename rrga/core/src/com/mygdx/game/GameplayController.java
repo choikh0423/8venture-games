@@ -6,11 +6,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.Music;
 import com.mygdx.game.model.hazard.BirdHazard;
+import com.mygdx.game.model.hazard.BirdRayCastCallback;
 import com.mygdx.game.model.hazard.HazardModel;
 import com.mygdx.game.model.hazard.LightningHazard;
 import com.mygdx.game.model.PlayerModel;
@@ -160,6 +162,8 @@ public class GameplayController implements ContactListener {
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
+
+    protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
     // <=============================== Physics objects for the game ENDS here ===============================>
 
@@ -442,15 +446,65 @@ public class GameplayController implements ContactListener {
             avatar.setVY(avatar.getMaxSpeedDownClosed());
         }
 
-        //System.out.println(avatar.getVX() + ", " + avatar.getVY());
+        //Process Hazard Collisions
+        for(HazardModel h: contactHazards) {
+            int dam = h.getDamage();
+            // player is only vulnerable to further damage and effects if the level is still ongoing
+            boolean vulnerable = !failed && !completed;
+            if (avatar.getiFrames() == 0 && vulnerable) {
+                if (avatar.getHealth() - dam > 0) {
+                    Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
+                    avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                    avatar.setHealth(avatar.getHealth() - dam);
+                    avatar.setiFrames(NUM_I_FRAMES);
+                } else {
+                    avatar.setHealth(0);
+                    // start iframes even when we die, otherwise player being damaged is not so apparent.
+                    avatar.setiFrames(NUM_I_FRAMES);
+                    setFailed();
+                }
+            }
+        }
 
         // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 //        umbrella.applyForce();
 
         //move the birds
+        float birdSensorRadius = 7;
+        float birdRays = 30;
+        float mindist;
+        Vector2 pos = new Vector2();
+        Vector2 targ = new Vector2();
+        BirdRayCastCallback rccb = new BirdRayCastCallback();
         for (BirdHazard bird : birds) {
             bird.move();
+            if(bird.getAttack()) {
+                float x = bird.getX()+bird.getWidth()/2;
+                float y = bird.getY()+bird.getHeight()/2;
+                pos.set(x, y);
+                for (int i = 0; i < birdRays; i++) {
+                    rccb.collisions.clear();
+                    mindist = Integer.MAX_VALUE;
+                    targ.set(x, y + birdSensorRadius).rotateAroundDeg(pos, 360 / birdRays * i);
+                    world.rayCast(rccb, pos, targ);
+                    for(ObjectMap.Entry e: rccb.collisions.entries()){
+                        if((Float) e.value < mindist){
+                            mindist = (Float) e.value;
+                        }
+                    }
+                    for(ObjectMap.Entry e: rccb.collisions.entries()){
+                        if(((Fixture) e.key).getBody().getUserData() == avatar){
+                            if(Math.abs((Float) e.value - mindist) < .001){
+                                if (!bird.seesTarget) {
+                                    bird.seesTarget = true;
+                                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         //update the lightnings
@@ -552,26 +606,12 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                int dam = h.getDamage();
-
-                // player is only vulnerable to further damage and effects if the level is still ongoing
-                boolean vulnerable = !failed && !completed;
-                if (avatar.getiFrames() == 0 && vulnerable) {
-                    if (avatar.getHealth() - dam > 0) {
-                        Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
-                        avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
-                        avatar.setHealth(avatar.getHealth() - dam);
-                        avatar.setiFrames(NUM_I_FRAMES);
-                    } else {
-                        avatar.setHealth(0);
-                        // start iframes even when we die, otherwise player being damaged is not so apparent.
-                        avatar.setiFrames(NUM_I_FRAMES);
-                        setFailed();
-                    }
-                }
+                contactHazards.add(h);
             }
 
             // check for bird sensor collision
+            //depreciated
+            /*
             if ((avatar == bd1 && fd2 == "birdSensor") ||
                     (avatar == bd2 && fd1 == "birdSensor")) {
                 BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
@@ -580,6 +620,7 @@ public class GameplayController implements ContactListener {
                     bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                 }
             }
+            */
 
             // Check for win condition
             if ((bd1 == avatar && bd2 == goalDoor) ||
@@ -627,6 +668,12 @@ public class GameplayController implements ContactListener {
                 (umbrella == bd1 && bd2.getName().contains("wind"))) {
             Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
             contactWindFix.remove(windFix);
+        }
+
+        if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
+            HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
+            contactHazards.remove(h);
         }
     }
 
