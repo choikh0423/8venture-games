@@ -78,6 +78,10 @@ public class LevelContainer{
      */
     private TextureRegion avatarSideTexture;
     /**
+     * Texture asset for avatar walking animation
+     */
+    private Texture avatarWalkTexture;
+    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -183,6 +187,7 @@ public class LevelContainer{
         globalConstants = directory.getEntry( "global:constants", JsonValue.class);
 
         platformTile = new TextureRegion(directory.getEntry("game:newplatform", Texture.class));
+        avatarWalkTexture = directory.getEntry("game:player_walk", Texture.class);
         avatarSideTexture = new TextureRegion(directory.getEntry("game:player", Texture.class));
         avatarFrontTexture = new TextureRegion(directory.getEntry("game:front", Texture.class));
         umbrellaOpenTexture = new TextureRegion(directory.getEntry("game:umbrella", Texture.class));
@@ -359,6 +364,8 @@ public class LevelContainer{
         avatar.useSideTexture();
         // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(avatarSideTexture);
+        avatar.setWalkAnimation(avatarWalkTexture);
+
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
 

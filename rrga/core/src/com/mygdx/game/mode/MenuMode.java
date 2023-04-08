@@ -1,8 +1,12 @@
 package com.mygdx.game.mode;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.GameCanvas;
@@ -24,10 +28,17 @@ public class MenuMode extends MenuScreen {
 
     /** Background texture */
     private TextureRegion backgroundTexture;
+    /** Level Selector Background texture */
+    private TextureRegion backgroundTexture2;
     /** level button (TEMPORARY) */
     private TextureRegion levelSelectButton;
+    /** back button */
+    private TextureRegion backButton;
     /** exit button */
     private TextureRegion exitButton;
+    /** start button */
+    // Temporary implementation of UI
+    private TextureRegion startButton;
     /** settings button */
     private TextureRegion settingsButton;
     /** level 1 button */
@@ -41,6 +52,10 @@ public class MenuMode extends MenuScreen {
 
     /** Background music */
     private Music backgroundMusic;
+    /** Music volume */
+    private float musicVolume;
+    /** SFX volume */
+    private float sfxVolume;
 
     /** exit code to terminate game */
     public static final int EXIT_QUIT = 0;
@@ -53,8 +68,12 @@ public class MenuMode extends MenuScreen {
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
-    /** Tracker for checking if menu is in levelSelect Mode  */
-    private int levelSelectMode;
+    /** Tracker for checking which screen the menu screen is showing
+     *  1: main menu
+     *  2: level selector
+     *  3: settings
+     * */
+    private int screenMode;
 
     /** The current state of the level select button */
     private int selectPressState;
@@ -62,6 +81,8 @@ public class MenuMode extends MenuScreen {
     private int settingsPressState;
     /** The current state of the exit button */
     private int exitPressState;
+    /** The current state of the exit button */
+    private int startPressState;
     /** The current state of the exit button */
     private int levelPressState1;
     /** The current state of the exit button */
@@ -76,31 +97,52 @@ public class MenuMode extends MenuScreen {
     /** The height of the canvas window (necessary since sprite origin != screen origin) */
     private int heightY;
     /** Height of the button */
-    private static float BUTTON_SCALE  = 0.75f;
+    private static float BUTTON_SCALE  = 1.2f;
     /** The width of the button */
     private int buttonWidth;
     /** Ratio of the button width to the screen */
     private static float BUTTON_WIDTH_RATIO  = 0.66f;
     /** Ration of the button height to the screen */
-    private static float Button_X_RATIO = 0.8f;
+    private static float Button_X_RATIO = 0.2f;
+    /** Ration of the level select height to the screen */
+    private static float SELECT_X_RATIO = 0.63f;
     /** Ration of the level select button height to the screen */
-    private static float SELECT_Y_RATIO = 0.6f;
+    private static float SELECT_Y_RATIO = 0.2f;
+    /** Ration of the level select button angle */
+    private static float SELECT_ANGLE = -0.05f * 3.14f;
     /** The y-coordinate of the center of the level select button */
     private int selectY;
     /** The x-coordinate of the center of the level select button */
     private int selectX;
     /** Ration of the settings button height to the screen */
-    private static float SETTINGS_Y_RATIO = 0.4f;
+    private static float SETTINGS_X_RATIO = 0.95f;
+    /** Ration of the settings button height to the screen */
+    private static float SETTINGS_Y_RATIO = 0.07f;
     /** The y-coordinate of the center of the settings button */
     private int settingsY;
     /** The x-coordinate of the center of the settings button */
     private int settingsX;
+    /** Ration of the exit button width to the screen */
+    private static float EXIT_X_RATIO = 0.05f;
     /** Ration of the exit button height to the screen */
-    private static float EXIT_Y_RATIO = 0.2f;
+    private static float EXIT_Y_RATIO = 0.93f;
+    /** The exit button angle */
+    private static float EXIT_ANGLE = 0.05f * 3.14f;
     /** The y-coordinate of the center of the settings button */
     private int exitY;
     /** The x-coordinate of the center of the settings button */
     private int exitX;
+    /** Ration of the start button width to the screen */
+    private static float START_X_RATIO = 0.37f;
+    /** Ration of the start button height to the screen */
+    private static float START_Y_RATIO = 0.2f;
+    /** Ration of the start button angle */
+    private static float START_ANGLE = 0.05f * 3.14f;
+    /** The y-coordinate of the center of the start  button */
+    private int startY;
+    /** The x-coordinate of the center of the start button */
+    private int startX;
+
     /** The y-coordinate of the center of the level 1 button */
     private int levelY1;
     /** The x-coordinate of the center of the level 1 button */
@@ -109,33 +151,78 @@ public class MenuMode extends MenuScreen {
     private int levelY2;
     /** The x-coordinate of the center of the level 2 button */
     private int levelX2;
+
+    /** Stage for setting features */
+    private Stage settingStage;
+    /** Music volume slider*/
+    private Slider musicSlider;
+    /** Music volume slider skin*/
+    private Skin musicSliderSkin;
+    /** The y-coordinate of the center of the music slider */
+    private int musicSliderY;
+    /** The x-coordinate of the center of the music slider */
+    private int musicSliderX;
+    /** Ration of the music slider height to the screen */
+    private static float MUSIC_Y_RATIO = 0.6f;
+    /** Ration of the music slider width to the screen */
+    private static float MUSIC_X_RATIO = 0.2f;
+    /** SFX volume slider*/
+    private Slider sfxSlider;
+    /** SFX volume slider skin*/
+    private Skin sfxSliderSkin;
+    /** The y-coordinate of the center of the sfx slider */
+    private int sfxSliderY;
+    /** The x-coordinate of the center of the sfx slider */
+    private int sfxSliderX;
+    /** Ration of the sfx slider height to the screen */
+    private static float SFX_Y_RATIO = 0.2f;
+    /** Ration of the sfx slider width to the screen */
+    private static float SFX_X_RATIO = 0.2f;
+    /** Slider width */
+    private float sliderWidth;
+    /** Slider height */
+    private float sliderHeight;
+    /** Slider width ratio */
+    private static float SLIDER_WIDTH_RATIO = 0.7f;
+    /** Slider height ratio */
+    private static float SLIDER_HEIGHT_RATIO = 0.2f;
+
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
         currentExitCode = Integer.MIN_VALUE;
-        this.levelSelectMode = 1;
+        this.screenMode = 1;
+
     }
 
     public void gatherAssets(AssetDirectory directory) {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         backgroundTexture = new TextureRegion(directory.getEntry( "menu:background", Texture.class ));
+        backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
         levelSelectButton = new TextureRegion(directory.getEntry("menu:level_select_button", Texture.class));
         settingsButton = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
         exitButton = new TextureRegion(directory.getEntry("menu:exit_button", Texture.class));
+        backButton = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
+        startButton = new TextureRegion(directory.getEntry("menu:start_button", Texture.class));
 
         levelButton1 = new TextureRegion(directory.getEntry("menu:level1_button", Texture.class));
         levelButton2 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
 
         backgroundMusic = directory.getEntry("music:menu", Music.class);
+
+        // TODO: We have to import volumes that are saved by the user
+        musicVolume = 1.0f;
+        sfxVolume = 1.0f;
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         screenY = heightY-screenY;
 
-        if (levelSelectMode == 1) {
-            boolean selectPressed = checkClicked(screenX, screenY, selectX, selectY, levelSelectButton);
-            boolean settingsPressed = checkClicked(screenX, screenY, settingsX, settingsY, settingsButton);
-            boolean exitPressed = checkClicked(screenX, screenY, exitX, exitY, exitButton);
+        if (screenMode == 1) {
+            boolean selectPressed = checkClicked(screenX, screenY, selectX, selectY, levelSelectButton, SELECT_ANGLE);
+            boolean settingsPressed = checkCircleClicked(screenX, screenY, settingsX, settingsY, settingsButton);
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
+            boolean startPressed = checkClicked(screenX, screenY, startX, startY, startButton, START_ANGLE);
 
             if (selectPressed) {
                 selectPressState = 1;
@@ -143,63 +230,114 @@ public class MenuMode extends MenuScreen {
                 settingsPressState = 1;
             } else if (exitPressed) {
                 exitPressState = 1;
+            } else if (startPressed) {
+                startPressState = 1;
             }
-        } else if (levelSelectMode == 2) {
-            boolean levelPressed1 = checkClicked(screenX, screenY, levelX1, levelY1, levelButton1);
-            boolean levelPressed2 = checkClicked(screenX, screenY, levelX2, levelY2, levelButton2);
+        } else if (screenMode == 2) {
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
+            boolean levelPressed1 = checkCircleClicked(screenX, screenY, levelX1, levelY1, levelButton1);
+            boolean levelPressed2 = checkCircleClicked(screenX, screenY, levelX2, levelY2, levelButton2);
 
             if (levelPressed1) {
                 levelPressState1 = 1;
             } else if (levelPressed2) {
                 levelPressState2 = 1;
+            } else if (exitPressed) {
+                exitPressState = 1;
             }
+        } else if (screenMode == 3) {
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
 
+            if (exitPressed) {
+                exitPressState = 1;
+            }
         }
 
         return false;
     }
+
     /**
-     * Checks if click was in bound for buttons
+     * Checks if click was in bound for rectangular buttons
      *
      * @return boolean for whether button is pressed
      */
-    private boolean checkClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button) {
-        boolean buttonPressedX = buttonX - BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenX &&
-                screenX <= buttonX + BUTTON_SCALE*scale*button.getRegionWidth()/2;
-        boolean buttonPressedY = buttonY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenY &&
-                screenY <= buttonY + BUTTON_SCALE*scale*button.getRegionHeight()/2;
+    private boolean checkClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button, float angle) {
+
+        // TODO: TEMPORARY touch range to make it smaller than button
+        float touchRange = 0.95f;
+
+        float buttonTX = buttonX * (float)Math.cos(angle) + buttonY * (float)Math.sin(angle);
+        float buttonTY = -buttonX * (float)Math.sin(angle) + buttonY * (float)Math.cos(angle);
+        float screenTX = screenX * (float)Math.cos(angle) + screenY * (float)Math.sin(angle);
+        float screenTY = -screenX * (float)Math.sin(angle) + screenY * (float)Math.cos(angle);
+
+        boolean buttonPressedX = buttonTX - touchRange*BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenTX &&
+                screenTX <= buttonTX + touchRange*BUTTON_SCALE*scale*button.getRegionWidth()/2;
+        boolean buttonPressedY = buttonTY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenTY &&
+                screenTY <= buttonTY + BUTTON_SCALE*scale*button.getRegionHeight()/2;
 
         return buttonPressedX && buttonPressedY;
     }
 
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        System.out.println("Touch up");
-
-        if (selectPressState == 1) {
-            selectPressState = 2;
-            levelSelectMode = 2;
+    /**
+     * Checks if click was in bound for circular buttons
+     *
+     * @return boolean for whether button is pressed
+     */
+    private boolean checkCircleClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button) {
+        float radius = BUTTON_SCALE*scale*button.getRegionWidth()/2.0f;
+        float dist = (screenX-buttonX)*(screenX-buttonX)+(screenY-buttonY)*(screenY-buttonY);
+        if (dist < radius*radius) {
+            return true;
+        } else {
             return false;
-        } else if (settingsPressState == 1) {
-            settingsPressState = 2;
-            currentExitCode = EXIT_SETTINGS;
-            listener.exitScreen(this, currentExitCode);
-        } else if (exitPressState == 1) {
-            exitPressState = 2;
-            currentExitCode = EXIT_QUIT;
-            listener.exitScreen(this, currentExitCode);
         }
+    }
 
-        // TEMPORARY NEED CHANGE
-        if (levelPressState1 == 1) {
-            currentLevel = 0;
-            levelPressState1 = 2;
-            currentExitCode = EXIT_PLAY;
-            listener.exitScreen(this, currentExitCode);
-        } else if (levelPressState2 == 1) {
-            currentLevel = 1;
-            levelPressState2 = 2;
-            currentExitCode = EXIT_PLAY;
-            listener.exitScreen(this, currentExitCode);
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (screenMode == 1) {
+            if (selectPressState == 1) {
+                selectPressState = 2;
+                screenMode = 2;
+                return false;
+            } else if (settingsPressState == 1) {
+                settingsPressState = 2;
+                screenMode = 3;
+                return false;
+            } else if (exitPressState == 1) {
+                // Main Menu: Exit Game
+                exitPressState = 2;
+                currentExitCode = EXIT_QUIT;
+                listener.exitScreen(this, currentExitCode);
+            } else if (startPressState == 1) {
+                currentLevel = 0;
+                levelPressState1 = 2;
+                currentExitCode = EXIT_PLAY;
+                listener.exitScreen(this, currentExitCode);
+            }
+        } else if (screenMode == 2) {
+            if (exitPressState == 1) {
+                // Level Selector: Back to main screen
+                screenMode = 1;
+                exitPressState = 2;
+            } else if (levelPressState1 == 1) {
+                // TODO: TEMPORARY NEED CHANGE - Level Selector needs to be a list of levels
+                currentLevel = 0;
+                levelPressState1 = 2;
+                currentExitCode = EXIT_PLAY;
+                listener.exitScreen(this, currentExitCode);
+            } else if (levelPressState2 == 1) {
+                currentLevel = 1;
+                levelPressState2 = 2;
+                currentExitCode = EXIT_PLAY;
+                listener.exitScreen(this, currentExitCode);
+            }
+        } else if (screenMode == 3) {
+            if (exitPressState == 1) {
+                // Level Selector: Back to main screen
+                screenMode = 1;
+                exitPressState = 2;
+            }
         }
         return true;
     }
@@ -221,13 +359,17 @@ public class MenuMode extends MenuScreen {
      */
     private void draw() {
         canvas.begin();
-        canvas.draw(backgroundTexture, 0, 0);
+        if (screenMode == 1) {
+            canvas.draw(backgroundTexture, 0, 0);
+        } else if (screenMode == 2 || screenMode == 3) {
+            canvas.draw(backgroundTexture2, 0, 0);
+        }
 
-        if (levelSelectMode == 1) {
+        if (screenMode == 1) {
             // Draw Level Select Button
             Color selectTint = (selectPressState == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(levelSelectButton, selectTint, levelSelectButton.getRegionWidth() / 2, levelSelectButton.getRegionHeight() / 2,
-                    selectX, selectY, 0, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
+                    selectX, selectY, SELECT_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
             // Draw Settings Button
             Color settingsTint = (settingsPressState == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(settingsButton, settingsTint, settingsButton.getRegionWidth() / 2, settingsButton.getRegionHeight() / 2,
@@ -235,8 +377,16 @@ public class MenuMode extends MenuScreen {
             // Draw Exit Button
             Color exitTint = (exitPressState == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(exitButton, exitTint, exitButton.getRegionWidth() / 2, exitButton.getRegionHeight() / 2,
-                    exitX, exitY, 0, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
-        } else if (levelSelectMode == 2){
+                    exitX, exitY, EXIT_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
+            // Draw Start Button
+            Color startTint = (startPressState == 1 ? Color.GRAY : Color.WHITE);
+            canvas.draw(startButton, startTint, startButton.getRegionWidth() / 2, startButton.getRegionHeight() / 2,
+                    startX, startY, START_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
+        } else if (screenMode == 2){
+            // Draw Back Button
+            Color exitTint = (exitPressState == 1 ? Color.GRAY : Color.WHITE);
+            canvas.draw(backButton, exitTint, backButton.getRegionWidth() / 2, backButton.getRegionHeight() / 2,
+                    exitX, exitY, EXIT_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
             // Temporary Implementation - Will change to iterables once we get proper textures
             Color levelTint1 = (levelPressState1 == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(levelButton1, levelTint1, levelButton1.getRegionWidth() / 2, levelButton1.getRegionHeight() / 2,
@@ -245,6 +395,13 @@ public class MenuMode extends MenuScreen {
             Color levelTint2 = (levelPressState2 == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(levelButton2, levelTint2, levelButton2.getRegionWidth() / 2, levelButton2.getRegionHeight() / 2,
                     levelX2, levelY2, 0, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
+        } else if (screenMode == 3) {
+
+            // Draw Back Button
+            Color exitTint = (exitPressState == 1 ? Color.GRAY : Color.WHITE);
+            canvas.draw(backButton, exitTint, backButton.getRegionWidth() / 2, backButton.getRegionHeight() / 2,
+                    exitX, exitY, EXIT_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
+
         }
         canvas.end();
     }
@@ -258,12 +415,14 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
-        // TO DO: Move this if necessary
+        // TODO: Move this if necessary
         backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
 
         draw();
-        // transition
+
+        // Screen Transition
         if (currentExitCode >= 0){
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
@@ -280,11 +439,20 @@ public class MenuMode extends MenuScreen {
         this.buttonWidth = (int)(BUTTON_WIDTH_RATIO*width);
         heightY = height;
         selectY = (int)(SELECT_Y_RATIO * height);
-        selectX = (int)(Button_X_RATIO * width);
+        selectX = (int)(SELECT_X_RATIO * width);
         settingsY = (int)(SETTINGS_Y_RATIO * height);
-        settingsX = (int)(Button_X_RATIO * width);
+        settingsX = (int)(SETTINGS_X_RATIO * width);
         exitY = (int)(EXIT_Y_RATIO * height);
-        exitX = (int)(Button_X_RATIO * width);
+        exitX = (int)(EXIT_X_RATIO * width);
+        startY = (int)(START_Y_RATIO * height);
+        startX = (int)(START_X_RATIO * width);
+
+        sliderHeight = (int)(SLIDER_HEIGHT_RATIO * height);
+        sliderWidth = (int)(SLIDER_WIDTH_RATIO * width);
+        musicSliderY = (int)(MUSIC_Y_RATIO * height);
+        musicSliderX = (int)(MUSIC_X_RATIO * width);
+        sfxSliderY = (int)(SFX_Y_RATIO * height);
+        sfxSliderX = (int)(SFX_X_RATIO * width);
 
         // TEMPORARY
         levelY1 = (int)(0.5 * height);

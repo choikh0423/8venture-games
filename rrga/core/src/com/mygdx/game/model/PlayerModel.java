@@ -10,8 +10,11 @@
  */
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -19,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.graphics.g2d.Animation;
 
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.*;
@@ -77,6 +81,23 @@ public class PlayerModel extends CapsuleObstacle {
 	 * The number i-frames the player currently has
 	 */
 	private int iFrames;
+
+	/** Player walk film texture */
+	private Texture walkTexture;
+	/** Player walk sprite batch*/
+	private SpriteBatch walkBatch;
+
+	/** Player walk animation frames */
+	private TextureRegion[][] walkTmpFrames;
+
+	/** Player walk animation frames */
+	private TextureRegion[] walkAnimationFrames;
+
+	/** Player walk animation*/
+	private Animation walkAnimation;
+
+	/** Walk animation elapsed time */
+	float walkElapsedTime;
 
 	/** health point texture */
 	private TextureRegion hpTexture;
@@ -160,6 +181,12 @@ public class PlayerModel extends CapsuleObstacle {
 		isGrounded = value; 
 	}
 
+	/**
+	 *
+	 * */
+	public boolean isMoving() {
+		return this.movement != 0f;
+	}
 	/**
 	 * Returns how much force to apply to get the player moving
 	 *
@@ -317,6 +344,28 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Sets player walk animation
+	 * NOTE: This is method specifically for walking animation
+	 * */
+	public void setWalkAnimation(Texture texture) {
+		this.walkTexture = texture;
+		this.walkTmpFrames = TextureRegion.split(walkTexture, 253, 377);
+		this.walkAnimationFrames = new TextureRegion[15];
+
+		// PLacing animation frames in order
+		int index = 0;
+		for (int i=0; i<3; i++) {
+			for (int j=0; j<5; j++) {
+				this.walkAnimationFrames[index] = walkTmpFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust walk speed here
+		this.walkAnimation = new Animation(1f/45f, walkAnimationFrames);
+	}
+
+	/**
 	 * sets the texture to be frontal view for drawing purposes.
 	 *
 	 * No update occurs if the current texture is already the front view texture.
@@ -380,6 +429,9 @@ public class PlayerModel extends CapsuleObstacle {
 		jumpCooldown = 0;
 		setName("player");
 		iFrames = 0;
+
+		walkBatch = new SpriteBatch();
+		walkElapsedTime = 0f;
 	}
 
 	/**
@@ -515,13 +567,18 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	private void drawAux(GameCanvas canvas, Color tint){
 		// mirror left or right (if player is facing left, this should be -1)
-		float effect = faceRight ? 1.0f : -1.0f;
-		//canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
-		canvas.draw(texture, tint, origin.x, origin.y,
-				getX()*drawScale.x,getY()*drawScale.y, getAngle(),
-				effect*textureScale, textureScale
-		);
-		canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+		float effect = faceRight ? -1.0f : 1.0f;
+		if (isGrounded() && isMoving()) {
+			walkElapsedTime += Gdx.graphics.getDeltaTime();
+			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
+					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+					effect * textureScale, textureScale);
+		} else {
+			canvas.draw(texture, tint, origin.x, origin.y,
+					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+					effect * textureScale, textureScale
+			);
+		}
 	}
 
 	/**
