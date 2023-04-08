@@ -186,6 +186,9 @@ public class MenuMode extends MenuScreen {
     private static float SLIDER_WIDTH_RATIO = 0.7f;
     /** Slider height ratio */
     private static float SLIDER_HEIGHT_RATIO = 0.2f;
+    /** Touch range constant */
+
+    private static float TOUCH_AREA_RATIO = 0.95f;
 
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -264,15 +267,15 @@ public class MenuMode extends MenuScreen {
     private boolean checkClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button, float angle) {
 
         // TODO: TEMPORARY touch range to make it smaller than button
-        float touchRange = 0.95f;
+
 
         float buttonTX = buttonX * (float)Math.cos(angle) + buttonY * (float)Math.sin(angle);
         float buttonTY = -buttonX * (float)Math.sin(angle) + buttonY * (float)Math.cos(angle);
         float screenTX = screenX * (float)Math.cos(angle) + screenY * (float)Math.sin(angle);
         float screenTY = -screenX * (float)Math.sin(angle) + screenY * (float)Math.cos(angle);
 
-        boolean buttonPressedX = buttonTX - touchRange*BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenTX &&
-                screenTX <= buttonTX + touchRange*BUTTON_SCALE*scale*button.getRegionWidth()/2;
+        boolean buttonPressedX = buttonTX - TOUCH_AREA_RATIO*BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenTX &&
+                screenTX <= buttonTX + TOUCH_AREA_RATIO*BUTTON_SCALE*scale*button.getRegionWidth()/2;
         boolean buttonPressedY = buttonTY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenTY &&
                 screenTY <= buttonTY + BUTTON_SCALE*scale*button.getRegionHeight()/2;
 
