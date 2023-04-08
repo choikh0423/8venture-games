@@ -3,10 +3,12 @@ package com.mygdx.game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.util.*;
@@ -64,16 +66,21 @@ public class GameMode implements Screen {
 
     /** The boundary of the world */
     protected Rectangle bounds;
+
     /** The world scale */
     protected Vector2 scale;
 
     /** Whether or not this is an active controller */
     private boolean active;
-    /** Whether we have completed this level */
 
     private boolean debug;
-    /** Whether or not the game is paused */
-    private boolean paused;
+
+    private LevelParser parser;
+
+    private int currentLevel;
+
+    /** reference to asset manager to get level JSON files. */
+    private AssetDirectory directory;
 
     /**
      * Returns true if debug mode is active.
@@ -165,6 +172,7 @@ public class GameMode implements Screen {
         active = false;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
+        this.currentLevel = 1;
 
         // Create the controllers.
         inputController = new InputController();
@@ -183,6 +191,10 @@ public class GameMode implements Screen {
         bounds = null;
         scale  = null;
         canvas = null;
+        parser = null;
+
+        // GameMode does not own the directory, so it does not unload assets
+        directory = null;
     }
 
     /**
@@ -194,18 +206,20 @@ public class GameMode implements Screen {
      * @param directory	Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        // Allocate the tiles
+        this.directory = directory;
+
+        JsonValue worldData = directory.getEntry("global:constants", JsonValue.class).get("world");
+        displayWidth = worldData.get("width").asFloat();
+        displayHeight = worldData.get("height").asFloat();
+
         gameplayController.gatherAssets(directory);
 
-        this.backgroundTexture = gameplayController.getBackgroundTexture();
+        backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
 
-        float[] physicsDim = gameplayController.getPhysicsDims();
-        this.physicsWidth = physicsDim[0];
-        this.physicsHeight = physicsDim[1];
-
-        float[] displayDim = gameplayController.getDisplayDims();
-        this.displayWidth = displayDim[0];
-        this.displayHeight = displayDim[1];
+        // instantiate level parser for loading levels
+        parser = new LevelParser(directory);
+        // pass parser reference to level container to lessen the traffic on GameMode -> Gameplay -> Container.
+        gameplayController.getLevelContainer().setParser(parser);
     }
 
     /**
@@ -214,6 +228,12 @@ public class GameMode implements Screen {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        // level may have changed, parse data
+        // this is instantaneous if the level has been parsed in previous reset.
+        parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+
+        physicsWidth = parser.getWorldSize().x;
+        physicsHeight = parser.getWorldSize().y;
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
@@ -235,9 +255,9 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // TODO: maybe this field is unnecessary since GameMode's update() and draw() are public.
+        // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
         //  screen modes that use GameMode as background can just avoid render()...
-        if (paused){
+        if (!active){
             return false;
         }
 
@@ -314,11 +334,36 @@ public class GameMode implements Screen {
         canvas.begin();
 
         // center a background on player
-        // TODO: make sure to get the right rectangle of the full background.
-        //  For efficiency, DO NOT render the entire background.
-        //  ox and oy denotes the origin of the texture that we sample a rectangle from.
+        // TODO: replace with repeating background?
         canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
                 py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+
+        PlayerModel avatar = gameplayController.getPlayer();
+        // draw texture tiles
+        int centerTileX = (int) (avatar.getX());
+        // invert y because tilesets are stored top down rather than bottom up
+        int centerTileY = (int) avatar.getY();
+        int minX = (int) Math.max(0, centerTileX - displayWidth/2);
+        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2);
+        int minY = (int) Math.max(0, centerTileY - displayHeight/2);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileX + displayWidth/2);
+        // texture tiles are stored row-major order in an array
+        for (TextureRegion[] tiles : parser.getLayers()){
+            // get grid around the player's tile
+            // O(dw * dh)
+            for (int j = minY; j <= maxY; j++){
+                for (int i = minX; i <= maxX; i++){
+                    int idx = j * (int) physicsWidth + i;
+                    if (tiles[idx] != null){
+                        canvas.draw(tiles[idx], Color.WHITE, 0, 0,
+                                 i * scale.x,  j * scale.y,
+                                scale.x,scale.y
+                        );
+                    }
+                }
+            }
+        }
+
 
         // draw all game objects, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
@@ -425,7 +470,7 @@ public class GameMode implements Screen {
     public void pause() {
         // does nothing
         // this only gets called when we minimize the application, we can switch to pause mode that way.
-        paused = true;
+        active = false;
         listener.exitScreen(this, GameMode.EXIT_PAUSE);
     }
 
@@ -444,7 +489,6 @@ public class GameMode implements Screen {
     public void show() {
         // Useless if called in outside animation loop
         active = true;
-        paused = false;
     }
 
     /**
@@ -453,7 +497,6 @@ public class GameMode implements Screen {
     public void hide() {
         // Useless if called in outside animation loop
         active = false;
-        paused = true;
     }
 
     /**
@@ -469,7 +512,7 @@ public class GameMode implements Screen {
      * Sets current level of the game
      */
     public void setLevel(int level){
-        gameplayController.setLevel(level);
+        currentLevel = level;
     }
 
 }

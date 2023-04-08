@@ -10,8 +10,8 @@
     "density": 0.0,
     "friction": 0.0,
     "restitution": 0.0,
-    "width": 2.0,
-    "height": 2.0
+    "width": 4.0,
+    "height": 4.0
   },
   "player": {
     "shrink": [0.7, 0.95],
@@ -46,6 +46,19 @@
       "height" : 0.05
     },
     "texturescale": 0.08333,
-    "closedmomentum": 0.5
+    "closedmomentum": 0.1,
+    "offset": [0.0, 0.26666]
+  },
+  "world": {
+    "max_width": 50.0,
+    "max_height": 40.0,
+    "width": 32.0,
+    "height": 18.0
+  },
+  "hazards": {
+    "birdDamage": 1,
+    "birdSensorRadius": 7,
+    "birdAttackSpeed": 20,
+    "birdKnockback": 5
   }
 }
