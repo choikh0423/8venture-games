@@ -84,23 +84,6 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	private int iFrames;
 
-	/** Player walk film texture */
-	private Texture walkTexture;
-	/** Player walk sprite batch*/
-	private SpriteBatch walkBatch;
-
-	/** Player walk animation frames */
-	private TextureRegion[][] walkTmpFrames;
-
-	/** Player walk animation frames */
-	private TextureRegion[] walkAnimationFrames;
-
-	/** Player walk animation*/
-	private Animation walkAnimation;
-
-	/** Walk animation elapsed time */
-	float walkElapsedTime;
-
 	/** health point texture */
 	private TextureRegion hpTexture;
 
@@ -117,6 +100,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * Swaps between all white and regular */
 	private boolean drawIFrameTexture = true;
 
+	// <=============================== Animation objects start here ===============================>
+	/** Player walk animation filmstrip texture */
+	private Texture walkTexture;
+
+	/** Player walk animation frames */
+	private TextureRegion[][] walkTmpFrames;
+
+	/** Player walk animation frames */
+	private TextureRegion[] walkAnimationFrames;
+
+	/** Player walk animation*/
+	private Animation walkAnimation;
+
+	/** Player walk animation elapsed time */
+	float walkElapsedTime;
 
 	/**
 	 * Returns left/right movement of this character.
@@ -347,11 +345,11 @@ public class PlayerModel extends CapsuleObstacle {
 
 	/**
 	 * Sets player walk animation
-	 * NOTE: This is method specifically for walking animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setWalkAnimation(Texture texture) {
 		this.walkTexture = texture;
-		this.walkTmpFrames = TextureRegion.split(walkTexture, 253, 377);
+		this.walkTmpFrames = TextureRegion.split(walkTexture, 369, 464);
 		this.walkAnimationFrames = new TextureRegion[15];
 
 		// PLacing animation frames in order
@@ -434,7 +432,6 @@ public class PlayerModel extends CapsuleObstacle {
 		setName("player");
 		iFrames = 0;
 
-		walkBatch = new SpriteBatch();
 		walkElapsedTime = 0f;
 	}
 
@@ -573,11 +570,15 @@ public class PlayerModel extends CapsuleObstacle {
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? -1.0f : 1.0f;
 		if (isGrounded() && isMoving()) {
+			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * textureScale, textureScale);
 		} else {
+			// Reset walk animation elapsed time
+			walkElapsedTime = 0f;
+
 			canvas.draw(texture, tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * textureScale, textureScale
