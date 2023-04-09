@@ -102,7 +102,11 @@ public class LevelParser {
 
     private final HashMap<String, JsonValue> tileSetJsonMap;
 
+    /** the list of texture region cutters, one for each tileset */
     private ArrayList<TileSetMaker> tileSetMakers;
+
+    private static final int LOWER28BITMASK = 0xFFFFFFF;
+
 
     /**
      * A TileSetMaker produces texture regions upon request.
@@ -138,13 +142,17 @@ public class LevelParser {
         /**
          * cuts out a region of the texture tileset
          * @param id the associated Id of the desired Tile, where minId <= id <= maxId
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
          * @return a region of the entire texture corresponding to the given Id
          */
-        TextureRegion getRegionFromId(int id){
+        TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
             int col = index % columns;
-            return new TextureRegion(texture, col * width, row * height, width, height);
+            TextureRegion tile = new TextureRegion(texture, col * width, row * height, width, height);
+            tile.flip(flipX, flipY);
+            return tile;
         }
     }
 
@@ -660,17 +668,26 @@ public class LevelParser {
         JsonValue data = layer.get("data");
         TextureRegion[] textures = new TextureRegion[data.size];
         for (int i = 0; i < textures.length; i++){
-            int id = data.get(i).asInt();
-            if (id == 0){
+            // the Tiled ID is a 32-bit UNSIGNED integer
+            long rawId = data.get(i).asLong();
+            if (rawId == 0){
                 continue;
             }
+
+            // actual ID is the lower 28 bits of the Tiled ID
+            int id = (int) (rawId & LOWER28BITMASK);
+            // Bit 32 is used for storing whether the tile is horizontally flipped
+            // Bit 31 is used for the vertically flipped tiles
+            boolean flipX = (rawId & (1L << 31)) != 0;
+            boolean flipY = (rawId & (1L << 30)) != 0;;
+
             // this loop should be fast with small number of tilesets
             for (TileSetMaker tsm : tileSetMakers) {
                 if (id <= tsm.maxId && id >= tsm.minId) {
                     int col = i % (int) worldSize.x;
-                    int row = (int) (worldSize.y - 1 -  i / worldSize.x);
+                    int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
                     int idx = row * (int) worldSize.x + col;
-                    textures[idx] = tsm.getRegionFromId(id);
+                    textures[idx] = tsm.getRegionFromId(id, flipX, flipY);
                     break;
                 }
             }
