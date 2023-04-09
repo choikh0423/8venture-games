@@ -1,6 +1,9 @@
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -32,6 +35,36 @@ public class UmbrellaModel extends BoxObstacle {
 
     /** texture asset for closed umbrella */
     private TextureRegion closedTexture;
+
+    // <=============================== Animation objects start here ===============================>
+    /** checks if the umbrella was opened or closed
+     *  -1: closed, 0: stationary, 1: opened */
+    private int openMode = 0;
+
+    /** Umbrella open film texture */
+    private Texture openAnimationTexture;
+
+    /** Umbrella open animation frames */
+    private TextureRegion[][] openTmpFrames;
+
+    /** Umbrella open animation frames */
+    private TextureRegion[] openAnimationFrames;
+
+    /** Umbrella open animation*/
+    private Animation openAnimation;
+
+    /** Umbrella close animation: Reversed open animation frames */
+    private Animation closeAnimation;
+
+    /** Umbrella open animation elapsed time */
+    float openElapsedTime;
+
+    /** Current remaining frame count for animation */
+    private int currentFrameCount;
+
+    /** Default Animation Frame Count
+     *  NOTE: This needs to change if animation frame duration changes */
+    private int OPEN_ANIMATION_FRAMECOUNT = 18;
 
 
     public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
@@ -93,18 +126,16 @@ public class UmbrellaModel extends BoxObstacle {
      * @param value left/right turning of this umbrella.*/
     public void setTurning(float value){turning = value;}
 
-    /** Applies the force to the body of this umbrella */
-    public void applyForce(){
-        if (!isActive()) {
-            return;
-        }
+    /**
+     * This method is used to count the remaining animation frame count
+     *
+     * @param dt	Number of seconds since last animation frame
+     */
+    public void update(float dt) {
+        // Apply cooldowns
+        if(currentFrameCount!=0) currentFrameCount--;
 
-        //stop turning if not turning
-        if (turning == 0f) setAngularVelocity(0);
-        //clamp angular velocity
-        if (Math.abs(getAngularVelocity()) > (float)2*Math.PI)
-            setAngularVelocity(Math.signum(getAngularVelocity())*2*(float)Math.PI);
-        else body.applyTorque(turning, true);
+        super.update(dt);
     }
 
     /**
@@ -114,7 +145,28 @@ public class UmbrellaModel extends BoxObstacle {
      */
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+
+        if (openMode == -1) {
+            // Playing umbrella close animation
+            openElapsedTime += Gdx.graphics.getDeltaTime();
+            canvas.draw((TextureRegion)closeAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+
+            // Reset to default openMode
+            if (currentFrameCount == 0) {
+                openMode = 0;
+            }
+        } else if (openMode == 1) {
+            // Playing umbrella open animation
+            openElapsedTime += Gdx.graphics.getDeltaTime();
+            canvas.draw((TextureRegion)openAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+
+            // Reset to default openMode
+            if (currentFrameCount == 0) {
+                openMode = 0;
+            }
+        } else if (openMode == 0) {
+            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+        }
     }
 
     /**
@@ -144,13 +196,43 @@ public class UmbrellaModel extends BoxObstacle {
     }
 
     /**
+     * Sets umbrella open animation
+     * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+     * */
+    public void setOpenAnimation(Texture texture) {
+        this.openAnimationTexture = texture;
+        this.openTmpFrames = TextureRegion.split(openAnimationTexture, 469, 469 );
+        this.openAnimationFrames = new TextureRegion[6];
+
+        // Setting animation frames
+        int index = 0;
+        for (int i=0; i<1; i++) {
+            for (int j=0; j<6; j++) {
+                this.openAnimationFrames[index] = openTmpFrames[i][j];
+                index++;
+            }
+        }
+
+        // NOTE: If changing frameDuration, make sure to change OPEN_ANIMATION_FRAMECOUNT accordingly.
+        this.openAnimation = new Animation(1f/20f, openAnimationFrames);
+        openAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+
+        this.closeAnimation = new Animation(1f/20f, openAnimationFrames);
+        closeAnimation.setPlayMode(Animation.PlayMode.REVERSED);
+    }
+
+    /**
      * sets the texture to be opened umbrella for drawing purposes.
      *
      * No update occurs if the current texture is already the opened texture.
      */
     public void useOpenedTexture(){
+        System.out.println("Open");
         if (texture != openTexture){
             setTexture(openTexture);
+            currentFrameCount = OPEN_ANIMATION_FRAMECOUNT;
+            openMode = 1;
+            openElapsedTime = 0;
         }
     }
 
@@ -160,8 +242,12 @@ public class UmbrellaModel extends BoxObstacle {
      * No update occurs if the current texture is already the closed texture
      */
     public void useClosedTexture(){
+        System.out.println("Close");
         if (texture != closedTexture){
             setTexture(closedTexture);
+            currentFrameCount = OPEN_ANIMATION_FRAMECOUNT;
+            openMode = -1;
+            openElapsedTime = 0;
         }
     }
 }
