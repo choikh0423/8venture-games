@@ -121,6 +121,8 @@ public class LevelParser {
         public int maxId;
         private int columns;
         private Texture texture;
+
+        private Texture texture_variant;
         private int width;
         private int height;
 
@@ -131,9 +133,14 @@ public class LevelParser {
             }
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
-            texture = textureMap.get(tileSetJson.getString("name"));
+            String name = tileSetJson.getString("name");
+            texture = textureMap.get(name);
+            texture_variant = textureMap.get(name + "_flipped");
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            if (texture_variant != null){
+                texture_variant.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            }
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
             columns = tileSetJson.getInt("columns");
@@ -142,15 +149,22 @@ public class LevelParser {
         /**
          * cuts out a region of the texture tileset
          * @param id the associated Id of the desired Tile, where minId <= id <= maxId
+         * @param flipD whether to flip the resulting region anti-diagonally
          * @param flipX whether to flip the resulting region horizontally
          * @param flipY whether to flip the resulting region vertically
          * @return a region of the entire texture corresponding to the given Id
          */
-        TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY){
+        TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
             int col = index % columns;
-            TextureRegion tile = new TextureRegion(texture, col * width, row * height, width, height);
+            TextureRegion tile;
+            if (flipD){
+                tile = new TextureRegion(texture_variant, col * width, row * height, width, height);
+            }
+            else {
+                tile = new TextureRegion(texture, col * width, row * height, width, height);
+            }
             tile.flip(flipX, flipY);
             return tile;
         }
@@ -248,8 +262,11 @@ public class LevelParser {
         textureMap = new HashMap<>();
         tileSetJsonMap = new HashMap<>();
         textureMap.put("bushes", directory.getEntry( "tileset:bushes", Texture.class ));
+        textureMap.put("bushes_flipped", directory.getEntry("tileset:bushes_flipped", Texture.class));
         textureMap.put("trees", directory.getEntry( "tileset:trees", Texture.class ));
+        textureMap.put("trees_flipped", directory.getEntry("tileset:trees_flipped", Texture.class));
         textureMap.put("cliffs", directory.getEntry( "tileset:cliffs", Texture.class ));
+        textureMap.put("cliffs_flipped", directory.getEntry("tileset:cliffs_flipped", Texture.class));
         tileSetJsonMap.put("bushes", directory.getEntry("data:bushes", JsonValue.class));
         tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
         tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
@@ -679,7 +696,8 @@ public class LevelParser {
             // Bit 32 is used for storing whether the tile is horizontally flipped
             // Bit 31 is used for the vertically flipped tiles
             boolean flipX = (rawId & (1L << 31)) != 0;
-            boolean flipY = (rawId & (1L << 30)) != 0;;
+            boolean flipY = (rawId & (1L << 30)) != 0;
+            boolean flipD = (rawId & (1L << 29)) != 0;
 
             // this loop should be fast with small number of tilesets
             for (TileSetMaker tsm : tileSetMakers) {
@@ -687,7 +705,7 @@ public class LevelParser {
                     int col = i % (int) worldSize.x;
                     int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
                     int idx = row * (int) worldSize.x + col;
-                    textures[idx] = tsm.getRegionFromId(id, flipX, flipY);
+                    textures[idx] = tsm.getRegionFromId(id, flipD, flipX, flipY);
                     break;
                 }
             }

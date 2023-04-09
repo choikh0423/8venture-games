@@ -33,7 +33,10 @@
         "game:goal": "game/goal.png",
         "tileset:bushes": "levels/tilesets/bushes.png",
         "tileset:trees": "levels/tilesets/trees.png",
-        "tileset:cliffs": "levels/tilesets/cliffs.png"
+        "tileset:cliffs": "levels/tilesets/cliffs.png",
+        "tileset:bushes_flipped": "levels/tilesets/bushes_flipped.png",
+        "tileset:trees_flipped": "levels/tilesets/trees_flipped.png",
+        "tileset:cliffs_flipped": "levels/tilesets/cliffs_flipped.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
