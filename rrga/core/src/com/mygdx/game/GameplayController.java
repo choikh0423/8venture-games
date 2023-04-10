@@ -370,7 +370,7 @@ public class GameplayController implements ContactListener {
             } else {
                 umbrella.useClosedTexture();
                 Body body = avatar.getBody();
-                body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y);
+                body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
             }
         }
         //make player face forward in air
