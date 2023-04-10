@@ -1,12 +1,15 @@
 package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 
 public class BirdHazard extends HazardModel {
+
+    private final int ATTACK_WAIT_TIME = 50;
 
     /**
      * Attack speed of this bird
@@ -68,7 +71,7 @@ public class BirdHazard extends HazardModel {
     /**
      * Which direction is the bird facing
      */
-    private boolean faceRight;
+    public boolean faceRight;
 
     private boolean attack;
 
@@ -82,6 +85,7 @@ public class BirdHazard extends HazardModel {
      */
     public boolean seesTarget;
 
+    public int attackWait;
     /**
      * Direction of the target
      */
@@ -99,6 +103,18 @@ public class BirdHazard extends HazardModel {
      */
     public String getSensorName() {
         return sensorName;
+    }
+
+    public boolean getAttack(){
+        return attack;
+    }
+
+    public float getWidth(){
+        return width;
+    }
+
+    public float getHeight(){
+        return height;
     }
 
     /**
@@ -130,9 +146,11 @@ public class BirdHazard extends HazardModel {
         moveSpeed = data.getInt("movespeed");
         loop = data.getBoolean("loop");
         color = data.getString("color");
+        faceRight = data.getBoolean("facing_right");
         attackSpeed = birdAttackSpeed;
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
+        attackWait = ATTACK_WAIT_TIME;
         sensorName = "birdSensor";
         seesTarget = false;
         faceRight = data.getBoolean("facing_right");
@@ -210,14 +228,16 @@ public class BirdHazard extends HazardModel {
         }
         //else target is seen
         else {
-            //move in direction of targetCoords until offscreen
-            setX(getX() + (targetDir.x / 100));
-            setY(getY() + (targetDir.y / 100));
-            moveDir.set(targetDir);
-            // targetDir is the direction of target relative to bird's location
-            if (targetDir.x > 0) faceRight = true;
-            else faceRight = false;
-            //Need some way to delete when offscreen, should be handled by gamecontroller
+            if(attackWait == -1) {
+                //move in direction of targetCoords until offscreen
+                setX(getX() + (targetDir.x / 100));
+                setY(getY() + (targetDir.y / 100));
+                moveDir.set(targetDir);
+                // targetDir is the direction of target relative to bird's location
+                if (targetDir.x > 0) faceRight = true;
+                else faceRight = false;
+                //Need some way to delete when offscreen, should be handled by gamecontroller
+            }
         }
     }
 
@@ -249,8 +269,25 @@ public class BirdHazard extends HazardModel {
      */
     public void drawDebug(GameCanvas canvas) {
         super.drawDebug(canvas);
-        if(attack) {
+        if (attack) {
             canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
+            //CAN CRASH THE GAME
+            //JUST FOR VISUALIZATION
+            /*
+            Vector2 targ = new Vector2();
+            Vector2 third = new Vector2();
+            Vector2 pos = new Vector2();
+            float x = getX()+getWidth()/2;
+            float y = getY()+getHeight()/2;
+            pos.set(x, y);
+            for (int i = 0; i < 30; i++) {
+                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 30 * i);;
+                third.set(targ).add(.01f, .01f);;
+                PolygonShape line = new PolygonShape();
+                line.set(new Vector2[]{pos, targ, third});
+                canvas.drawPhysics(line, Color.RED, 0, 0, 0, drawScale.x, drawScale.y);
+            }
+            */
         }
     }
 }

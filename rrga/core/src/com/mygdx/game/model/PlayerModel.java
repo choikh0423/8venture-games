@@ -84,25 +84,14 @@ public class PlayerModel extends CapsuleObstacle {
 	 */
 	private int iFrames;
 
-	/** Player walk film texture */
-	private Texture walkTexture;
-	/** Player walk sprite batch*/
-	private SpriteBatch walkBatch;
-
-	/** Player walk animation frames */
-	private TextureRegion[][] walkTmpFrames;
-
-	/** Player walk animation frames */
-	private TextureRegion[] walkAnimationFrames;
-
-	/** Player walk animation*/
-	private Animation walkAnimation;
-
-	/** Walk animation elapsed time */
-	float walkElapsedTime;
-
 	/** health point texture */
-	private TextureRegion hpTexture;
+	private TextureRegion[] hpTexture;
+
+	/** health point temporary texture */
+	private TextureRegion[][] hpTempTexture;
+
+	/** health point texture region film strip */
+	private Texture hpFilmStrip;
 
 	/** The player's front view texture (this is the main texture for air) */
 	private TextureRegion frontTexture;
@@ -117,6 +106,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * Swaps between all white and regular */
 	private boolean drawIFrameTexture = true;
 
+	// <=============================== Animation objects start here ===============================>
+	/** Player walk animation filmstrip texture */
+	private Texture walkTexture;
+
+	/** Player walk animation frames */
+	private TextureRegion[][] walkTmpFrames;
+
+	/** Player walk animation frames */
+	private TextureRegion[] walkAnimationFrames;
+
+	/** Player walk animation*/
+	private Animation walkAnimation;
+
+	/** Player walk animation elapsed time */
+	float walkElapsedTime;
 
 	/**
 	 * Returns left/right movement of this character.
@@ -324,10 +328,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * sets the player's HP texture.
 	 * @param texture the HP texture
 	 */
-	public void setHpTexture(TextureRegion texture){
-		this.hpTexture = texture;
-	}
+	public void setHpTexture(Texture texture){
+		this.hpFilmStrip = texture;
+		hpTempTexture = TextureRegion.split(hpFilmStrip, 250, 250);
+		hpTexture = new TextureRegion[4];
 
+		// Ordering Texture Tile
+		int count = 0;
+		for (int i = 1; i > -1; i--) {
+			for (int j = 1; j > -1; j--){
+				hpTexture[count] = hpTempTexture[i][j];
+				count ++;
+			}
+		}
+
+	}
 
 	/**
 	 * sets the player's in-air texture.
@@ -347,11 +362,11 @@ public class PlayerModel extends CapsuleObstacle {
 
 	/**
 	 * Sets player walk animation
-	 * NOTE: This is method specifically for walking animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setWalkAnimation(Texture texture) {
 		this.walkTexture = texture;
-		this.walkTmpFrames = TextureRegion.split(walkTexture, 253, 377);
+		this.walkTmpFrames = TextureRegion.split(walkTexture, 369, 464);
 		this.walkAnimationFrames = new TextureRegion[15];
 
 		// PLacing animation frames in order
@@ -434,7 +449,6 @@ public class PlayerModel extends CapsuleObstacle {
 		setName("player");
 		iFrames = 0;
 
-		walkBatch = new SpriteBatch();
 		walkElapsedTime = 0f;
 	}
 
@@ -573,11 +587,15 @@ public class PlayerModel extends CapsuleObstacle {
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? -1.0f : 1.0f;
 		if (isGrounded() && isMoving()) {
+			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * textureScale, textureScale);
 		} else {
+			// Reset walk animation elapsed time
+			walkElapsedTime = 0f;
+
 			canvas.draw(texture, tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * textureScale, textureScale
@@ -619,13 +637,14 @@ public class PlayerModel extends CapsuleObstacle {
 		if (hpTexture == null){
 			return;
 		}
-		float height = hpTexture.getRegionHeight();
-		float width = hpTexture.getRegionWidth();
-		float effect = faceRight ? 1.0f : -1.0f;
-		for (int i = 0; i < health; i++){
-			canvas.draw(texture,Color.NAVY,width/2f,height/2f, (i+1)*drawScale.x,
-					canvas.getHeight() - drawScale.y,0,effect*textureScale,textureScale);
-		}
+
+		System.out.println("HI");
+		float height = hpTexture[health].getRegionHeight();
+		float width = hpTexture[health].getRegionWidth();
+
+		// TODO: HP Texture is manually scaled at the moment
+		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
+					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
 
 	}
 	

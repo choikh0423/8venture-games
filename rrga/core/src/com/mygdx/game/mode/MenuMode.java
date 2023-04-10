@@ -214,7 +214,7 @@ public class MenuMode extends MenuScreen {
 
         // TODO: We have to import volumes that are saved by the user
         musicVolume = 1.0f;
-        sfxVolume = 1.0f;
+        sfxVolume = 0.0f;
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {

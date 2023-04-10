@@ -78,10 +78,6 @@ public class LevelContainer{
      */
     private TextureRegion avatarSideTexture;
     /**
-     * Texture asset for avatar walking animation
-     */
-    private Texture avatarWalkTexture;
-    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -112,9 +108,24 @@ public class LevelContainer{
      */
     private TextureRegion goalTexture;
     /**
+     * Texture asset for hp
+     */
+    private Texture hpTexture;
+    /**
      * Texture asset for lightning
      */
     private TextureRegion lightningTexture;
+
+    // Start of animation texture
+    /**
+     * Texture asset for avatar walking animation
+     */
+    private Texture avatarWalkAnimationTexture;
+    /**
+     * Texture asset for umbrella open animation
+     */
+    private Texture umbrellaOpenAnimationTexture;
+
     //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
 
@@ -186,22 +197,27 @@ public class LevelContainer{
     public void gatherAssets(AssetDirectory directory) {
         globalConstants = directory.getEntry( "global:constants", JsonValue.class);
 
+        // Player Component Textures
         platformTile = new TextureRegion(directory.getEntry("game:newplatform", Texture.class));
-        avatarWalkTexture = directory.getEntry("game:player_walk", Texture.class);
         avatarSideTexture = new TextureRegion(directory.getEntry("game:player", Texture.class));
         avatarFrontTexture = new TextureRegion(directory.getEntry("game:front", Texture.class));
         umbrellaOpenTexture = new TextureRegion(directory.getEntry("game:umbrella", Texture.class));
         umbrellaClosedTexture = new TextureRegion(directory.getEntry("game:closed", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("game:wind", Texture.class));
+        goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
+        hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
 
-        // get all bird textures
+        // Hazard Textures
         redBirdTexture = new TextureRegion(directory.getEntry("game:red_bird", Texture.class));
         blueBirdTexture = new TextureRegion(directory.getEntry("game:blue_bird", Texture.class));
         brownBirdTexture = new TextureRegion(directory.getEntry("game:brown_bird", Texture.class));
-
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
-        goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
-        // fonts
+
+        // Animation Textures
+        avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
+        umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+
+        // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
     /**
@@ -365,8 +381,8 @@ public class LevelContainer{
         avatar.setSideTexture(avatarSideTexture);
         avatar.useSideTexture();
         // TODO: (technical) load an HP texture and set texture here
-        avatar.setHpTexture(avatarSideTexture);
-        avatar.setWalkAnimation(avatarWalkTexture);
+        avatar.setHpTexture(hpTexture);
+        avatar.setWalkAnimation(avatarWalkAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
@@ -386,6 +402,7 @@ public class LevelContainer{
         umbrella.setClosedTexture(umbrellaClosedTexture);
         // TODO: (design) maybe default to closed umbrella at initial state
         umbrella.useOpenedTexture();
+        umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
     }

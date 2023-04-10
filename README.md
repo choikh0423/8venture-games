@@ -1,50 +1,41 @@
 # 8venture-games
 ## Game Description
-Rain, Rain, Go Away is a puzzle platformer in which the player's primary mechanism of movement is parachute physics represented by an umbrella catching gusts of wind. By aiming their umbrella in the right position at the right time, the player is able to propel themselves from platform to platform. They must also be aware of hazards that can inhibit their progress or damage the umbrella.
+Gale is a puzzle platformer in which the player's primary mechanism of movement is parachute physics represented by an umbrella catching gusts of wind. By aiming their umbrella in the right position at the right time, the player is able to propel themselves from platform to platform. They must also be aware of hazards that can inhibit their progress or damage the umbrella.
 
-## External Links
-Team Notion: https://glen-crabapple-3a3.notion.site/Essentials-1095ec178b324087bc984890605b5b20
-
-Programming Sprint Board: https://glen-crabapple-3a3.notion.site/84f28aac67f1412ca7d8f1563ed1392e?v=63916ed0dc8a4220a1dfec5196c8d02e
-
-API Documentation for Designers: https://glen-crabapple-3a3.notion.site/API-Documentation-for-Design-Team-bc768fd29d5c4cbdb35d02380e9d778c
+---
 
 ## Getting Started
-1. Open project with build.gradle > "Open as Project"
-2. Edit Configuration > Add Configuration
-3. "Add New" > Application
-4. Change the configuration setting to following:
-  - name: rrga, 
-  - cp "rrga.desktop.main"
-  - java version: java11
-  - main class: desktoplauncher
-  - working directory: rrga/assets
-5. Press OK > Build/Run
+1. Clone this repository
+2. On Intellij: Open project with build.gradle, then press "Open as Project"
+3. Add new run configuration: Press "Edit Configuration Button," then press "Add Configuration" (Note: You might have to press build on the build panel on libgdx
+4. Modify configuration option: Modify the configuration to the following detail:
+  - Name: Gale
+  - Java Version: Java11
+  - Class Path: -cp "rrga.desktop.main"
+  - If using macbook, add VM Options: -XstartOnFirstThread
+  - Main Class: com.mygdx.game.DesktopLauncher
+  - Working Directory: 8venture-games/rrga/assets
+5. Confirming configuration and run game: Press "OK," then press "Build/Run"
 
-## Running Executables
-For MacOS:
-java -XstartOnFirstThread -jar rrga_gameplay_prototype.jar
+## Running the Game Release
+1. Download one of the relases on our github.
+2. Run the following comment below on the jar file that is contained within the release.
+3. Read the readme.txt for details on controls and game features.
+
+For MacOS *Be sure to add "-XstartOnFirstThread"*:
+java -XstartOnFirstThread -jar [file_name].jar
 
 For Windows:
-java -jar rrga_gameplay_prototype.jar
+java -jar [file_name].jar
 
-## Basic Architecture
-**GameMode**
-- State Controls
-- Gather all assets - calls GameplayController gather function
-- Draws everything
-- Performs Update on Every Components
 
-**GameplayController**
-- Create Objects - Walls, Platform, Player (aka. everything)
-- Enumerates/Add/delete Objects
-- Apply Gravity and Force --> Enforce Interaction
-- Gather Gameplay-specific Assets
+---
+## Features
+To be updated.
 
-**CollisionController**
-Might not be needed according to the role of GameplayController.
-- Process/Handles Collision 
-- Process/Handles Bounds
-- Handle Vector Field Force application
-
-![IMG_D33AB56CBC9C-1](https://user-images.githubusercontent.com/57926472/222020256-adc39bd3-973e-4638-b9fb-5a046d6c2b9c.jpeg)
+---
+## Contributors
+* Kyu Hwan Choi: Programming Lead
+* Miguel Amor: Programmer (Add your highlights here!)
+* Zhiyuan Chen: Programmer (Add your highlights here!)
+* Benjamin Nozik: Programmer (Add your highlights here!)
