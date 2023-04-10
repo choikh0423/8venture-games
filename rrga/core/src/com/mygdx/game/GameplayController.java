@@ -234,9 +234,9 @@ public class GameplayController implements ContactListener {
     private long plopId = -1;
 
     /**
-     * The default sound volume
+     * The background music volume
      */
-    private float volume;
+    private float musicVolume = 1.0f;
     // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
 
 
@@ -318,6 +318,7 @@ public class GameplayController implements ContactListener {
 
         backgroundMusic.stop();
         backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
     }
 
