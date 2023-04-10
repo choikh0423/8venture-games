@@ -63,7 +63,7 @@ public class UmbrellaModel extends BoxObstacle {
         }
 
         FixtureDef sensorDef = new FixtureDef();
-        Vector2 sensorCenter = new Vector2(0, 6*getHeight()/16);
+        Vector2 sensorCenter = new Vector2(0, 1*getHeight()/8);
         sensorDef.density = 0;
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
