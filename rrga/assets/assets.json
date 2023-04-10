@@ -56,6 +56,7 @@
         "data:cliffs": "levels/tilesets/cliffs.json"
     },
     "sounds" : {
+      "sound:wind_strong": "sound/wind_strong.wav"
     },
     "music" : {
       "music:menu": "music/menu.wav",

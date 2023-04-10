@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.*;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.BirdRayCastCallback;
 import com.mygdx.game.model.hazard.HazardModel;
@@ -117,6 +117,21 @@ public class GameplayController implements ContactListener {
 
     /** Background music */
     private Music backgroundMusic;
+
+    /** Strong Wind Sound Effect */
+    private Sound windStrongSFX;
+
+    /** Strong Wind Sound Effect Current Frame*/
+    private int windStrongFrame = 0;
+
+    /** Strong Wind Sound Effect Duration Frame */
+    //TODO: This needs to be meticulously calculated later
+    private int WIND_STRONG_DURATION = 60;
+    /** Boolean to check if previously was in wind */
+    //TODO: This needs to be meticulously calculated later
+    private boolean prevInWind = false;
+
+
 
 
     // <=============================== Physics objects for the game BEGINS here ===============================>
@@ -237,10 +252,11 @@ public class GameplayController implements ContactListener {
     private long fireId = -1;
     private long plopId = -1;
 
-    /**
-     * The background music volume
-     */
-    private float musicVolume = 1.0f;
+    /** The background music volume */
+    private float musicVolume = 0.5f;
+    /** The sound effects volume */
+    private float SFXVolume = 0.5f;
+
     // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
 
 
@@ -279,6 +295,7 @@ public class GameplayController implements ContactListener {
         // Level container gather assets
         levelContainer.gatherAssets(directory);
         backgroundMusic = directory.getEntry("music:level0", Music.class);
+        windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -423,7 +440,27 @@ public class GameplayController implements ContactListener {
             }
         }
         if(count!=0){
+            // TODO: We might want to make a separate update loop for sounds
+
+            // Play Strong Wind SFX
+            if (windStrongFrame == 0 && !prevInWind) {
+                windStrongSFX.stop();
+                windStrongSFX.play(SFXVolume);
+                windStrongFrame = WIND_STRONG_DURATION;
+
+                // To prevent repeat all the time - only if you go out and come back in
+                prevInWind = true;
+            } else {
+                windStrongFrame --;
+            }
+
             avatar.applyWindForce(windForce.x/count, windForce.y/count);
+        } else {
+            // Gradually Reset Strong Wind SFX
+            if (windStrongFrame > 0) {
+                windStrongFrame--;
+            }
+            prevInWind = false;
         }
         contactWindBod.clear();
         windForce.set(0,0);

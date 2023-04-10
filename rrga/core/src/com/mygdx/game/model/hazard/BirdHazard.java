@@ -136,7 +136,6 @@ public class BirdHazard extends HazardModel {
     public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
         super(data, shape, birdDamage, birdKnockback);
 
-        System.out.println(data);
         //may need to change depending on shape of bird
         width = shape[4] - shape[0];
         height = shape[5] - shape[1];

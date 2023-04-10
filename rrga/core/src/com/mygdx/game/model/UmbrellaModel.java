@@ -227,7 +227,6 @@ public class UmbrellaModel extends BoxObstacle {
      * No update occurs if the current texture is already the opened texture.
      */
     public void useOpenedTexture(){
-        System.out.println("Open");
         if (texture != openTexture){
             setTexture(openTexture);
             currentFrameCount = OPEN_ANIMATION_FRAMECOUNT;
@@ -242,7 +241,6 @@ public class UmbrellaModel extends BoxObstacle {
      * No update occurs if the current texture is already the closed texture
      */
     public void useClosedTexture(){
-        System.out.println("Close");
         if (texture != closedTexture){
             setTexture(closedTexture);
             currentFrameCount = OPEN_ANIMATION_FRAMECOUNT;
