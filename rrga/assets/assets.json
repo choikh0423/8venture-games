@@ -26,7 +26,8 @@
             "wrapV": "repeated"
         },
         "game:player": "game/player.png",
-        "game:player_walk": "game/player_walk.png",
+        "game:player_walk_animation": "game/player_walk_filmstrip.png",
+        "game:umbrella_open_animation": "game/umbrella_open_filmstrip.png",
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
