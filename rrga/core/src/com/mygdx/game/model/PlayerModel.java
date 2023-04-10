@@ -85,7 +85,13 @@ public class PlayerModel extends CapsuleObstacle {
 	private int iFrames;
 
 	/** health point texture */
-	private TextureRegion hpTexture;
+	private TextureRegion[] hpTexture;
+
+	/** health point temporary texture */
+	private TextureRegion[][] hpTempTexture;
+
+	/** health point texture region film strip */
+	private Texture hpFilmStrip;
 
 	/** The player's front view texture (this is the main texture for air) */
 	private TextureRegion frontTexture;
@@ -322,10 +328,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * sets the player's HP texture.
 	 * @param texture the HP texture
 	 */
-	public void setHpTexture(TextureRegion texture){
-		this.hpTexture = texture;
-	}
+	public void setHpTexture(Texture texture){
+		this.hpFilmStrip = texture;
+		hpTempTexture = TextureRegion.split(hpFilmStrip, 250, 250);
+		hpTexture = new TextureRegion[4];
 
+		// Ordering Texture Tile
+		int count = 0;
+		for (int i = 1; i > -1; i--) {
+			for (int j = 1; j > -1; j--){
+				hpTexture[count] = hpTempTexture[i][j];
+				count ++;
+			}
+		}
+
+	}
 
 	/**
 	 * sets the player's in-air texture.
@@ -620,13 +637,14 @@ public class PlayerModel extends CapsuleObstacle {
 		if (hpTexture == null){
 			return;
 		}
-		float height = hpTexture.getRegionHeight();
-		float width = hpTexture.getRegionWidth();
-		float effect = faceRight ? 1.0f : -1.0f;
-		for (int i = 0; i < health; i++){
-			canvas.draw(texture,Color.NAVY,width/2f,height/2f, (i+1)*drawScale.x,
-					canvas.getHeight() - drawScale.y,0,effect*textureScale,textureScale);
-		}
+
+		System.out.println("HI");
+		float height = hpTexture[health].getRegionHeight();
+		float width = hpTexture[health].getRegionWidth();
+
+		// TODO: HP Texture is manually scaled at the moment
+		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
+					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
 
 	}
 	

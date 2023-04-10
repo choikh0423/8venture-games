@@ -108,6 +108,10 @@ public class LevelContainer{
      */
     private TextureRegion goalTexture;
     /**
+     * Texture asset for hp
+     */
+    private Texture hpTexture;
+    /**
      * Texture asset for lightning
      */
     private TextureRegion lightningTexture;
@@ -201,6 +205,7 @@ public class LevelContainer{
         umbrellaClosedTexture = new TextureRegion(directory.getEntry("game:closed", Texture.class));
         windTexture = new TextureRegion(directory.getEntry("game:wind", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
+        hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
 
         // Hazard Textures
         redBirdTexture = new TextureRegion(directory.getEntry("game:red_bird", Texture.class));
@@ -376,7 +381,7 @@ public class LevelContainer{
         avatar.setSideTexture(avatarSideTexture);
         avatar.useSideTexture();
         // TODO: (technical) load an HP texture and set texture here
-        avatar.setHpTexture(avatarSideTexture);
+        avatar.setHpTexture(hpTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
