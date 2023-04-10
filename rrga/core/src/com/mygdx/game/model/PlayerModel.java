@@ -638,7 +638,6 @@ public class PlayerModel extends CapsuleObstacle {
 			return;
 		}
 
-		System.out.println("HI");
 		float height = hpTexture[health].getRegionHeight();
 		float width = hpTexture[health].getRegionWidth();
 
