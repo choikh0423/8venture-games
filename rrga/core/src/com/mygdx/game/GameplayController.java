@@ -495,8 +495,8 @@ public class GameplayController implements ContactListener {
 
             //send out rays and check for collisions with player
             if(bird.getAttack()) {
-                float x = bird.getX()+bird.getWidth()/2;
-                float y = bird.getY()+bird.getHeight()/2;
+                float x = bird.getX();
+                float y = bird.getY();
                 pos.set(x, y);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();

@@ -135,8 +135,6 @@ public class BirdHazard extends HazardModel {
 
     public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
         super(data, shape, birdDamage, birdKnockback);
-
-        System.out.println(data);
         //may need to change depending on shape of bird
         width = shape[4] - shape[0];
         height = shape[5] - shape[1];
@@ -256,7 +254,7 @@ public class BirdHazard extends HazardModel {
         float effect = faceRight ? -1.0f : 1.0f;
         float birdScale = .15f;
         canvas.draw(texture, Color.WHITE, origin.x, origin.y,
-                (getX() + width/2) * drawScale.x, (getY() + height/2) * drawScale.y,
+                (getX()) * drawScale.x, (getY()) * drawScale.y,
                 getAngle(), effect * birdScale, birdScale);
     }
 
