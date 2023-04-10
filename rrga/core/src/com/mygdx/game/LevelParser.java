@@ -353,12 +353,9 @@ public class LevelParser {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
             String template = obj.getString("template", "IGNORE");
-            if (template.equals("IGNORE")){
-                continue;
-            }
             if (template.contains("bird.json")) {
                 birdRawData.add(obj);
-            } else if (template.contains("platform.json")) {
+            } else if (template.contains("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
                 platformRawData.add(obj);
             } else if (template.contains("lightning.json")) {
                 lightningRawData.add(obj);
