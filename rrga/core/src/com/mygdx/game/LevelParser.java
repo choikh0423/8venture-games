@@ -122,7 +122,7 @@ public class LevelParser {
         private int columns;
         private Texture texture;
 
-        private Texture texture_variant;
+        private Texture textureVariant;
         private int width;
         private int height;
 
@@ -135,11 +135,11 @@ public class LevelParser {
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
             texture = textureMap.get(name);
-            texture_variant = textureMap.get(name + "_flipped");
+            textureVariant = textureMap.get(name + "_flipped");
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            if (texture_variant != null){
-                texture_variant.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            if (textureVariant != null){
+                textureVariant.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             }
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
@@ -160,7 +160,7 @@ public class LevelParser {
             int col = index % columns;
             TextureRegion tile;
             if (flipD){
-                tile = new TextureRegion(texture_variant, col * width, row * height, width, height);
+                tile = new TextureRegion(textureVariant, col * width, row * height, width, height);
             }
             else {
                 tile = new TextureRegion(texture, col * width, row * height, width, height);
@@ -379,6 +379,15 @@ public class LevelParser {
     }
 
     /**
+     * red birds face to the right, all others to the left.
+     * @param color the color {"red", "blue", "brown"}
+     * @return whether the bird asset is facing to the right
+     */
+    private boolean isBirdInitiallyFacingRight(String color){
+        return color.equals("red");
+    }
+
+    /**
      * Convert raw bird JSON into game-expected JSON format.
      * @param rawData the unprocessed bird object data
      * @param trajectory map of path node Ids to raw JSON
@@ -394,7 +403,7 @@ public class LevelParser {
             String color = computeColor(variant);
             // set deterministic trivial properties
             data.addChild("color", new JsonValue(color));
-            data.addChild("attack", new JsonValue(color.equals("brown") || color.equals("red")));
+            data.addChild("attack", new JsonValue(color.equals("brown") || color.equals("blue")));
             // set position data
             readPositionAndConvert(b, temp);
             addPosition(data, temp);
@@ -407,15 +416,20 @@ public class LevelParser {
             JsonValue properties = b.get("properties");
             JsonValue defaults = getBirdDefaults(color);
             boolean loop = false;
-            float movespeed = 0;
-            float atkspeed = 0;
+            float moveSpeed = 0;
+            float atkSpeed = 0;
             // add whether facing right
-            data.addChild("facing_right", new JsonValue(getFromProperties(properties, "facing_right", defaults).asBoolean()));
+            boolean facingRight = isBirdInitiallyFacingRight(color);
+            boolean horizontalFlipped = (b.getLong("gid", 0) & 1L << 31) != 0;
+            // XOR(flip, facingRight)
+            facingRight = horizontalFlipped ^ facingRight;
+            data.addChild("facing_right", new JsonValue(facingRight));
 
-            if (color.equals("blue") || color.equals("brown")){
+            // path birds are red and brown
+            if (color.equals("red") || color.equals("brown")){
                 // update properties
                 loop = getFromProperties(properties, "loop", defaults).asBoolean();
-                movespeed = getFromProperties(properties, "move_speed", defaults).asFloat();
+                moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
                 // using custom properties to find rest of path
                 HashSet<Integer> seen = new HashSet<>();
                 // this takes either the bird's next point along its path or take from default (which should be 0)
@@ -435,13 +449,14 @@ public class LevelParser {
                     next = jsonId.asInt();
                 }
             }
-            if (color.equals("brown") || color.equals("red")){
-                atkspeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
+            // attack birds are blue and brown
+            if (color.equals("brown") || color.equals("blue")){
+                atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
             }
             data.addChild("path", pathJson);
             data.addChild("loop", new JsonValue(loop));
-            data.addChild("movespeed", new JsonValue(movespeed));
-            data.addChild("atkspeed", new JsonValue(atkspeed));
+            data.addChild("movespeed", new JsonValue(moveSpeed));
+            data.addChild("atkspeed", new JsonValue(atkSpeed));
             data.addChild("points", birdPoints);
             birdData[ii] = data;
         }

@@ -120,6 +120,7 @@ public class BirdHazard extends HazardModel {
     public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
         super(data, shape, birdDamage, birdKnockback);
 
+        System.out.println(data);
         //may need to change depending on shape of bird
         width = shape[4] - shape[0];
         height = shape[5] - shape[1];
@@ -134,7 +135,7 @@ public class BirdHazard extends HazardModel {
         currentPathIndex = 0;
         sensorName = "birdSensor";
         seesTarget = false;
-        faceRight = true;
+        faceRight = data.getBoolean("facing_right");
         fixture.isSensor = true;
     }
 
@@ -161,7 +162,7 @@ public class BirdHazard extends HazardModel {
     public void move() {
         //if target not seen
         if (!seesTarget) {
-            if(color.equals("blue") || color.equals("brown")) {
+            if(moveSpeed > 0) {
                 float pathX = path[currentPathIndex];
                 float pathY = path[currentPathIndex + 1];
                 float moveX = pathX - getX();

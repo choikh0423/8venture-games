@@ -9,12 +9,7 @@
              "name":"atk_speed",
              "type":"int",
              "value":20
-            }, 
-            {
-             "name":"facing_right",
-             "type":"bool",
-             "value":false
-            }, 
+            },
             {
              "name":"move_speed",
              "type":"int",
