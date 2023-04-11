@@ -441,9 +441,8 @@ public class GameplayController implements ContactListener {
         }
         if(count!=0){
             // TODO: We might want to make a separate update loop for sounds
-
             // Play Strong Wind SFX
-            if (windStrongFrame == 0 && !prevInWind) {
+            if (windStrongFrame < 0 && !prevInWind) {
                 windStrongSFX.stop();
                 windStrongSFX.play(SFXVolume);
                 windStrongFrame = WIND_STRONG_DURATION;
