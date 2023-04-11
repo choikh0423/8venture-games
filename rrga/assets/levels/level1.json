@@ -459,6 +459,7 @@
                          "y":-50.5
                         }],
                  "template":"templates\/platform.json",
+                 "visible":true,
                  "x":1934,
                  "y":4080
                 }, 
@@ -504,8 +505,8 @@
                  "id":63,
                  "rotation":308,
                  "template":"templates\/wind_dir.json",
-                 "x":2306.20733321808,
-                 "y":4731.26869423744
+                 "x":2281.51597519339,
+                 "y":4709.04647201522
                 }, 
                 {
                  "id":64,
@@ -672,6 +673,7 @@
                  "y":3844
                 }, 
                 {
+                 "gid":2147483653,
                  "id":73,
                  "properties":[
                         {
@@ -826,10 +828,19 @@
                 }, 
                 {
                  "id":85,
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":0,
+                         "y":-562.231175999328
+                        }],
                  "rotation":308,
                  "template":"templates\/wind_dir.json",
-                 "x":3262.48462121212,
-                 "y":3345.5558030303
+                 "x":3292.94894425291,
+                 "y":3284.02795290217
                 }, 
                 {
                  "id":86,
@@ -862,10 +873,19 @@
                 }, 
                 {
                  "id":87,
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":0,
+                         "y":-449.509325640913
+                        }],
                  "rotation":40,
                  "template":"templates\/wind_dir.json",
-                 "x":1541.60594748051,
-                 "y":2841.04801342453
+                 "x":1603.79794426429,
+                 "y":2770.76734924243
                 }, 
                 {
                  "id":92,
@@ -943,6 +963,12 @@
                 }, 
                 {
                  "id":93,
+                 "properties":[
+                        {
+                         "name":"atk_speed",
+                         "type":"int",
+                         "value":10
+                        }],
                  "template":"templates\/blue_bird.json",
                  "x":3720,
                  "y":2944
@@ -981,10 +1007,19 @@
                 }, 
                 {
                  "id":96,
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":0,
+                         "y":-496.273842351766
+                        }],
                  "rotation":-45,
                  "template":"templates\/wind_dir.json",
-                 "x":3706.60583333333,
-                 "y":4637.19216666667
+                 "x":3690.73324553042,
+                 "y":4650.78037092793
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -996,7 +1031,7 @@
  "nextobjectid":97,
  "orientation":"orthogonal",
  "renderorder":"right-up",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -1017,6 +1052,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":32
 }

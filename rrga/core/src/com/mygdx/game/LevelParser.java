@@ -237,9 +237,9 @@ public class LevelParser {
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
 
-        redBirdDefaults = redBirdTemplate.get("object").get("properties");
-        blueBirdDefaults = blueBirdTemplate.get("object").get("properties");
-        brownBirdDefaults = brownBirdTemplate.get("object").get("properties");
+        redBirdDefaults = redBirdTemplate.get("object");
+        blueBirdDefaults = blueBirdTemplate.get("object");
+        brownBirdDefaults = brownBirdTemplate.get("object");
         pointDefault = pathPointTemplate.get("object").get("properties");
         lightningDefault = lightningTemplate.get("object").get("properties");
         lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
@@ -385,6 +385,24 @@ public class LevelParser {
     }
 
     /**
+     * put bird's hitbox shrink factors into vector cache.
+     * @param color the color {"red", "blue", "brown"}
+     */
+    private void loadShrinkFactors(String color){
+        if (color.equals("red")){
+            temp.x = 45f/164f;
+            temp.y = 47f/164f;
+        } else if (color.equals("brown")){
+            temp.x = 220f/230f;
+            temp.y = 42f/90f;
+        }else {
+            // blue
+            temp.x = 155f/230f;
+            temp.y = 54f/90f;
+        }
+    }
+
+    /**
      * Convert raw bird JSON into game-expected JSON format.
      * @param rawData the unprocessed bird object data
      * @param trajectory map of path node Ids to raw JSON
@@ -409,9 +427,9 @@ public class LevelParser {
             // implicitly, the bird's location is the FIRST point on their path.
             pathJson.addChild(new JsonValue(temp.x));
             pathJson.addChild(new JsonValue(temp.y));
-
             JsonValue properties = b.get("properties");
-            JsonValue defaults = getBirdDefaults(color);
+            JsonValue defaultObj = getBirdDefaults(color);
+            JsonValue defaults = defaultObj.get("properties");
             boolean loop = false;
             float moveSpeed = 0;
             float atkSpeed = 0;
@@ -421,6 +439,18 @@ public class LevelParser {
             // XOR(flip, facingRight)
             facingRight = horizontalFlipped ^ facingRight;
             data.addChild("facing_right", new JsonValue(facingRight));
+            // TODO: retrieve bounding box size and make hitbox
+            JsonValue widthJson = b.get("width") == null ? defaultObj.get("width") : b.get("width");
+            JsonValue heightJson = b.get("height") == null ? defaultObj.get("height") : b.get("height");
+            float width = widthJson.asFloat() / tileScale.x;
+            float height = heightJson.asFloat() / tileScale.y;
+            data.addChild("width", new JsonValue(width));
+            data.addChild("height", new JsonValue(height));
+//            loadShrinkFactors(color);
+//            width *= temp.x;
+//            height *= temp.y;
+//            JsonValue shape = new JsonValue(JsonValue.ValueType.array);
+
 
             // path birds are red and brown
             if (color.equals("red") || color.equals("brown")){
@@ -617,7 +647,7 @@ public class LevelParser {
     }
 
     /**
-     * returns the defaults (the entire custom properties)
+     * returns the bird defaults (the entire bird object)
      * @param color the color of the bird
      * @return default JsonValue for the given bird variant
      */

@@ -79,6 +79,8 @@ public class GameMode implements Screen {
 
     private int currentLevel;
 
+    private BitmapFont debugFont;
+
     /** reference to asset manager to get level JSON files. */
     private AssetDirectory directory;
 
@@ -215,6 +217,7 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
+        debugFont = directory.getEntry("shared:retro", BitmapFont.class);
 
         // instantiate level parser for loading levels
         parser = new LevelParser(directory);
@@ -386,6 +389,13 @@ public class GameMode implements Screen {
         PlayerModel p = gameplayController.getPlayer();
         canvas.begin();
         p.drawInfo(canvas);
+        // debug information on screen to track FPS, etc
+        if (debug){
+            debugFont.setColor(Color.BLACK);
+            canvas.drawText("FPS:" + (int) (1/dt), debugFont, 0.05f*canvas.getWidth(), 0.95f*canvas.getHeight());
+            canvas.drawText("X:" + p.getX(), debugFont, 0.05f*canvas.getWidth(), 0.8f*canvas.getHeight());
+            canvas.drawText("Y:" + p.getY(), debugFont, 0.05f*canvas.getWidth(), 0.65f*canvas.getHeight());
+        }
         canvas.end();
     }
 

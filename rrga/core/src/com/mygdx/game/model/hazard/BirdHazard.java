@@ -14,7 +14,7 @@ public class BirdHazard extends HazardModel {
     /**
      * Attack speed of this bird
      */
-    private final int attackSpeed;
+    private final float attackSpeed;
 
     /**
      * Radius of a bird's sensor
@@ -124,7 +124,7 @@ public class BirdHazard extends HazardModel {
         //Right now using euler's method to determine target direction
         //In the future might want to switch to tracking player's location up to a certain point
         //and incrementally adjusting direction.
-        float timestep = (float) sensorRadius / attackSpeed;
+        float timestep = sensorRadius / attackSpeed;
         float moveX = tx - getX() + (tvx * timestep);
         float moveY = ty - getY() + (tvy * timestep);
         move.set(moveX, moveY);
@@ -133,11 +133,12 @@ public class BirdHazard extends HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, int birdAttackSpeed, float birdKnockback) {
+    public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, float birdKnockback) {
         super(data, shape, birdDamage, birdKnockback);
-        //may need to change depending on shape of bird
-        width = shape[4] - shape[0];
-        height = shape[5] - shape[1];
+        //this is the bounding box dimensions of the texture (not exactly for brown birds because they were cropped in Tiled)
+        //TODO: fix brown bird (Tiled parsing data)
+        width = data.getFloat("width");
+        height = data.getFloat("height");
 
         path = data.get("path").asFloatArray();
         attack = data.getBoolean("attack");
@@ -145,7 +146,7 @@ public class BirdHazard extends HazardModel {
         loop = data.getBoolean("loop");
         color = data.getString("color");
         faceRight = data.getBoolean("facing_right");
-        attackSpeed = birdAttackSpeed;
+        attackSpeed = data.getFloat("atkspeed");
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
         attackWait = ATTACK_WAIT_TIME;
@@ -252,7 +253,7 @@ public class BirdHazard extends HazardModel {
     public void draw(GameCanvas canvas) {
         // TODO: birds should also be mirrored when facing opposite directions
         float effect = faceRight ? -1.0f : 1.0f;
-        float birdScale = .15f;
+        float birdScale = .2f;
         canvas.draw(texture, Color.WHITE, origin.x, origin.y,
                 (getX()) * drawScale.x, (getY()) * drawScale.y,
                 getAngle(), effect * birdScale, birdScale);

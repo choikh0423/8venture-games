@@ -309,13 +309,12 @@ public class LevelContainer{
         JsonValue[] birdData = parser.getBirdData();
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
-        int birdAttackSpeed = hazardsjv.getInt("birdAttackSpeed");
         float birdKnockback = hazardsjv.getInt("birdKnockback");
         float[] birdShape = hazardsjv.get("birdShape").asFloatArray();
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdShape, birdDamage, birdSensorRadius, birdAttackSpeed, birdKnockback);
+            obj = new BirdHazard(jv, birdShape, birdDamage, birdSensorRadius, birdKnockback);
             obj.setDrawScale(scale);
             obj.setTexture(getBirdTexture(jv.getString("color", "red")));
             obj.setOriginCenter();
