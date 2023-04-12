@@ -106,6 +106,12 @@ public class PlayerModel extends CapsuleObstacle {
 	 * Swaps between all white and regular */
 	private boolean drawIFrameTexture = true;
 
+	/** The magnitude of the lighter force */
+	private float lighterForce;
+	private final float maxLighterFuel;
+	private float lighterFuel;
+	private float lighterChangeRate;
+
 	// <=============================== Animation objects start here ===============================>
 	/** Player walk animation filmstrip texture */
 	private Texture walkTexture;
@@ -437,6 +443,10 @@ public class PlayerModel extends CapsuleObstacle {
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
 		sensorName = "PlayerGroundSensor";
+		lighterForce = data.getFloat("lighter_force");
+		maxLighterFuel = data.getFloat("lighter_fuel");
+		lighterFuel = maxLighterFuel;
+		lighterChangeRate = data.getFloat("lighter_change_rate");
 		this.data = data;
 
 		// Gameplay attributes
@@ -533,7 +543,7 @@ public class PlayerModel extends CapsuleObstacle {
 		if (!isActive()) {
 			return;
 		}
-
+		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
 		}
@@ -563,6 +573,40 @@ public class PlayerModel extends CapsuleObstacle {
 			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2+1 : 1.0f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
+		}
+	}
+
+	/**
+	 * Applies lighter force to the body of this player.
+	 */
+	public void applyLighterForce(float umbAng) {
+		if(lighterFuel > 0) {
+			lighterFuel -= lighterChangeRate;
+			float umbrellaX = (float) Math.cos(umbAng);
+			float umbrellaY = (float) Math.sin(umbAng);
+			//determine X
+			if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+				setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
+				forceCache.x = 0;
+			}
+			else {
+				forceCache.x = umbrellaX * lighterForce;
+			}
+			//determine Y
+			if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+				setVY(Math.signum(getVY())*getMaxSpeedUp());
+				forceCache.y = 0;
+			} else {
+				forceCache.y = umbrellaY * lighterForce;
+			}
+			body.applyForce(forceCache, getPosition(), true);
+		}
+	}
+
+	public void refillLighter(){
+		if(lighterFuel != maxLighterFuel){
+			if(lighterFuel + lighterChangeRate > maxLighterFuel) lighterFuel = maxLighterFuel;
+			else lighterFuel += lighterChangeRate;
 		}
 	}
 
@@ -634,16 +678,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param canvas the game canvas
 	 */
 	public void drawInfo(GameCanvas canvas){
+		// draw health info
 		if (hpTexture == null){
 			return;
 		}
-
 		float height = hpTexture[health].getRegionHeight();
 		float width = hpTexture[health].getRegionWidth();
 
 		// TODO: HP Texture is manually scaled at the moment
 		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
 					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+
+		// draw lighter info
+		float lighter_capac = lighterFuel / maxLighterFuel;
+		canvas.drawText(Float.toString(lighter_capac), healthFont, 10,
+				canvas.getHeight() - 70);
 
 	}
 	
