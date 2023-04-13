@@ -175,7 +175,8 @@ public class BirdHazard extends HazardModel {
         //Right now using euler's method to determine target direction
         //In the future might want to switch to tracking player's location up to a certain point
         //and incrementally adjusting direction.
-        float timestep = sensorRadius / attackSpeed;
+        float dist = (float) Math.sqrt(Math.pow((tx-getX()), 2) + Math.pow((ty-getY()), 2));
+        float timestep = dist / attackSpeed;
         float moveX = tx - getX() + (tvx * timestep);
         float moveY = ty - getY() + (tvy * timestep);
         move.set(moveX, moveY);
