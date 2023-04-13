@@ -220,11 +220,18 @@ public class MenuMode extends MenuScreen {
         musicVolume = 1.0f;
         sfxVolume = 0.0f;
 
+        // TODO: Scale slider bars
         musicSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
         musicSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
         musicSliderX = canvas.getWidth()/2;
         musicSliderY = canvas.getHeight()/2;
         musicSlider = new MySlider(musicSliderBar, musicSliderKnob, 20, musicSliderX, musicSliderY, 1, 1);
+
+        sfxSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
+        sfxSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
+        sfxSliderX = canvas.getWidth()/2;
+        sfxSliderY = canvas.getHeight()/2 - 2*musicSliderBar.getRegionHeight();
+        sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, 1, 1);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -267,6 +274,11 @@ public class MenuMode extends MenuScreen {
             boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.knobX, musicSlider.knobY, musicSliderKnob, musicSlider.sx);
             if(musicKnobPressed){
                 musicSlider.knobFollow = true;
+            }
+
+            boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.knobX, sfxSlider.knobY, sfxSliderKnob, sfxSlider.sx);
+            if(sfxKnobPressed){
+                sfxSlider.knobFollow = true;
             }
         }
 
@@ -355,7 +367,8 @@ public class MenuMode extends MenuScreen {
                 screenMode = 1;
                 exitPressState = 2;
             }
-            if(musicSlider.knobFollow = true) musicSlider.knobFollow = false;
+            if(musicSlider.knobFollow) musicSlider.knobFollow = false;
+            if(sfxSlider.knobFollow) sfxSlider.knobFollow = false;
         }
         return true;
     }
@@ -364,6 +377,9 @@ public class MenuMode extends MenuScreen {
         if(screenMode == 3){
             if(musicSlider.knobFollow){
                 musicSlider.updateKnob(screenX, screenY);
+            }
+            if(sfxSlider.knobFollow){
+                sfxSlider.updateKnob(screenX, screenY);
             }
         }
         return true;
@@ -430,6 +446,7 @@ public class MenuMode extends MenuScreen {
 
             // Draw sliders
             musicSlider.draw(canvas);
+            sfxSlider.draw(canvas);
         }
         canvas.end();
     }
