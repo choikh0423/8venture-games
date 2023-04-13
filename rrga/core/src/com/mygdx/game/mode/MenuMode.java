@@ -193,6 +193,8 @@ public class MenuMode extends MenuScreen {
     private MySlider musicSlider;
     /** The sfx slider */
     private MySlider sfxSlider;
+    private TextureRegion musicTag;
+    private TextureRegion sfxTag;
 
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -210,6 +212,8 @@ public class MenuMode extends MenuScreen {
         exitButton = new TextureRegion(directory.getEntry("menu:exit_button", Texture.class));
         backButton = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
         startButton = new TextureRegion(directory.getEntry("menu:start_button", Texture.class));
+        musicTag = new TextureRegion(directory.getEntry("menu:music_tag", Texture.class));
+        sfxTag = new TextureRegion(directory.getEntry("menu:sfx_tag", Texture.class));
 
         levelButton1 = new TextureRegion(directory.getEntry("menu:level1_button", Texture.class));
         levelButton2 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
@@ -230,7 +234,7 @@ public class MenuMode extends MenuScreen {
         sfxSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
         sfxSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
         sfxSliderX = canvas.getWidth()/2;
-        sfxSliderY = canvas.getHeight()/2 - 2*musicSliderBar.getRegionHeight();
+        sfxSliderY = canvas.getHeight()/2 - 3*musicSliderBar.getRegionHeight();
         sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, 1, 1);
     }
 
@@ -270,18 +274,15 @@ public class MenuMode extends MenuScreen {
             if (exitPressed) {
                 exitPressState = 1;
             }
-
             boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.knobX, musicSlider.knobY, musicSliderKnob, musicSlider.sx);
             if(musicKnobPressed){
                 musicSlider.knobFollow = true;
             }
-
             boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.knobX, sfxSlider.knobY, sfxSliderKnob, sfxSlider.sx);
             if(sfxKnobPressed){
                 sfxSlider.knobFollow = true;
             }
         }
-
         return false;
     }
 
@@ -447,6 +448,12 @@ public class MenuMode extends MenuScreen {
             // Draw sliders
             musicSlider.draw(canvas);
             sfxSlider.draw(canvas);
+
+            float tagScl = 1;
+            canvas.draw(musicTag, Color.WHITE, musicTag.getRegionWidth()/2f, musicTag.getRegionHeight()/2f,
+                    musicSliderX*musicSlider.sx, musicSliderY*musicSlider.sy, 0,  tagScl * scale, tagScl * scale);
+            canvas.draw(sfxTag, Color.WHITE, sfxTag.getRegionWidth()/2f, sfxTag.getRegionHeight()/2f,
+                    sfxSliderX*sfxSlider.sx, sfxSliderY*sfxSlider.sy, 0,  tagScl * scale, tagScl * scale);
         }
         canvas.end();
     }

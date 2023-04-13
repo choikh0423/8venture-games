@@ -140,5 +140,4 @@ public class WindModel extends PolygonObstacle {
             //direction-((float) Math.PI/2)
         }
     }
-
 }

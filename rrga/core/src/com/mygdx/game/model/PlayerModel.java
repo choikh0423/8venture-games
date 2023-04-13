@@ -590,7 +590,7 @@ public class PlayerModel extends CapsuleObstacle {
 				forceCache.x = 0;
 			}
 			else {
-				forceCache.x = umbrellaX * lighterForce;
+				forceCache.x = umbrellaX * lighterForce / 2;
 			}
 			//determine Y
 			if (Math.abs(getVY()) >= getMaxSpeedUp()) {
