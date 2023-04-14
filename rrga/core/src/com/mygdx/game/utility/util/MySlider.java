@@ -17,13 +17,13 @@ public class MySlider {
     /** Ratio of current notch to total number of notches */
     public float ratio;
     /** x position of the center of the slider bar */
-    public float barX;
+    private float barX;
     /** y position of the center of the slider bar */
-    public float barY;
+    private float barY;
     /** x position of center of knob */
-    public float knobX;
+    private float knobX;
     /** y position of center of knob */
-    public float knobY;
+    private float knobY;
     /** x scale */
     public float sx;
     /** y scale */
@@ -31,6 +31,30 @@ public class MySlider {
     /** Whether the knob should follow the x position of the cursor */
     public boolean knobFollow;
 
+    public float getKnobX() {
+        return knobX;
+    }
+    public float getKnobY(){
+        return knobY;
+    }
+
+    public void setX(float x){
+        barX = x;
+        knobX = barX-barTexture.getRegionWidth()/2f + ratio * barTexture.getRegionWidth();
+    }
+
+    public void setY(float y){
+        barY = y;
+        knobY = y;
+    }
+
+    public void setSX(float sx){
+        this.sx = sx;
+    }
+
+    public void setSY(float sy){
+        this.sy = sy;
+    }
 
     public MySlider(TextureRegion barTex, TextureRegion knobTex, int numNotches, int x, int y, float sx, float sy){
         barTexture = barTex;
@@ -59,7 +83,8 @@ public class MySlider {
         else{
             //commented out is for continous progress bar
             //float prog = (x - barX + barTexture.getRegionWidth()/2f) / barTexture.getRegionWidth();
-            int prog = (int) ((x - barX + barTexture.getRegionWidth()/2f) / barTexture.getRegionWidth() * numNotches);
+            float tempX = x + (.5f * barTexture.getRegionWidth()/numNotches);
+            int prog = (int) ((tempX - barX + barTexture.getRegionWidth()/2f) / barTexture.getRegionWidth() * numNotches);
             //knobX = (barX - barTexture.getRegionWidth()/2f)  + (prog * barTexture.getRegionWidth());
             knobX = (barX - barTexture.getRegionWidth()/2f)  + (prog * barTexture.getRegionWidth()/numNotches);
             //curNotch = (prog * numNotches);

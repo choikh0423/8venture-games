@@ -159,34 +159,28 @@ public class MenuMode extends MenuScreen {
     private TextureRegion musicSliderBar;
     /** Music volume slider knob texture */
     private TextureRegion musicSliderKnob;
-    /** The y-coordinate of the center of the music slider */
-    private int musicSliderY;
     /** The x-coordinate of the center of the music slider */
     private int musicSliderX;
+    /** The y-coordinate of the center of the music slider */
+    private int musicSliderY;
+    /** Ratio of the music slider width to the screen */
+    private static float MUSIC_X_RATIO = 0.7f;
     /** Ratio of the music slider height to the screen */
     private static float MUSIC_Y_RATIO = 0.6f;
-    /** Ratio of the music slider width to the screen */
-    private static float MUSIC_X_RATIO = 0.2f;
     /** SFX volume slider bar texture */
     private TextureRegion sfxSliderBar;
     /** SFX volume slider knob texture */
     private TextureRegion sfxSliderKnob;
-    /** The y-coordinate of the center of the sfx slider */
-    private int sfxSliderY;
     /** The x-coordinate of the center of the sfx slider */
     private int sfxSliderX;
-    /** Ration of the sfx slider height to the screen */
-    private static float SFX_Y_RATIO = 0.2f;
-    /** Ration of the sfx slider width to the screen */
-    private static float SFX_X_RATIO = 0.2f;
-    /** Slider width */
-    private float sliderWidth;
-    /** Slider height */
-    private float sliderHeight;
-    /** Slider width ratio */
-    private static float SLIDER_WIDTH_RATIO = 0.7f;
-    /** Slider height ratio */
-    private static float SLIDER_HEIGHT_RATIO = 0.2f;
+    /** The y-coordinate of the center of the sfx slider */
+    private int sfxSliderY;
+    /** Ratio of the sfx slider width to the screen */
+    private static float SFX_X_RATIO = 0.7f;
+    /** Ratio of the sfx slider height to the screen */
+    private static float SFX_Y_RATIO = 0.45f;
+    private float SLIDER_SCL_X = 1;
+    private float SLIDER_SCL_Y = 1;
     /** Touch range constant */
     private static float TOUCH_AREA_RATIO = 0.95f;
     /** The music slider */
@@ -194,7 +188,17 @@ public class MenuMode extends MenuScreen {
     /** The sfx slider */
     private MySlider sfxSlider;
     private TextureRegion musicTag;
+    private static float MUSIC_TAG_X_RATIO = .43f;
+    private static float MUSIC_TAG_Y_RATIO = .61f;
+    private int musicTagX;
+    private int musicTagY;
     private TextureRegion sfxTag;
+    private static float SFX_TAG_X_RATIO = .43f;
+    private static float SFX_TAG_Y_RATIO = .46f;
+    private int sfxTagX;
+    private int sfxTagY;
+    private float TAG_SCL = 1;
+
 
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -227,15 +231,11 @@ public class MenuMode extends MenuScreen {
         // TODO: Scale slider bars
         musicSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
         musicSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
-        musicSliderX = canvas.getWidth()/2;
-        musicSliderY = canvas.getHeight()/2;
-        musicSlider = new MySlider(musicSliderBar, musicSliderKnob, 20, musicSliderX, musicSliderY, 1, 1);
+        musicSlider = new MySlider(musicSliderBar, musicSliderKnob, 20, musicSliderX, musicSliderY, SLIDER_SCL_X, SLIDER_SCL_Y);
 
         sfxSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
         sfxSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
-        sfxSliderX = canvas.getWidth()/2;
-        sfxSliderY = canvas.getHeight()/2 - 3*musicSliderBar.getRegionHeight();
-        sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, 1, 1);
+        sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, SLIDER_SCL_X, SLIDER_SCL_Y);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -274,11 +274,11 @@ public class MenuMode extends MenuScreen {
             if (exitPressed) {
                 exitPressState = 1;
             }
-            boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.knobX, musicSlider.knobY, musicSliderKnob, musicSlider.sx);
+            boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.getKnobX(), musicSlider.getKnobY(), musicSliderKnob, musicSlider.sx);
             if(musicKnobPressed){
                 musicSlider.knobFollow = true;
             }
-            boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.knobX, sfxSlider.knobY, sfxSliderKnob, sfxSlider.sx);
+            boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.getKnobX(), sfxSlider.getKnobY(), sfxSliderKnob, sfxSlider.sx);
             if(sfxKnobPressed){
                 sfxSlider.knobFollow = true;
             }
@@ -449,11 +449,10 @@ public class MenuMode extends MenuScreen {
             musicSlider.draw(canvas);
             sfxSlider.draw(canvas);
 
-            float tagScl = 1;
             canvas.draw(musicTag, Color.WHITE, musicTag.getRegionWidth()/2f, musicTag.getRegionHeight()/2f,
-                    musicSliderX*musicSlider.sx, musicSliderY*musicSlider.sy, 0,  tagScl * scale, tagScl * scale);
+                    musicTagX, musicTagY, 0,  TAG_SCL * scale, TAG_SCL * scale);
             canvas.draw(sfxTag, Color.WHITE, sfxTag.getRegionWidth()/2f, sfxTag.getRegionHeight()/2f,
-                    sfxSliderX*sfxSlider.sx, sfxSliderY*sfxSlider.sy, 0,  tagScl * scale, tagScl * scale);
+                    sfxTagX, sfxTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
         }
         canvas.end();
     }
@@ -500,12 +499,16 @@ public class MenuMode extends MenuScreen {
         startY = (int)(START_Y_RATIO * height);
         startX = (int)(START_X_RATIO * width);
 
-        sliderHeight = (int)(SLIDER_HEIGHT_RATIO * height);
-        sliderWidth = (int)(SLIDER_WIDTH_RATIO * width);
-        musicSliderY = (int)(MUSIC_Y_RATIO * height);
-        musicSliderX = (int)(MUSIC_X_RATIO * width);
-        sfxSliderY = (int)(SFX_Y_RATIO * height);
-        sfxSliderX = (int)(SFX_X_RATIO * width);
+        musicTagX = (int)(MUSIC_TAG_X_RATIO * width);
+        musicTagY = (int)(MUSIC_TAG_Y_RATIO * height);
+        sfxTagX = (int)(SFX_TAG_X_RATIO * width);
+        sfxTagY = (int)(SFX_TAG_Y_RATIO * height);
+
+        musicSlider.setY(MUSIC_Y_RATIO * height);
+        musicSlider.setX(MUSIC_X_RATIO * width);
+        sfxSlider.setY(SFX_Y_RATIO * height);
+        sfxSlider.setX(SFX_X_RATIO * width);
+
 
         // TEMPORARY
         levelY1 = (int)(0.5 * height);
