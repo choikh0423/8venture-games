@@ -176,7 +176,6 @@
         {
          "draworder":"topdown",
          "id":5,
-         "locked":true,
          "name":"Object Layer 1",
          "objects":[
                 {
@@ -1020,6 +1019,46 @@
                  "template":"templates\/wind_dir.json",
                  "x":3690.73324553042,
                  "y":4650.78037092793
+                }, 
+                {
+                 "id":100,
+                 "template":"templates\/path_point.json",
+                 "x":2204,
+                 "y":1960
+                }, 
+                {
+                 "id":102,
+                 "polygon":[
+                        {
+                         "x":104,
+                         "y":40
+                        }, 
+                        {
+                         "x":-24,
+                         "y":168
+                        }, 
+                        {
+                         "x":488,
+                         "y":168
+                        }, 
+                        {
+                         "x":360,
+                         "y":40
+                        }],
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":100
+                        }],
+                 "template":"templates\/moving_platform.json",
+                 "x":2192,
+                 "y":2500
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1028,7 +1067,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":97,
+ "nextobjectid":103,
  "orientation":"orthogonal",
  "renderorder":"right-up",
  "tiledversion":"1.10.0",

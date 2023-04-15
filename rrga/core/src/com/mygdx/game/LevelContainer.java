@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.mygdx.game.model.MovingPlatform;
 import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
@@ -21,6 +22,7 @@ import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.PooledList;
+import org.graalvm.compiler.nodes.calc.ObjectEqualsNode;
 
 public class LevelContainer{
     /**
@@ -58,6 +60,11 @@ public class LevelContainer{
      * The set of all birds currently in the level
      */
     private ObjectSet<BirdHazard> birds;
+
+    /**
+     * The set of all moving platforms currently in the level
+     */
+    private ObjectSet<MovingPlatform> movingPlats;
 
     /**
      * The set of all lightning currently in the level
@@ -175,6 +182,7 @@ public class LevelContainer{
         sensorFixtures = new ObjectSet<Fixture>();
         birds = new ObjectSet<>();
         lightnings = new ObjectSet<>();
+        movingPlats = new ObjectSet<>();
 
         objects = new PooledList<Obstacle>();
         addQueue = new PooledList<Obstacle>();
@@ -257,6 +265,7 @@ public class LevelContainer{
         addQueue.clear();
         birds.clear();
         lightnings.clear();
+        movingPlats.clear();
     }
 
     /**
@@ -303,6 +312,23 @@ public class LevelContainer{
             obj.setTexture(platformTile);
             obj.setName(pname + ii);
             addObject(obj);
+        }
+
+        String mpname = "movingplatform";
+        JsonValue[] mPlats = parser.getMovingPlatformData();
+        for (int ii = 0; ii < mPlats.length; ii++) {
+            cur = mPlats[ii];
+            MovingPlatform obj = new MovingPlatform(cur, cur.get("points").asFloatArray(), cur.getFloat("x"), cur.getFloat("y"));
+            obj.setBodyType(BodyDef.BodyType.StaticBody);
+            obj.setDensity(defaults.getFloat("density", 0.0f));
+            obj.setFriction(defaults.getFloat("friction", 0.0f));
+            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+            obj.setDrawScale(scale);
+            //temporary texture - might have to get this from parsing
+            obj.setTexture(lightningTexture);
+            obj.setName(mpname + ii);
+            addObject(obj);
+            movingPlats.add(obj);
         }
 
         // Create wind gusts
@@ -424,7 +450,7 @@ public class LevelContainer{
         float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
         umbrella = new UmbrellaModel(
                 globalConstants.get("umbrella"),
-                new Vector2(parser.getPlayerPos()).add(offset[0], offset[1]), dwidth, dheight
+                new Vector2(parser.getPlayerPos().x+offset[0], parser.getPlayerPos().y+offset[1]), dwidth, dheight
         );
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
@@ -543,6 +569,11 @@ public class LevelContainer{
     public ObjectSet<LightningHazard> getLightnings() {
         return lightnings;
     }
+    /**
+     * Get moving platforms
+     * @return movingPlats
+     */
+    public ObjectSet<MovingPlatform> getMovingPlats(){return movingPlats;}
 
     public void setParser(LevelParser parser) { this.parser = parser; }
 

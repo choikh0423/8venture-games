@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
+import com.mygdx.game.model.MovingPlatform;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.BirdRayCastCallback;
 import com.mygdx.game.model.hazard.HazardModel;
@@ -177,6 +178,11 @@ public class GameplayController implements ContactListener {
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
+
+    /**
+     * The set of all moving platforms currently in the level
+     */
+    private ObjectSet<MovingPlatform> movingPlats = new ObjectSet<>();
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
@@ -362,6 +368,7 @@ public class GameplayController implements ContactListener {
         this.lightnings = levelContainer.getLightnings();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
+        this.movingPlats = levelContainer.getMovingPlats();
 
         // Process actions in object model
 
@@ -506,6 +513,11 @@ public class GameplayController implements ContactListener {
         // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 //        umbrella.applyForce();
+
+        //move moving platforms
+        for(MovingPlatform mp: movingPlats){
+            mp.move();
+        }
 
         //Bird Updates
         float birdSensorRadius = 7;
