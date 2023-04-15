@@ -2,8 +2,6 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -11,7 +9,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
-import com.mygdx.game.model.MovingPlatform;
+import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.BirdRayCastCallback;
 import com.mygdx.game.model.hazard.HazardModel;
@@ -19,9 +17,6 @@ import com.mygdx.game.model.hazard.LightningHazard;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.model.UmbrellaModel;
 import com.mygdx.game.model.WindModel;
-import com.mygdx.game.utility.obstacle.*;
-import com.mygdx.game.utility.util.*;
-import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -182,7 +177,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all moving platforms currently in the level
      */
-    private ObjectSet<MovingPlatform> movingPlats = new ObjectSet<>();
+    private ObjectSet<MovingPlatformModel> movingPlats = new ObjectSet<>();
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
@@ -515,7 +510,7 @@ public class GameplayController implements ContactListener {
 //        umbrella.applyForce();
 
         //move moving platforms
-        for(MovingPlatform mp: movingPlats){
+        for(MovingPlatformModel mp: movingPlats){
             mp.move();
         }
 

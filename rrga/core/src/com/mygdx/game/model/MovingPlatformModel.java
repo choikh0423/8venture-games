@@ -1,18 +1,12 @@
 package com.mygdx.game.model;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
-public class MovingPlatform extends PolygonObstacle {
+public class MovingPlatformModel extends PolygonObstacle {
     /**
      * A list of points which represent this bird's flight path.
      * Invariant: length >=2 and length is even.
@@ -48,7 +42,7 @@ public class MovingPlatform extends PolygonObstacle {
 
     private JsonValue data;
 
-    public MovingPlatform(JsonValue data, float[] points, float x, float y) {
+    public MovingPlatformModel(JsonValue data, float[] points, float x, float y) {
         super(points, x, y);
         this.data = data;
         path = data.get("path").asFloatArray();
