@@ -402,7 +402,7 @@ public class GameplayController implements ContactListener {
         mousePos.x = input.getMousePos().x;
         mousePos.y = input.getMousePos().y;
         //convert from screen coordinates to canvas coordinates
-        mousePos.y = 2 * center.y - mousePos.y;
+        mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
         //convert to player coordinates
         mousePos.sub(center);
         //normalize manually because Vector2.nor() is less accurate
