@@ -18,7 +18,7 @@
     "force": 40.0,
     "damping": 10.0,
     "density": 1.0,
-    "friction": 0.55,
+    "friction": 0.3,
     "maxspeed_x_ground": 5.0,
     "maxspeed_x_air_wind": 10.0,
     "maxspeed_x_air_drag": 3.0,
