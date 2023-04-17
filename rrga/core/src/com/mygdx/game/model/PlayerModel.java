@@ -591,14 +591,14 @@ public class PlayerModel extends CapsuleObstacle {
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale, textureScale);
+					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y);
 		} else {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
 
 			canvas.draw(texture, tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale, textureScale
+					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y
 			);
 		}
 	}
@@ -633,8 +633,8 @@ public class PlayerModel extends CapsuleObstacle {
 	 * TODO: possibly other status information
 	 * @param canvas the game canvas
 	 */
-	public void drawInfo(GameCanvas canvas){
-		if (hpTexture == null){
+	public void drawInfo(GameCanvas canvas) {
+		if (hpTexture == null) {
 			return;
 		}
 
@@ -642,9 +642,8 @@ public class PlayerModel extends CapsuleObstacle {
 		float width = hpTexture[health].getRegionWidth();
 
 		// TODO: HP Texture is manually scaled at the moment
-		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
-					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
-
+		canvas.draw(hpTexture[health], Color.WHITE, width / 2f, height / 2f, drawScale.x,
+				canvas.getHeight() - drawScale.y, 0, 0.3f, 0.3f);
 	}
 	
 	/**

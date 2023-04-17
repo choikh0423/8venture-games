@@ -84,6 +84,9 @@ public class GameMode implements Screen {
     /** reference to asset manager to get level JSON files. */
     private AssetDirectory directory;
 
+    /** temporary vector cache */
+    private Vector2 cache;
+
     /**
      * Returns true if debug mode is active.
      *
@@ -179,6 +182,7 @@ public class GameMode implements Screen {
         // Create the controllers.
         inputController = new InputController();
         gameplayController = new GameplayController(bounds, gravity, 0);
+        cache = new Vector2(1,1);
     }
 
     /**
@@ -194,6 +198,7 @@ public class GameMode implements Screen {
         scale  = null;
         canvas = null;
         parser = null;
+        cache = null;
 
         // GameMode does not own the directory, so it does not unload assets
         directory = null;
@@ -217,7 +222,7 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
-        debugFont = directory.getEntry("shared:retro", BitmapFont.class);
+        debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
         // instantiate level parser for loading levels
         parser = new LevelParser(directory);
@@ -344,12 +349,11 @@ public class GameMode implements Screen {
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
-        // invert y because tilesets are stored top down rather than bottom up
         int centerTileY = (int) avatar.getY();
-        int minX = (int) Math.max(0, centerTileX - displayWidth/2);
-        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2);
-        int minY = (int) Math.max(0, centerTileY - displayHeight/2);
-        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2);
+        int minX = (int) Math.max(0, centerTileX - displayWidth/2 - 1);
+        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 + 1);
+        int minY = (int) Math.max(0, centerTileY - displayHeight/2 - 1);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2 + 1);
         // texture tiles are stored row-major order in an array
         for (TextureRegion[] tiles : parser.getLayers()){
             // get grid around the player's tile
@@ -392,9 +396,27 @@ public class GameMode implements Screen {
         // debug information on screen to track FPS, etc
         if (debug){
             debugFont.setColor(Color.BLACK);
-            canvas.drawText("FPS:" + (int) (1/dt), debugFont, 0.05f*canvas.getWidth(), 0.95f*canvas.getHeight());
-            canvas.drawText("X:" + p.getX(), debugFont, 0.05f*canvas.getWidth(), 0.8f*canvas.getHeight());
-            canvas.drawText("Y:" + p.getY(), debugFont, 0.05f*canvas.getWidth(), 0.65f*canvas.getHeight());
+            int fps = (int) (1/dt);
+            String s = fps >= 59 ? "GOOD" : fps >= 57 ? "MEDIOCRE" : "BAD";
+            Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
+            canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
+            debugFont.setColor(c);
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f*canvas.getWidth(), 0.9f*canvas.getHeight());
+            debugFont.setColor(Color.BLACK);
+            canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
+            canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
+            canvas.drawText("VX:" + p.getVX(), debugFont, 0.1f*canvas.getWidth(), 0.75f*canvas.getHeight());
+            canvas.drawText("VY:" + p.getVY(), debugFont, 0.1f*canvas.getWidth(), 0.7f*canvas.getHeight());
+            canvas.drawText("HP:" + p.getHealth(), debugFont, 0.1f*canvas.getWidth(), 0.65f*canvas.getHeight());
+            cache.set(inputController.getMousePos());
+            canvas.drawText("MouseScreenX:" + cache.x, debugFont, 0.1f*canvas.getWidth(), 0.6f*canvas.getHeight());
+            canvas.drawText("MouseScreenY:" + cache.y, debugFont, 0.1f*canvas.getWidth(), 0.55f*canvas.getHeight());
+            canvas.drawText("MouseX:" + ((cache.x - canvas.getWidth()/2f)/scale.x + p.getX()),
+                    debugFont, 0.1f*canvas.getWidth(), 0.50f*canvas.getHeight());
+            canvas.drawText("MouseY:" + ((canvas.getHeight()/2f - cache.y)/scale.y + p.getY()),
+                    debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
+            canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
         }
         canvas.end();
     }

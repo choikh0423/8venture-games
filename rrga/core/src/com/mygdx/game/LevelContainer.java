@@ -85,40 +85,26 @@ public class LevelContainer{
      * Texture asset for opened umbrella
      */
     private TextureRegion umbrellaOpenTexture;
-    /**
-     * Texture asset for closed umbrella
-     */
+
+    /** Texture asset for closed umbrella */
     private TextureRegion umbrellaClosedTexture;
-    /**
-     * Texture asset for a red bird
-     */
-    private TextureRegion redBirdTexture;
-    /**
-     * Texture asset for red bird animation
-     */
+
+    /** Texture asset for red bird animation */
     private Texture redBirdAnimationTexture;
 
-    /**
-     * Texture asset for a red bird
-     */
-    private TextureRegion blueBirdTexture;
-    /**
-     * Texture asset for blue bird animation
-     */
+    /** Texture asset for blue bird animation */
     private Texture blueBirdAnimationTexture;
 
-    /**
-     * Texture asset for a brown bird
-     */
-    private TextureRegion brownBirdTexture;
-    /**
-     * Texture asset for brown bird animation
-     */
+    /** Texture asset for green bird animation */
+    private Texture greenBirdAnimationTexture;
+
+    /** Texture asset for brown bird animation */
+
     private Texture brownBirdAnimationTexture;
-    /**
-     * Texture asset for goal
-     */
+
+    /** Texture asset for goal */
     private TextureRegion goalTexture;
+
     /**
      * Texture asset for hp
      */
@@ -189,25 +175,11 @@ public class LevelContainer{
      * @param color the color of the bird
      * @return texture of bird for the given value color.
      */
-    private TextureRegion getBirdTexture(String color){
-        switch(color){
-            case "red": return redBirdTexture;
-            case "blue": return blueBirdTexture;
-            case "brown": return brownBirdTexture;
-            default: return null;
-        }
-    }
-
-    /**
-     * Note: Null texture is returned when color is invalid.
-     * @param color the color of the bird
-     * @return texture of bird for the given value color.
-     */
     private Texture getFlapAnimationTexture(String color){
         switch(color){
             case "red": return redBirdAnimationTexture;
             case "blue": return blueBirdAnimationTexture;
-            case "brown": return brownBirdAnimationTexture;
+            case "brown": return greenBirdAnimationTexture;
             default: return null;
         }
     }
@@ -234,11 +206,9 @@ public class LevelContainer{
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
 
         // Hazard Textures
-        redBirdTexture = new TextureRegion(directory.getEntry("game:red_bird", Texture.class));
-        blueBirdTexture = new TextureRegion(directory.getEntry("game:blue_bird", Texture.class));
-        brownBirdTexture = new TextureRegion(directory.getEntry("game:brown_bird", Texture.class));
-
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
+        blueBirdAnimationTexture = directory.getEntry("game:blue_bird_flapping", Texture.class);
+        greenBirdAnimationTexture = directory.getEntry("game:green_bird_flapping", Texture.class);
 
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
 
@@ -339,15 +309,12 @@ public class LevelContainer{
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
         float birdKnockback = hazardsjv.getInt("birdKnockback");
-        float[] birdShape = hazardsjv.get("birdShape").asFloatArray();
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdShape, birdDamage, birdSensorRadius, birdKnockback);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(jv.getString("color", "red")));
-            obj.setTexture(getBirdTexture(jv.getString("color", "red")));
-            obj.setOriginCenter();
             obj.setName(birdName + ii);
             addObject(obj);
             birds.add(obj);
@@ -402,8 +369,8 @@ public class LevelContainer{
         // Create player
         float scl = globalConstants.get("player").getFloat("texturescale");
         // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
-        dwidth = avatarSideTexture.getRegionWidth() / scale.x * scl;
-        dheight = avatarSideTexture.getRegionHeight() / scale.y * scl;
+        dwidth = avatarSideTexture.getRegionWidth() / 32f * scl;
+        dheight = avatarSideTexture.getRegionHeight() / 32f * scl;
         avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
@@ -419,8 +386,8 @@ public class LevelContainer{
         // Create the umbrella
         scl = globalConstants.get("umbrella").getFloat("texturescale");
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
-        dwidth = umbrellaOpenTexture.getRegionWidth() / scale.x * scl;
-        dheight = umbrellaOpenTexture.getRegionHeight() / scale.y * scl;
+        dwidth = umbrellaOpenTexture.getRegionWidth() / 32f * scl;
+        dheight = umbrellaOpenTexture.getRegionHeight() / 32f * scl;
         float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
         umbrella = new UmbrellaModel(
                 globalConstants.get("umbrella"),

@@ -490,8 +490,8 @@ public class GameplayController implements ContactListener {
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
                 if (avatar.getHealth() - dam > 0) {
-                    Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
-                    avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                    cache.set(h.getKnockbackForce()).scl(h.getKnockbackScl());
+                    avatar.getBody().applyLinearImpulse(cache, avatar.getPosition(), true);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
                 } else {
@@ -508,9 +508,7 @@ public class GameplayController implements ContactListener {
 //        umbrella.applyForce();
 
         //Bird Updates
-        float birdSensorRadius = 7;
-        float birdRays = 40;
-        float mindist;
+        float birdRays = 60;
         Vector2 pos = new Vector2();
         Vector2 targ = new Vector2();
         BirdRayCastCallback rccb = new BirdRayCastCallback();
@@ -536,21 +534,20 @@ public class GameplayController implements ContactListener {
                 pos.set(x, y);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
-                    mindist = Integer.MAX_VALUE;
-                    targ.set(x, y + birdSensorRadius).rotateAroundDeg(pos, 360 / birdRays * i);
+                    float minDist = Integer.MAX_VALUE;
+                    targ.set(x, y + bird.getSensorRadius()).rotateAroundDeg(pos, 360 / birdRays * i);
                     world.rayCast(rccb, pos, targ);
-                    for(ObjectMap.Entry e: rccb.collisions.entries()){
-                        if((Float) e.value < mindist){
-                            mindist = (Float) e.value;
+                    for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
+                        if(e.value < minDist){
+                            minDist = e.value;
                         }
                     }
-                    for(ObjectMap.Entry e: rccb.collisions.entries()){
-                        if(((Fixture) e.key).getBody().getUserData() == avatar){
-                            if(Math.abs((Float) e.value - mindist) < .001){
+                    for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
+                        if((e.key).getBody().getUserData() == avatar){
+                            if(Math.abs(e.value - minDist) < .001){
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
-                                    boolean right = !(avatar.getX() - bird.getX() < 0);
-                                    bird.faceRight = right;
+                                    bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
                                 }
                             }
                         }
@@ -584,8 +581,8 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + mousePos.x * diff.len();
-        cache.y = avatar.getY() + mousePos.y * diff.len();
+        cache.x = avatar.getX() + diff.x;
+        cache.y = avatar.getY() + diff.y;
         umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.

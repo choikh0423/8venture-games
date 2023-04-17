@@ -1,34 +1,34 @@
 { "object":
     {
-     "gid":5,
-     "height":164,
-     "id":12,
-     "name":"red_bird",
-      "properties":[
-        {
-          "name":"loop",
-          "type":"bool",
-          "value":false
-        },
-        {
-          "name":"move_speed",
-          "type":"int",
-          "value":4
-        },
-        {
-          "name":"path",
-          "type":"object",
-          "value":0
-        }],
+     "gid":2147483651,
+     "height":114.5,
+     "id":99,
+     "name":"",
+     "properties":[
+            {
+             "name":"loop",
+             "type":"bool",
+             "value":false
+            }, 
+            {
+             "name":"move_speed",
+             "type":"float",
+             "value":4
+            }, 
+            {
+             "name":"path",
+             "type":"object",
+             "value":71
+            }],
      "rotation":0,
-      "type":"bird",
+     "type":"",
      "visible":true,
-     "width":164
+     "width":118.5
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/tilesets\/objs.json"
+     "source":"..\/objects\/red_bird_tile.json"
     },
  "type":"template"
 }

@@ -176,7 +176,6 @@
         {
          "draworder":"topdown",
          "id":5,
-         "locked":true,
          "name":"Object Layer 1",
          "objects":[
                 {
@@ -466,7 +465,7 @@
                 {
                  "id":60,
                  "template":"templates\/spawn.json",
-                 "x":2013,
+                 "x":1828.92920353982,
                  "y":3849
                 }, 
                 {
@@ -649,70 +648,6 @@
                  "y":4124
                 }, 
                 {
-                 "id":71,
-                 "properties":[
-                        {
-                         "name":"next_trajectory",
-                         "type":"object",
-                         "value":72
-                        }],
-                 "template":"templates\/path_point.json",
-                 "x":1014,
-                 "y":3622
-                }, 
-                {
-                 "id":72,
-                 "properties":[
-                        {
-                         "name":"next_trajectory",
-                         "type":"object",
-                         "value":70
-                        }],
-                 "template":"templates\/path_point.json",
-                 "x":752,
-                 "y":3844
-                }, 
-                {
-                 "gid":2147483653,
-                 "id":73,
-                 "properties":[
-                        {
-                         "name":"loop",
-                         "type":"bool",
-                         "value":true
-                        }, 
-                        {
-                         "name":"move_speed",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":71
-                        }],
-                 "template":"templates\/red_bird.json",
-                 "x":1392,
-                 "y":3716
-                }, 
-                {
-                 "id":77,
-                 "properties":[
-                        {
-                         "name":"loop",
-                         "type":"bool",
-                         "value":true
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":79
-                        }],
-                 "template":"templates\/brown_bird.json",
-                 "x":1419.57575757576,
-                 "y":1898.66666666667
-                }, 
-                {
                  "id":78,
                  "polygon":[
                         {
@@ -758,12 +693,6 @@
                  "template":"templates\/path_point.json",
                  "x":692,
                  "y":2292
-                }, 
-                {
-                 "id":81,
-                 "template":"templates\/path_point.json",
-                 "x":1432,
-                 "y":2088
                 }, 
                 {
                  "id":82,
@@ -962,18 +891,6 @@
                  "y":1366.14435085658
                 }, 
                 {
-                 "id":93,
-                 "properties":[
-                        {
-                         "name":"atk_speed",
-                         "type":"int",
-                         "value":10
-                        }],
-                 "template":"templates\/blue_bird.json",
-                 "x":3720,
-                 "y":2944
-                }, 
-                {
                  "height":507.189,
                  "id":95,
                  "polygon":[
@@ -1020,6 +937,48 @@
                  "template":"templates\/wind_dir.json",
                  "x":3690.73324553042,
                  "y":4650.78037092793
+                }, 
+                {
+                 "id":99,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":104
+                        }],
+                 "template":"templates\/red_bird.json",
+                 "x":1129.2574949133,
+                 "y":3759.99164356514
+                }, 
+                {
+                 "id":101,
+                 "template":"templates\/blue_bird.json",
+                 "x":3754.39582088067,
+                 "y":2954.58970617412
+                }, 
+                {
+                 "id":104,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":105
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1011.28880526811,
+                 "y":3706.49106302916
+                }, 
+                {
+                 "id":105,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":99
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":775.45935845531,
+                 "y":3783.86795390844
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1028,7 +987,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":97,
+ "nextobjectid":106,
  "orientation":"orthogonal",
  "renderorder":"right-up",
  "tiledversion":"1.10.0",
@@ -1049,6 +1008,14 @@
         {
          "firstgid":119,
          "source":"tilesets\/trees.json"
+        }, 
+        {
+         "firstgid":263,
+         "source":"objects\/red_bird_tile.json"
+        }, 
+        {
+         "firstgid":267,
+         "source":"objects\/blue_bird_tile.json"
         }],
  "tilewidth":128,
  "type":"map",

@@ -21,7 +21,8 @@ public class BirdRayCastCallback implements RayCastCallback {
         //add see-through objects here
         if (!(fixture.getBody().getUserData() instanceof UmbrellaModel) &&
                 !(fixture.getBody().getUserData() instanceof WindModel) &&
-                !(fixture.getBody().getUserData() instanceof LightningHazard)) {
+                !(fixture.getBody().getUserData() instanceof LightningHazard) &&
+                !(fixture.getBody().getUserData() instanceof BirdHazard)) {
             collisions.put(fixture, v);
         }
         return 1;

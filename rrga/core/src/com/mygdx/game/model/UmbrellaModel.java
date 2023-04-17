@@ -51,10 +51,10 @@ public class UmbrellaModel extends BoxObstacle {
     private TextureRegion[] openAnimationFrames;
 
     /** Umbrella open animation*/
-    private Animation openAnimation;
+    private Animation<TextureRegion> openAnimation;
 
     /** Umbrella close animation: Reversed open animation frames */
-    private Animation closeAnimation;
+    private Animation<TextureRegion> closeAnimation;
 
     /** Umbrella open animation elapsed time */
     float openElapsedTime;
@@ -145,11 +145,13 @@ public class UmbrellaModel extends BoxObstacle {
      */
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
-
+        //canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
         if (openMode == -1) {
             // Playing umbrella close animation
             openElapsedTime += Gdx.graphics.getDeltaTime();
-            canvas.draw((TextureRegion)closeAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+            canvas.draw(closeAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),
+                    effect*textureScale/32f * drawScale.x,
+                    textureScale/32f * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -158,15 +160,23 @@ public class UmbrellaModel extends BoxObstacle {
         } else if (openMode == 1) {
             // Playing umbrella open animation
             openElapsedTime += Gdx.graphics.getDeltaTime();
-            canvas.draw((TextureRegion)openAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+            canvas.draw(openAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),
+                    effect*textureScale/32f * drawScale.x,
+                    textureScale/32f * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
                 openMode = 0;
             }
         } else if (openMode == 0) {
-            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale,textureScale);
+            if (texture == openTexture){
+                canvas.draw(openAnimationFrames[openAnimationFrames.length - 1], Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale/32f * drawScale.x,textureScale/32f * drawScale.y);
+            }else {
+                canvas.draw(openAnimationFrames[0], Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), effect * textureScale / 32f * drawScale.x, textureScale / 32f * drawScale.y);
+            }
         }
+        canvas.draw(texture, Color.BLUE,  getX()*drawScale.x,getY()*drawScale.y, 1, 1);
+        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
     }
 
     /**
@@ -214,10 +224,10 @@ public class UmbrellaModel extends BoxObstacle {
         }
 
         // NOTE: If changing frameDuration, make sure to change OPEN_ANIMATION_FRAMECOUNT accordingly.
-        this.openAnimation = new Animation(1f/20f, openAnimationFrames);
+        this.openAnimation = new Animation<>(1f/20f, openAnimationFrames);
         openAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        this.closeAnimation = new Animation(1f/20f, openAnimationFrames);
+        this.closeAnimation = new Animation<>(1f/20f, openAnimationFrames);
         closeAnimation.setPlayMode(Animation.PlayMode.REVERSED);
     }
 

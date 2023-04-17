@@ -27,7 +27,8 @@ public class LightningHazard extends HazardModel{
     private int strikeTimer;
 
     public LightningHazard(JsonValue data) {
-        super(data, LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
+        super(data.getFloat("x"), data.getFloat("y"), data.get("points").asFloatArray(),
+                LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
         waitDuration = data.getInt("strike_timer");
         waitTimer = waitDuration + data.getInt("strike_timer_offset");
         strikeTimer = -1;

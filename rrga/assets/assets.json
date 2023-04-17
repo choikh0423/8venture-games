@@ -11,11 +11,14 @@
         "menu:level2_button": "menu/level2_button.png",
         "game:background" : "game/background.png",
         "game:platform" : "game/small_platform.png",
-        "game:wind" : "game/wind.png",
-        "game:red_bird" : "game/hazard/bird_easy_red.png",
-        "game:blue_bird" : "game/hazard/bird_medium_blue.png",
-        "game:brown_bird" : "game/hazard/bird_hard_brown.png",
-        "game:red_bird_flapping" : "game/hazard/red_bird_flapping.png",
+        "game:wind" : {
+          "file":   "game/wind.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:red_bird_flapping" : "levels/objects/bird_nice_flapping.png",
+        "game:blue_bird_flapping" : "levels/objects/blue_bird_flapping.png",
+        "game:green_bird_flapping" : "game/hazard/bird_nest_flapping.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",
@@ -54,7 +57,10 @@
         "wind:template": "levels/templates/wind.json",
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
-        "data:cliffs": "levels/tilesets/cliffs.json"
+        "data:cliffs": "levels/tilesets/cliffs.json",
+        "red_bird:tiles": "levels/objects/red_bird_tile.json",
+        "blue_bird:tiles": "levels/objects/blue_bird_tile.json",
+        "green_bird:tiles": "levels/objects/blue_bird_tile.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
