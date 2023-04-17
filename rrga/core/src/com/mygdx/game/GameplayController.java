@@ -226,6 +226,8 @@ public class GameplayController implements ContactListener {
      */
     private boolean angInBounds = true;
 
+    private boolean wasOpen;
+
     /**
      * The level container for GameplayController
      */
@@ -379,17 +381,33 @@ public class GameplayController implements ContactListener {
         }
 
         // Check for whether the player toggled the umbrella being open/closed
-        if (input.didToggle()) {
-            umbrella.setOpen(!umbrella.isOpen());
-            if (umbrella.isOpen()) {
+        if(!input.secondaryControlMode){
+            if (input.didToggle()) {
+                umbrella.setOpen(!umbrella.isOpen());
+                if (umbrella.isOpen()) {
+                    umbrella.useOpenedTexture();
+                    //TODO: apply some force to the player so the floatiness comes back
+                } else {
+                    umbrella.useClosedTexture();
+                    Body body = avatar.getBody();
+                    body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                }
+            }
+        } else {
+            if (input.isToggleHeld()) {
+                umbrella.setOpen(true);
                 umbrella.useOpenedTexture();
-                //TODO: apply some force to the player so the floatiness comes back
+                wasOpen = true;
             } else {
+                umbrella.setOpen(false);
                 umbrella.useClosedTexture();
                 Body body = avatar.getBody();
-                body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                wasOpen = false;
             }
         }
+
+
         //make player face forward in air
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();

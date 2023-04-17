@@ -58,6 +58,8 @@ public class InputController {
     private boolean exitPrevious;
     /** Whether the player toggled the umbrella open/closed */
     private boolean togglePressed;
+    /** Whether the player is holding down to toggle the umbrella open/closed */
+    private boolean toggleHeld;
     /** Whether the pause button was pressed */
     private boolean pausePressed;
 
@@ -71,6 +73,9 @@ public class InputController {
     private Vector2 crosscache;
     /** For the gamepad crosshair control */
     private float momentum;
+
+    /** whether the secondary umbrella open/close control mode is enabled */
+    public boolean secondaryControlMode;
 
     /** An X-Box controller (if it is connected) */
     XBoxController xbox;
@@ -133,6 +138,11 @@ public class InputController {
      * @return true if the open/closed toggle button was pressed
      */
     public boolean didToggle() { return togglePressed; }
+    /**
+     * Returns true if the button to toggle whether the umbrella is open or closed
+     * is held down.
+     */
+    public boolean isToggleHeld(){ return toggleHeld; }
 
     /**
      * Returns true if the pause button was toggled
@@ -243,8 +253,13 @@ public class InputController {
         mousePos.y = Gdx.input.getY();
 
         // Left mouse click for toggling umbrella open/closed
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) togglePressed = true;
-        else togglePressed = false;
+        if (!secondaryControlMode){
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) togglePressed = true;
+            else togglePressed = false;
+        } else {
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) toggleHeld = true;
+            else toggleHeld = false;
+        }
 
         // P for pausing game
         pausePressed = Gdx.input.isKeyJustPressed(Input.Keys.P);
