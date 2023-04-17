@@ -1,7 +1,7 @@
 { "object":
     {
      "gid":2147483651,
-     "height":114.5,
+     "height":229,
      "id":99,
      "name":"",
      "properties":[
@@ -23,7 +23,7 @@
      "rotation":0,
      "type":"",
      "visible":true,
-     "width":118.5
+     "width":237
     },
  "tileset":
     {

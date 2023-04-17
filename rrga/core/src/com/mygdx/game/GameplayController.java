@@ -2,8 +2,6 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -18,9 +16,6 @@ import com.mygdx.game.model.hazard.LightningHazard;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.model.UmbrellaModel;
 import com.mygdx.game.model.WindModel;
-import com.mygdx.game.utility.obstacle.*;
-import com.mygdx.game.utility.util.*;
-import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -63,12 +58,12 @@ public class GameplayController implements ContactListener {
     /**
      * All the objects in the world.
      */
-    protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> objects = new PooledList<>();
 
     /**
      * Queue for adding objects
      */
-    protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> addQueue = new PooledList<>();
 
     /**
      * The Box2D world
@@ -188,9 +183,9 @@ public class GameplayController implements ContactListener {
     Vector2 cache = new Vector2();
 
     /**
-     * cache for wind force computations
+     * second cache for vector computations
      */
-    Vector2 windForce = new Vector2();
+    Vector2 temp = new Vector2();
 
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
 
@@ -202,7 +197,7 @@ public class GameplayController implements ContactListener {
     /**
      * center of the screen in canvas coordinates
      */
-    private Vector2 center = new Vector2();
+    private final Vector2 center = new Vector2();
 
     /**
      * the upward-pointing unit vector
@@ -430,12 +425,13 @@ public class GameplayController implements ContactListener {
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
         int count = 0;
+        cache.set(0,0);
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
             if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
                 count++;
-                windForce.add(umbrellaX * f, umbrellaY * f);
+                cache.add(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
@@ -453,7 +449,7 @@ public class GameplayController implements ContactListener {
                 windStrongFrame --;
             }
 
-            avatar.applyWindForce(windForce.x/count, windForce.y/count);
+            avatar.applyWindForce(cache.x/count, cache.y/count);
         } else {
             // Gradually Reset Strong Wind SFX
             if (windStrongFrame > 0) {
@@ -462,7 +458,6 @@ public class GameplayController implements ContactListener {
             prevInWind = false;
         }
         contactWindBod.clear();
-        windForce.set(0,0);
 
         // Process actions in object model
         if (avatar.isGrounded()) {
@@ -508,9 +503,7 @@ public class GameplayController implements ContactListener {
 //        umbrella.applyForce();
 
         //Bird Updates
-        float birdRays = 60;
-        Vector2 pos = new Vector2();
-        Vector2 targ = new Vector2();
+        int birdRays = 10;
         BirdRayCastCallback rccb = new BirdRayCastCallback();
         for (BirdHazard bird : birds) {
             //If sees target, wait before attacking
@@ -531,12 +524,14 @@ public class GameplayController implements ContactListener {
             if(bird.getAttack()) {
                 float x = bird.getX();
                 float y = bird.getY();
-                pos.set(x, y);
+                // load position into cache
+                cache.set(x, y);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
-                    targ.set(x, y + bird.getSensorRadius()).rotateAroundDeg(pos, 360 / birdRays * i);
-                    world.rayCast(rccb, pos, targ);
+                    // load ray target into temporary cache
+                    temp.set(x, y + bird.getSensorRadius()).rotateAroundDeg(cache, 360f / birdRays * i);
+                    world.rayCast(rccb, cache, temp);
                     for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
                         if(e.value < minDist){
                             minDist = e.value;

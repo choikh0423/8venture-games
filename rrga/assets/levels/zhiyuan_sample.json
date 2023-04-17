@@ -49,18 +49,6 @@
          "name":"objects",
          "objects":[
                 {
-                 "id":18,
-                 "properties":[
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":34
-                        }],
-                 "template":"templates\/brown_bird.json",
-                 "x":3026.37966480223,
-                 "y":2042.01703582508
-                }, 
-                {
                  "id":19,
                  "template":"templates\/red_bird.json",
                  "x":878.055118451255,
@@ -364,6 +352,12 @@
                  "template":"templates\/wind_dir.json",
                  "x":4240.22549688714,
                  "y":1216.50506457185
+                }, 
+                {
+                 "id":95,
+                 "template":"templates\/blue_bird.json",
+                 "x":3825.54945054945,
+                 "y":3530.21978021978
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -395,7 +389,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":95,
+ "nextobjectid":96,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

@@ -117,7 +117,7 @@ public class PlayerModel extends CapsuleObstacle {
 	private TextureRegion[] walkAnimationFrames;
 
 	/** Player walk animation*/
-	private Animation walkAnimation;
+	private Animation<TextureRegion> walkAnimation;
 
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
@@ -379,7 +379,7 @@ public class PlayerModel extends CapsuleObstacle {
 		}
 
 		// Adjust walk speed here
-		this.walkAnimation = new Animation(1f/45f, walkAnimationFrames);
+		this.walkAnimation = new Animation<>(1f/45f, walkAnimationFrames);
 	}
 
 	/**

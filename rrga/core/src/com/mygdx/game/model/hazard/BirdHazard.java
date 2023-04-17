@@ -179,8 +179,7 @@ public class BirdHazard extends HazardModel {
     }
 
     public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockback) {
-        super(data.getFloat("x"), data.getFloat("y"), data.get("shape").asFloatArray(),
-                birdDamage, birdKnockback);
+        super(data, data.get("points").asFloatArray(),birdDamage, birdKnockback);
 
         //this is the bounding box dimensions of the texture that contains all animation frames.
         // aabb = [x,y, width, height] where x,y is relative to bird coordinate
@@ -199,11 +198,11 @@ public class BirdHazard extends HazardModel {
         // make hit-box #2:
         float x = data.getFloat("x");
         float y = data.getFloat("y");
-        float[] shape = data.get("shape").asFloatArray();
+        float[] shape = data.get("points").asFloatArray();
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        hit2 = new HazardModel(x, y, shape, birdDamage, birdKnockback) {
+        hit2 = new HazardModel(data, shape, birdDamage, birdKnockback) {
             @Override
             public Vector2 getKnockbackForce() {
                 return temp.set(moveDir.x, moveDir.y).nor();
@@ -230,7 +229,14 @@ public class BirdHazard extends HazardModel {
         }
 
         hit2.activatePhysics(world);
+        hit2.getBody().setUserData(this);
         return true;
+    }
+
+    @Override
+    public void deactivatePhysics(World world){
+        super.deactivatePhysics(world);
+        hit2.deactivatePhysics(world);
     }
 
     public void move() {
@@ -344,8 +350,8 @@ public class BirdHazard extends HazardModel {
             float x = getX();
             float y = getY();
             pos.set(x, y);
-            for (int i = 0; i < 30; i++) {
-                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 30 * i);;
+            for (int i = 0; i < 60; i++) {
+                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 60f * i);;
                 third.set(targ).add(.01f, .01f);;
                 PolygonShape line = new PolygonShape();
                 line.set(new Vector2[]{pos, targ, third});

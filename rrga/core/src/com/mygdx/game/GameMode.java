@@ -87,6 +87,9 @@ public class GameMode implements Screen {
     /** temporary vector cache */
     private Vector2 cache;
 
+    /** level in development */
+    private JsonValue sampleLevel;
+
     /**
      * Returns true if debug mode is active.
      *
@@ -238,7 +241,15 @@ public class GameMode implements Screen {
     public void reset() {
         // level may have changed, parse data
         // this is instantaneous if the level has been parsed in previous reset.
-        parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+
+        // TODO: REMOVE FOR SUBMISSION
+        // this ignores all levels, always runs the given file
+        if (sampleLevel != null){
+            parser.parseLevel(sampleLevel);
+        }
+        else {
+            parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+        }
 
         physicsWidth = parser.getWorldSize().x;
         physicsHeight = parser.getWorldSize().y;
@@ -344,7 +355,7 @@ public class GameMode implements Screen {
         // center a background on player
         // TODO: replace with repeating background?
         canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
-                py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+            py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
 
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
@@ -546,5 +557,11 @@ public class GameMode implements Screen {
     public void setLevel(int level){
         currentLevel = level;
     }
+
+    /**
+     * temporary override of levels with sample level
+     * @param sampleLevel tiled json
+     */
+    public void setSampleLevel(JsonValue sampleLevel){ this.sampleLevel = sampleLevel;}
 
 }

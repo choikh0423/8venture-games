@@ -34,8 +34,8 @@ public abstract class HazardModel extends PolygonObstacle {
         return knockback;
     }
 
-    public HazardModel(float x, float y, float[] points, int dam, float kb) {
-        super(points, x, y);
+    public HazardModel(JsonValue data, float[] points, int dam, float kb) {
+        super(points, data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
         setDensity(0);
         setFriction(0);

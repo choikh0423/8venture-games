@@ -50,8 +50,8 @@
     "offset": [0.0, 0.26666]
   },
   "world": {
-    "width": 32,
-    "height": 18
+    "width": 24,
+    "height": 13.5
   },
   "hazards": {
     "birdDamage": 1,

@@ -413,7 +413,7 @@ public class LevelParser {
                 shape.addChild(new JsonValue(temp.x));
                 shape.addChild(new JsonValue(temp.y));
             }
-            data.addChild("shape", shape);
+            data.addChild("points", shape);
 
 
             // Remaining: set bird properties and complete their path

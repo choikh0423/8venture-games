@@ -951,12 +951,6 @@
                  "y":3759.99164356514
                 }, 
                 {
-                 "id":101,
-                 "template":"templates\/blue_bird.json",
-                 "x":3754.39582088067,
-                 "y":2954.58970617412
-                }, 
-                {
                  "id":104,
                  "properties":[
                         {
@@ -979,6 +973,12 @@
                  "template":"templates\/path_point.json",
                  "x":775.45935845531,
                  "y":3783.86795390844
+                }, 
+                {
+                 "id":106,
+                 "template":"templates\/blue_bird.json",
+                 "x":3737.33108108108,
+                 "y":2943.41216216216
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -987,7 +987,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":106,
+ "nextobjectid":108,
  "orientation":"orthogonal",
  "renderorder":"right-up",
  "tiledversion":"1.10.0",

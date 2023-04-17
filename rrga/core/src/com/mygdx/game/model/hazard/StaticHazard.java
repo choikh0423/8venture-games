@@ -13,8 +13,7 @@ public class StaticHazard extends HazardModel{
 
     private final Vector2 knockBackForce = new Vector2(0,1);
     public StaticHazard(JsonValue data) {
-        super(data.getFloat("x"), data.getFloat("y"),
-                data.get("points").asFloatArray(), STATIC_DAMAGE, STATIC_KNOCKBACK);
+        super(data,data.get("points").asFloatArray(), STATIC_DAMAGE, STATIC_KNOCKBACK);
     }
 
     @Override
