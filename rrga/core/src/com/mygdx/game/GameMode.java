@@ -90,6 +90,20 @@ public class GameMode implements Screen {
     /** level in development */
     private JsonValue sampleLevel;
 
+    public static final float standardZoom = 1.0f;
+
+    /** maximum camera zoom scale factor */
+    private static final float maximumZoom = 1.25f;
+
+    /** interpolation coefficient for zooming */
+    private float zoomAlpha = 0;
+
+    /** how quickly to change zoom scale */
+    private static final float zoomAlphaDelta = 0.05f;
+
+    /** the current zoom factor */
+    private float zoomScl = 1;
+
     /**
      * Returns true if debug mode is active.
      *
@@ -276,7 +290,7 @@ public class GameMode implements Screen {
 
         // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
         //  screen modes that use GameMode as background can just avoid render()...
-        if (!active){
+        if (!active) {
             return false;
         }
 
@@ -329,6 +343,21 @@ public class GameMode implements Screen {
      * @param dt	Number of seconds since last animation frame
      */
     public void update(float dt) {
+
+        if (inputController.didZoom()){
+            zoomAlpha += zoomAlphaDelta;
+        }
+        else {
+            zoomAlpha -= zoomAlphaDelta;
+        }
+
+        // constraint zoomAlpha into [0,1] range
+        if (zoomAlpha < 0){ zoomAlpha = 0; }
+        else if (zoomAlpha > 1){ zoomAlpha = 1; }
+
+        zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
+        canvas.setDynamicCameraZoom(zoomScl);
+
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
     };
@@ -354,17 +383,20 @@ public class GameMode implements Screen {
 
         // center a background on player
         // TODO: replace with repeating background?
-        canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
-            py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+        canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
+                backgroundTexture.getRegionHeight()/2f, px , py, 0,
+                canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
+                canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
 
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
         int centerTileY = (int) avatar.getY();
-        int minX = (int) Math.max(0, centerTileX - displayWidth/2 - 1);
-        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 + 1);
-        int minY = (int) Math.max(0, centerTileY - displayHeight/2 - 1);
-        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2 + 1);
+        System.out.println(zoomScl);
+        int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
+        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
+        int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2 * zoomScl + 1);
         // texture tiles are stored row-major order in an array
         for (TextureRegion[] tiles : parser.getLayers()){
             // get grid around the player's tile

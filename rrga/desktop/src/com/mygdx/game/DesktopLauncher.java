@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Gale - 8venture Games");
-		config.setResizable(false);
+		config.setResizable(true);
 		// Default size for Physics Lab 4
 		config.setWindowedMode(1024, 576);
 		if (arg.length > 0) {

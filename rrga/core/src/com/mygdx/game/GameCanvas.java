@@ -285,6 +285,29 @@ public class GameCanvas {
         // TA Vineet
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
 
+        float newWidth;
+        float newHeight;
+        float maxWidth = Gdx.graphics.getHeight() * 16f/9f;
+        if (maxWidth > Gdx.graphics.getWidth()) {
+            newWidth = Gdx.graphics.getWidth();
+            newHeight = Gdx.graphics.getWidth() * 9f / 16f;
+        }
+        else {
+            newWidth = maxWidth;
+            newHeight = maxWidth * 9f/16f;
+        }
+
+        dynamicCamera.viewportWidth = newWidth;
+        dynamicCamera.viewportHeight = newHeight;
+        dynamicCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
+        dynamicCamera.update();
+
+        hudCamera.viewportWidth = newWidth;
+        hudCamera.viewportHeight = newHeight;
+        hudCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
+        hudCamera.update();
+        //System.out.println(camera.viewportWidth);
+        //System.out.println(camera.viewportHeight);
     }
 
     /**
@@ -1185,5 +1208,11 @@ public class GameCanvas {
 
     public void setCameraHUD(){
         camera = hudCamera;
+    }
+
+    public void setDynamicCameraZoom(float zoom){
+        dynamicCamera.viewportWidth = hudCamera.viewportWidth * zoom;
+        dynamicCamera.viewportHeight = hudCamera.viewportHeight * zoom;
+        dynamicCamera.update();
     }
 }

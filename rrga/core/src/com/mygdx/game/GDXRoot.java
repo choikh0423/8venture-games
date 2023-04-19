@@ -186,6 +186,7 @@ public class GDXRoot extends Game implements ScreenListener {
 			}
 
 		} else if (screen == playing) {
+			canvas.setDynamicCameraZoom(GameMode.standardZoom);
 			switch (exitCode){
 				case GameMode.EXIT_VICTORY:
 					victory.setBackgroundScreen(playing);
