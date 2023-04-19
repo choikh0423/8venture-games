@@ -65,6 +65,8 @@ public class InputController {
     private float horizontal;
     /** How much did the mouse move horizontally? */
     private float mouseMovement;
+    /** Whether the lighter button was pressed */
+    private boolean lighter;
     /** The crosshair position (for raddoll) */
     private Vector2 crosshair;
     /** The crosshair cache (for using as a return value) */
@@ -97,6 +99,15 @@ public class InputController {
      */
     public float getMouseMovement() {
         return mouseMovement;
+    }
+
+    /**
+     * Returns if the lighter button is pressed or not
+     *
+     * @return if the lighter button is pressed or not
+     */
+    public boolean getLighter() {
+        return lighter;
     }
 
     /**
@@ -248,6 +259,9 @@ public class InputController {
 
         // P for pausing game
         pausePressed = Gdx.input.isKeyJustPressed(Input.Keys.P);
+
+        // W for using the lighter
+        lighter = Gdx.input.isKeyPressed(Input.Keys.W);
     }
 
     /**

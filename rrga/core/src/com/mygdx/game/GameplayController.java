@@ -454,7 +454,6 @@ public class GameplayController implements ContactListener {
             } else {
                 windStrongFrame --;
             }
-
             avatar.applyWindForce(windForce.x/count, windForce.y/count);
         } else {
             // Gradually Reset Strong Wind SFX
@@ -466,7 +465,7 @@ public class GameplayController implements ContactListener {
         contactWindBod.clear();
         windForce.set(0,0);
 
-        // Process actions in object model
+        // Process player movement
         if (avatar.isGrounded()) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
@@ -483,6 +482,14 @@ public class GameplayController implements ContactListener {
         }
         if (!umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
             avatar.setVY(avatar.getMaxSpeedDownClosed());
+        }
+
+        // Process Lighter Force
+        if(input.getLighter() && umbrella.isOpen()){
+            avatar.applyLighterForce(ang);
+        }
+        if(avatar.isGrounded()){
+            avatar.refillLighter();
         }
 
         //Process Hazard Collisions
