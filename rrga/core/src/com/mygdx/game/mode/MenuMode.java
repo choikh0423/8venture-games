@@ -14,6 +14,7 @@ import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.utility.assets.AssetDirectory;
+import com.mygdx.game.utility.util.MySlider;
 import com.mygdx.game.utility.util.ScreenListener;
 import org.w3c.dom.Text;
 
@@ -156,40 +157,52 @@ public class MenuMode extends MenuScreen {
     /** Stage for setting features */
     private Stage settingStage;
     /** Music volume slider bar texture */
-    private Texture musicSliderBar;
+    private TextureRegion musicSliderBar;
     /** Music volume slider knob texture */
-    private Texture musicSliderKnob;
-    /** The y-coordinate of the center of the music slider */
-    private int musicSliderY;
+    private TextureRegion musicSliderKnob;
+
     /** The x-coordinate of the center of the music slider */
     private int musicSliderX;
-    /** Ration of the music slider height to the screen */
+    /** The y-coordinate of the center of the music slider */
+    private int musicSliderY;
+    /** Ratio of the music slider width to the screen */
+    private static float MUSIC_X_RATIO = 0.7f;
+    /** Ratio of the music slider height to the screen */
     private static float MUSIC_Y_RATIO = 0.6f;
-    /** Ration of the music slider width to the screen */
-    private static float MUSIC_X_RATIO = 0.2f;
-    /** SFX volume slider bar*/
-    private Texture sfxSliderBar;
-    /** SFX volume slider knob*/
-    private Texture sfxSliderKnob;
-    /** The y-coordinate of the center of the sfx slider */
-    private int sfxSliderY;
+
+    /** SFX volume slider bar texture */
+    private TextureRegion sfxSliderBar;
+    /** SFX volume slider knob texture */
+    private TextureRegion sfxSliderKnob;
+
     /** The x-coordinate of the center of the sfx slider */
     private int sfxSliderX;
-    /** Ration of the sfx slider height to the screen */
-    private static float SFX_Y_RATIO = 0.2f;
-    /** Ration of the sfx slider width to the screen */
-    private static float SFX_X_RATIO = 0.2f;
-    /** Slider width */
-    private float sliderWidth;
-    /** Slider height */
-    private float sliderHeight;
-    /** Slider width ratio */
-    private static float SLIDER_WIDTH_RATIO = 0.7f;
-    /** Slider height ratio */
-    private static float SLIDER_HEIGHT_RATIO = 0.2f;
+    /** The y-coordinate of the center of the sfx slider */
+    private int sfxSliderY;
+    /** Ratio of the sfx slider width to the screen */
+    private static float SFX_X_RATIO = 0.7f;
+    /** Ratio of the sfx slider height to the screen */
+    private static float SFX_Y_RATIO = 0.45f;
+    private float SLIDER_SCL_X = 1;
+    private float SLIDER_SCL_Y = 1;
     /** Touch range constant */
-
     private static float TOUCH_AREA_RATIO = 0.95f;
+    /** The music slider */
+    private MySlider musicSlider;
+    /** The sfx slider */
+    private MySlider sfxSlider;
+    private TextureRegion musicTag;
+    private static float MUSIC_TAG_X_RATIO = .43f;
+    private static float MUSIC_TAG_Y_RATIO = .61f;
+    private int musicTagX;
+    private int musicTagY;
+    private TextureRegion sfxTag;
+    private static float SFX_TAG_X_RATIO = .43f;
+    private static float SFX_TAG_Y_RATIO = .46f;
+    private int sfxTagX;
+    private int sfxTagY;
+    private float TAG_SCL = 1;
+
 
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -207,6 +220,8 @@ public class MenuMode extends MenuScreen {
         exitButton = new TextureRegion(directory.getEntry("menu:exit_button", Texture.class));
         backButton = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
         startButton = new TextureRegion(directory.getEntry("menu:start_button", Texture.class));
+        musicTag = new TextureRegion(directory.getEntry("menu:music_tag", Texture.class));
+        sfxTag = new TextureRegion(directory.getEntry("menu:sfx_tag", Texture.class));
 
         levelButton1 = new TextureRegion(directory.getEntry("menu:level1_button", Texture.class));
         levelButton2 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
@@ -216,6 +231,15 @@ public class MenuMode extends MenuScreen {
         // TODO: We have to import volumes that are saved by the user
         musicVolume = 1.0f;
         sfxVolume = 0.0f;
+
+        // TODO: Scale slider bars
+        musicSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
+        musicSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
+        musicSlider = new MySlider(musicSliderBar, musicSliderKnob, 20, musicSliderX, musicSliderY, SLIDER_SCL_X, SLIDER_SCL_Y);
+
+        sfxSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
+        sfxSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
+        sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, SLIDER_SCL_X, SLIDER_SCL_Y);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -224,8 +248,8 @@ public class MenuMode extends MenuScreen {
 
         if (screenMode == 1) {
             boolean selectPressed = checkClicked(screenX, screenY, selectX, selectY, levelSelectButton, SELECT_ANGLE);
-            boolean settingsPressed = checkCircleClicked(screenX, screenY, settingsX, settingsY, settingsButton);
-            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
+            boolean settingsPressed = checkCircleClicked(screenX, screenY, settingsX, settingsY, settingsButton, BUTTON_SCALE);
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton, BUTTON_SCALE);
             boolean startPressed = checkClicked(screenX, screenY, startX, startY, startButton, START_ANGLE);
 
             if (selectPressed) {
@@ -238,9 +262,9 @@ public class MenuMode extends MenuScreen {
                 startPressState = 1;
             }
         } else if (screenMode == 2) {
-            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
-            boolean levelPressed1 = checkCircleClicked(screenX, screenY, levelX1, levelY1, levelButton1);
-            boolean levelPressed2 = checkCircleClicked(screenX, screenY, levelX2, levelY2, levelButton2);
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton, BUTTON_SCALE);
+            boolean levelPressed1 = checkCircleClicked(screenX, screenY, levelX1, levelY1, levelButton1, BUTTON_SCALE);
+            boolean levelPressed2 = checkCircleClicked(screenX, screenY, levelX2, levelY2, levelButton2, BUTTON_SCALE);
 
             if (levelPressed1) {
                 levelPressState1 = 1;
@@ -250,10 +274,17 @@ public class MenuMode extends MenuScreen {
                 exitPressState = 1;
             }
         } else if (screenMode == 3) {
-            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton);
-
+            boolean exitPressed = checkCircleClicked(screenX, screenY, exitX, exitY, exitButton, BUTTON_SCALE);
             if (exitPressed) {
                 exitPressState = 1;
+            }
+            boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.getKnobX(), musicSlider.getKnobY(), musicSliderKnob, musicSlider.sx);
+            if(musicKnobPressed){
+                musicSlider.knobFollow = true;
+            }
+            boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.getKnobX(), sfxSlider.getKnobY(), sfxSliderKnob, sfxSlider.sx);
+            if(sfxKnobPressed){
+                sfxSlider.knobFollow = true;
             }
         }
         return false;
@@ -287,8 +318,8 @@ public class MenuMode extends MenuScreen {
      *
      * @return boolean for whether button is pressed
      */
-    private boolean checkCircleClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button) {
-        float radius = BUTTON_SCALE*scale*button.getRegionWidth()/2.0f;
+    private boolean checkCircleClicked(float screenX, float screenY, float buttonX, float buttonY, TextureRegion button, float scl) {
+        float radius = scl*scale*button.getRegionWidth()/2.0f;
         float dist = (screenX-buttonX)*(screenX-buttonX)+(screenY-buttonY)*(screenY-buttonY);
         if (dist < radius*radius) {
             return true;
@@ -341,7 +372,20 @@ public class MenuMode extends MenuScreen {
                 screenMode = 1;
                 exitPressState = 2;
             }
+            if(musicSlider.knobFollow) musicSlider.knobFollow = false;
+            if(sfxSlider.knobFollow) sfxSlider.knobFollow = false;
+        }
+        return true;
+    }
 
+    public boolean touchDragged(int screenX, int screenY, int pointer){
+        if(screenMode == 3){
+            if(musicSlider.knobFollow){
+                musicSlider.updateKnob(screenX, screenY);
+            }
+            if(sfxSlider.knobFollow){
+                sfxSlider.updateKnob(screenX, screenY);
+            }
         }
         return true;
     }
@@ -405,6 +449,14 @@ public class MenuMode extends MenuScreen {
             canvas.draw(backButton, exitTint, backButton.getRegionWidth() / 2, backButton.getRegionHeight() / 2,
                     exitX, exitY, EXIT_ANGLE, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
 
+            // Draw sliders
+            musicSlider.draw(canvas);
+            sfxSlider.draw(canvas);
+
+            canvas.draw(musicTag, Color.WHITE, musicTag.getRegionWidth()/2f, musicTag.getRegionHeight()/2f,
+                    musicTagX, musicTagY, 0,  TAG_SCL * scale, TAG_SCL * scale);
+            canvas.draw(sfxTag, Color.WHITE, sfxTag.getRegionWidth()/2f, sfxTag.getRegionHeight()/2f,
+                    sfxTagX, sfxTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
         }
         canvas.end();
     }
@@ -419,6 +471,7 @@ public class MenuMode extends MenuScreen {
      */
     public void render(float delta) {
         // TODO: Move this if necessary
+        musicVolume = musicSlider.ratio;
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
@@ -450,12 +503,16 @@ public class MenuMode extends MenuScreen {
         startY = (int)(START_Y_RATIO * height);
         startX = (int)(START_X_RATIO * width);
 
-        sliderHeight = (int)(SLIDER_HEIGHT_RATIO * height);
-        sliderWidth = (int)(SLIDER_WIDTH_RATIO * width);
-        musicSliderY = (int)(MUSIC_Y_RATIO * height);
-        musicSliderX = (int)(MUSIC_X_RATIO * width);
-        sfxSliderY = (int)(SFX_Y_RATIO * height);
-        sfxSliderX = (int)(SFX_X_RATIO * width);
+        musicTagX = (int)(MUSIC_TAG_X_RATIO * width);
+        musicTagY = (int)(MUSIC_TAG_Y_RATIO * height);
+        sfxTagX = (int)(SFX_TAG_X_RATIO * width);
+        sfxTagY = (int)(SFX_TAG_Y_RATIO * height);
+
+        musicSlider.setY(MUSIC_Y_RATIO * height);
+        musicSlider.setX(MUSIC_X_RATIO * width);
+        sfxSlider.setY(SFX_Y_RATIO * height);
+        sfxSlider.setX(SFX_X_RATIO * width);
+
 
         // TEMPORARY
         levelY1 = (int)(0.5 * height);

@@ -14,7 +14,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -27,6 +26,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
+
+import java.text.DecimalFormat;
 
 /**
  * Player avatar for the plaform game.
@@ -74,7 +75,9 @@ public class PlayerModel extends CapsuleObstacle {
 	private int MAX_HEALTH;
 	/** Player hp */
 	private int health;
-	public BitmapFont healthFont = new BitmapFont();
+	public BitmapFont healthFont;
+
+	private static final DecimalFormat formatter = new DecimalFormat("0.00");
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -105,6 +108,12 @@ public class PlayerModel extends CapsuleObstacle {
 	/** When the player is hit, whether or not the all white texture is drawn.
 	 * Swaps between all white and regular */
 	private boolean drawIFrameTexture = true;
+
+	/** The magnitude of the lighter force */
+	private float lighterForce;
+	private final float maxLighterFuel;
+	private float lighterFuel;
+	private float lighterChangeRate;
 
 	// <=============================== Animation objects start here ===============================>
 	/** Player walk animation filmstrip texture */
@@ -437,6 +446,10 @@ public class PlayerModel extends CapsuleObstacle {
 		force = data.getFloat("force", 0);
 		textureScale = data.getFloat("texturescale", 1.0f);
 		sensorName = "PlayerGroundSensor";
+		lighterForce = data.getFloat("lighter_force");
+		maxLighterFuel = data.getFloat("lighter_fuel");
+		lighterFuel = maxLighterFuel;
+		lighterChangeRate = data.getFloat("lighter_change_rate");
 		this.data = data;
 
 		// Gameplay attributes
@@ -515,12 +528,6 @@ public class PlayerModel extends CapsuleObstacle {
 			forceCache.set(getMovement(),0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
-
-		// TODO: consider/remove Jump!
-//		if (isJumping()) {
-//			forceCache.set(0, jump_force);
-//			body.applyLinearImpulse(forceCache,getPosition(),true);
-//		}
 	}
 
 	/**
@@ -533,7 +540,7 @@ public class PlayerModel extends CapsuleObstacle {
 		if (!isActive()) {
 			return;
 		}
-
+		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
 		}
@@ -563,6 +570,40 @@ public class PlayerModel extends CapsuleObstacle {
 			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2+1 : 1.0f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
+		}
+	}
+
+	/**
+	 * Applies lighter force to the body of this player.
+	 */
+	public void applyLighterForce(float umbAng) {
+		if(lighterFuel > 0) {
+			lighterFuel -= lighterChangeRate;
+			float umbrellaX = (float) Math.cos(umbAng);
+			float umbrellaY = (float) Math.sin(umbAng);
+			//determine X
+			if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+				setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
+				forceCache.x = 0;
+			}
+			else {
+				forceCache.x = umbrellaX * lighterForce / 2;
+			}
+			//determine Y
+			if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+				setVY(Math.signum(getVY())*getMaxSpeedUp());
+				forceCache.y = 0;
+			} else {
+				forceCache.y = umbrellaY * lighterForce;
+			}
+			body.applyForce(forceCache, getPosition(), true);
+		}
+	}
+
+	public void refillLighter(){
+		if(lighterFuel != maxLighterFuel){
+			if(lighterFuel + lighterChangeRate > maxLighterFuel) lighterFuel = maxLighterFuel;
+			else lighterFuel += lighterChangeRate;
 		}
 	}
 
@@ -633,17 +674,24 @@ public class PlayerModel extends CapsuleObstacle {
 	 * TODO: possibly other status information
 	 * @param canvas the game canvas
 	 */
-	public void drawInfo(GameCanvas canvas) {
-		if (hpTexture == null) {
+
+	public void drawInfo(GameCanvas canvas){
+		// draw health info
+		if (hpTexture == null){
 			return;
 		}
-
 		float height = hpTexture[health].getRegionHeight();
 		float width = hpTexture[health].getRegionWidth();
 
 		// TODO: HP Texture is manually scaled at the moment
-		canvas.draw(hpTexture[health], Color.WHITE, width / 2f, height / 2f, drawScale.x,
-				canvas.getHeight() - drawScale.y, 0, 0.3f, 0.3f);
+		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
+					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+
+		// draw lighter info
+		float lighter_capac = lighterFuel / maxLighterFuel;
+		healthFont.setColor(Color.WHITE);
+		canvas.drawText(formatter.format(lighter_capac), healthFont, 10,
+				canvas.getHeight() - 90);
 	}
 	
 	/**

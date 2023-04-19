@@ -16,7 +16,7 @@
   "player": {
     "shrink": [0.7, 0.95],
     "force": 40.0,
-    "damping": 10.0,
+    "damping": 30.0,
     "density": 1.0,
     "friction": 0.3,
     "maxspeed_x_ground": 5.0,
@@ -32,7 +32,10 @@
     "texturescale": 0.08333,
     "maxhealth": 3,
     "drag_x" : 10,
-    "drag_y" : 5
+    "drag_y" : 5,
+    "lighter_force": 10,
+    "lighter_fuel": 150,
+    "lighter_change_rate": 1
   },
   "umbrella" : {
     "shrink": [0.7, 0.95],
