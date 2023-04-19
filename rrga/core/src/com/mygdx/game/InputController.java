@@ -253,8 +253,8 @@ public class InputController {
         mousePos.x = Gdx.input.getX();
         mousePos.y = Gdx.input.getY();
 
-        // E for toggling umbrella open/closed
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) togglePressed = true;
+        // Left mouse click for toggling umbrella open/closed
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) togglePressed = true;
         else togglePressed = false;
 
         // P for pausing game

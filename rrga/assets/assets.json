@@ -19,6 +19,7 @@
         "game:red_bird" : "game/hazard/bird_easy_red.png",
         "game:blue_bird" : "game/hazard/bird_medium_blue.png",
         "game:brown_bird" : "game/hazard/bird_hard_brown.png",
+        "game:red_bird_flapping" : "game/hazard/red_bird_flapping.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",

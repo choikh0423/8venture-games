@@ -93,16 +93,28 @@ public class LevelContainer{
      * Texture asset for a red bird
      */
     private TextureRegion redBirdTexture;
+    /**
+     * Texture asset for red bird animation
+     */
+    private Texture redBirdAnimationTexture;
 
     /**
      * Texture asset for a red bird
      */
     private TextureRegion blueBirdTexture;
+    /**
+     * Texture asset for blue bird animation
+     */
+    private Texture blueBirdAnimationTexture;
 
     /**
-     * Texture asset for a red bird
+     * Texture asset for a brown bird
      */
     private TextureRegion brownBirdTexture;
+    /**
+     * Texture asset for brown bird animation
+     */
+    private Texture brownBirdAnimationTexture;
     /**
      * Texture asset for goal
      */
@@ -187,6 +199,20 @@ public class LevelContainer{
     }
 
     /**
+     * Note: Null texture is returned when color is invalid.
+     * @param color the color of the bird
+     * @return texture of bird for the given value color.
+     */
+    private Texture getFlapAnimationTexture(String color){
+        switch(color){
+            case "red": return redBirdAnimationTexture;
+            case "blue": return blueBirdAnimationTexture;
+            case "brown": return brownBirdAnimationTexture;
+            default: return null;
+        }
+    }
+
+    /**
      * Gather the assets for this controller.
      * <p>
      * This method extracts the asset variables from the given asset directory. It
@@ -211,6 +237,9 @@ public class LevelContainer{
         redBirdTexture = new TextureRegion(directory.getEntry("game:red_bird", Texture.class));
         blueBirdTexture = new TextureRegion(directory.getEntry("game:blue_bird", Texture.class));
         brownBirdTexture = new TextureRegion(directory.getEntry("game:brown_bird", Texture.class));
+
+        redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
+
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
 
         // Animation Textures
@@ -316,6 +345,7 @@ public class LevelContainer{
             JsonValue jv = birdData[ii];
             obj = new BirdHazard(jv, birdShape, birdDamage, birdSensorRadius, birdKnockback);
             obj.setDrawScale(scale);
+            obj.setFlapAnimation(getFlapAnimationTexture(jv.getString("color", "red")));
             obj.setTexture(getBirdTexture(jv.getString("color", "red")));
             obj.setOriginCenter();
             obj.setName(birdName + ii);

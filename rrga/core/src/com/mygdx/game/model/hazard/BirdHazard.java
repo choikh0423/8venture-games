@@ -1,6 +1,10 @@
 package com.mygdx.game.model.hazard;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -78,6 +82,23 @@ public class BirdHazard extends HazardModel {
     private float width;
     private float height;
 
+    // <=============================== Animation objects start here ===============================>
+    /** Bird flap animation filmstrip texture */
+    private Texture flapTexture;
+
+    /** Bird flap animation frames */
+    private TextureRegion[][] flapTmpFrames;
+
+    /** Bird flap animation frames */
+    private TextureRegion[] flapAnimationFrames;
+
+    /** Bird flap animation*/
+    private Animation flapAnimation;
+
+    /** Bird flap animation elapsed time */
+    float flapElapsedTime;
+
+
     /**
      * Whether this bird sees its target.
      * If true, moves in a straight line towards initial sighting position.
@@ -118,13 +139,44 @@ public class BirdHazard extends HazardModel {
     }
 
     /**
+     * Sets bird flapping animation
+     * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+     * */
+    public void setFlapAnimation(Texture texture) {
+        // Temporary
+        System.out.println(texture);
+        if (texture == null) {
+            return;
+        }
+
+        this.flapTexture = texture;
+        this.flapTmpFrames = TextureRegion.split(flapTexture, 237, 229);
+        this.flapAnimationFrames = new TextureRegion[4];
+
+        System.out.println(flapTmpFrames.length);
+
+        // PLacing animation frames in order
+        int index = 0;
+        for (int i=0; i<1; i++) {
+            for (int j=0; j<4; j++) {
+                this.flapAnimationFrames[index] = flapTmpFrames[i][j];
+                index++;
+            }
+        }
+
+        // Adjust walk speed here
+        this.flapAnimation = new Animation(1f/10f, flapAnimationFrames);
+    }
+
+    /**
      * Sets the direction of the target using the targets x and y coordinates
      */
     public void setTargetDir(float tx, float ty, float tvx, float tvy) {
         //Right now using euler's method to determine target direction
         //In the future might want to switch to tracking player's location up to a certain point
         //and incrementally adjusting direction.
-        float timestep = sensorRadius / attackSpeed;
+        float dist = (float) Math.sqrt(Math.pow((tx-getX()), 2) + Math.pow((ty-getY()), 2));
+        float timestep = dist / attackSpeed;
         float moveX = tx - getX() + (tvx * timestep);
         float moveY = ty - getY() + (tvy * timestep);
         move.set(moveX, moveY);
@@ -252,11 +304,23 @@ public class BirdHazard extends HazardModel {
      */
     public void draw(GameCanvas canvas) {
         // TODO: birds should also be mirrored when facing opposite directions
+
+
         float effect = faceRight ? -1.0f : 1.0f;
         float birdScale = .2f;
-        canvas.draw(texture, Color.WHITE, origin.x, origin.y,
-                (getX()) * drawScale.x, (getY()) * drawScale.y,
-                getAngle(), effect * birdScale, birdScale);
+
+        if (flapAnimation == null) {
+            canvas.draw(texture, Color.WHITE, origin.x, origin.y,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y,
+                    getAngle(), effect * birdScale, birdScale);
+        } else {
+            flapElapsedTime += Gdx.graphics.getDeltaTime();
+
+            // TODO: Box is adjusted manually - THIS MUST be FIXED
+            canvas.draw((TextureRegion)flapAnimation.getKeyFrame(flapElapsedTime, true), Color.WHITE, origin.x, origin.y-60,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y,
+                    getAngle(), -effect * birdScale, birdScale);
+        }
     }
 
     /**

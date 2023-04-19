@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -159,6 +160,7 @@ public class MenuMode extends MenuScreen {
     private TextureRegion musicSliderBar;
     /** Music volume slider knob texture */
     private TextureRegion musicSliderKnob;
+
     /** The x-coordinate of the center of the music slider */
     private int musicSliderX;
     /** The y-coordinate of the center of the music slider */
@@ -167,10 +169,12 @@ public class MenuMode extends MenuScreen {
     private static float MUSIC_X_RATIO = 0.7f;
     /** Ratio of the music slider height to the screen */
     private static float MUSIC_Y_RATIO = 0.6f;
+
     /** SFX volume slider bar texture */
     private TextureRegion sfxSliderBar;
     /** SFX volume slider knob texture */
     private TextureRegion sfxSliderKnob;
+
     /** The x-coordinate of the center of the sfx slider */
     private int sfxSliderX;
     /** The y-coordinate of the center of the sfx slider */
