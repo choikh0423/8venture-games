@@ -52,6 +52,7 @@
         "platform:template": "levels/templates/platform.json",
         "static_hazard:template": "levels/templates/static_hazard.json",
         "wind:template": "levels/templates/wind.json",
+        "moving_platform:template": "levels/templates/moving_platform.json",
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json"
