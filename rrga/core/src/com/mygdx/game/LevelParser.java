@@ -48,6 +48,11 @@ public class LevelParser {
      */
     private JsonValue[] windData;
 
+    /** list of moving platform json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue[] movingPlatformData;
+
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
@@ -96,6 +101,12 @@ public class LevelParser {
     /** the default JSON polygon of a wind object */
     private final JsonValue windDefaultPoly;
 
+    /** the default JSON properties of a moving platform object */
+    private final JsonValue movingPlatformDefault;
+
+    /** the default JSON polygon of a moving platform object */
+    private final JsonValue movingPlatformDefaultPoly;
+
     /** the default direction of a wind object */
     private final float windDirDefault = 0;
 
@@ -139,6 +150,13 @@ public class LevelParser {
     }
 
     /**
+     * @return processed moving platform data that is ready for consumption
+     */
+    public JsonValue[] getMovingPlatformData() {
+        return movingPlatformData;
+    }
+
+    /**
      * @return processed static hazard data that is ready for consumption
      */
     public JsonValue[] getStaticHazardData() {
@@ -171,6 +189,7 @@ public class LevelParser {
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
+        JsonValue movingPlatformTemplate = directory.getEntry("moving_platform:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object");
         blueBirdDefaults = blueBirdTemplate.get("object");
@@ -182,6 +201,8 @@ public class LevelParser {
         staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
+        movingPlatformDefault = movingPlatformTemplate.get("object").get("properties");
+        movingPlatformDefaultPoly = movingPlatformTemplate.get("object").get("polygon");
 
         // save tileset textures and their corresponding JSON tileset data
         textureMap = new HashMap<>();
@@ -244,6 +265,7 @@ public class LevelParser {
         ArrayList<JsonValue> windRawData = new ArrayList<>();
         HashMap<Integer, JsonValue> windDirs = new HashMap<>();
         ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
+        ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
 
         JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together)
@@ -252,7 +274,7 @@ public class LevelParser {
         for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, staticHazardRawData);
+                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, movingPlatRawData, staticHazardRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -268,6 +290,7 @@ public class LevelParser {
         processPlatforms(platformRawData);
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
+        processMovingPlats(movingPlatRawData, trajectory);
     }
 
     /**
@@ -279,6 +302,7 @@ public class LevelParser {
                                   ArrayList<JsonValue> platformRawData,
                                   ArrayList<JsonValue> windRawData,
                                   HashMap<Integer, JsonValue> windDirs,
+                                  ArrayList<JsonValue> movingPlatRawData,
                                   ArrayList<JsonValue> staticHazardRawData)
     {
         JsonValue objs = layer.get("objects");
@@ -286,7 +310,7 @@ public class LevelParser {
             String template = obj.getString("template", "IGNORE");
             if (template.contains("bird.json")) {
                 birdRawData.add(obj);
-            } else if (template.contains("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
+            } else if ((!template.contains("moving_platform.json") && template.contains("platform.json")) || (obj.has("type") && obj.getString("type").equals("platform"))) {
                 platformRawData.add(obj);
             } else if (template.contains("lightning.json")) {
                 lightningRawData.add(obj);
@@ -302,6 +326,8 @@ public class LevelParser {
                 windRawData.add(obj);
             } else if (template.contains("wind_dir.json")){
                 windDirs.put(obj.getInt("id"), obj);
+            } else if (template.contains("moving_platform.json")){
+                movingPlatRawData.add(obj);
             }
         }
     }
@@ -525,6 +551,54 @@ public class LevelParser {
             data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
             data.addChild("direction", computeWindDirection(props, windDirs));
             windData[ii] = data;
+        }
+    }
+
+    private void processMovingPlats(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+        movingPlatformData = new JsonValue[rawData.size()];
+        for (int ii = 0; ii < movingPlatformData.length; ii++) {
+            //data we pass in to platform constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //moving platform raw data
+            JsonValue mp = rawData.get(ii);
+            // set position data
+            readPositionAndConvert(mp, temp);
+            addPosition(data, temp);
+            // the resulting path should be stored as a list of floats which is Json array of Json floats.
+            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+            // implicitly, the platform's location is the FIRST point on its path.
+            pathJson.addChild(new JsonValue(temp.x));
+            pathJson.addChild(new JsonValue(temp.y));
+            boolean loop = false;
+            float moveSpeed = 0;
+            JsonValue props = mp.get("properties");
+
+            // update properties
+            loop = getFromProperties(props, "loop", movingPlatformDefault).asBoolean();
+            moveSpeed = getFromProperties(props, "move_speed", movingPlatformDefault).asFloat();
+            // using custom properties to find rest of path
+            HashSet<Integer> seen = new HashSet<>();
+            // this takes either the platform's next point along its path or take from default (which should be 0)
+            JsonValue jsonId = getFromProperties(props, "path", movingPlatformDefault);
+            int next = jsonId.asInt();
+            while (next != 0 && !seen.contains(next) && trajectory.get(next) != null) {
+                seen.add(next);
+                JsonValue nodeData = trajectory.get(next);
+                // put path point (x,y) into vector cache and perform conversion
+                readPositionAndConvert(nodeData, temp);
+                // add this node to bird's path
+                pathJson.addChild(new JsonValue(temp.x));
+                pathJson.addChild(new JsonValue(temp.y));
+                // get next
+                nodeData = nodeData.get("properties");
+                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
+                next = jsonId.asInt();
+            }
+            data.addChild("path", pathJson);
+            data.addChild("loop", new JsonValue(loop));
+            data.addChild("movespeed", new JsonValue(moveSpeed));
+            data.addChild("points", polyPoints(mp.get("polygon"), movingPlatformDefaultPoly));
+            movingPlatformData[ii] = data;
         }
     }
 

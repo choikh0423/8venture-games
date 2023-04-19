@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -154,10 +155,10 @@ public class MenuMode extends MenuScreen {
 
     /** Stage for setting features */
     private Stage settingStage;
-    /** Music volume slider*/
-    private Slider musicSlider;
-    /** Music volume slider skin*/
-    private Skin musicSliderSkin;
+    /** Music volume slider bar texture */
+    private Texture musicSliderBar;
+    /** Music volume slider knob texture */
+    private Texture musicSliderKnob;
     /** The y-coordinate of the center of the music slider */
     private int musicSliderY;
     /** The x-coordinate of the center of the music slider */
@@ -166,10 +167,10 @@ public class MenuMode extends MenuScreen {
     private static float MUSIC_Y_RATIO = 0.6f;
     /** Ration of the music slider width to the screen */
     private static float MUSIC_X_RATIO = 0.2f;
-    /** SFX volume slider*/
-    private Slider sfxSlider;
-    /** SFX volume slider skin*/
-    private Skin sfxSliderSkin;
+    /** SFX volume slider bar*/
+    private Texture sfxSliderBar;
+    /** SFX volume slider knob*/
+    private Texture sfxSliderKnob;
     /** The y-coordinate of the center of the sfx slider */
     private int sfxSliderY;
     /** The x-coordinate of the center of the sfx slider */
@@ -255,7 +256,6 @@ public class MenuMode extends MenuScreen {
                 exitPressState = 1;
             }
         }
-
         return false;
     }
 
@@ -341,6 +341,7 @@ public class MenuMode extends MenuScreen {
                 screenMode = 1;
                 exitPressState = 2;
             }
+
         }
         return true;
     }
@@ -399,7 +400,6 @@ public class MenuMode extends MenuScreen {
             canvas.draw(levelButton2, levelTint2, levelButton2.getRegionWidth() / 2, levelButton2.getRegionHeight() / 2,
                     levelX2, levelY2, 0, BUTTON_SCALE * scale, BUTTON_SCALE * scale);
         } else if (screenMode == 3) {
-
             // Draw Back Button
             Color exitTint = (exitPressState == 1 ? Color.GRAY : Color.WHITE);
             canvas.draw(backButton, exitTint, backButton.getRegionWidth() / 2, backButton.getRegionHeight() / 2,

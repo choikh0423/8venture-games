@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
+import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.BirdRayCastCallback;
 import com.mygdx.game.model.hazard.HazardModel;
@@ -172,6 +173,11 @@ public class GameplayController implements ContactListener {
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
+
+    /**
+     * The set of all moving platforms currently in the level
+     */
+    private ObjectSet<MovingPlatformModel> movingPlats = new ObjectSet<>();
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
@@ -357,6 +363,7 @@ public class GameplayController implements ContactListener {
         this.lightnings = levelContainer.getLightnings();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
+        this.movingPlats = levelContainer.getMovingPlats();
 
         // Process actions in object model
 
@@ -395,7 +402,7 @@ public class GameplayController implements ContactListener {
         mousePos.x = input.getMousePos().x;
         mousePos.y = input.getMousePos().y;
         //convert from screen coordinates to canvas coordinates
-        mousePos.y = 2 * center.y - mousePos.y;
+        mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
         //convert to player coordinates
         mousePos.sub(center);
         //normalize manually because Vector2.nor() is less accurate
@@ -501,6 +508,11 @@ public class GameplayController implements ContactListener {
         // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
 //        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
 //        umbrella.applyForce();
+
+        //move moving platforms
+        for(MovingPlatformModel mp: movingPlats){
+            mp.move();
+        }
 
         //Bird Updates
         int birdRays = 10;
