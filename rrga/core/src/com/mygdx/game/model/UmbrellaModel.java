@@ -25,8 +25,8 @@ public class UmbrellaModel extends BoxObstacle {
     private boolean open;
     /** The current angular rotation of the umbrella */
     private float turning;
-    /** The scale to multiply the texture by for drawing */
-    private float textureScale;
+    /** The size of the umbrella in physics units (up to scaling by shrink factor) */
+    private float size;
     /** Ratio of horizontal speed to conserve when closing the umbrella */
     private float closedMomentum = 0;
 
@@ -81,7 +81,7 @@ public class UmbrellaModel extends BoxObstacle {
         setBodyType(BodyDef.BodyType.StaticBody);
 
         force = data.getFloat("force", 0);
-        textureScale = data.getFloat("texturescale", 1.0f);
+        size = data.getFloat("size", 1.0f);
         sensorName = "umbrellaSensor";
         this.data = data;
         faceRight = true;
@@ -146,12 +146,14 @@ public class UmbrellaModel extends BoxObstacle {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
         //canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
+        TextureRegion t;
         if (openMode == -1) {
             // Playing umbrella close animation
             openElapsedTime += Gdx.graphics.getDeltaTime();
-            canvas.draw(closeAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),
-                    effect*textureScale/32f * drawScale.x,
-                    textureScale/32f * drawScale.y);
+            t = closeAnimation.getKeyFrame(openElapsedTime, false);
+            canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -160,9 +162,10 @@ public class UmbrellaModel extends BoxObstacle {
         } else if (openMode == 1) {
             // Playing umbrella open animation
             openElapsedTime += Gdx.graphics.getDeltaTime();
-            canvas.draw(openAnimation.getKeyFrame(openElapsedTime, false), Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),
-                    effect*textureScale/32f * drawScale.x,
-                    textureScale/32f * drawScale.y);
+            t = openAnimation.getKeyFrame(openElapsedTime, false);
+            canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -170,9 +173,15 @@ public class UmbrellaModel extends BoxObstacle {
             }
         } else if (openMode == 0) {
             if (texture == openTexture){
-                canvas.draw(openAnimationFrames[openAnimationFrames.length - 1], Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect*textureScale/32f * drawScale.x,textureScale/32f * drawScale.y);
+                t=openAnimationFrames[openAnimationFrames.length - 1];
+                canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+                        getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
             }else {
-                canvas.draw(openAnimationFrames[0], Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), effect * textureScale / 32f * drawScale.x, textureScale / 32f * drawScale.y);
+                t = openAnimationFrames[0];
+                canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+                        getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
             }
         }
         canvas.draw(texture, Color.BLUE,  getX()*drawScale.x,getY()*drawScale.y, 1, 1);

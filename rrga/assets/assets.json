@@ -34,7 +34,7 @@
             "wrapV": "repeated"
         },
         "game:player": "game/player.png",
-        "game:player_walk_animation": "game/player_walk_filmstrip.png",
+        "game:player_walk_animation": "game/gale34_filmstrip_walking.png",
         "game:umbrella_open_animation": "game/umbrella_open_filmstrip.png",
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",

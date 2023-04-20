@@ -615,8 +615,8 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + diff.x;
-        cache.y = avatar.getY() + diff.y;
+        cache.x = avatar.getX() + diff.len()* mousePos.x;
+        cache.y = avatar.getY() + diff.len()*mousePos.y;
         umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.

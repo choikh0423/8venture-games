@@ -393,10 +393,9 @@ public class LevelContainer{
         addObject(wall);
 
         // Create player
-        float scl = globalConstants.get("player").getFloat("texturescale");
         // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
-        dwidth = avatarSideTexture.getRegionWidth() / 32f * scl;
-        dheight = avatarSideTexture.getRegionHeight() / 32f * scl;
+        dwidth = globalConstants.get("player").getFloat("size");
+        dheight = globalConstants.get("player").getFloat("size");
         avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
@@ -410,10 +409,9 @@ public class LevelContainer{
         addObject(avatar);
 
         // Create the umbrella
-        scl = globalConstants.get("umbrella").getFloat("texturescale");
         // TODO: (technical) specify umbrella size WITHOUT dependency on view
-        dwidth = umbrellaOpenTexture.getRegionWidth() / 32f * scl;
-        dheight = umbrellaOpenTexture.getRegionHeight() / 32f * scl;
+        dwidth = globalConstants.get("umbrella").getFloat("size");
+        dheight = globalConstants.get("umbrella").getFloat("size");
         float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
         umbrella = new UmbrellaModel(
                 globalConstants.get("umbrella"),
