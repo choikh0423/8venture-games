@@ -59,6 +59,6 @@
   "hazards": {
     "birdDamage": 1,
     "birdSensorRadius": 7,
-    "birdKnockback": 5
+    "birdKnockback": 8
   }
 }

@@ -16,25 +16,22 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
     private final int damage;
 
     /** The scale of this hazard's knock-back */
-    private final float knockBack;
+    private final float knockBackScl;
 
     /** The knock-back force vector */
-    private final Vector2 knockBackForce;
+    private Vector2 knockBackForce = new Vector2();
 
     @Override
     public int getDamage() { return damage; }
 
     @Override
-    public float getKnockBackScl() { return knockBack; }
+    public float getKnockBackScl() { return knockBackScl; }
 
     @Override
     public Vector2 getKnockBackForce() { return knockBackForce; }
 
-    /**
-     * copies the force over into the force cache.
-     * @param kbForce a (normalized) force vector
-     */
-    public void setKnockBackForce(Vector2 kbForce) { knockBackForce.set(kbForce); }
+    @Override
+    public void setKnockBackForce(Vector2 kbForce) { knockBackForce.set(kbForce.nor()); }
 
     /**
      * constructs a polygonal hazard with the given shape, damage and knock-back values.
@@ -82,7 +79,7 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
         setRestitution(0);
         fixture.isSensor = true;
         this.damage = dam;
-        this.knockBack = kb;
+        this.knockBackScl = kb;
         // ideally, if the constructor was called without knock-back force vector,
         // the subclass should override the knock-back force method. Otherwise, default (no knock-back).
         if (kbForce == null){

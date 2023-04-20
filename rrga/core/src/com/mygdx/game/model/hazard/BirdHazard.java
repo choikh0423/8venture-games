@@ -82,7 +82,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final int damage;
 
-    private final float knockBack;
+    private final float knockBackScl;
+
+    private Vector2 knockBackVec = new Vector2();
 
     /** the dimensions of filmstrip AABB.
      * Together with this object's AABB dimensions, this gives a texture scale ratio.
@@ -151,7 +153,11 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     @Override
     public Vector2 getKnockBackForce() {
-        return temp.set(moveDir.x, moveDir.y).nor();
+        return knockBackVec;
+    }
+    @Override
+    public void setKnockBackForce(Vector2 in) {
+        knockBackVec.set(in.nor());
     }
 
     public String getColor() {
@@ -162,7 +168,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     public int getDamage() { return damage; }
 
     @Override
-    public float getKnockBackScl() { return knockBack; }
+    public float getKnockBackScl() { return knockBackScl; }
 
     /**
      * Sets bird flapping animation
@@ -235,13 +241,13 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         attackWait = ATTACK_WAIT_TIME;
         seesTarget = false;
         damage = birdDamage;
-        knockBack = birdKnockBack;
+        knockBackScl = birdKnockBack;
         warning = false;
         this.warningTex = warningTex;
 
         // make hit-box objects
         // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
-        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBack, temp);
+        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBackScl, temp);
         // flip points and make hit-box #2:
         float x = data.getFloat("x");
         float y = data.getFloat("y");
@@ -249,7 +255,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBack, temp);
+        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBackScl, temp);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
             // hit1 must be right hitbox
