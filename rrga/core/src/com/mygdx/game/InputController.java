@@ -58,10 +58,13 @@ public class InputController {
     private boolean exitPrevious;
     /** Whether the player toggled the umbrella open/closed */
     private boolean togglePressed;
+    /** Whether the pause button was toggled */
+    private boolean pauseToggled;
+
+    /** whether the zoom button was pressed */
+    private boolean zoomPressed;
     /** Whether the player is holding down to toggle the umbrella open/closed */
     private boolean toggleHeld;
-    /** Whether the pause button was pressed */
-    private boolean pausePressed;
 
     /** How much did we move horizontally? */
     private float horizontal;
@@ -159,8 +162,12 @@ public class InputController {
      * Returns true if the pause button was toggled
      * @return
      */
-    public boolean didPause() { return pausePressed; }
+    public boolean didPause() { return pauseToggled; }
 
+    /**
+     * Returns true if the zoom button is held
+     */
+    public boolean didZoom() { return zoomPressed; }
 
     /**
      * Creates a new input controller
@@ -273,7 +280,11 @@ public class InputController {
         }
 
         // P for pausing game
-        pausePressed = Gdx.input.isKeyJustPressed(Input.Keys.P);
+
+        pauseToggled = Gdx.input.isKeyJustPressed(Input.Keys.P);
+
+        // Z for zooming
+        zoomPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
 
         // W for using the lighter
         lighter = Gdx.input.isKeyPressed(Input.Keys.W);

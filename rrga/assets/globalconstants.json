@@ -53,13 +53,12 @@
     "offset": [0.0, 0.26666]
   },
   "world": {
-    "width": 32.0,
-    "height": 18.0
+    "width": 16,
+    "height": 9
   },
   "hazards": {
     "birdDamage": 1,
     "birdSensorRadius": 7,
-    "birdKnockback": 5,
-    "birdShape" : [-0.5, -0.25, 0.5, -0.25, 0.5, 0.25, -0.5, 0.25]
+    "birdKnockback": 5
   }
 }

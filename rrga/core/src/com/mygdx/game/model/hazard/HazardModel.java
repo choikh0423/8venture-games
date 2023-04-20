@@ -13,10 +13,10 @@ public abstract class HazardModel extends PolygonObstacle {
     /**
      * The damage done to the player when colliding with this hazard
      */
-    private int damage;
+    private final int damage;
 
     /** The scale of this hazard's knockback */
-    private float knockback;
+    private final float knockback;
 
     /**
      * Returns this hazard's damage
@@ -34,17 +34,6 @@ public abstract class HazardModel extends PolygonObstacle {
         return knockback;
     }
 
-    public HazardModel(JsonValue data, int dam, float kb) {
-        super(data.get("points").asFloatArray(), data.getFloat("x"), data.getFloat("y"));
-        setBodyType(BodyDef.BodyType.StaticBody);
-        setDensity(0);
-        setFriction(0);
-        setRestitution(0);
-        this.damage = dam;
-        this.knockback = kb;
-    }
-
-    //constructor used for birds
     public HazardModel(JsonValue data, float[] points, int dam, float kb) {
         super(points, data.getFloat("x"), data.getFloat("y"));
         setBodyType(BodyDef.BodyType.StaticBody);
@@ -62,4 +51,3 @@ public abstract class HazardModel extends PolygonObstacle {
      * */
     public abstract Vector2 getKnockbackForce();
 }
-

@@ -84,6 +84,26 @@ public class GameMode implements Screen {
     /** reference to asset manager to get level JSON files. */
     private AssetDirectory directory;
 
+    /** temporary vector cache */
+    private Vector2 cache;
+
+    /** level in development */
+    private JsonValue sampleLevel;
+
+    public static final float standardZoom = 1.0f;
+
+    /** maximum camera zoom scale factor */
+    private static final float maximumZoom = 1.25f;
+
+    /** interpolation coefficient for zooming */
+    private float zoomAlpha = 0;
+
+    /** how quickly to change zoom scale */
+    private static final float zoomAlphaDelta = 0.05f;
+
+    /** the current zoom factor */
+    private float zoomScl = 1;
+
     /**
      * Returns true if debug mode is active.
      *
@@ -179,6 +199,7 @@ public class GameMode implements Screen {
         // Create the controllers.
         inputController = new InputController();
         gameplayController = new GameplayController(bounds, gravity, 0);
+        cache = new Vector2(1,1);
     }
 
     /**
@@ -194,6 +215,7 @@ public class GameMode implements Screen {
         scale  = null;
         canvas = null;
         parser = null;
+        cache = null;
 
         // GameMode does not own the directory, so it does not unload assets
         directory = null;
@@ -217,7 +239,7 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
-        debugFont = directory.getEntry("shared:retro", BitmapFont.class);
+        debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
         // instantiate level parser for loading levels
         parser = new LevelParser(directory);
@@ -233,7 +255,15 @@ public class GameMode implements Screen {
     public void reset() {
         // level may have changed, parse data
         // this is instantaneous if the level has been parsed in previous reset.
-        parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+
+        // TODO: REMOVE FOR SUBMISSION
+        // this ignores all levels, always runs the given file
+        if (sampleLevel != null){
+            parser.parseLevel(sampleLevel);
+        }
+        else {
+            parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+        }
 
         physicsWidth = parser.getWorldSize().x;
         physicsHeight = parser.getWorldSize().y;
@@ -260,7 +290,7 @@ public class GameMode implements Screen {
 
         // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
         //  screen modes that use GameMode as background can just avoid render()...
-        if (!active){
+        if (!active) {
             return false;
         }
 
@@ -313,6 +343,21 @@ public class GameMode implements Screen {
      * @param dt	Number of seconds since last animation frame
      */
     public void update(float dt) {
+
+        if (inputController.didZoom()){
+            zoomAlpha += zoomAlphaDelta;
+        }
+        else {
+            zoomAlpha -= zoomAlphaDelta;
+        }
+
+        // constraint zoomAlpha into [0,1] range
+        if (zoomAlpha < 0){ zoomAlpha = 0; }
+        else if (zoomAlpha > 1){ zoomAlpha = 1; }
+
+        zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
+        canvas.setDynamicCameraZoom(zoomScl);
+
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
     };
@@ -338,18 +383,19 @@ public class GameMode implements Screen {
 
         // center a background on player
         // TODO: replace with repeating background?
-        canvas.draw(backgroundTexture, Color.WHITE, 0,0,px - canvas.getWidth()/2f,
-                py - canvas.getHeight()/2f,canvas.getWidth(),canvas.getHeight());
+        canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
+                backgroundTexture.getRegionHeight()/2f, px , py, 0,
+                canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
+                canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
 
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
-        // invert y because tilesets are stored top down rather than bottom up
         int centerTileY = (int) avatar.getY();
-        int minX = (int) Math.max(0, centerTileX - displayWidth/2);
-        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2);
-        int minY = (int) Math.max(0, centerTileY - displayHeight/2);
-        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2);
+        int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
+        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
+        int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);
+        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2 * zoomScl + 1);
         // texture tiles are stored row-major order in an array
         for (TextureRegion[] tiles : parser.getLayers()){
             // get grid around the player's tile
@@ -392,9 +438,27 @@ public class GameMode implements Screen {
         // debug information on screen to track FPS, etc
         if (debug){
             debugFont.setColor(Color.BLACK);
-            canvas.drawText("FPS:" + (int) (1/dt), debugFont, 0.05f*canvas.getWidth(), 0.95f*canvas.getHeight());
-            canvas.drawText("X:" + p.getX(), debugFont, 0.05f*canvas.getWidth(), 0.8f*canvas.getHeight());
-            canvas.drawText("Y:" + p.getY(), debugFont, 0.05f*canvas.getWidth(), 0.65f*canvas.getHeight());
+            int fps = (int) (1/dt);
+            String s = fps >= 59 ? "GOOD" : fps >= 57 ? "MEDIOCRE" : "BAD";
+            Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
+            canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
+            debugFont.setColor(c);
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f*canvas.getWidth(), 0.9f*canvas.getHeight());
+            debugFont.setColor(Color.BLACK);
+            canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
+            canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
+            canvas.drawText("VX:" + p.getVX(), debugFont, 0.1f*canvas.getWidth(), 0.75f*canvas.getHeight());
+            canvas.drawText("VY:" + p.getVY(), debugFont, 0.1f*canvas.getWidth(), 0.7f*canvas.getHeight());
+            canvas.drawText("HP:" + p.getHealth(), debugFont, 0.1f*canvas.getWidth(), 0.65f*canvas.getHeight());
+            cache.set(inputController.getMousePos());
+            canvas.drawText("MouseScreenX:" + cache.x, debugFont, 0.1f*canvas.getWidth(), 0.6f*canvas.getHeight());
+            canvas.drawText("MouseScreenY:" + cache.y, debugFont, 0.1f*canvas.getWidth(), 0.55f*canvas.getHeight());
+            canvas.drawText("MouseX:" + ((cache.x - canvas.getWidth()/2f)/scale.x + p.getX()),
+                    debugFont, 0.1f*canvas.getWidth(), 0.50f*canvas.getHeight());
+            canvas.drawText("MouseY:" + ((canvas.getHeight()/2f - cache.y)/scale.y + p.getY()),
+                    debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
+            canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
         }
         canvas.end();
     }
@@ -524,5 +588,11 @@ public class GameMode implements Screen {
     public void setLevel(int level){
         currentLevel = level;
     }
+
+    /**
+     * temporary override of levels with sample level
+     * @param sampleLevel tiled json
+     */
+    public void setSampleLevel(JsonValue sampleLevel){ this.sampleLevel = sampleLevel;}
 
 }

@@ -14,7 +14,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -27,6 +26,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
+
+import java.text.DecimalFormat;
 
 /**
  * Player avatar for the plaform game.
@@ -74,7 +75,9 @@ public class PlayerModel extends CapsuleObstacle {
 	private int MAX_HEALTH;
 	/** Player hp */
 	private int health;
-	public BitmapFont healthFont = new BitmapFont();
+	public BitmapFont healthFont;
+
+	private static final DecimalFormat formatter = new DecimalFormat("0.00");
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -123,7 +126,7 @@ public class PlayerModel extends CapsuleObstacle {
 	private TextureRegion[] walkAnimationFrames;
 
 	/** Player walk animation*/
-	private Animation walkAnimation;
+	private Animation<TextureRegion> walkAnimation;
 
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
@@ -385,7 +388,7 @@ public class PlayerModel extends CapsuleObstacle {
 		}
 
 		// Adjust walk speed here
-		this.walkAnimation = new Animation(1f/45f, walkAnimationFrames);
+		this.walkAnimation = new Animation<>(1f/45f, walkAnimationFrames);
 	}
 
 	/**
@@ -525,12 +528,6 @@ public class PlayerModel extends CapsuleObstacle {
 			forceCache.set(getMovement(),0);
 			body.applyForce(forceCache,getPosition(),true);
 		}
-
-		// TODO: consider/remove Jump!
-//		if (isJumping()) {
-//			forceCache.set(0, jump_force);
-//			body.applyLinearImpulse(forceCache,getPosition(),true);
-//		}
 	}
 
 	/**
@@ -635,14 +632,14 @@ public class PlayerModel extends CapsuleObstacle {
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale, textureScale);
+					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y);
 		} else {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
 
 			canvas.draw(texture, tint, origin.x, origin.y,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale, textureScale
+					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y
 			);
 		}
 	}
@@ -677,6 +674,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * TODO: possibly other status information
 	 * @param canvas the game canvas
 	 */
+
 	public void drawInfo(GameCanvas canvas){
 		// draw health info
 		if (hpTexture == null){
@@ -691,9 +689,9 @@ public class PlayerModel extends CapsuleObstacle {
 
 		// draw lighter info
 		float lighter_capac = lighterFuel / maxLighterFuel;
-		canvas.drawText(Float.toString(lighter_capac), healthFont, 10,
-				canvas.getHeight() - 70);
-
+		healthFont.setColor(Color.WHITE);
+		canvas.drawText(formatter.format(lighter_capac), healthFont, 10,
+				canvas.getHeight() - 90);
 	}
 	
 	/**

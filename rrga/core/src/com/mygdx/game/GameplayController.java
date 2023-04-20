@@ -59,12 +59,12 @@ public class GameplayController implements ContactListener {
     /**
      * All the objects in the world.
      */
-    protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> objects = new PooledList<>();
 
     /**
      * Queue for adding objects
      */
-    protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
+    protected PooledList<Obstacle> addQueue = new PooledList<>();
 
     /**
      * The Box2D world
@@ -189,9 +189,9 @@ public class GameplayController implements ContactListener {
     Vector2 cache = new Vector2();
 
     /**
-     * cache for wind force computations
+     * second cache for vector computations
      */
-    Vector2 windForce = new Vector2();
+    Vector2 temp = new Vector2();
 
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
 
@@ -203,7 +203,7 @@ public class GameplayController implements ContactListener {
     /**
      * center of the screen in canvas coordinates
      */
-    private Vector2 center = new Vector2();
+    private final Vector2 center = new Vector2();
 
     /**
      * the upward-pointing unit vector
@@ -450,12 +450,13 @@ public class GameplayController implements ContactListener {
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
         int count = 0;
+        cache.set(0,0);
         for (Fixture w : contactWindFix) {
             WindModel bod = (WindModel) w.getBody().getUserData();
             float f = bod.getWindForce(ang);
             if (!contactWindBod.contains(bod) && umbrella.isOpen()) {
                 count++;
-                windForce.add(umbrellaX * f, umbrellaY * f);
+                cache.add(umbrellaX * f, umbrellaY * f);
                 contactWindBod.add(bod);
             }
         }
@@ -472,7 +473,8 @@ public class GameplayController implements ContactListener {
             } else {
                 windStrongFrame --;
             }
-            avatar.applyWindForce(windForce.x/count, windForce.y/count);
+            avatar.applyWindForce(cache.x/count, cache.y/count);
+
         } else {
             // Gradually Reset Strong Wind SFX
             if (windStrongFrame > 0) {
@@ -481,7 +483,6 @@ public class GameplayController implements ContactListener {
             prevInWind = false;
         }
         contactWindBod.clear();
-        windForce.set(0,0);
 
         // Process player movement
         if (avatar.isGrounded()) {
@@ -517,8 +518,8 @@ public class GameplayController implements ContactListener {
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
                 if (avatar.getHealth() - dam > 0) {
-                    Vector2 knockback = h.getKnockbackForce().scl(h.getKnockbackScl());
-                    avatar.getBody().applyLinearImpulse(knockback, avatar.getPosition(), true);
+                    cache.set(h.getKnockbackForce()).scl(h.getKnockbackScl());
+                    avatar.getBody().applyLinearImpulse(cache, avatar.getPosition(), true);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
                 } else {
@@ -540,11 +541,7 @@ public class GameplayController implements ContactListener {
         }
 
         //Bird Updates
-        float birdSensorRadius = 7;
-        float birdRays = 40;
-        float mindist;
-        Vector2 pos = new Vector2();
-        Vector2 targ = new Vector2();
+        int birdRays = 10;
         BirdRayCastCallback rccb = new BirdRayCastCallback();
         for (BirdHazard bird : birds) {
             //If sees target, wait before attacking
@@ -562,27 +559,29 @@ public class GameplayController implements ContactListener {
             bird.move();
 
             //send out rays and check for collisions with player
+
             if(bird.getAttack()) {
                 float x = bird.getX();
                 float y = bird.getY();
-                pos.set(x, y);
+                // load position into cache
+                cache.set(x, y);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
-                    mindist = Integer.MAX_VALUE;
-                    targ.set(x, y + birdSensorRadius).rotateAroundDeg(pos, 360 / birdRays * i);
-                    world.rayCast(rccb, pos, targ);
-                    for(ObjectMap.Entry e: rccb.collisions.entries()){
-                        if((Float) e.value < mindist){
-                            mindist = (Float) e.value;
+                    float minDist = Integer.MAX_VALUE;
+                    // load ray target into temporary cache
+                    temp.set(x, y + bird.getSensorRadius()).rotateAroundDeg(cache, 360f / birdRays * i);
+                    world.rayCast(rccb, cache, temp);
+                    for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
+                        if(e.value < minDist){
+                            minDist = e.value;
                         }
                     }
-                    for(ObjectMap.Entry e: rccb.collisions.entries()){
-                        if(((Fixture) e.key).getBody().getUserData() == avatar){
-                            if(Math.abs((Float) e.value - mindist) < .001){
+                    for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
+                        if((e.key).getBody().getUserData() == avatar){
+                            if(Math.abs(e.value - minDist) < .001){
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
-                                    boolean right = !(avatar.getX() - bird.getX() < 0);
-                                    bird.faceRight = right;
+                                    bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
                                 }
                             }
                         }
@@ -616,8 +615,8 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + mousePos.x * diff.len();
-        cache.y = avatar.getY() + mousePos.y * diff.len();
+        cache.x = avatar.getX() + diff.x;
+        cache.y = avatar.getY() + diff.y;
         umbrella.setPosition(cache.x, cache.y);
 
         // Garbage collect the deleted objects.

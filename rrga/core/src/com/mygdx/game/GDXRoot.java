@@ -3,6 +3,9 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.mode.*;
 import com.mygdx.game.screen.LoseScreen;
 import com.mygdx.game.screen.VictoryScreen;
@@ -31,6 +34,9 @@ public class GDXRoot extends Game implements ScreenListener {
 	/** Screen mode for transitioning between levels */
 	private LoseScreen defeat;
 
+	private String filePath = "";
+	private JsonValue sampleLevel;
+
 	/**
 	 * Creates a new game from the configuration settings.
 	 *
@@ -38,6 +44,15 @@ public class GDXRoot extends Game implements ScreenListener {
 	 * or assign any screen.
 	 */
 	public GDXRoot() { }
+
+	/**
+	 * this is a temporary constructor for quick development.
+	 * @param filepath the filepath to a local Tiled JSON file
+	 */
+	public GDXRoot(String filepath){
+		this();
+		this.filePath = filepath;
+	}
 
 	/**
 	 * Called when the Application is first created.
@@ -135,6 +150,18 @@ public class GDXRoot extends Game implements ScreenListener {
 					Gdx.app.exit();
 					break;
 				case MenuMode.EXIT_PLAY:
+					if (filePath.length() > 0){
+						String filePath = Gdx.files.local(this.filePath).file().getAbsolutePath();
+
+						// Load the JSON file into a FileHandle
+						FileHandle fileHandle = Gdx.files.absolute(filePath);
+
+						String jsonString = fileHandle.readString();
+
+						// Parse the JSON string into a JsonValue object
+						sampleLevel = new JsonReader().parse(jsonString);
+					}
+					playing.setSampleLevel(sampleLevel);
 					playing.setScreenListener(this);
 					playing.setCanvas(canvas);
 					// TODO: use exit codes to determine level.
@@ -159,6 +186,7 @@ public class GDXRoot extends Game implements ScreenListener {
 			}
 
 		} else if (screen == playing) {
+			canvas.setDynamicCameraZoom(GameMode.standardZoom);
 			switch (exitCode){
 				case GameMode.EXIT_VICTORY:
 					victory.setBackgroundScreen(playing);

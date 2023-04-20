@@ -14,18 +14,6 @@
    "tileheight": 512,
    "tiles": [
       {
-         "id": 0,
-         "image": "..\/objects\/blue_bird_cropped.png",
-         "imageheight": 90,
-         "imagewidth": 230
-      },
-      {
-         "id": 1,
-         "image": "..\/objects\/brown_bird_cropped.png",
-         "imageheight": 90,
-         "imagewidth": 230
-      },
-      {
          "id": 2,
          "image": "..\/objects\/gale_cropped.png",
          "imageheight": 352,
@@ -36,12 +24,6 @@
          "image": "..\/objects\/marker_flag_blue.png",
          "imageheight": 512,
          "imagewidth": 512
-      },
-      {
-         "id": 4,
-         "image": "..\/objects\/red_bird_cropped.png",
-         "imageheight": 164,
-         "imagewidth": 164
       }
    ],
    "tilewidth": 512,

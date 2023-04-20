@@ -5,12 +5,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 
+/**
+ * A multi-hit-box bird hazard.
+ */
 public class BirdHazard extends HazardModel {
 
     private final int ATTACK_WAIT_TIME = 50;
@@ -26,20 +28,10 @@ public class BirdHazard extends HazardModel {
     private final int sensorRadius;
 
     /**
-     * Identifier to allow us to track the sensor in ContactListener
-     */
-    private final String sensorName;
-
-    /**
-     * The shape of this bird's sensor
-     */
-    private CircleShape sensorShape;
-
-    /**
      * A list of points which represent this bird's flight path.
      * Invariant: length >=2 and length is even.
      */
-    private float[] path;
+    private final float[] path;
 
     /**
      * The index of the birds current targeted x-coordinate in path
@@ -51,7 +43,7 @@ public class BirdHazard extends HazardModel {
      * If loop is true, bird will go from last point in path to first.
      * If loop is false, bird will turn around after last point and reverse its path
      */
-    private boolean loop;
+    private final boolean loop;
 
     /**
      * The color of this bird. Determines the bird's behavior.
@@ -60,43 +52,48 @@ public class BirdHazard extends HazardModel {
      * Brown: Patrols, then attacks.
      * Invariant: Must be one of "red", "blue", or "brown"
      */
-    private String color;
+    private final String color;
 
     /**
      * Move speed of this bird
      */
-    private int moveSpeed;
+    private final int moveSpeed;
 
     /**
      * The coordinates this bird is currently moving to
      */
-    private Vector2 move = new Vector2();
+    private final Vector2 move = new Vector2();
 
     /**
      * Which direction is the bird facing
      */
-    public boolean faceRight;
+    private boolean faceRight;
 
-    private boolean attack;
+    private final boolean attack;
 
-    private float width;
-    private float height;
+    // the dimensions of filmstrip AABB
+    private final Vector2 textureAABB = new Vector2();
+
+    // the dimensions of object AABB
+    private final Vector2 dimensions = new Vector2();
+
+    // the top left corner coordinate of object AABB
+    private final Vector2 boxCoordinate = new Vector2();
+
+    private final Vector2 filmStripSize = new Vector2();
+
+    private final Vector2 temp = new Vector2();
 
     // <=============================== Animation objects start here ===============================>
-    /** Bird flap animation filmstrip texture */
-    private Texture flapTexture;
-
-    /** Bird flap animation frames */
-    private TextureRegion[][] flapTmpFrames;
-
-    /** Bird flap animation frames */
-    private TextureRegion[] flapAnimationFrames;
 
     /** Bird flap animation*/
-    private Animation flapAnimation;
+    private Animation<TextureRegion> flapAnimation;
 
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
+
+    /** secondary hit-box */
+    private final HazardModel hit2;
 
 
     /**
@@ -107,65 +104,66 @@ public class BirdHazard extends HazardModel {
     public boolean seesTarget;
 
     public int attackWait;
+
     /**
      * Direction of the target
      */
-    private Vector2 targetDir = new Vector2();
+    private final Vector2 targetDir = new Vector2();
 
     /**
      * Direction of the birds movement
      */
-    private Vector2 moveDir = new Vector2();
-
-    /**
-     * Returns the name of this bird's sensor
-     *
-     * @return the name of this bird's sensor
-     */
-    public String getSensorName() {
-        return sensorName;
-    }
+    private final Vector2 moveDir = new Vector2();
 
     public boolean getAttack(){
         return attack;
     }
 
-    public float getWidth(){
-        return width;
-    }
+    public float getWidth(){ return dimensions.x; }
 
     public float getHeight(){
-        return height;
+        return dimensions.y;
+    }
+
+    public float getAABBx(){ return boxCoordinate.x; }
+
+    public float getAABBy(){ return boxCoordinate.y; }
+
+    /** the radius of player detection */
+    public int getSensorRadius() {return sensorRadius;}
+
+    @Override
+    public Vector2 getKnockbackForce() {
+        return temp.set(moveDir.x, moveDir.y).nor();
+    }
+
+    public String getColor() {
+        return color;
     }
 
     /**
      * Sets bird flapping animation
-     * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
-     * */
-    public void setFlapAnimation(Texture texture) {
-        // Temporary
-        System.out.println(texture);
-        if (texture == null) {
+     */
+    public void setFlapAnimation(Texture flapTexture) {
+        if (flapTexture == null) {
             return;
         }
 
-        this.flapTexture = texture;
-        this.flapTmpFrames = TextureRegion.split(flapTexture, 237, 229);
-        this.flapAnimationFrames = new TextureRegion[4];
-
-        System.out.println(flapTmpFrames.length);
+        TextureRegion[][] flapTmpFrames = TextureRegion.split(flapTexture, (int) filmStripSize.x, (int) filmStripSize.y);
+        int columns = flapTmpFrames.length == 0? 0 : flapTmpFrames[0].length;
+        // Bird flap animation frames
+        TextureRegion[] flapAnimationFrames = new TextureRegion[flapTmpFrames.length * columns];
 
         // PLacing animation frames in order
         int index = 0;
-        for (int i=0; i<1; i++) {
-            for (int j=0; j<4; j++) {
-                this.flapAnimationFrames[index] = flapTmpFrames[i][j];
+        for (TextureRegion[] flapTmpFrame : flapTmpFrames) {
+            for (TextureRegion textureRegion : flapTmpFrame) {
+                flapAnimationFrames[index] = textureRegion;
                 index++;
             }
         }
-
-        // Adjust walk speed here
-        this.flapAnimation = new Animation(1f/10f, flapAnimationFrames);
+        // Adjust frame duration here
+        this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
     }
 
     /**
@@ -179,18 +177,41 @@ public class BirdHazard extends HazardModel {
         float timestep = dist / attackSpeed;
         float moveX = tx - getX() + (tvx * timestep);
         float moveY = ty - getY() + (tvy * timestep);
+
         move.set(moveX, moveY);
         move.nor();
         move.scl(attackSpeed);
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, float[] shape, int birdDamage, int birdSensorRadius, float birdKnockback) {
-        super(data, shape, birdDamage, birdKnockback);
-        //this is the bounding box dimensions of the texture (not exactly for brown birds because they were cropped in Tiled)
-        //TODO: fix brown bird (Tiled parsing data)
-        width = data.getFloat("width");
-        height = data.getFloat("height");
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockback) {
+        super(data, data.get("points").asFloatArray(),birdDamage, birdKnockback);
+
+        //this is the bounding box dimensions of the texture that contains all animation frames.
+        // aabb = [x,y, width, height] where x,y is relative to bird coordinate
+        float[] aabb = data.get("AABB").asFloatArray();
+        boxCoordinate.x = aabb[0];
+        boxCoordinate.y = aabb[1];
+        textureAABB.x = aabb[2];
+        textureAABB.y = aabb[3];
+        dimensions.x = textureAABB.x * aabb[4];
+        dimensions.y = textureAABB.y * aabb[5];
+        filmStripSize.x = data.getInt("filmStripWidth");
+        filmStripSize.y = data.getInt("filmStripHeight");
+
+        // make hit-box objects
+        // first, current object is hit-box 1.
+        // make hit-box #2:
+        float[] shape = data.get("points").asFloatArray();
+        for (int idx = 0; idx < shape.length; idx+=2){
+            shape[idx] = -shape[idx];
+        }
+        hit2 = new HazardModel(data, shape, birdDamage, birdKnockback) {
+            @Override
+            public Vector2 getKnockbackForce() {
+                return temp.set(moveDir.x, moveDir.y).nor();
+            }
+        };
 
         path = data.get("path").asFloatArray();
         attack = data.getBoolean("attack");
@@ -202,30 +223,24 @@ public class BirdHazard extends HazardModel {
         sensorRadius = birdSensorRadius;
         currentPathIndex = 0;
         attackWait = ATTACK_WAIT_TIME;
-        sensorName = "birdSensor";
         seesTarget = false;
-        faceRight = data.getBoolean("facing_right");
-        fixture.isSensor = true;
+        //fixture.isSensor = true;
     }
 
     public boolean activatePhysics(World world) {
-        // create the box from our superclass
         if (!super.activatePhysics(world)) {
             return false;
         }
 
-        //create sensor if attacker
-        if(attack) {
-            FixtureDef sensorDef = new FixtureDef();
-            sensorDef.density = 0;
-            sensorDef.isSensor = true;
-            sensorShape = new CircleShape();
-            sensorShape.setRadius(sensorRadius);
-            sensorDef.shape = sensorShape;
-            Fixture sensorFixture = body.createFixture(sensorDef);
-            sensorFixture.setUserData(getSensorName());
-        }
+        hit2.activatePhysics(world);
+        hit2.getBody().setUserData(this);
         return true;
+    }
+
+    @Override
+    public void deactivatePhysics(World world){
+        super.deactivatePhysics(world);
+        hit2.deactivatePhysics(world);
     }
 
     public void move() {
@@ -268,8 +283,7 @@ public class BirdHazard extends HazardModel {
                         else setX(getX() + (move.x / 100));
                         if (Math.abs((move.y / 100)) > Math.abs(moveY)) setY(pathY);
                         else setY(getY() + (move.y / 100));
-                        if (move.x > 0) faceRight = true;
-                        else faceRight = false;
+                        setFaceRight(move.x > 0);
                     }
                 }
                 //else path is 1 point
@@ -285,16 +299,11 @@ public class BirdHazard extends HazardModel {
                 setY(getY() + (targetDir.y / 100));
                 moveDir.set(targetDir);
                 // targetDir is the direction of target relative to bird's location
-                if (targetDir.x > 0) faceRight = true;
-                else faceRight = false;
-                //Need some way to delete when offscreen, should be handled by gamecontroller
+                setFaceRight(targetDir.x > 0);
+                //TODO: Need some way to delete when offscreen, should be handled by gamecontroller
+                //TODO: use AABB to determine off screen
             }
         }
-    }
-
-    @Override
-    public Vector2 getKnockbackForce() {
-        return new Vector2(moveDir.x, moveDir.y).nor();
     }
 
     /**
@@ -303,24 +312,20 @@ public class BirdHazard extends HazardModel {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        // TODO: birds should also be mirrored when facing opposite directions
+        float effect = faceRight ? 1.0f : -1.0f;
 
-
-        float effect = faceRight ? -1.0f : 1.0f;
-        float birdScale = .2f;
-
-        if (flapAnimation == null) {
-            canvas.draw(texture, Color.WHITE, origin.x, origin.y,
-                    (getX()) * drawScale.x, (getY()) * drawScale.y,
-                    getAngle(), effect * birdScale, birdScale);
-        } else {
-            flapElapsedTime += Gdx.graphics.getDeltaTime();
-
-            // TODO: Box is adjusted manually - THIS MUST be FIXED
-            canvas.draw((TextureRegion)flapAnimation.getKeyFrame(flapElapsedTime, true), Color.WHITE, origin.x, origin.y-60,
-                    (getX()) * drawScale.x, (getY()) * drawScale.y,
-                    getAngle(), -effect * birdScale, birdScale);
+        // this fixes inconsistency with blue bird asset
+        if (color.equals("blue")){
+            effect = faceRight ? -1.0f : 1f;
         }
+
+        flapElapsedTime += Gdx.graphics.getDeltaTime();
+        TextureRegion region = flapAnimation.getKeyFrame(flapElapsedTime, true);
+
+        canvas.draw(region, Color.WHITE, region.getRegionWidth()/2f, region.getRegionHeight()/2f,
+                (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                effect * dimensions.x/textureAABB.x * drawScale.x,
+                dimensions.y/textureAABB.y * drawScale.y);
     }
 
     /**
@@ -331,26 +336,86 @@ public class BirdHazard extends HazardModel {
      * @param canvas Drawing context
      */
     public void drawDebug(GameCanvas canvas) {
-        super.drawDebug(canvas);
+        if (this.isActive()){
+            super.drawDebug(canvas);
+        }
+        else{
+            hit2.drawDebug(canvas);
+        }
+
+        /*
         if (attack) {
-            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
+            //canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
             //CAN CRASH THE GAME
             //JUST FOR VISUALIZATION
-            /*
             Vector2 targ = new Vector2();
             Vector2 third = new Vector2();
             Vector2 pos = new Vector2();
-            float x = getX()+getWidth()/2;
-            float y = getY()+getHeight()/2;
+            float x = getX();
+            float y = getY();
             pos.set(x, y);
-            for (int i = 0; i < 30; i++) {
-                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 30 * i);;
+            for (int i = 0; i < 60; i++) {
+                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 60f * i);;
                 third.set(targ).add(.01f, .01f);;
                 PolygonShape line = new PolygonShape();
                 line.set(new Vector2[]{pos, targ, third});
                 canvas.drawPhysics(line, Color.RED, 0, 0, 0, drawScale.x, drawScale.y);
             }
-            */
+        }
+        */
+
+    }
+
+    /**
+     * swaps the active states of the two hit-box bodies
+     */
+    private void swapActive(){
+        if (this.isActive()){
+            this.setActive(false);
+            hit2.setActive(true);
+        }
+        else {
+            this.setActive(true);
+            hit2.setActive(false);
         }
     }
+
+    /**
+     * sets the bird to face right based on given boolean.
+     * If bird changes directions, hit-box also switches.
+     * @param value whether to face right
+     */
+    public void setFaceRight(boolean value) {
+        // switch active bodies if direction changes
+        boolean old = this.faceRight;
+        this.faceRight = value;
+        if (old != this.faceRight){
+            swapActive();
+        }
+    }
+
+    @Override
+    public void setName(String value) {
+        super.setName(value);
+        hit2.setName(value + "_2");
+    }
+
+    @Override
+    public void setDrawScale(Vector2 value) {
+        super.setDrawScale(value);
+        hit2.setDrawScale(value);
+    }
+
+    @Override
+    public void setX(float value){
+        super.setX(value);
+        hit2.setX(value);
+    }
+
+    @Override
+    public void setY(float value){
+        super.setY(value);
+        hit2.setY(value);
+    }
+
 }

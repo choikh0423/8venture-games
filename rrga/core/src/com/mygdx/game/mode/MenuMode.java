@@ -529,7 +529,10 @@ public class MenuMode extends MenuScreen {
     public void dispose() {
         listener = null;
         canvas = null;
-        backgroundMusic.stop();
+        if (backgroundMusic != null){
+            backgroundMusic.stop();
+        }
+        backgroundMusic = null;
         // NEED TO ADD
     }
 }
