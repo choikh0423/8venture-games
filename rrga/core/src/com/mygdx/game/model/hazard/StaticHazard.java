@@ -3,21 +3,17 @@ package com.mygdx.game.model.hazard;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 
-public class StaticHazard extends HazardModel{
+public class StaticHazard extends PolygonHazard{
 
     /** Damage of a static hazard */
     private static final int STATIC_DAMAGE = 1;
 
-    /** Knockback of a static hazard */
+    /** Knock-back of a static hazard */
     private static final float STATIC_KNOCKBACK = 3;
 
-    private final Vector2 knockBackForce = new Vector2(0,1);
     public StaticHazard(JsonValue data) {
-        super(data,data.get("points").asFloatArray(), STATIC_DAMAGE, STATIC_KNOCKBACK);
+        super(data, STATIC_DAMAGE, STATIC_KNOCKBACK);
+        setKnockBackForce(new Vector2(0, 1));
     }
 
-    @Override
-    public Vector2 getKnockbackForce() {
-        return knockBackForce;
-    }
 }

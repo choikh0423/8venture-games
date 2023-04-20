@@ -518,7 +518,7 @@ public class GameplayController implements ContactListener {
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
                 if (avatar.getHealth() - dam > 0) {
-                    cache.set(h.getKnockbackForce()).scl(h.getKnockbackScl());
+                    cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
                     avatar.getBody().applyLinearImpulse(cache, avatar.getPosition(), true);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
@@ -541,8 +541,11 @@ public class GameplayController implements ContactListener {
         }
 
         //Bird Updates
-        int birdRays = 10;
+        int birdRays = 40;
         BirdRayCastCallback rccb = new BirdRayCastCallback();
+        // vector reference (alias to make code more readable)
+        Vector2 pos = cache;
+        Vector2 target = temp;
         for (BirdHazard bird : birds) {
             //If sees target, wait before attacking
             if(bird.seesTarget){
@@ -564,13 +567,13 @@ public class GameplayController implements ContactListener {
                 float x = bird.getX();
                 float y = bird.getY();
                 // load position into cache
-                cache.set(x, y);
+                pos.set(x, y);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    temp.set(x, y + bird.getSensorRadius()).rotateAroundDeg(cache, 360f / birdRays * i);
-                    world.rayCast(rccb, cache, temp);
+                    target.set(x, y + bird.getSensorRadius()).rotateAroundDeg(pos, 360f / birdRays * i);
+                    world.rayCast(rccb, pos, target);
                     for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
                         if(e.value < minDist){
                             minDist = e.value;

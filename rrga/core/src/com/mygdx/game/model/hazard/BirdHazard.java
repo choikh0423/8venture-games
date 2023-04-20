@@ -9,11 +9,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.obstacle.ComplexObstacle;
+import com.mygdx.game.utility.obstacle.Obstacle;
 
 /**
  * A multi-hit-box bird hazard.
  */
-public class BirdHazard extends HazardModel {
+public class BirdHazard extends ComplexObstacle implements HazardModel {
+
+    public enum BirdColor {
+        RED,
+        BLUE,
+        GREEN,
+        BROWN
+    }
 
     private final int ATTACK_WAIT_TIME = 50;
 
@@ -71,15 +80,22 @@ public class BirdHazard extends HazardModel {
 
     private final boolean attack;
 
-    // the dimensions of filmstrip AABB
+    private final int damage;
+
+    private final float knockBack;
+
+    /** the dimensions of filmstrip AABB.
+     * Together with this object's AABB dimensions, this gives a texture scale ratio.
+     */
     private final Vector2 textureAABB = new Vector2();
 
-    // the dimensions of object AABB
+    /** the dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
 
-    // the top left corner coordinate of object AABB
+    /** the top left corner coordinate of object AABB */
     private final Vector2 boxCoordinate = new Vector2();
 
+    /** the dimensions of a single animation frame */
     private final Vector2 filmStripSize = new Vector2();
 
     private final Vector2 temp = new Vector2();
@@ -91,9 +107,6 @@ public class BirdHazard extends HazardModel {
 
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
-
-    /** secondary hit-box */
-    private final HazardModel hit2;
 
 
     /**
@@ -133,13 +146,19 @@ public class BirdHazard extends HazardModel {
     public int getSensorRadius() {return sensorRadius;}
 
     @Override
-    public Vector2 getKnockbackForce() {
+    public Vector2 getKnockBackForce() {
         return temp.set(moveDir.x, moveDir.y).nor();
     }
 
     public String getColor() {
         return color;
     }
+
+    @Override
+    public int getDamage() { return damage; }
+
+    @Override
+    public float getKnockBackScl() { return knockBack; }
 
     /**
      * Sets bird flapping animation
@@ -174,9 +193,9 @@ public class BirdHazard extends HazardModel {
         //In the future might want to switch to tracking player's location up to a certain point
         //and incrementally adjusting direction.
         float dist = (float) Math.sqrt(Math.pow((tx-getX()), 2) + Math.pow((ty-getY()), 2));
-        float timestep = dist / attackSpeed;
-        float moveX = tx - getX() + (tvx * timestep);
-        float moveY = ty - getY() + (tvy * timestep);
+        float timeStep = dist / attackSpeed;
+        float moveX = tx - getX() + (tvx * timeStep);
+        float moveY = ty - getY() + (tvy * timeStep);
 
         move.set(moveX, moveY);
         move.nor();
@@ -184,10 +203,10 @@ public class BirdHazard extends HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockback) {
-        super(data, data.get("points").asFloatArray(),birdDamage, birdKnockback);
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack) {
+        super(data.getFloat("x"), data.getFloat("y"));
 
-        //this is the bounding box dimensions of the texture that contains all animation frames.
+        // this is the bounding box dimensions of the texture that contains all animation frames.
         // aabb = [x,y, width, height] where x,y is relative to bird coordinate
         float[] aabb = data.get("AABB").asFloatArray();
         boxCoordinate.x = aabb[0];
@@ -199,20 +218,7 @@ public class BirdHazard extends HazardModel {
         filmStripSize.x = data.getInt("filmStripWidth");
         filmStripSize.y = data.getInt("filmStripHeight");
 
-        // make hit-box objects
-        // first, current object is hit-box 1.
-        // make hit-box #2:
-        float[] shape = data.get("points").asFloatArray();
-        for (int idx = 0; idx < shape.length; idx+=2){
-            shape[idx] = -shape[idx];
-        }
-        hit2 = new HazardModel(data, shape, birdDamage, birdKnockback) {
-            @Override
-            public Vector2 getKnockbackForce() {
-                return temp.set(moveDir.x, moveDir.y).nor();
-            }
-        };
-
+        // set remaining properties
         path = data.get("path").asFloatArray();
         attack = data.getBoolean("attack");
         moveSpeed = data.getInt("movespeed");
@@ -224,24 +230,65 @@ public class BirdHazard extends HazardModel {
         currentPathIndex = 0;
         attackWait = ATTACK_WAIT_TIME;
         seesTarget = false;
-        //fixture.isSensor = true;
+//        fixture.isSensor = false;
+        damage = birdDamage;
+        knockBack = birdKnockBack;
+
+        // make hit-box objects
+        // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
+        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBack, temp);
+        // flip points and make hit-box #2:
+        float x = data.getFloat("x");
+        float y = data.getFloat("y");
+        float[] shape = data.get("points").asFloatArray();
+        for (int idx = 0; idx < shape.length; idx+=2){
+            shape[idx] = -shape[idx];
+        }
+        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBack, temp);
+        // now figure out which of the above is left/right hitbox
+        if (faceRight){
+            // hit1 must be right hitbox
+            bodies.add(hit2);
+            bodies.add(hit1);
+        }
+        else {
+            bodies.add(hit1);
+            bodies.add(hit2);
+        }
     }
 
+    @Override
     public boolean activatePhysics(World world) {
         if (!super.activatePhysics(world)) {
             return false;
         }
 
-        hit2.activatePhysics(world);
-        hit2.getBody().setUserData(this);
+        for (Obstacle hitbox : bodies){
+            // all hit-boxes of this bird should reference the same bird hazard
+            hitbox.getBody().setUserData(this);
+        }
+        // NOTE: this is a 2 hit-box model.
+        // keep one of the sided hit-box inactive at all times.
+        if (faceRight){
+            bodies.get(0).setActive(false);
+        }
+        else {
+            bodies.get(1).setActive(false);
+        }
+
         return true;
     }
 
     @Override
-    public void deactivatePhysics(World world){
-        super.deactivatePhysics(world);
-        hit2.deactivatePhysics(world);
+    protected boolean createJoints(World world) {
+        // no joints needed for multi-hitbox
+        return true;
     }
+
+    //    @Override
+//    public void deactivatePhysics(World world){
+//        super.deactivatePhysics(world);
+//    }
 
     public void move() {
         //if target not seen
@@ -335,12 +382,12 @@ public class BirdHazard extends HazardModel {
      *
      * @param canvas Drawing context
      */
+    @Override
     public void drawDebug(GameCanvas canvas) {
-        if (this.isActive()){
-            super.drawDebug(canvas);
-        }
-        else{
-            hit2.drawDebug(canvas);
+        for(Obstacle obj : bodies) {
+            if (obj.isActive()){
+                obj.drawDebug(canvas);
+            }
         }
 
         /*
@@ -370,13 +417,13 @@ public class BirdHazard extends HazardModel {
      * swaps the active states of the two hit-box bodies
      */
     private void swapActive(){
-        if (this.isActive()){
-            this.setActive(false);
-            hit2.setActive(true);
+        if (bodies.get(0).isActive()){
+            bodies.get(0).setActive(false);
+            bodies.get(1).setActive(true);
         }
         else {
-            this.setActive(true);
-            hit2.setActive(false);
+            bodies.get(0).setActive(true);
+            bodies.get(1).setActive(false);
         }
     }
 
@@ -397,25 +444,30 @@ public class BirdHazard extends HazardModel {
     @Override
     public void setName(String value) {
         super.setName(value);
-        hit2.setName(value + "_2");
+        for (Obstacle o : bodies){
+            o.setName(value + "_hitbox");
+        }
     }
 
     @Override
     public void setDrawScale(Vector2 value) {
         super.setDrawScale(value);
-        hit2.setDrawScale(value);
     }
 
     @Override
     public void setX(float value){
         super.setX(value);
-        hit2.setX(value);
+        for (Obstacle o : bodies){
+            o.setX(value);
+        }
     }
 
     @Override
     public void setY(float value){
         super.setY(value);
-        hit2.setY(value);
+        for (Obstacle o : bodies){
+            o.setY(value);
+        }
     }
 
 }
