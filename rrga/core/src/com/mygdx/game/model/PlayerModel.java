@@ -131,6 +131,21 @@ public class PlayerModel extends CapsuleObstacle {
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
 
+	/** Player fall animation filmstrip texture */
+	private Texture fallTexture;
+
+	/** Player fall animation frames */
+	private TextureRegion[][] fallTmpFrames;
+
+	/** Player fall animation frames */
+	private TextureRegion[] fallAnimationFrames;
+
+	/** Player fall animation*/
+	private Animation<TextureRegion> fallAnimation;
+
+	/** Player fall animation elapsed time */
+	float fallElapsedTime;
+
 	/**
 	 * Returns left/right movement of this character.
 	 * 
@@ -391,6 +406,29 @@ public class PlayerModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Sets player falling animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setFallingAnimation(Texture texture) {
+		this.fallTexture = texture;
+		//TODO maybe find a way to do this without constants?
+		this.fallTmpFrames = TextureRegion.split(fallTexture, 252, 352);
+		this.fallAnimationFrames = new TextureRegion[4];
+
+		// PLacing animation frames in order
+		int index = 0;
+		for (int i=0; i<fallTmpFrames.length; i++) {
+			for (int j=0; j<fallTmpFrames[0].length; j++) {
+				this.fallAnimationFrames[index] = fallTmpFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust walk speed here
+		this.fallAnimation = new Animation<>(1f/12f, fallAnimationFrames);
+	}
+
+	/**
 	 * sets the texture to be frontal view for drawing purposes.
 	 *
 	 * No update occurs if the current texture is already the front view texture.
@@ -628,6 +666,8 @@ public class PlayerModel extends CapsuleObstacle {
 		float effect = faceRight ? -1.0f : 1.0f;
 		TextureRegion t;
 		if (isGrounded() && isMoving()) {
+			fallElapsedTime = 0;
+
 			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
@@ -638,8 +678,9 @@ public class PlayerModel extends CapsuleObstacle {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
 
+			fallElapsedTime += Gdx.graphics.getDeltaTime();
 			//TODO put an idle animation here. I just picked a frame that looked like Gale was standing
-			t = walkAnimationFrames[2];
+			t = isGrounded() ? walkAnimationFrames[2] : fallAnimation.getKeyFrame(fallElapsedTime, true);
 			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);

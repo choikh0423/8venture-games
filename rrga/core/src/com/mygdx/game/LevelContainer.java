@@ -126,6 +126,10 @@ public class LevelContainer{
      */
     private Texture avatarWalkAnimationTexture;
     /**
+     * Texture asset for avatar falling animation
+     */
+    private Texture avatarFallingAnimationTexture;
+    /**
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
@@ -222,6 +226,7 @@ public class LevelContainer{
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
+        avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
 
         // Fonts
@@ -393,7 +398,6 @@ public class LevelContainer{
         addObject(wall);
 
         // Create player
-        // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
         dwidth = globalConstants.get("player").getFloat("size");
         dheight = globalConstants.get("player").getFloat("size");
         avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
@@ -404,12 +408,12 @@ public class LevelContainer{
         // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(hpTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
+        avatar.setFallingAnimation(avatarFallingAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
 
         // Create the umbrella
-        // TODO: (technical) specify umbrella size WITHOUT dependency on view
         dwidth = globalConstants.get("umbrella").getFloat("size");
         dheight = globalConstants.get("umbrella").getFloat("size");
         float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
@@ -420,8 +424,7 @@ public class LevelContainer{
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
-        // TODO: (design) maybe default to closed umbrella at initial state
-        umbrella.useOpenedTexture();
+        umbrella.useClosedTexture();
         umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
