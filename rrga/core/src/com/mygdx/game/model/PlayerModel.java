@@ -626,10 +626,11 @@ public class PlayerModel extends CapsuleObstacle {
 	private void drawAux(GameCanvas canvas, Color tint){
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? -1.0f : 1.0f;
+		TextureRegion t;
 		if (isGrounded() && isMoving()) {
 			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
-			TextureRegion t = walkAnimation.getKeyFrame(walkElapsedTime, true);
+			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
 			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
@@ -637,9 +638,11 @@ public class PlayerModel extends CapsuleObstacle {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
 
-			canvas.draw(texture, tint, texture.getRegionWidth()/2f, texture.getRegionHeight()/2f,
+			//TODO put an idle animation here. I just picked a frame that looked like Gale was standing
+			t = walkAnimationFrames[2];
+			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size/ texture.getRegionWidth() * drawScale.x, size/texture.getRegionHeight() * drawScale.y);
+					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
 		}
 	}
 
