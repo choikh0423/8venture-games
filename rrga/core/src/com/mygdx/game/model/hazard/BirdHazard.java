@@ -137,6 +137,10 @@ public class BirdHazard extends HazardModel {
         return temp.set(moveDir.x, moveDir.y).nor();
     }
 
+    public String getColor() {
+        return color;
+    }
+
     /**
      * Sets bird flapping animation
      */
@@ -198,8 +202,6 @@ public class BirdHazard extends HazardModel {
         // make hit-box objects
         // first, current object is hit-box 1.
         // make hit-box #2:
-        float x = data.getFloat("x");
-        float y = data.getFloat("y");
         float[] shape = data.get("points").asFloatArray();
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];

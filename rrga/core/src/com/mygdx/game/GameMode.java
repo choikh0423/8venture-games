@@ -392,7 +392,6 @@ public class GameMode implements Screen {
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
         int centerTileY = (int) avatar.getY();
-        System.out.println(zoomScl);
         int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
         int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
         int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);

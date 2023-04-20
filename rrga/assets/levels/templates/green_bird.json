@@ -1,0 +1,24 @@
+{ "object":
+    {
+     "gid":1,
+     "height":242,
+     "id":109,
+     "name":"",
+     "properties":[
+            {
+             "name":"atk_speed",
+             "type":"float",
+             "value":15
+            }],
+     "rotation":0,
+     "type":"",
+     "visible":true,
+     "width":199
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/objects\/green_bird_tile.json"
+    },
+ "type":"template"
+}

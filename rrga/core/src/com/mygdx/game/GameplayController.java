@@ -541,6 +541,7 @@ public class GameplayController implements ContactListener {
             bird.move();
 
             //send out rays and check for collisions with player
+
             if(bird.getAttack()) {
                 float x = bird.getX();
                 float y = bird.getY();

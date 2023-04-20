@@ -186,7 +186,8 @@ public class LevelContainer{
         switch(color){
             case "red": return redBirdAnimationTexture;
             case "blue": return blueBirdAnimationTexture;
-            case "brown": return greenBirdAnimationTexture;
+            case "green": return greenBirdAnimationTexture;
+            case "brown": return brownBirdAnimationTexture;
             default: return null;
         }
     }

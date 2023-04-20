@@ -78,6 +78,8 @@ public class LevelParser {
     /** default values for colored birds*/
     private final JsonValue redBirdDefaults;
     private final JsonValue blueBirdDefaults;
+
+    private final JsonValue greenBirdDefaults;
     private final JsonValue brownBirdDefaults;
 
     /** the default JSON of path point. */
@@ -183,6 +185,7 @@ public class LevelParser {
 
         JsonValue redBirdTemplate = directory.getEntry("red_bird:template", JsonValue.class);
         JsonValue blueBirdTemplate = directory.getEntry("blue_bird:template", JsonValue.class);
+        JsonValue greenBirdTemplate = directory.getEntry("green_bird:template", JsonValue.class);
         JsonValue brownBirdTemplate = directory.getEntry("brown_bird:template", JsonValue.class);
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
         JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
@@ -193,6 +196,7 @@ public class LevelParser {
 
         redBirdDefaults = redBirdTemplate.get("object");
         blueBirdDefaults = blueBirdTemplate.get("object");
+        greenBirdDefaults = greenBirdTemplate.get("object");
         brownBirdDefaults = brownBirdTemplate.get("object");
         pointDefault = pathPointTemplate.get("object").get("properties");
         lightningDefault = lightningTemplate.get("object").get("properties");
@@ -220,7 +224,9 @@ public class LevelParser {
         // add bird tilesets
         tileSetJsonMap.put("blue_bird", directory.getEntry("blue_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("red_bird", directory.getEntry("red_bird:tiles", JsonValue.class));
-        tileSetJsonMap.put("brown_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
+        tileSetJsonMap.put("green_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
+        // TODO: replace
+        tileSetJsonMap.put("brown_bird", directory.getEntry("blue_bird:tiles", JsonValue.class));
     }
 
     /**
@@ -334,11 +340,15 @@ public class LevelParser {
 
     /**
      * red birds face to the right, all others to the left.
-     * @param color the color {"red", "blue", "brown"}
+     * @param color the color {"red", "blue", "brown", "green"}
      * @return whether the bird asset is facing to the right
      */
     private boolean isBirdInitiallyFacingRight(String color){
-        return color.equals("red");
+        return color.equals("red") || color.equals("green");
+    }
+
+    private boolean doesBirdAttack(String color){
+        return color.equals("blue") || color.equals("green") || color.equals("brown");
     }
 
     /**
@@ -376,7 +386,7 @@ public class LevelParser {
             JsonValue defaults = defaultObj.get("properties");
             // set deterministic trivial properties
             data.addChild("color", new JsonValue(color));
-            data.addChild("attack", new JsonValue(color.equals("brown") || color.equals("blue")));
+            data.addChild("attack", new JsonValue(doesBirdAttack(color)));
             // add whether facing right
             boolean facingRight = isBirdInitiallyFacingRight(color);
             boolean horizontalFlipped = (b.getLong("gid", 0) & 1L << 31) != 0;
@@ -412,6 +422,7 @@ public class LevelParser {
             scalars.set(tileWidth/assetWidth/tileScale.x, tileHeight/assetHeight/tileScale.y);
 
             // the AABB is specified entirely in game coordinates relative to the bird's position
+            // AABB[0 ... 5] = {corner x, corner y, asset AABB width, asset AABB height, width scl, height scl}
             JsonValue AABB = new JsonValue(JsonValue.ValueType.array);
             AABB.addChild(new JsonValue(temp.x * scalars.x));
             AABB.addChild(new JsonValue(temp.y * scalars.y));
@@ -472,7 +483,7 @@ public class LevelParser {
                 }
             }
             // attack birds are blue and brown
-            if (color.equals("brown") || color.equals("blue")){
+            if (doesBirdAttack(color)){
                 atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
             }
             data.addChild("path", pathJson);
@@ -701,6 +712,7 @@ public class LevelParser {
         if (variant.contains("blue_bird.json")) return "blue";
         else if (variant.contains("brown_bird.json")) return "brown";
         else if (variant.contains("red_bird.json")) return "red";
+        else if (variant.contains("green_bird.json")) return "green";
         else return "UNKNOWN";
     }
 
@@ -713,6 +725,8 @@ public class LevelParser {
         switch (color){
             case "blue":
                 return blueBirdDefaults;
+            case "green":
+                return greenBirdDefaults;
             case "brown":
                 return brownBirdDefaults;
             default:
