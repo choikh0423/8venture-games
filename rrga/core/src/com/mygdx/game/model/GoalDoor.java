@@ -36,7 +36,7 @@ public class GoalDoor extends BoxObstacle {
             }
         }
 
-         this.animation = new Animation<>(1f/12f, animation);
+         this.animation = new Animation<>(1f/8f, animation);
     }
     public void draw(GameCanvas canvas){
         elapsedTime += Gdx.graphics.getDeltaTime();

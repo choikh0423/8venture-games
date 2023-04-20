@@ -413,10 +413,9 @@ public class LevelContainer{
         // Create the umbrella
         dwidth = globalConstants.get("umbrella").getFloat("size");
         dheight = globalConstants.get("umbrella").getFloat("size");
-        float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
         umbrella = new UmbrellaModel(
                 globalConstants.get("umbrella"),
-                new Vector2(parser.getPlayerPos().x+offset[0], parser.getPlayerPos().y+offset[1]), dwidth, dheight
+                new Vector2(parser.getPlayerPos().x, parser.getPlayerPos().y), dwidth, dheight
         );
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);

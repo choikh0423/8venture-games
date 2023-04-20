@@ -220,7 +220,7 @@ public class UmbrellaModel extends BoxObstacle {
      * */
     public void setOpenAnimation(Texture texture) {
         this.openAnimationTexture = texture;
-        this.openTmpFrames = TextureRegion.split(openAnimationTexture, 469, 469 );
+        this.openTmpFrames = TextureRegion.split(openAnimationTexture, 469, 600 );
         this.openAnimationFrames = new TextureRegion[6];
 
         // Setting animation frames
