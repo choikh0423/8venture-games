@@ -108,6 +108,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
 
+    private Texture warningTex;
+
 
     /**
      * Whether this bird sees its target.
@@ -117,6 +119,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     public boolean seesTarget;
 
     public int attackWait;
+
+    public boolean warning;
 
     /**
      * Direction of the target
@@ -203,7 +207,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         targetDir.set(move);
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack) {
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex) {
         super(data.getFloat("x"), data.getFloat("y"));
 
         // this is the bounding box dimensions of the texture that contains all animation frames.
@@ -230,9 +234,10 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         currentPathIndex = 0;
         attackWait = ATTACK_WAIT_TIME;
         seesTarget = false;
-//        fixture.isSensor = false;
         damage = birdDamage;
         knockBack = birdKnockBack;
+        warning = false;
+        this.warningTex = warningTex;
 
         // make hit-box objects
         // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
@@ -373,6 +378,12 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
                 (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
                 effect * dimensions.x/textureAABB.x * drawScale.x,
                 dimensions.y/textureAABB.y * drawScale.y);
+
+        if(warning){
+            canvas.draw(warningTex, Color.WHITE, warningTex.getWidth()/2f, warningTex.getHeight()/2f,
+                    (getX()) * drawScale.x, (getY() + warningTex.getHeight() * .002f) * drawScale.y, getAngle(), .002f * drawScale.x, .002f * drawScale.y);
+        }
+
     }
 
     /**

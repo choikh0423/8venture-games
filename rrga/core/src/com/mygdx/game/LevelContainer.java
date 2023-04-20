@@ -129,7 +129,10 @@ public class LevelContainer{
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
-
+    /**
+     * Texture asset for a bird warning
+     */
+    private Texture warningTexture;
     //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
 
@@ -217,6 +220,7 @@ public class LevelContainer{
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
         blueBirdAnimationTexture = directory.getEntry("game:blue_bird_flapping", Texture.class);
         greenBirdAnimationTexture = directory.getEntry("game:green_bird_flapping", Texture.class);
+        warningTexture = directory.getEntry("game:bird_warning", Texture.class);
 
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
 
@@ -338,7 +342,7 @@ public class LevelContainer{
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback, warningTexture);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(jv.getString("color", "red")));
             obj.setName(birdName + ii);

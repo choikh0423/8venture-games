@@ -80,6 +80,7 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
         setDensity(0);
         setFriction(0);
         setRestitution(0);
+        fixture.isSensor = true;
         this.damage = dam;
         this.knockBack = kb;
         // ideally, if the constructor was called without knock-back force vector,

@@ -546,12 +546,15 @@ public class GameplayController implements ContactListener {
         // vector reference (alias to make code more readable)
         Vector2 pos = cache;
         Vector2 target = temp;
+
+        //loop through birds
         for (BirdHazard bird : birds) {
             //If sees target, wait before attacking
             if(bird.seesTarget){
                 if(bird.attackWait == 0){
                     bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                     bird.attackWait--;
+                    bird.warning = false;
                 }
                 else if(bird.attackWait > 0){
                     bird.attackWait--;
@@ -562,7 +565,6 @@ public class GameplayController implements ContactListener {
             bird.move();
 
             //send out rays and check for collisions with player
-
             if(bird.getAttack()) {
                 float x = bird.getX();
                 float y = bird.getY();
@@ -585,6 +587,8 @@ public class GameplayController implements ContactListener {
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
                                     bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
+                                    //play sound effect
+                                    bird.warning = true;
                                 }
                             }
                         }
