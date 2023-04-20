@@ -86,7 +86,7 @@ public class UmbrellaModel extends BoxObstacle {
         this.data = data;
         faceRight = true;
         setName("umbrella");
-        open = true;
+        open = false;
     }
 
     public boolean activatePhysics(World world) {
