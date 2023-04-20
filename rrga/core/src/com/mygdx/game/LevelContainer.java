@@ -342,6 +342,7 @@ public class LevelContainer{
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
+            System.out.println(jv);
             obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback, warningTexture);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(jv.getString("color", "red")));
@@ -350,6 +351,10 @@ public class LevelContainer{
             birds.add(obj);
         }
 
+        //create nests
+
+
+        //create lightning
         String lightningName = "lightning";
         JsonValue[] lightningData = parser.getLightningData();
         for (int ii = 0; ii < lightningData.length; ii++) {

@@ -697,6 +697,7 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
+                //eventually replace with worldmanifold normal?
                 Body hazBod = (bd1 instanceof HazardModel ? body1 : body2);
                 Body playerBod = (bd2 instanceof HazardModel ? body1 : body2);
                 cache.set(playerBod.getPosition());
