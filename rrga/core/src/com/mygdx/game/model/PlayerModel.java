@@ -144,7 +144,7 @@ public class PlayerModel extends CapsuleObstacle {
 	private Animation<TextureRegion> fallAnimation;
 
 	/** Player fall animation elapsed time */
-	float fallElapsedTime;
+	private float fallElapsedTime;
 
 	/**
 	 * Returns left/right movement of this character.
@@ -402,7 +402,7 @@ public class PlayerModel extends CapsuleObstacle {
 		}
 
 		// Adjust walk speed here
-		this.walkAnimation = new Animation<>(1f/24f, walkAnimationFrames);
+		this.walkAnimation = new Animation<>(1f/12f, walkAnimationFrames);
 	}
 
 	/**

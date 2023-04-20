@@ -41,6 +41,7 @@
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
         "game:goal": "game/goal.png",
+        "game:goal_animation": "game/goal_scarf_filmstrip.png",
         "game:hp_indicator": "game/health_indicator.png",
         "tileset:bushes": "levels/tilesets/bushes.png",
         "tileset:trees": "levels/tilesets/trees.png",

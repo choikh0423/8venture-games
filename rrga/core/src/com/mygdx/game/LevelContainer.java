@@ -10,14 +10,11 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
-import com.mygdx.game.model.MovingPlatformModel;
+import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.LightningHazard;
-import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.model.UmbrellaModel;
-import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
@@ -133,6 +130,10 @@ public class LevelContainer{
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
+    /**
+     * Texture asset for goal animation
+     */
+    private Texture goalAnimationTexture;
 
     //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
@@ -152,7 +153,7 @@ public class LevelContainer{
     /**
      * Reference to the goalDoor (for collision detection)
      */
-    private BoxObstacle goalDoor;
+    private GoalDoor goalDoor;
 
     /** reference to the JSON parser */
     private LevelParser parser;
@@ -228,6 +229,7 @@ public class LevelContainer{
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
         avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+        goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
@@ -253,19 +255,14 @@ public class LevelContainer{
         Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
-        goalDoor = new BoxObstacle(goalPos.x, goalPos.y,dwidth, dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goalconst.getFloat("density", 0));
-        goalDoor.setFriction(goalconst.getFloat("friction", 0));
-        goalDoor.setRestitution(goalconst.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
+        goalDoor = new GoalDoor(goalconst, goalPos.x, goalPos.y,dwidth, dheight);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
         // doing so fits the texture onto the specified size of the object
         goalDoor.setTextureScale(
                 dwidth * scale.x/goalTexture.getRegionWidth(),
                 dheight * scale.y/goalTexture.getRegionHeight());
-        goalDoor.setName("goal");
+        goalDoor.setAnimation(goalAnimationTexture);
         addObject(goalDoor);
 
         // Setting Gravity on World
