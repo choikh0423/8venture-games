@@ -1,245 +1,248 @@
-{ "columns":5,
- "image":"blue_bird_flapping.png",
- "imageheight":232,
- "imagewidth":1160,
- "margin":0,
- "name":"blue_bird_flapping",
- "objectalignment":"center",
- "spacing":0,
- "tilecount":5,
- "tiledversion":"1.10.0",
- "tileheight":232,
- "tiles":[
-        {
-         "id":0,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":225,
-                     "id":1,
-                     "name":"AABB",
-                     "rotation":0,
-                     "type":"",
-                     "visible":false,
-                     "width":226,
-                     "x":3,
-                     "y":2
-                    }, 
-                    {
-                     "height":0,
-                     "id":3,
-                     "name":"hitbox",
-                     "polygon":[
-                            {
-                             "x":0,
-                             "y":0
-                            }, 
-                            {
-                             "x":-5.85688,
-                             "y":1.6734
-                            }, 
-                            {
-                             "x":-12.3413,
-                             "y":5.85688
-                            }, 
-                            {
-                             "x":-15.6881,
-                             "y":10.8771
-                            }, 
-                            {
-                             "x":-18.4073,
-                             "y":18.4073
-                            }, 
-                            {
-                             "x":-18.8257,
-                             "y":21.545
-                            }, 
-                            {
-                             "x":-29.0752,
-                             "y":26.356
-                            }, 
-                            {
-                             "x":-19.0349,
-                             "y":28.2385
-                            }, 
-                            {
-                             "x":-14.8514,
-                             "y":34.3046
-                            }, 
-                            {
-                             "x":-8.78532,
-                             "y":40.1615
-                            }, 
-                            {
-                             "x":-2.09174,
-                             "y":42.8807
-                            }, 
-                            {
-                             "x":48.5285,
-                             "y":43.5083
-                            }, 
-                            {
-                             "x":114,
-                             "y":43.5083
-                            }, 
-                            {
-                             "x":124.514,
-                             "y":40.1615
-                            }, 
-                            {
-                             "x":131.835,
-                             "y":32.9492
-                            }, 
-                            {
-                             "x":134.499,
-                             "y":23.0092
-                            }, 
-                            {
-                             "x":132.027,
-                             "y":13.5503
-                            }, 
-                            {
-                             "x":126.889,
-                             "y":5.30067
-                            }, 
-                            {
-                             "x":118.284,
-                             "y":0.698829
-                            }, 
-                            {
-                             "x":105.842,
-                             "y":-0.983015
-                            }, 
-                            {
-                             "x":84.7156,
-                             "y":-0.246673
-                            }, 
-                            {
-                             "x":61.9156,
-                             "y":-0.200726
-                            }, 
-                            {
-                             "x":26.8287,
-                             "y":0.217626
-                            }],
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":0,
-                     "x":41,
-                     "y":100.61
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":1,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":138,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":215,
-                     "x":3,
-                     "y":22
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":2,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":120,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":225,
-                     "x":4,
-                     "y":40
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":3,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":92,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":224,
-                     "x":3,
-                     "y":98
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":4,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":129,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":212,
-                     "x":4,
-                     "y":98
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }],
- "tilewidth":232,
- "type":"tileset",
- "version":"1.10"
+{
+       "columns": 5,
+       "image": "blue_bird_flapping.png",
+       "imageheight": 232,
+       "imagewidth": 1160,
+       "margin": 0,
+       "name": "blue_bird",
+       "objectalignment": "center",
+       "spacing": 0,
+       "tilecount": 5,
+       "tiledversion": "1.10.0",
+       "tileheight": 232,
+       "tiles": [
+              {
+                     "id": 0,
+                     "objectgroup": {
+                            "draworder": "index",
+                            "name": "",
+                            "objects": [
+                                   {
+                                          "height": 225,
+                                          "id": 1,
+                                          "name": "AABB",
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": false,
+                                          "width": 226,
+                                          "x": 3,
+                                          "y": 2
+                                   },
+                                   {
+                                          "height": 0,
+                                          "id": 3,
+                                          "name": "hitbox",
+                                          "polygon": [
+                                                 {
+                                                        "x": 0,
+                                                        "y": 0
+                                                 },
+                                                 {
+                                                        "x": -5.85688,
+                                                        "y": 1.6734
+                                                 },
+                                                 {
+                                                        "x": -12.3413,
+                                                        "y": 5.85688
+                                                 },
+                                                 {
+                                                        "x": -15.6881,
+                                                        "y": 10.8771
+                                                 },
+                                                 {
+                                                        "x": -18.4073,
+                                                        "y": 18.4073
+                                                 },
+                                                 {
+                                                        "x": -18.8257,
+                                                        "y": 21.545
+                                                 },
+                                                 {
+                                                        "x": -29.0752,
+                                                        "y": 26.356
+                                                 },
+                                                 {
+                                                        "x": -19.0349,
+                                                        "y": 28.2385
+                                                 },
+                                                 {
+                                                        "x": -14.8514,
+                                                        "y": 34.3046
+                                                 },
+                                                 {
+                                                        "x": -8.78532,
+                                                        "y": 40.1615
+                                                 },
+                                                 {
+                                                        "x": -2.09174,
+                                                        "y": 42.8807
+                                                 },
+                                                 {
+                                                        "x": 48.5285,
+                                                        "y": 43.5083
+                                                 },
+                                                 {
+                                                        "x": 114,
+                                                        "y": 43.5083
+                                                 },
+                                                 {
+                                                        "x": 124.514,
+                                                        "y": 40.1615
+                                                 },
+                                                 {
+                                                        "x": 131.835,
+                                                        "y": 32.9492
+                                                 },
+                                                 {
+                                                        "x": 134.499,
+                                                        "y": 23.0092
+                                                 },
+                                                 {
+                                                        "x": 132.027,
+                                                        "y": 13.5503
+                                                 },
+                                                 {
+                                                        "x": 126.889,
+                                                        "y": 5.30067
+                                                 },
+                                                 {
+                                                        "x": 118.284,
+                                                        "y": 0.698829
+                                                 },
+                                                 {
+                                                        "x": 105.842,
+                                                        "y": -0.983015
+                                                 },
+                                                 {
+                                                        "x": 84.7156,
+                                                        "y": -0.246673
+                                                 },
+                                                 {
+                                                        "x": 61.9156,
+                                                        "y": -0.200726
+                                                 },
+                                                 {
+                                                        "x": 26.8287,
+                                                        "y": 0.217626
+                                                 }
+                                          ],
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": true,
+                                          "width": 0,
+                                          "x": 41,
+                                          "y": 100.61
+                                   }
+                            ],
+                            "opacity": 1,
+                            "type": "objectgroup",
+                            "visible": true,
+                            "x": 0,
+                            "y": 0
+                     }
+              },
+              {
+                     "id": 1,
+                     "objectgroup": {
+                            "draworder": "index",
+                            "name": "",
+                            "objects": [
+                                   {
+                                          "height": 138,
+                                          "id": 1,
+                                          "name": "",
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": true,
+                                          "width": 215,
+                                          "x": 3,
+                                          "y": 22
+                                   }
+                            ],
+                            "opacity": 1,
+                            "type": "objectgroup",
+                            "visible": true,
+                            "x": 0,
+                            "y": 0
+                     }
+              },
+              {
+                     "id": 2,
+                     "objectgroup": {
+                            "draworder": "index",
+                            "name": "",
+                            "objects": [
+                                   {
+                                          "height": 120,
+                                          "id": 1,
+                                          "name": "",
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": true,
+                                          "width": 225,
+                                          "x": 4,
+                                          "y": 40
+                                   }
+                            ],
+                            "opacity": 1,
+                            "type": "objectgroup",
+                            "visible": true,
+                            "x": 0,
+                            "y": 0
+                     }
+              },
+              {
+                     "id": 3,
+                     "objectgroup": {
+                            "draworder": "index",
+                            "name": "",
+                            "objects": [
+                                   {
+                                          "height": 92,
+                                          "id": 1,
+                                          "name": "",
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": true,
+                                          "width": 224,
+                                          "x": 3,
+                                          "y": 98
+                                   }
+                            ],
+                            "opacity": 1,
+                            "type": "objectgroup",
+                            "visible": true,
+                            "x": 0,
+                            "y": 0
+                     }
+              },
+              {
+                     "id": 4,
+                     "objectgroup": {
+                            "draworder": "index",
+                            "name": "",
+                            "objects": [
+                                   {
+                                          "height": 129,
+                                          "id": 1,
+                                          "name": "",
+                                          "rotation": 0,
+                                          "type": "",
+                                          "visible": true,
+                                          "width": 212,
+                                          "x": 4,
+                                          "y": 98
+                                   }
+                            ],
+                            "opacity": 1,
+                            "type": "objectgroup",
+                            "visible": true,
+                            "x": 0,
+                            "y": 0
+                     }
+              }
+       ],
+       "tilewidth": 232,
+       "type": "tileset",
+       "version": "1.10"
 }

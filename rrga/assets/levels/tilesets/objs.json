@@ -1,32 +1,31 @@
-{
-   "columns": 0,
-   "grid": {
-      "height": 1,
-      "orientation": "orthogonal",
-      "width": 1
-   },
-   "margin": 0,
-   "name": "objs",
-   "objectalignment": "center",
-   "spacing": 0,
-   "tilecount": 5,
-   "tiledversion": "1.10.0",
-   "tileheight": 512,
-   "tiles": [
-      {
-         "id": 2,
-         "image": "..\/objects\/gale_cropped.png",
-         "imageheight": 352,
-         "imagewidth": 164
-      },
-      {
-         "id": 3,
-         "image": "..\/objects\/marker_flag_blue.png",
-         "imageheight": 512,
-         "imagewidth": 512
-      }
-   ],
-   "tilewidth": 512,
-   "type": "tileset",
-   "version": "1.10"
+{ "columns":0,
+ "grid":
+    {
+     "height":1,
+     "orientation":"orthogonal",
+     "width":1
+    },
+ "margin":0,
+ "name":"objs",
+ "objectalignment":"center",
+ "spacing":0,
+ "tilecount":2,
+ "tiledversion":"1.10.0",
+ "tileheight":512,
+ "tiles":[
+        {
+         "id":2,
+         "image":"..\/objects\/gale_cropped.png",
+         "imageheight":352,
+         "imagewidth":164
+        }, 
+        {
+         "id":3,
+         "image":"..\/objects\/marker_flag_blue.png",
+         "imageheight":512,
+         "imagewidth":512
+        }],
+ "tilewidth":512,
+ "type":"tileset",
+ "version":"1.10"
 }

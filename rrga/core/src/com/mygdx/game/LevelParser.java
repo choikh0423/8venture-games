@@ -3,9 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 
 import java.util.ArrayList;
@@ -225,8 +223,7 @@ public class LevelParser {
         tileSetJsonMap.put("blue_bird", directory.getEntry("blue_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("red_bird", directory.getEntry("red_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("green_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
-        // TODO: replace
-        tileSetJsonMap.put("brown_bird", directory.getEntry("blue_bird:tiles", JsonValue.class));
+        tileSetJsonMap.put("brown_bird", directory.getEntry("brown_bird:tiles", JsonValue.class));
     }
 
     /**
@@ -374,9 +371,12 @@ public class LevelParser {
      */
     private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         birdData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < birdData.length; ii++) {
+            seen.clear();
             // b = raw bird data
             JsonValue b = rawData.get(ii);
+            seen.put(b.getInt("id"), 0);
             // data = the bird JSON that game will read
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             String variant = b.getString("template", "UNKNOWN");
@@ -452,24 +452,21 @@ public class LevelParser {
             }
             data.addChild("points", shape);
 
-
             // Remaining: set bird properties and complete their path
             // the resulting path should be stored as a list of floats which is Json array of Json floats.
-            boolean loop = false;
             float moveSpeed = 0;
             float atkSpeed = 0;
             // path birds are red and brown
             if (color.equals("red") || color.equals("brown")){
                 // update properties
-                loop = getFromProperties(properties, "loop", defaults).asBoolean();
                 moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
                 // using custom properties to find rest of path
-                HashSet<Integer> seen = new HashSet<>();
                 // this takes either the bird's next point along its path or take from default (which should be 0)
-                JsonValue jsonId = getFromProperties(properties, "path", defaults);
-                int next = jsonId.asInt();
-                while (next != 0 && !seen.contains(next) && trajectory.get(next) != null) {
-                    seen.add(next);
+                int next = getFromProperties(properties, "path", defaults).asInt();
+                int idx = 1;
+                while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                    seen.put(next, idx);
+                    idx++;
                     JsonValue nodeData = trajectory.get(next);
                     // put path point (x,y) into vector cache and perform conversion
                     readPositionAndConvert(nodeData, temp);
@@ -478,16 +475,18 @@ public class LevelParser {
                     pathJson.addChild(new JsonValue(temp.y));
                     // get next
                     nodeData = nodeData.get("properties");
-                    jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
-                    next = jsonId.asInt();
+                    next = getFromProperties(nodeData, "next_trajectory", pointDefault).asInt();
+                }
+                if (seen.containsKey(next)){
+                    // -1 if no loop otherwise last node on path points to a node already on path
+                    data.addChild("loopTo", new JsonValue(seen.get(next, -1)));
                 }
             }
-            // attack birds are blue and brown
+
             if (doesBirdAttack(color)){
                 atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
             }
             data.addChild("path", pathJson);
-            data.addChild("loop", new JsonValue(loop));
             data.addChild("movespeed", new JsonValue(moveSpeed));
             data.addChild("atkspeed", new JsonValue(atkSpeed));
             birdData[ii] = data;

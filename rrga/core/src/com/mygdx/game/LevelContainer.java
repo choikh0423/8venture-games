@@ -217,6 +217,7 @@ public class LevelContainer{
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
         blueBirdAnimationTexture = directory.getEntry("game:blue_bird_flapping", Texture.class);
         greenBirdAnimationTexture = directory.getEntry("game:green_bird_flapping", Texture.class);
+        brownBirdAnimationTexture = directory.getEntry("game:brown_bird_flapping", Texture.class);
 
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
 

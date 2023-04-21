@@ -915,6 +915,7 @@
                  "y":4650.78037092793
                 }, 
                 {
+                 "height":96.4106722828959,
                  "id":99,
                  "properties":[
                         {
@@ -923,8 +924,9 @@
                          "value":104
                         }],
                  "template":"templates\/red_bird.json",
-                 "x":1129.2574949133,
-                 "y":3759.99164356514
+                 "width":99.778730703259,
+                 "x":1528.36372915022,
+                 "y":3648.37226427335
                 }, 
                 {
                  "id":104,
@@ -932,23 +934,11 @@
                         {
                          "name":"next_trajectory",
                          "type":"object",
-                         "value":105
+                         "value":123
                         }],
                  "template":"templates\/path_point.json",
-                 "x":1011.28880526811,
-                 "y":3706.49106302916
-                }, 
-                {
-                 "id":105,
-                 "properties":[
-                        {
-                         "name":"next_trajectory",
-                         "type":"object",
-                         "value":99
-                        }],
-                 "template":"templates\/path_point.json",
-                 "x":775.45935845531,
-                 "y":3783.86795390844
+                 "x":1515.50589364361,
+                 "y":3733.99381330419
                 }, 
                 {
                  "height":198.499162479062,
@@ -963,6 +953,235 @@
                  "template":"templates\/green_bird.json",
                  "x":701,
                  "y":2422.53846153846
+                }, 
+                {
+                 "id":121,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":124
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1331.13311331133,
+                 "y":3745.87458745875
+                }, 
+                {
+                 "id":122,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":136
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1233.95672900623,
+                 "y":3514.85148514852
+                }, 
+                {
+                 "id":123,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":121
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1422.80894756142,
+                 "y":3769.71030436377
+                }, 
+                {
+                 "id":124,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":125
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1257.79244591126,
+                 "y":3663.36633663366
+                }, 
+                {
+                 "id":125,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":126
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1129.44627796113,
+                 "y":3522.18555188852
+                }, 
+                {
+                 "id":126,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":127
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1039.60396039604,
+                 "y":3474.51411807847
+                }, 
+                {
+                 "id":127,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":128
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":935.093509350935,
+                 "y":3445.17785111845
+                }, 
+                {
+                 "id":128,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":129
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":850.751741840851,
+                 "y":3491.01576824349
+                }, 
+                {
+                 "id":129,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":130
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":812.247891455812,
+                 "y":3579.02456912358
+                }, 
+                {
+                 "id":130,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":131
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":799.4132746608,
+                 "y":3676.20095342868
+                },
+            
+                {
+                 "id":131,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":132
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":828.749541620829,
+                 "y":3773.37733773377
+                }, 
+                {
+                 "id":132,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":133
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":907.590759075908,
+                 "y":3806.38063806381
+                }, 
+                {
+                 "id":133,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":134
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1010.26769343601,
+                 "y":3788.04547121379
+                }, 
+                {
+                 "id":134,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":135
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1089.10891089109,
+                 "y":3734.87348734874
+                }, 
+                {
+                 "id":135,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":122
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1166.11661166117,
+                 "y":3659.69930326366
+                }, 
+                {
+                 "id":136,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":137
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1307.29739640631,
+                 "y":3430.50971763843
+                }, 
+                {
+                 "id":137,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":138
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1400.8067473414,
+                 "y":3388.33883388339
+                }, 
+                {
+                 "id":138,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":139
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1481.48148148148,
+                 "y":3436.01026769344
+                }, 
+                {
+                 "id":139,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":99
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1554.82214888155,
+                 "y":3509.35093509351
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -971,7 +1190,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":110,
+ "nextobjectid":140,
  "orientation":"orthogonal",
  "renderorder":"right-up",
  "tiledversion":"1.10.0",
@@ -1004,6 +1223,10 @@
         {
          "firstgid":271,
          "source":"objects\/green_bird_tile.json"
+        }, 
+        {
+         "firstgid":277,
+         "source":"objects\/brown_bird_tile.json"
         }],
  "tilewidth":128,
  "type":"map",

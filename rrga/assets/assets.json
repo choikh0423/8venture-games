@@ -23,6 +23,7 @@
         "game:red_bird_flapping" : "levels/objects/bird_nice_flapping.png",
         "game:blue_bird_flapping" : "levels/objects/blue_bird_flapping.png",
         "game:green_bird_flapping" : "levels/objects/bird_nest_flapping.png",
+        "game:brown_bird_flapping" : "levels/objects/bird_hard_brown.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",
@@ -66,7 +67,8 @@
         "data:cliffs": "levels/tilesets/cliffs.json",
         "red_bird:tiles": "levels/objects/red_bird_tile.json",
         "blue_bird:tiles": "levels/objects/blue_bird_tile.json",
-        "green_bird:tiles": "levels/objects/green_bird_tile.json"
+        "green_bird:tiles": "levels/objects/green_bird_tile.json",
+        "brown_bird:tiles": "levels/objects/brown_bird_tile.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
