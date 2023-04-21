@@ -1,6 +1,6 @@
 {
        "columns": 4,
-       "image": "bird_nice_flapping.png",
+       "image": "../asset/bird_nice_flapping.png",
        "imageheight": 229,
        "imagewidth": 948,
        "margin": 0,

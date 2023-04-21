@@ -1,18 +1,18 @@
 { "object":
     {
-     "gid":4,
-     "height":228,
-     "id":22,
+     "gid":2,
+     "height":256,
+     "id":98,
      "name":"goal",
      "rotation":0,
      "type":"goal",
      "visible":true,
-     "width":228
+     "width":256
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/tilesets\/objs.json"
+     "source":"..\/objects\/json\/goal_scarf.json"
     },
  "type":"template"
 }

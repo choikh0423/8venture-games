@@ -24,10 +24,10 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
-        "game:red_bird_flapping" : "levels/objects/bird_nice_flapping.png",
-        "game:blue_bird_flapping" : "levels/objects/blue_bird_flapping.png",
-        "game:green_bird_flapping" : "levels/objects/bird_nest_flapping.png",
-        "game:brown_bird_flapping" : "levels/objects/bird_hard_brown.png",
+        "game:red_bird_flapping" : "levels/objects/asset/bird_nice_flapping.png",
+        "game:blue_bird_flapping" : "levels/objects/asset/blue_bird_flapping.png",
+        "game:green_bird_flapping" : "levels/objects/asset/bird_nest_flapping.png",
+        "game:brown_bird_flapping" : "levels/objects/asset/bird_hard_brown.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",
@@ -58,10 +58,10 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "tiled:level1" : "levels/level1.json",
-        "red_bird:template": "levels/templates/red_bird.json",
-        "blue_bird:template": "levels/templates/blue_bird.json",
-        "green_bird:template": "levels/templates/green_bird.json",
-        "brown_bird:template": "levels/templates/brown_bird.json",
+        "red_bird:template": "levels/templates/birds/red_bird.json",
+        "blue_bird:template": "levels/templates/birds/blue_bird.json",
+        "green_bird:template": "levels/templates/birds/green_bird.json",
+        "brown_bird:template": "levels/templates/birds/brown_bird.json",
         "path_point:template": "levels/templates/path_point.json",
         "lightning:template": "levels/templates/lightning.json",
         "platform:template": "levels/templates/platform.json",
@@ -71,10 +71,10 @@
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json",
-        "red_bird:tiles": "levels/objects/red_bird_tile.json",
-        "blue_bird:tiles": "levels/objects/blue_bird_tile.json",
-        "green_bird:tiles": "levels/objects/green_bird_tile.json",
-        "brown_bird:tiles": "levels/objects/brown_bird_tile.json"
+        "red_bird:tiles": "levels/objects/json/red_bird_tile.json",
+        "blue_bird:tiles": "levels/objects/json/blue_bird_tile.json",
+        "green_bird:tiles": "levels/objects/json/green_bird_tile.json",
+        "brown_bird:tiles": "levels/objects/json/brown_bird_tile.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"

@@ -1,6 +1,6 @@
 {
        "columns": 6,
-       "image": "bird_nest_flapping.png",
+       "image": "../asset/bird_nest_flapping.png",
        "imageheight": 242,
        "imagewidth": 1194,
        "margin": 0,

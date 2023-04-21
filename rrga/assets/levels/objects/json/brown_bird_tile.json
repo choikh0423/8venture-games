@@ -1,6 +1,6 @@
 {
        "columns": 1,
-       "image": "bird_hard_brown.png",
+       "image": "../asset/bird_hard_brown.png",
        "imageheight": 375,
        "imagewidth": 231,
        "margin": 0,

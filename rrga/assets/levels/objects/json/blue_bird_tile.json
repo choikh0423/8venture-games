@@ -1,6 +1,6 @@
 {
        "columns": 5,
-       "image": "blue_bird_flapping.png",
+       "image": "../asset/blue_bird_flapping.png",
        "imageheight": 232,
        "imagewidth": 1160,
        "margin": 0,
