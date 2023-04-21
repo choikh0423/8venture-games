@@ -110,7 +110,21 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
 
+    /** Bird warning animation filmstrip texture */
     private Texture warningTex;
+
+
+    /** Bird warning animation frames */
+    private TextureRegion[][] warningTmpFrames;
+
+    /** Bird warning animation frames */
+    private TextureRegion[] warningAnimationFrames;
+
+    /** Bird warning animation*/
+    private Animation<TextureRegion> warningAnimation;
+
+    /** Bird waning animation elapsed time */
+    float warningElapsedTime;
 
 
     /**
@@ -193,6 +207,27 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         }
         // Adjust frame duration here
         this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
+    }
+
+    public void setWarningAnimation(Texture warningTexture){
+        if (warningTexture == null) {
+            return;
+        }
+
+        warningTmpFrames = TextureRegion.split(warningTexture, warningTexture.getWidth()/4, warningTexture.getHeight());
+        int columns = warningTmpFrames.length == 0? 0 : warningTmpFrames[0].length;
+        warningAnimationFrames = new TextureRegion[warningTmpFrames.length * columns];
+
+        // PLacing animation frames in order
+        int index = 0;
+        for (TextureRegion[] warningTmpFrame : warningTmpFrames) {
+            for (TextureRegion textureRegion : warningTmpFrame) {
+                warningAnimationFrames[index] = textureRegion;
+                index++;
+            }
+        }
+        // Adjust frame duration here
+        this.warningAnimation = new Animation<>(1f/10f, warningAnimationFrames);
     }
 
     /**
@@ -378,18 +413,23 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         }
 
         flapElapsedTime += Gdx.graphics.getDeltaTime();
-        TextureRegion region = flapAnimation.getKeyFrame(flapElapsedTime, true);
+        TextureRegion birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
 
-        canvas.draw(region, Color.WHITE, region.getRegionWidth()/2f, region.getRegionHeight()/2f,
+        canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth()/2f, birdRegion.getRegionHeight()/2f,
                 (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
                 effect * dimensions.x/textureAABB.x * drawScale.x,
                 dimensions.y/textureAABB.y * drawScale.y);
 
         if(warning){
-            canvas.draw(warningTex, Color.WHITE, warningTex.getWidth()/2f, warningTex.getHeight()/2f,
-                    (getX()) * drawScale.x, (getY() + warningTex.getHeight() * .002f) * drawScale.y, getAngle(), .002f * drawScale.x, .002f * drawScale.y);
-        }
+            warningElapsedTime += Gdx.graphics.getDeltaTime();
+            TextureRegion warningRegion = warningAnimation.getKeyFrame(warningElapsedTime, true);
 
+            int flip = faceRight ? 1 : -1;
+            float eye = color == "blue" ? 7.5f : 6f;
+            canvas.draw(warningRegion, Color.WHITE, warningRegion.getRegionWidth()/2f, warningRegion.getRegionHeight()/2f,
+                    (getX()) * drawScale.x + flip*birdRegion.getRegionWidth()/eye, (getY()) * drawScale.y, getAngle(),
+                    dimensions.x/textureAABB.x * drawScale.x, dimensions.y/textureAABB.y * drawScale.y);
+            }
     }
 
     /**

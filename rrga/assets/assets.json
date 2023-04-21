@@ -23,7 +23,7 @@
         "game:red_bird_flapping" : "levels/objects/bird_nice_flapping.png",
         "game:blue_bird_flapping" : "levels/objects/blue_bird_flapping.png",
         "game:green_bird_flapping" : "levels/objects/bird_nest_flapping.png",
-        "game:bird_warning" : "game/hazard/bird_warning.png",
+        "game:bird_warning" : "game/hazard/annoy.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",
