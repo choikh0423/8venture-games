@@ -3,13 +3,8 @@
      "gid":2147483651,
      "height":229,
      "id":99,
-     "name":"",
+     "name":"red_bird",
      "properties":[
-            {
-             "name":"loop",
-             "type":"bool",
-             "value":false
-            }, 
             {
              "name":"move_speed",
              "type":"float",
@@ -21,7 +16,7 @@
              "value":71
             }],
      "rotation":0,
-     "type":"",
+     "type":"bird",
      "visible":true,
      "width":237
     },

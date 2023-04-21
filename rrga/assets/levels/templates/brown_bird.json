@@ -1,39 +1,34 @@
 { "object":
     {
-     "gid":2,
-     "height":90,
-     "id":11,
+     "gid":1,
+     "height":375,
+     "id":115,
      "name":"brown_bird",
      "properties":[
             {
              "name":"atk_speed",
-             "type":"int",
+             "type":"float",
              "value":20
             },
             {
              "name":"move_speed",
-             "type":"int",
-             "value":6
+             "type":"float",
+             "value":20
             }, 
             {
              "name":"path",
              "type":"object",
              "value":0
-            },
-            {
-               "name":"loop",
-               "type":"bool",
-               "value":false
-             }],
+            }],
      "rotation":0,
      "type":"bird",
      "visible":true,
-     "width":230
+     "width":231
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/tilesets\/objs.json"
+     "source":"..\/objects\/brown_bird_tile.json"
     },
  "type":"template"
 }

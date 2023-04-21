@@ -10,8 +10,8 @@
     "density": 0.0,
     "friction": 0.0,
     "restitution": 0.0,
-    "width": 4.0,
-    "height": 4.0
+    "width": 1,
+    "height": 1.5
   },
   "player": {
     "shrink": [0.7, 0.95],
@@ -29,7 +29,7 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "texturescale": 0.08333,
+    "size": 0.75,
     "maxhealth": 3,
     "drag_x" : 10,
     "drag_y" : 5,
@@ -48,9 +48,8 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "texturescale": 0.08333,
-    "closedmomentum": 0.35,
-    "offset": [0.0, 0.26666]
+    "size": 1,
+    "closedmomentum": 0.35
   },
   "world": {
     "width": 16,

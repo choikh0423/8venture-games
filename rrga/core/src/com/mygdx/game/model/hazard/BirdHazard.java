@@ -24,6 +24,30 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         BROWN
     }
 
+    /**
+     * @param variant a bird's color
+     */
+    public BirdColor convertToColor(String variant){
+        switch (variant){
+            case "blue": return BirdColor.BLUE;
+            case "green": return BirdColor.GREEN;
+            case "brown": return BirdColor.BROWN;
+            case "red": return BirdColor.RED;
+            default: return null;
+        }
+    }
+
+    /**
+     * A bird is either looping, moving forward, or reverse movement.
+     * Birds that don't follow a path are said to be stationary.
+     */
+    private enum MoveBehavior {
+        LOOP,
+        FORWARD,
+        REVERSE,
+        STATIONARY
+    }
+
     private final int ATTACK_WAIT_TIME = 50;
 
     /**
@@ -40,11 +64,11 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
      * A list of points which represent this bird's flight path.
      * Invariant: length >=2 and length is even.
      */
-    private final float[] path;
+    private float[] path;
 
     /**
      * The index of the birds current targeted x-coordinate in path
-     * Invariant: currentPath index is even or 0
+     * Invariant: currentPath index is even
      */
     private int currentPathIndex;
 
@@ -52,16 +76,24 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
      * If loop is true, bird will go from last point in path to first.
      * If loop is false, bird will turn around after last point and reverse its path
      */
-    private final boolean loop;
+    private final boolean loop = false;
+
+    /** if valid, this is the path index that follows the very last path point. */
+    private int loopTo;
+
+    /**
+     * the bird's current way of moving around
+     */
+    private MoveBehavior patrol;
 
     /**
      * The color of this bird. Determines the bird's behavior.
-     * Red: Stationary, then attacks.
-     * Blue: Patrols, doesn't attacks.
-     * Brown: Patrols, then attacks.
-     * Invariant: Must be one of "red", "blue", or "brown"
+     * Red: Patrolling Passively.
+     * Green: Stationary Ambush
+     * Blue: Nested Repeated Spawn.
+     * Brown: Patrols Aggressively.
      */
-    private final String color;
+    private final BirdColor color;
 
     /**
      * Move speed of this bird
@@ -69,7 +101,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     private final int moveSpeed;
 
     /**
-     * The coordinates this bird is currently moving to
+     * The amount (in physics units) this bird is currently trying to move
      */
     private final Vector2 move = new Vector2();
 
@@ -174,7 +206,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         knockBackVec.set(in.nor());
     }
 
-    public String getColor() {
+    public BirdColor getColor() {
         return color;
     }
 
@@ -242,10 +274,30 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         float moveX = tx - getX() + (tvx * timeStep);
         float moveY = ty - getY() + (tvy * timeStep);
 
-        move.set(moveX, moveY);
-        move.nor();
-        move.scl(attackSpeed);
+        move.set(moveX, moveY).nor().scl(attackSpeed);
         targetDir.set(move);
+    }
+    
+    /**
+     * sets the birds path to the given valid path and loopTo index. The bird's patrolling pattern
+     * is also modified so that the bird will remain stationary if the path only contains 1 point (2 coordinates).
+     * @param path list of coordinates, length(path) must be even and at least 2.
+     * @param loopTo the index [0] <= [idx] <= [length(path)/2 - 1] to connect last point on path with. This parameter
+     *               can be set to any other value if the bird does not intend to loop.
+     */
+    public void setPath(float[] path, int loopTo){
+        this.path = path;
+        this.loopTo = loopTo;
+        if (path.length <= 2){
+            patrol = MoveBehavior.STATIONARY;
+            return;
+        }
+        if (0 <= loopTo && loopTo <= path.length/2 - 1){
+            patrol = MoveBehavior.LOOP;
+        }
+        else {
+            patrol = MoveBehavior.FORWARD;
+        }
     }
 
     public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex) {
@@ -265,10 +317,11 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
         // set remaining properties
         path = data.get("path").asFloatArray();
+        setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
         attack = data.getBoolean("attack");
         moveSpeed = data.getInt("movespeed");
-        loop = data.getBoolean("loop");
-        color = data.getString("color");
+
+        color = convertToColor(data.getString("color"));
         faceRight = data.getBoolean("facing_right");
         attackSpeed = data.getFloat("atkspeed");
         sensorRadius = birdSensorRadius;
@@ -301,6 +354,11 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             bodies.add(hit1);
             bodies.add(hit2);
         }
+
+        // TODO: if we need birds to be sensors...
+//        for (Obstacle o : bodies){
+//            o.setSensor(true);
+//        }
     }
 
     @Override
@@ -331,57 +389,59 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         return true;
     }
 
-    //    @Override
-//    public void deactivatePhysics(World world){
-//        super.deactivatePhysics(world);
-//    }
+    /**
+     * update the current position on a patrolling path
+     * based on a variety of factors (path, patrolling behavior, etc).
+     */
+    private void patrol(){
+        // update direction, using next (X,Y) coordinate on path and computing distances
+        float pathX = path[currentPathIndex];
+        float pathY = path[currentPathIndex + 1];
+        float deltaX = pathX - getX();
+        float deltaY = pathY - getY();
+        move.set(deltaX, deltaY).nor().scl(moveSpeed / 100f);
+        if (Math.abs(move.x) > Math.abs(deltaX)) setX(pathX);
+        else setX(getX() + move.x);
+        if (Math.abs(move.y) > Math.abs(deltaY)) setY(pathY);
+        else setY(getY() + move.y);
+        setFaceRight(move.x > 0);
+        if (Math.abs(deltaX) < .001 && Math.abs(deltaY) < .001){
+            // determine next point to move to
+            switch (patrol){
+                case FORWARD:
+                    // end of forward path, time to reverse
+                    if (currentPathIndex == path.length - 2){
+                        patrol = MoveBehavior.REVERSE;
+                        currentPathIndex -= 2;
+                    }
+                    else currentPathIndex += 2;
+                    break;
+                case REVERSE:
+                    // end of backwards path
+                    if (currentPathIndex == 0){
+                        patrol = MoveBehavior.FORWARD;
+                        currentPathIndex += 2;
+                    }
+                    else currentPathIndex -= 2;
+                    break;
+                case LOOP:
+                    if (currentPathIndex == path.length - 2 ){
+                        currentPathIndex = 2 * loopTo;
+                    }
+                    else currentPathIndex += 2;
+                    break;
+                case STATIONARY:
+                    break;
+            }
+        }
+    }
 
     public void move() {
         //if target not seen
         if (!seesTarget) {
             if(moveSpeed > 0) {
-                float pathX = path[currentPathIndex];
-                float pathY = path[currentPathIndex + 1];
-                float moveX = pathX - getX();
-                float moveY = pathY - getY();
-                //if bird's path is > 1 point
-                if (path.length > 2) {
-                    //if at next point in path
-                    if (Math.abs(moveX) < .001 && Math.abs(moveY) < .001) {
-                        //if at end of path
-                        if (currentPathIndex == path.length - 2) {
-                            if (!loop) {
-                                for (int i = 0; i < path.length / 2; i += 2) {
-                                    float temp1 = path[i];
-                                    float temp2 = path[i + 1];
-                                    path[i] = path[path.length - i - 2];
-                                    path[i + 1] = path[path.length - i - 1];
-                                    path[path.length - i - 2] = temp1;
-                                    path[path.length - i - 1] = temp2;
-                                }
-                            }
-                            currentPathIndex = 0;
-                        }
-                        //else not at end of path
-                        else {
-                            currentPathIndex += 2;
-                        }
-                    }
-                    //else not yet at next point in path
-                    else {
-                        move.set(moveX, moveY);
-                        move.nor();
-                        move.scl(moveSpeed);
-                        if (Math.abs((move.x / 100)) > Math.abs(moveX)) setX(pathX);
-                        else setX(getX() + (move.x / 100));
-                        if (Math.abs((move.y / 100)) > Math.abs(moveY)) setY(pathY);
-                        else setY(getY() + (move.y / 100));
-                        setFaceRight(move.x > 0);
-                    }
-                }
-                //else path is 1 point
-                //no movement
-                moveDir.set(moveX, moveY);
+                patrol();
+                moveDir.set(move);
             }
         }
         //else target is seen
@@ -407,8 +467,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
 
-        // this fixes inconsistency with blue bird asset
-        if (color.equals("blue")){
+        // this fixes inconsistency with blue/brown bird assets
+        if (color.equals(BirdColor.BROWN) || color.equals(BirdColor.BLUE)){
             effect = faceRight ? -1.0f : 1f;
         }
 

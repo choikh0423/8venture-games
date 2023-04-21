@@ -118,6 +118,11 @@ public class InputController {
         return lighter;
     }
 
+    /** Set secondary control mode */
+    public void setSecondaryControlMode(boolean toggleOn) {
+        this.secondaryControlMode = toggleOn;
+    }
+
     /**
      * Returns true if the reset button was pressed.
      *

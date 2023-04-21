@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -439,14 +440,17 @@ public class GameplayController implements ContactListener {
         if (angInBounds) {
             umbrella.setAngle(mouseAng);
             lastValidAng = mouseAng;
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         } else if (lastValidAng >= 0) {
             umbrella.setAngle((float) Math.PI / 2);
             mousePos.x = -1;
             mousePos.y = 0;
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
         } else {
             umbrella.setAngle(-(float) Math.PI / 2);
             mousePos.x = 1;
             mousePos.y = 0;
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
         }
 
         //average the force of touched winds
@@ -674,9 +678,9 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + diff.x;
-        cache.y = avatar.getY() + diff.y;
-        umbrella.setPosition(cache.x, cache.y);
+        cache.x = avatar.getX() + diff.len()* mousePos.x;
+        cache.y = avatar.getY() + diff.len()*mousePos.y;
+        umbrella.setPosition(avatar.getX(), avatar.getY());
 
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
@@ -994,5 +998,16 @@ public class GameplayController implements ContactListener {
     private void setFailed() {
         failed = true;
         countdown = LOSE_COUNTDOWN_TIMER;
+    }
+
+    /** Sets SFX Volume */
+    public void setVolume(float sfxVolume, float musicVolume) {
+        this.SFXVolume = sfxVolume;
+        this.musicVolume = musicVolume;
+    }
+
+    /** Sets Background Volume */
+    public void setBackgroundVolume(float volume) {
+        this.musicVolume = volume;
     }
 }

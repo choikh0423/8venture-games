@@ -1,13 +1,13 @@
 { "object":
     {
      "gid":4,
-     "height":512,
+     "height":228,
      "id":22,
      "name":"goal",
      "rotation":0,
      "type":"goal",
      "visible":true,
-     "width":512
+     "width":228
     },
  "tileset":
     {

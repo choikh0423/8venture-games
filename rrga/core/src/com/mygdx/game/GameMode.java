@@ -590,6 +590,19 @@ public class GameMode implements Screen {
     }
 
     /**
+     * Sets current level of the game
+     */
+    public void setVolume(float sfxVolume, float musicVolume){
+        gameplayController.setVolume(sfxVolume, musicVolume);
+    }
+
+    /**
+     * Sets secondary control mode
+     */
+    public void setSecondaryControlMode(boolean toggleOn){
+        inputController.setSecondaryControlMode(toggleOn);
+    }
+    /**
      * temporary override of levels with sample level
      * @param sampleLevel tiled json
      */

@@ -3,7 +3,7 @@
      "gid":1,
      "height":242,
      "id":109,
-     "name":"",
+     "name":"green_bird",
      "properties":[
             {
              "name":"atk_speed",
@@ -11,7 +11,7 @@
              "value":15
             }],
      "rotation":0,
-     "type":"",
+     "type":"bird",
      "visible":true,
      "width":199
     },
