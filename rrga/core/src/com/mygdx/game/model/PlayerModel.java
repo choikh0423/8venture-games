@@ -604,7 +604,7 @@ public class PlayerModel extends CapsuleObstacle {
 		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
 				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
 			forceCache.set(fx, 0);
-			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2+1 : 1.0f;
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2 + 1 : .6f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
 		}
@@ -614,26 +614,46 @@ public class PlayerModel extends CapsuleObstacle {
 	 * Applies lighter force to the body of this player.
 	 */
 	public void applyLighterForce(float umbAng) {
-		if(lighterFuel > 0) {
-			lighterFuel -= lighterChangeRate;
+		if(lighterFuel == maxLighterFuel) {
+			lighterFuel = 0;
 			float umbrellaX = (float) Math.cos(umbAng);
 			float umbrellaY = (float) Math.sin(umbAng);
-			//determine X
-			if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-				setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
-				forceCache.x = 0;
+
+			//switch between lighter boost as a force or setting velocity directly
+			boolean force = false;
+
+			if(force) {
+				//determine X
+				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+					setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
+					forceCache.x = 0;
+				} else {
+					forceCache.x = umbrellaX * lighterForce;
+				}
+				//determine Y
+				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+					setVY(Math.signum(getVY()) * getMaxSpeedUp());
+					forceCache.y = 0;
+				} else {
+					forceCache.y = umbrellaY * lighterForce;
+				}
+				body.applyLinearImpulse(forceCache, getPosition(), true);
 			}
-			else {
-				forceCache.x = umbrellaX * lighterForce / 2;
+			else{
+				//determine X
+				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+					forceCache.x = getMaxSpeedXAirWind();
+				} else {
+					forceCache.x = umbrellaX * lighterForce;
+				}
+				//determine Y
+				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+					forceCache.y = getMaxSpeedUp();
+				} else {
+					forceCache.y = umbrellaY * lighterForce;
+				}
+				body.setLinearVelocity(forceCache);
 			}
-			//determine Y
-			if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-				setVY(Math.signum(getVY())*getMaxSpeedUp());
-				forceCache.y = 0;
-			} else {
-				forceCache.y = umbrellaY * lighterForce;
-			}
-			body.applyForce(forceCache, getPosition(), true);
 		}
 	}
 

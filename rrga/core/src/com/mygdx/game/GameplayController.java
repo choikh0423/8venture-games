@@ -11,10 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
 import com.mygdx.game.model.MovingPlatformModel;
-import com.mygdx.game.model.hazard.BirdHazard;
-import com.mygdx.game.model.hazard.BirdRayCastCallback;
-import com.mygdx.game.model.hazard.HazardModel;
-import com.mygdx.game.model.hazard.LightningHazard;
+import com.mygdx.game.model.hazard.*;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.model.UmbrellaModel;
 import com.mygdx.game.model.WindModel;
@@ -24,6 +21,7 @@ import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
@@ -174,6 +172,11 @@ public class GameplayController implements ContactListener {
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
+
+    /**
+     * The set of all nests currently in the level
+     */
+    private ObjectSet<NestHazard> nests = new ObjectSet<>();
 
     /**
      * The set of all moving platforms currently in the level
@@ -360,10 +363,12 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Get objects from level container
+        //TODO: Is this a 1 time thing??
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
         this.lightnings = levelContainer.getLightnings();
+        this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
         this.movingPlats = levelContainer.getMovingPlats();
@@ -545,17 +550,20 @@ public class GameplayController implements ContactListener {
         }
 
         //Bird Updates
-        int birdRays = 40;
+        int birdRays = 5;
         BirdRayCastCallback rccb = new BirdRayCastCallback();
         // vector reference (alias to make code more readable)
         Vector2 pos = cache;
         Vector2 target = temp;
+
+        //loop through birds
         for (BirdHazard bird : birds) {
             //If sees target, wait before attacking
             if(bird.seesTarget){
                 if(bird.attackWait == 0){
                     bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
                     bird.attackWait--;
+                    bird.warning = false;
                 }
                 else if(bird.attackWait > 0){
                     bird.attackWait--;
@@ -565,18 +573,54 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            //send out rays and check for collisions with player
+            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
+                    || bird.getAABBx() + bird.getWidth() < 0 || bird.getAABBy() - bird.getHeight() > bounds.height) {
+                //IS THIS SUFFICIENT FOR DELETION?
+                objects.remove(bird);
+                birds.remove(bird);
+                bird.deactivatePhysics(world);
+                bird.markRemoved(true);
+            }
 
-            if(bird.getAttack()) {
-                float x = bird.getX();
-                float y = bird.getY();
+            float bx = bird.getX();
+            float by = bird.getY();
+            float px = avatar.getX();
+            float py = avatar.getY();
+            temp.set(px, py);
+            temp.sub(bx, by);
+            temp.nor();
+            float angle;
+
+            //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+            if (temp.x == 0) {
+                angle =  (temp.y > 0) ? (float) Math.PI/2 : (temp. y == 0) ? 0 : 3 * (float) Math.PI/2;
+            }
+            else if (temp.y == 0){
+                angle = (temp.x >= 0) ? 0 : (float) Math.PI;
+            }
+            else {
+                angle = (float) Math.atan(temp.y / temp.x);
+                if (temp.x < 0 && temp.y < 0) // quadrant Ⅲ
+                    angle += Math.PI;
+                else if (temp.x < 0) // quadrant Ⅱ
+                    angle += Math.PI;
+                else if (temp.y < 0) // quadrant Ⅳ
+                    angle += 2*Math.PI;
+            }
+
+            float dist = (float) Math.sqrt(Math.pow(px-bx, 2) + Math.pow(py-by, 2));
+            boolean check = dist < bird.getSensorRadius();
+            //send out rays and check for collisions with player
+            if(bird.getAttack() && check) {
                 // load position into cache
-                pos.set(x, y);
+                pos.set(bx, by);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    target.set(x, y + bird.getSensorRadius()).rotateAroundDeg(pos, 360f / birdRays * i);
+                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / birdRays);
+                    //DEPRECIATED
+                    // target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f * i / birdRays);
                     world.rayCast(rccb, pos, target);
                     for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
                         if(e.value < minDist){
@@ -588,7 +632,9 @@ public class GameplayController implements ContactListener {
                             if(Math.abs(e.value - minDist) < .001){
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
-                                    bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
+                                    bird.setFaceRight(!(px - bx < 0));
+                                    //play sound effect
+                                    bird.warning = true;
                                 }
                             }
                         }
@@ -600,6 +646,16 @@ public class GameplayController implements ContactListener {
         //update the lightnings
         for (LightningHazard light : lightnings) {
             light.strike();
+        }
+
+        //update nests
+        for(NestHazard n: nests){
+            BirdHazard b = n.update();
+            if(b != null){
+                objects.add(b);
+                b.activatePhysics(world);
+                birds.add(b);
+            }
         }
     }
 
@@ -696,6 +752,11 @@ public class GameplayController implements ContactListener {
             if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
+                //norm from a to b
+                WorldManifold wm = contact.getWorldManifold();
+                Vector2 norm = wm.getNormal();
+                float flip = (bd1 instanceof HazardModel ? 1 : -1);
+                h.setKnockBackForce(norm.scl(flip));
                 contactHazards.add(h);
             }
 
@@ -777,6 +838,31 @@ public class GameplayController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        Object fd1 = fix1.getUserData();
+        Object fd2 = fix2.getUserData();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            if (umbrella == bd2  || umbrella == bd1) {
+                contact.setEnabled(false);
+            }
+
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !(bd1 instanceof StaticHazard)) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !(bd2 instanceof StaticHazard))))) {
+                contact.setEnabled(false);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

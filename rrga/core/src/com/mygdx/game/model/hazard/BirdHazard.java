@@ -114,7 +114,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final int damage;
 
-    private final float knockBack;
+    private final float knockBackScl;
+
+    private Vector2 knockBackVec = new Vector2();
 
     /** the dimensions of filmstrip AABB.
      * Together with this object's AABB dimensions, this gives a texture scale ratio.
@@ -140,6 +142,22 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
 
+    /** Bird warning animation filmstrip texture */
+    private Texture warningTex;
+
+
+    /** Bird warning animation frames */
+    private TextureRegion[][] warningTmpFrames;
+
+    /** Bird warning animation frames */
+    private TextureRegion[] warningAnimationFrames;
+
+    /** Bird warning animation*/
+    private Animation<TextureRegion> warningAnimation;
+
+    /** Bird waning animation elapsed time */
+    float warningElapsedTime;
+
 
     /**
      * Whether this bird sees its target.
@@ -149,6 +167,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     public boolean seesTarget;
 
     public int attackWait;
+
+    public boolean warning;
 
     /**
      * Direction of the target
@@ -179,7 +199,11 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     @Override
     public Vector2 getKnockBackForce() {
-        return temp.set(moveDir.x, moveDir.y).nor();
+        return knockBackVec;
+    }
+    @Override
+    public void setKnockBackForce(Vector2 in) {
+        knockBackVec.set(in.nor());
     }
 
     public BirdColor getColor() {
@@ -190,7 +214,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     public int getDamage() { return damage; }
 
     @Override
-    public float getKnockBackScl() { return knockBack; }
+    public float getKnockBackScl() { return knockBackScl; }
 
     /**
      * Sets bird flapping animation
@@ -217,6 +241,27 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
     }
 
+    public void setWarningAnimation(Texture warningTexture){
+        if (warningTexture == null) {
+            return;
+        }
+
+        warningTmpFrames = TextureRegion.split(warningTexture, warningTexture.getWidth()/4, warningTexture.getHeight());
+        int columns = warningTmpFrames.length == 0? 0 : warningTmpFrames[0].length;
+        warningAnimationFrames = new TextureRegion[warningTmpFrames.length * columns];
+
+        // PLacing animation frames in order
+        int index = 0;
+        for (TextureRegion[] warningTmpFrame : warningTmpFrames) {
+            for (TextureRegion textureRegion : warningTmpFrame) {
+                warningAnimationFrames[index] = textureRegion;
+                index++;
+            }
+        }
+        // Adjust frame duration here
+        this.warningAnimation = new Animation<>(1f/10f, warningAnimationFrames);
+    }
+
     /**
      * Sets the direction of the target using the targets x and y coordinates
      */
@@ -232,7 +277,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         move.set(moveX, moveY).nor().scl(attackSpeed);
         targetDir.set(move);
     }
-
+    
     /**
      * sets the birds path to the given valid path and loopTo index. The bird's patrolling pattern
      * is also modified so that the bird will remain stationary if the path only contains 1 point (2 coordinates).
@@ -255,7 +300,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         }
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack) {
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex) {
         super(data.getFloat("x"), data.getFloat("y"));
 
         // this is the bounding box dimensions of the texture that contains all animation frames.
@@ -284,11 +329,13 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         attackWait = ATTACK_WAIT_TIME;
         seesTarget = false;
         damage = birdDamage;
-        knockBack = birdKnockBack;
+        knockBackScl = birdKnockBack;
+        warning = false;
+        this.warningTex = warningTex;
 
         // make hit-box objects
         // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
-        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBack, temp);
+        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBackScl, temp);
         // flip points and make hit-box #2:
         float x = data.getFloat("x");
         float y = data.getFloat("y");
@@ -296,7 +343,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBack, temp);
+        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBackScl, temp);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
             // hit1 must be right hitbox
@@ -426,12 +473,23 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         }
 
         flapElapsedTime += Gdx.graphics.getDeltaTime();
-        TextureRegion region = flapAnimation.getKeyFrame(flapElapsedTime, true);
+        TextureRegion birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
 
-        canvas.draw(region, Color.WHITE, region.getRegionWidth()/2f, region.getRegionHeight()/2f,
+        canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth()/2f, birdRegion.getRegionHeight()/2f,
                 (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
                 effect * dimensions.x/textureAABB.x * drawScale.x,
                 dimensions.y/textureAABB.y * drawScale.y);
+
+        if(warning){
+            warningElapsedTime += Gdx.graphics.getDeltaTime();
+            TextureRegion warningRegion = warningAnimation.getKeyFrame(warningElapsedTime, true);
+
+            int flip = faceRight ? 1 : -1;
+            float eye = color == "blue" ? 7.5f : 6f;
+            canvas.draw(warningRegion, Color.WHITE, warningRegion.getRegionWidth()/2f, warningRegion.getRegionHeight()/2f,
+                    (getX()) * drawScale.x + flip*birdRegion.getRegionWidth()/eye, (getY()) * drawScale.y, getAngle(),
+                    dimensions.x/textureAABB.x * drawScale.x, dimensions.y/textureAABB.y * drawScale.y);
+            }
     }
 
     /**
