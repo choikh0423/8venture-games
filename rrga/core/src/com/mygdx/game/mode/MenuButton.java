@@ -65,20 +65,22 @@ public class MenuButton {
     /** Returns the regional height of button texture */
     public int getRegionHeight() { return texture.getRegionHeight(); }
 
-    /** Set XY Coordinate of the center of the button */
-    public void setXY(int width, int height) {
+    /** Set XY Coordinate of the center of the button & scale of button */
+    public void setPos(int width, int height, float scale) {
         buttonY = (int)(ratioY * height);
         buttonX = (int)(ratioX * width);
+
+        this.scale = scale;
     }
 
-    /** Set XY scale of the button */
-    public void setScale(float scale) {
-        this.scale = scale;
+    /** Directly sets XY Coordinate of the center of the button */
+    public void setXY(int x, int y) {
+        buttonY = x;
+        buttonX = y;
     }
 
     /** Set texture of the button */
     public void setTexture(TextureRegion texture) { this.texture = texture; }
-
 
 
     /**
