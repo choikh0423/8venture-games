@@ -546,7 +546,7 @@ public class GameplayController implements ContactListener {
         }
 
         //Bird Updates
-        int birdRays = 40;
+        int birdRays = 5;
         BirdRayCastCallback rccb = new BirdRayCastCallback();
         // vector reference (alias to make code more readable)
         Vector2 pos = cache;
@@ -569,17 +569,54 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
+            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
+                    || bird.getAABBx() + bird.getWidth() < 0 || bird.getAABBy() - bird.getHeight() > bounds.height) {
+                //IS THIS SUFFICIENT FOR DELETION?
+                objects.remove(bird);
+                birds.remove(bird);
+                bird.deactivatePhysics(world);
+                bird.markRemoved(true);
+            }
+
+            float bx = bird.getX();
+            float by = bird.getY();
+            float px = avatar.getX();
+            float py = avatar.getY();
+            temp.set(px, py);
+            temp.sub(bx, by);
+            temp.nor();
+            float angle;
+
+            //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+            if (temp.x == 0) {
+                angle =  (temp.y > 0) ? (float) Math.PI/2 : (temp. y == 0) ? 0 : 3 * (float) Math.PI/2;
+            }
+            else if (temp.y == 0){
+                angle = (temp.x >= 0) ? 0 : (float) Math.PI;
+            }
+            else {
+                angle = (float) Math.atan(temp.y / temp.x);
+                if (temp.x < 0 && temp.y < 0) // quadrant Ⅲ
+                    angle += Math.PI;
+                else if (temp.x < 0) // quadrant Ⅱ
+                    angle += Math.PI;
+                else if (temp.y < 0) // quadrant Ⅳ
+                    angle += 2*Math.PI;
+            }
+
+            float dist = (float) Math.sqrt(Math.pow(px-bx, 2) + Math.pow(py-by, 2));
+            boolean check = dist < bird.getSensorRadius();
             //send out rays and check for collisions with player
-            if(bird.getAttack()) {
-                float bx = bird.getX();
-                float by = bird.getY();
+            if(bird.getAttack() && check) {
                 // load position into cache
                 pos.set(bx, by);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f / birdRays * i);
+                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / birdRays);
+                    //DEPRECIATED
+                    // target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f * i / birdRays);
                     world.rayCast(rccb, pos, target);
                     for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
                         if(e.value < minDist){
@@ -591,7 +628,7 @@ public class GameplayController implements ContactListener {
                             if(Math.abs(e.value - minDist) < .001){
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
-                                    bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
+                                    bird.setFaceRight(!(px - bx < 0));
                                     //play sound effect
                                     bird.warning = true;
                                 }

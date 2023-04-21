@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.obstacle.SimpleObstacle;
+import com.mygdx.game.utility.util.PooledList;
 
 public class NestHazard extends PolygonObstacle {
     private float[] path;
@@ -19,6 +21,7 @@ public class NestHazard extends PolygonObstacle {
     private final float birdKnockback;
     private final Vector2 scale;
     private final Texture birdTex;
+    private PooledList<BirdHazard> birdList;
 
     public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
         super(points, x, y);
@@ -32,6 +35,8 @@ public class NestHazard extends PolygonObstacle {
         birdKnockback = kb;
         scale = scl;
         this.birdTex = birdTex;
+        // TODO: better memory allocation with PooledList
+        birdList = new PooledList<>();
     }
 
     public BirdHazard update(){
