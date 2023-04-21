@@ -11,7 +11,7 @@
  "spacing":0,
  "tilecount":2,
  "tiledversion":"1.10.0",
- "tileheight":512,
+ "tileheight":352,
  "tiles":[
         {
          "id":2,
@@ -20,12 +20,39 @@
          "imagewidth":164
         }, 
         {
+         "height":228,
          "id":3,
-         "image":"..\/objects\/marker_flag_blue.png",
-         "imageheight":512,
-         "imagewidth":512
+         "image":"..\/..\/game\/goal_scarf_filmstrip.png",
+         "imageheight":684,
+         "imagewidth":912,
+         "objectgroup":
+            {
+             "draworder":"index",
+             "id":3,
+             "name":"",
+             "objects":[
+                    {
+                     "height":221.052631578947,
+                     "id":3,
+                     "name":"",
+                     "rotation":0,
+                     "type":"",
+                     "visible":true,
+                     "width":145.263157894737,
+                     "x":42.1052631578947,
+                     "y":288.421052631579
+                    }],
+             "opacity":1,
+             "type":"objectgroup",
+             "visible":true,
+             "x":0,
+             "y":0
+            },
+         "width":228,
+         "x":228,
+         "y":0
         }],
- "tilewidth":512,
+ "tilewidth":228,
  "type":"tileset",
  "version":"1.10"
 }

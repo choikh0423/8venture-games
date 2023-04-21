@@ -67,8 +67,8 @@ public class PlayerModel extends CapsuleObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
-	/** The scale to multiply the texture by for drawing */
-	private float textureScale;
+	/** The size of the player in physics units (up to scaling by shrink factor) */
+	private float size;
 	/** Player Mass */
 	private float FINAL_MASS = 1.8f;
 	/** Max player hp */
@@ -130,6 +130,21 @@ public class PlayerModel extends CapsuleObstacle {
 
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
+
+	/** Player fall animation filmstrip texture */
+	private Texture fallTexture;
+
+	/** Player fall animation frames */
+	private TextureRegion[][] fallTmpFrames;
+
+	/** Player fall animation frames */
+	private TextureRegion[] fallAnimationFrames;
+
+	/** Player fall animation*/
+	private Animation<TextureRegion> fallAnimation;
+
+	/** Player fall animation elapsed time */
+	private float fallElapsedTime;
 
 	/**
 	 * Returns left/right movement of this character.
@@ -365,9 +380,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * sets the player's platform/ground texture.
 	 * @param texture side view texture
 	 */
-	public void setSideTexture(TextureRegion texture){
-		this.sideTexture = texture;
-	}
+	public void setSideTexture(TextureRegion texture){this.sideTexture = texture;}
 
 	/**
 	 * Sets player walk animation
@@ -375,20 +388,44 @@ public class PlayerModel extends CapsuleObstacle {
 	 * */
 	public void setWalkAnimation(Texture texture) {
 		this.walkTexture = texture;
-		this.walkTmpFrames = TextureRegion.split(walkTexture, 369, 464);
-		this.walkAnimationFrames = new TextureRegion[15];
+		//TODO maybe find a way to do this without constants?
+		this.walkTmpFrames = TextureRegion.split(walkTexture, 252, 352);
+		this.walkAnimationFrames = new TextureRegion[8];
 
 		// PLacing animation frames in order
 		int index = 0;
-		for (int i=0; i<3; i++) {
-			for (int j=0; j<5; j++) {
+		for (int i=0; i<walkTmpFrames.length; i++) {
+			for (int j=0; j<walkTmpFrames[0].length; j++) {
 				this.walkAnimationFrames[index] = walkTmpFrames[i][j];
 				index++;
 			}
 		}
 
 		// Adjust walk speed here
-		this.walkAnimation = new Animation<>(1f/45f, walkAnimationFrames);
+		this.walkAnimation = new Animation<>(1f/12f, walkAnimationFrames);
+	}
+
+	/**
+	 * Sets player falling animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setFallingAnimation(Texture texture) {
+		this.fallTexture = texture;
+		//TODO maybe find a way to do this without constants?
+		this.fallTmpFrames = TextureRegion.split(fallTexture, 252, 352);
+		this.fallAnimationFrames = new TextureRegion[4];
+
+		// PLacing animation frames in order
+		int index = 0;
+		for (int i=0; i<fallTmpFrames.length; i++) {
+			for (int j=0; j<fallTmpFrames[0].length; j++) {
+				this.fallAnimationFrames[index] = fallTmpFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust walk speed here
+		this.fallAnimation = new Animation<>(1f/12f, fallAnimationFrames);
 	}
 
 	/**
@@ -444,7 +481,7 @@ public class PlayerModel extends CapsuleObstacle {
 		maxspeed_down_closed = data.getFloat("maxspeed_down_closed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
-		textureScale = data.getFloat("texturescale", 1.0f);
+		size = data.getFloat("size", 1f);
 		sensorName = "PlayerGroundSensor";
 		lighterForce = data.getFloat("lighter_force");
 		maxLighterFuel = data.getFloat("lighter_fuel");
@@ -627,20 +664,26 @@ public class PlayerModel extends CapsuleObstacle {
 	private void drawAux(GameCanvas canvas, Color tint){
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? -1.0f : 1.0f;
+		TextureRegion t;
 		if (isGrounded() && isMoving()) {
+			fallElapsedTime = 0;
+
 			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
-			canvas.draw((TextureRegion)walkAnimation.getKeyFrame(walkElapsedTime, true), tint, origin.x, origin.y,
+			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
+			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y);
+					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
 		} else {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
 
-			canvas.draw(texture, tint, origin.x, origin.y,
+			fallElapsedTime += Gdx.graphics.getDeltaTime();
+			//TODO put an idle animation here. I just picked a frame that looked like Gale was standing
+			t = isGrounded() ? walkAnimationFrames[2] : fallAnimation.getKeyFrame(fallElapsedTime, true);
+			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * textureScale/32.0f * drawScale.x, textureScale/32.0f * drawScale.y
-			);
+					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
 		}
 	}
 

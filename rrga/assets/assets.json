@@ -16,7 +16,7 @@
         "game:background" : "game/background.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
-          "file":   "game/wind.png",
+          "file":   "game/windgust_waves.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
@@ -35,12 +35,14 @@
             "wrapV": "repeated"
         },
         "game:player": "game/player.png",
-        "game:player_walk_animation": "game/player_walk_filmstrip.png",
-        "game:umbrella_open_animation": "game/umbrella_open_filmstrip.png",
+        "game:player_walk_animation": "game/gale34_filmstrip_walking.png",
+        "game:umbrella_open_animation": "game/umbrella_filmstrip_opening.png",
+        "game:player_falling_animation": "game/gale_filmstrip_falling.png",
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
         "game:goal": "game/goal.png",
+        "game:goal_animation": "game/goal_scarf_filmstrip.png",
         "game:hp_indicator": "game/health_indicator.png",
         "tileset:bushes": "levels/tilesets/bushes.png",
         "tileset:trees": "levels/tilesets/trees.png",

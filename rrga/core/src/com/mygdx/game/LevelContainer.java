@@ -10,14 +10,11 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
-import com.mygdx.game.model.MovingPlatformModel;
+import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
 import com.mygdx.game.model.hazard.LightningHazard;
-import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.model.UmbrellaModel;
-import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
@@ -126,9 +123,17 @@ public class LevelContainer{
      */
     private Texture avatarWalkAnimationTexture;
     /**
+     * Texture asset for avatar falling animation
+     */
+    private Texture avatarFallingAnimationTexture;
+    /**
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
+    /**
+     * Texture asset for goal animation
+     */
+    private Texture goalAnimationTexture;
 
     //font for writing player health. temporary solution until a proper health asset is added
     private BitmapFont avatarHealthFont;
@@ -148,7 +153,7 @@ public class LevelContainer{
     /**
      * Reference to the goalDoor (for collision detection)
      */
-    private BoxObstacle goalDoor;
+    private GoalDoor goalDoor;
 
     /** reference to the JSON parser */
     private LevelParser parser;
@@ -223,7 +228,9 @@ public class LevelContainer{
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
+        avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+        goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
@@ -249,19 +256,14 @@ public class LevelContainer{
         Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
-        goalDoor = new BoxObstacle(goalPos.x, goalPos.y,dwidth, dheight);
-        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goalconst.getFloat("density", 0));
-        goalDoor.setFriction(goalconst.getFloat("friction", 0));
-        goalDoor.setRestitution(goalconst.getFloat("restitution", 0));
-        goalDoor.setSensor(true);
+        goalDoor = new GoalDoor(goalconst, goalPos.x, goalPos.y,dwidth, dheight);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
         // doing so fits the texture onto the specified size of the object
         goalDoor.setTextureScale(
                 dwidth * scale.x/goalTexture.getRegionWidth(),
                 dheight * scale.y/goalTexture.getRegionHeight());
-        goalDoor.setName("goal");
+        goalDoor.setAnimation(goalAnimationTexture);
         addObject(goalDoor);
 
         // Setting Gravity on World
@@ -394,10 +396,8 @@ public class LevelContainer{
         addObject(wall);
 
         // Create player
-        float scl = globalConstants.get("player").getFloat("texturescale");
-        // TODO: (technical) specify player size (model) WITHOUT depending on view (texture)...bad design from lab 4
-        dwidth = avatarSideTexture.getRegionWidth() / 32f * scl;
-        dheight = avatarSideTexture.getRegionHeight() / 32f * scl;
+        dwidth = globalConstants.get("player").getFloat("size");
+        dheight = globalConstants.get("player").getFloat("size");
         avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
@@ -406,25 +406,22 @@ public class LevelContainer{
         // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(hpTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
+        avatar.setFallingAnimation(avatarFallingAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
 
         // Create the umbrella
-        scl = globalConstants.get("umbrella").getFloat("texturescale");
-        // TODO: (technical) specify umbrella size WITHOUT dependency on view
-        dwidth = umbrellaOpenTexture.getRegionWidth() / 32f * scl;
-        dheight = umbrellaOpenTexture.getRegionHeight() / 32f * scl;
-        float[] offset = globalConstants.get("umbrella").get("offset").asFloatArray();
+        dwidth = globalConstants.get("umbrella").getFloat("size");
+        dheight = globalConstants.get("umbrella").getFloat("size");
         umbrella = new UmbrellaModel(
                 globalConstants.get("umbrella"),
-                new Vector2(parser.getPlayerPos().x+offset[0], parser.getPlayerPos().y+offset[1]), dwidth, dheight
+                new Vector2(parser.getPlayerPos().x, parser.getPlayerPos().y), dwidth, dheight
         );
         umbrella.setDrawScale(scale);
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
-        // TODO: (design) maybe default to closed umbrella at initial state
-        umbrella.useOpenedTexture();
+        umbrella.useClosedTexture();
         umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
