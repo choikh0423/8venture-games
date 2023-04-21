@@ -26,7 +26,7 @@ public class UmbrellaModel extends BoxObstacle {
     /** The current angular rotation of the umbrella */
     private float turning;
     /** The size of the umbrella in physics units (up to scaling by shrink factor) */
-    private float size;
+    private float[] size;
     /** Ratio of horizontal speed to conserve when closing the umbrella */
     private float closedMomentum = 0;
 
@@ -81,7 +81,7 @@ public class UmbrellaModel extends BoxObstacle {
         setBodyType(BodyDef.BodyType.StaticBody);
 
         force = data.getFloat("force", 0);
-        size = data.getFloat("size", 1.0f);
+        size = data.get("size").asFloatArray();
         sensorName = "umbrellaSensor";
         this.data = data;
         faceRight = true;
@@ -96,7 +96,7 @@ public class UmbrellaModel extends BoxObstacle {
         }
 
         FixtureDef sensorDef = new FixtureDef();
-        Vector2 sensorCenter = new Vector2(0, 1*getHeight()/8);
+        Vector2 sensorCenter = new Vector2(0, 3*getHeight()/8);
         sensorDef.density = 0;
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
@@ -153,7 +153,7 @@ public class UmbrellaModel extends BoxObstacle {
             t = closeAnimation.getKeyFrame(openElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                    effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -165,7 +165,7 @@ public class UmbrellaModel extends BoxObstacle {
             t = openAnimation.getKeyFrame(openElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                    effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -176,12 +176,12 @@ public class UmbrellaModel extends BoxObstacle {
                 t=openAnimationFrames[openAnimationFrames.length - 1];
                 canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                        effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
             }else {
                 t = openAnimationFrames[0];
                 canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                        effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
             }
         }
         canvas.draw(texture, Color.BLUE,  getX()*drawScale.x,getY()*drawScale.y, 1, 1);

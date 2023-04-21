@@ -68,7 +68,7 @@ public class PlayerModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 	/** The size of the player in physics units (up to scaling by shrink factor) */
-	private float size;
+	private float[] size;
 	/** Player Mass */
 	private float FINAL_MASS = 1.8f;
 	/** Max player hp */
@@ -481,7 +481,7 @@ public class PlayerModel extends CapsuleObstacle {
 		maxspeed_down_closed = data.getFloat("maxspeed_down_closed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
-		size = data.getFloat("size", 1f);
+		size = data.get("size").asFloatArray();
 		sensorName = "PlayerGroundSensor";
 		lighterForce = data.getFloat("lighter_force");
 		maxLighterFuel = data.getFloat("lighter_fuel");
@@ -673,7 +673,7 @@ public class PlayerModel extends CapsuleObstacle {
 			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
 			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+					effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 		} else {
 			// Reset walk animation elapsed time
 			walkElapsedTime = 0f;
@@ -683,7 +683,7 @@ public class PlayerModel extends CapsuleObstacle {
 			t = isGrounded() ? walkAnimationFrames[2] : fallAnimation.getKeyFrame(fallElapsedTime, true);
 			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+					effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 		}
 	}
 

@@ -197,11 +197,6 @@ public class GameplayController implements ContactListener {
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
 
     /**
-     * difference in initial position between umbrella and player
-     */
-    private final Vector2 diff = new Vector2();
-
-    /**
      * center of the screen in canvas coordinates
      */
     private final Vector2 center = new Vector2();
@@ -334,12 +329,8 @@ public class GameplayController implements ContactListener {
         levelContainer.populateLevel();
         goalDoor = levelContainer.getGoalDoor();
 
-        // Calculate Diff for Umbrella Position
         avatar = levelContainer.getAvatar();
         umbrella = levelContainer.getUmbrella();
-
-        diff.x = umbrella.getX()-avatar.getX();
-        diff.y = umbrella.getY()-avatar.getY();
 
         backgroundMusic.stop();
         backgroundMusic.play();
@@ -619,8 +610,6 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + diff.len()* mousePos.x;
-        cache.y = avatar.getY() + diff.len()*mousePos.y;
         umbrella.setPosition(avatar.getX(), avatar.getY());
 
         // Garbage collect the deleted objects.

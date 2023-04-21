@@ -29,7 +29,7 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "size": 0.75,
+    "size": [0.7159,1],
     "maxhealth": 3,
     "drag_x" : 10,
     "drag_y" : 5,
@@ -48,7 +48,7 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "size": 1,
+    "size": [0.97708333, 1.25],
     "closedmomentum": 0.35
   },
   "world": {
