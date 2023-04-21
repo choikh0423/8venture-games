@@ -176,6 +176,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"Object Layer 1",
          "objects":[
                 {
@@ -1198,6 +1199,7 @@
         {
          "draworder":"topdown",
          "id":7,
+         "locked":true,
          "name":"Canvas",
          "objects":[],
          "opacity":1,
@@ -1224,10 +1226,6 @@
         {
          "firstgid":114,
          "source":"tilesets\/trees.json"
-        }, 
-        {
-         "firstgid":258,
-         "source":"objects\/json\/gale_walking.json"
         }],
  "tilewidth":128,
  "type":"map",

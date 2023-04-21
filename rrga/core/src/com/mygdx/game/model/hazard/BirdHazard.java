@@ -357,7 +357,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         else setX(getX() + move.x);
         if (Math.abs(move.y) > Math.abs(deltaY)) setY(pathY);
         else setY(getY() + move.y);
-        setFaceRight(move.x > 0);
+        if (move.x != 0){
+            setFaceRight(move.x > 0);
+        }
         if (Math.abs(deltaX) < .001 && Math.abs(deltaY) < .001){
             // determine next point to move to
             switch (patrol){

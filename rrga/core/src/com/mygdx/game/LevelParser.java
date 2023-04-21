@@ -119,7 +119,8 @@ public class LevelParser {
 
     private static final int LOWER28BITMASK = 0xFFFFFFF;
 
-
+    /** map used to track visited trajectory */
+    private IntIntMap seen = new IntIntMap(16);
 
     /**
      * @return tile texture layers
@@ -336,6 +337,39 @@ public class LevelParser {
     }
 
     /**
+     * processes the trajectory starting from the given node represented by the next point ID.
+     *
+     * Note: this modifies the given path JSON in place.
+     *
+     * @param pathJson the json array to store list of {x:value, y:value}. There should be a point (x,y) in this json
+     *                 already because every object's first point on their path is their initial position.
+     * @param trajectory the map of all path points
+     * @param next the next point on the bird's path (the first point following the bird's position).
+     * @param id the unique ID of the object
+     * @return an index denoting which node the last point loops to. This index will be invalid if there is no loop on path.
+     */
+    private int processPath(JsonValue pathJson, HashMap<Integer,JsonValue> trajectory, int next, int id){
+        // pathJson is already [{x:, y:}]. Hence next point to be added is index 1 on the path of points.
+        int idx = 1;
+        seen.clear();
+        seen.put(id, 0);
+        while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+            seen.put(next, idx);
+            idx++;
+            JsonValue nodeData = trajectory.get(next);
+            // put path point (x,y) into vector cache and perform conversion
+            readPositionAndConvert(nodeData, temp);
+            // add this node to bird's path
+            pathJson.addChild(new JsonValue(temp.x));
+            pathJson.addChild(new JsonValue(temp.y));
+            // get next
+            nodeData = nodeData.get("properties");
+            next = getFromProperties(nodeData, "next_trajectory", pointDefault).asInt();
+        }
+        return seen.get(next, -1);
+    }
+
+    /**
      * red birds face to the right, all others to the left.
      * @param color the color {"red", "blue", "brown", "green"}
      * @return whether the bird asset is facing to the right
@@ -345,7 +379,7 @@ public class LevelParser {
     }
 
     private boolean doesBirdAttack(String color){
-        return color.equals("blue") || color.equals("green") || color.equals("brown");
+        return color.equals("green") || color.equals("brown");
     }
 
     /**
@@ -371,9 +405,7 @@ public class LevelParser {
      */
     private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         birdData = new JsonValue[rawData.size()];
-        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < birdData.length; ii++) {
-            seen.clear();
             // b = raw bird data
             JsonValue b = rawData.get(ii);
             seen.put(b.getInt("id"), 0);
@@ -463,26 +495,9 @@ public class LevelParser {
                 // using custom properties to find rest of path
                 // this takes either the bird's next point along its path or take from default (which should be 0)
                 int next = getFromProperties(properties, "path", defaults).asInt();
-                int idx = 1;
-                while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
-                    seen.put(next, idx);
-                    idx++;
-                    JsonValue nodeData = trajectory.get(next);
-                    // put path point (x,y) into vector cache and perform conversion
-                    readPositionAndConvert(nodeData, temp);
-                    // add this node to bird's path
-                    pathJson.addChild(new JsonValue(temp.x));
-                    pathJson.addChild(new JsonValue(temp.y));
-                    // get next
-                    nodeData = nodeData.get("properties");
-                    next = getFromProperties(nodeData, "next_trajectory", pointDefault).asInt();
-                }
-                if (seen.containsKey(next)){
-                    // -1 if no loop otherwise last node on path points to a node already on path
-                    data.addChild("loopTo", new JsonValue(seen.get(next, -1)));
-                }
+                int loopTo = processPath(pathJson, trajectory, next, b.getInt("id"));
+                data.addChild("loopTo", new JsonValue(loopTo));
             }
-
             if (doesBirdAttack(color)){
                 atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
             }
