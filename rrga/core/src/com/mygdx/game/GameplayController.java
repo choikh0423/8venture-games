@@ -913,4 +913,15 @@ public class GameplayController implements ContactListener {
         failed = true;
         countdown = LOSE_COUNTDOWN_TIMER;
     }
+
+    /** Sets SFX Volume */
+    public void setVolume(float sfxVolume, float musicVolume) {
+        this.SFXVolume = sfxVolume;
+        this.musicVolume = musicVolume;
+    }
+
+    /** Sets Background Volume */
+    public void setBackgroundVolume(float volume) {
+        this.musicVolume = volume;
+    }
 }
