@@ -167,7 +167,7 @@ public class GDXRoot extends Game implements ScreenListener {
 					// TODO: use exit codes to determine level.
 					//  reserve exit codes 1 to 30 for levels.
 
-					// Transferring menu mode information to game modedd
+					// Transferring menu mode information to game mode
 					playing.setLevel(menu.getCurrentLevel());
 					playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
 					playing.setSecondaryControlMode(menu.getControlToggle());
