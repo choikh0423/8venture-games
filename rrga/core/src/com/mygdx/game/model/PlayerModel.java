@@ -577,8 +577,8 @@ public class PlayerModel extends CapsuleObstacle {
 	 * Applies lighter force to the body of this player.
 	 */
 	public void applyLighterForce(float umbAng) {
-		if(lighterFuel > 0) {
-			lighterFuel -= lighterChangeRate;
+		if(lighterFuel == maxLighterFuel) {
+			lighterFuel = 0;
 			float umbrellaX = (float) Math.cos(umbAng);
 			float umbrellaY = (float) Math.sin(umbAng);
 			//determine X
@@ -587,7 +587,7 @@ public class PlayerModel extends CapsuleObstacle {
 				forceCache.x = 0;
 			}
 			else {
-				forceCache.x = umbrellaX * lighterForce / 2;
+				forceCache.x = umbrellaX * lighterForce;
 			}
 			//determine Y
 			if (Math.abs(getVY()) >= getMaxSpeedUp()) {
@@ -596,7 +596,7 @@ public class PlayerModel extends CapsuleObstacle {
 			} else {
 				forceCache.y = umbrellaY * lighterForce;
 			}
-			body.applyForce(forceCache, getPosition(), true);
+			body.applyLinearImpulse(forceCache, getPosition(), true);
 		}
 	}
 

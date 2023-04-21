@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.mygdx.game.model.MovingPlatformModel;
+import com.mygdx.game.model.hazard.NestHazard;
 import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
@@ -69,6 +70,11 @@ public class LevelContainer{
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings;
+
+    /**
+     * The set of all nests currently in the level
+     */
+    private ObjectSet<NestHazard> nests;
 
 
     /**
@@ -171,6 +177,7 @@ public class LevelContainer{
         birds = new ObjectSet<>();
         lightnings = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
+        nests = new ObjectSet<>();
 
         objects = new PooledList<Obstacle>();
         addQueue = new PooledList<Obstacle>();
@@ -240,6 +247,7 @@ public class LevelContainer{
         birds.clear();
         lightnings.clear();
         movingPlats.clear();
+        nests.clear();
     }
 
     /**
@@ -351,7 +359,10 @@ public class LevelContainer{
             birds.add(obj);
         }
 
+        //TODO
         //create nests
+
+
 
 
         //create lightning
@@ -486,6 +497,7 @@ public class LevelContainer{
         addQueue.clear();
         birds.clear();
         lightnings.clear();
+        nests.clear();
 
 
         objects = null;
@@ -495,6 +507,7 @@ public class LevelContainer{
         world = null;
         birds = null;
         lightnings = null;
+        nests = null;
     }
     /**
      * Get world object
@@ -546,6 +559,13 @@ public class LevelContainer{
         return lightnings;
     }
     /**
+     * Get nests
+     * @return nests
+     */
+    public ObjectSet<NestHazard> getNests() {
+        return nests;
+    }
+    /**
      * Get moving platforms
      * @return movingPlats
      */
@@ -587,5 +607,7 @@ public class LevelContainer{
     public void setLightnings(ObjectSet<LightningHazard> lightningsObj) {
         lightnings = lightningsObj;
     }
+
+
 
 }

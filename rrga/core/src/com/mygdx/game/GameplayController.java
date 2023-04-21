@@ -10,10 +10,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
 import com.mygdx.game.model.MovingPlatformModel;
-import com.mygdx.game.model.hazard.BirdHazard;
-import com.mygdx.game.model.hazard.BirdRayCastCallback;
-import com.mygdx.game.model.hazard.HazardModel;
-import com.mygdx.game.model.hazard.LightningHazard;
+import com.mygdx.game.model.hazard.*;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.model.UmbrellaModel;
 import com.mygdx.game.model.WindModel;
@@ -174,6 +171,11 @@ public class GameplayController implements ContactListener {
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
+
+    /**
+     * The set of all nests currently in the level
+     */
+    private ObjectSet<NestHazard> nests = new ObjectSet<>();
 
     /**
      * The set of all moving platforms currently in the level
@@ -360,10 +362,12 @@ public class GameplayController implements ContactListener {
      */
     public void update(InputController input, float dt) {
         // Get objects from level container
+        //TODO: Is this a 1 time thing??
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
         this.lightnings = levelContainer.getLightnings();
+        this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
         this.movingPlats = levelContainer.getMovingPlats();
@@ -567,15 +571,15 @@ public class GameplayController implements ContactListener {
 
             //send out rays and check for collisions with player
             if(bird.getAttack()) {
-                float x = bird.getX();
-                float y = bird.getY();
+                float bx = bird.getX();
+                float by = bird.getY();
                 // load position into cache
-                pos.set(x, y);
+                pos.set(bx, by);
                 for (int i = 0; i < birdRays; i++) {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    target.set(x, y + bird.getSensorRadius()).rotateAroundDeg(pos, 360f / birdRays * i);
+                    target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f / birdRays * i);
                     world.rayCast(rccb, pos, target);
                     for(ObjectMap.Entry<Fixture, Float> e: rccb.collisions.entries()){
                         if(e.value < minDist){
@@ -601,6 +605,16 @@ public class GameplayController implements ContactListener {
         //update the lightnings
         for (LightningHazard light : lightnings) {
             light.strike();
+        }
+
+        //update nests
+        for(NestHazard n: nests){
+            BirdHazard b = n.update();
+            if(b != null){
+                objects.add(b);
+                b.activatePhysics(world);
+                birds.add(b);
+            }
         }
     }
 
@@ -784,6 +798,31 @@ public class GameplayController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+
+        Body body1 = fix1.getBody();
+        Body body2 = fix2.getBody();
+
+        Object fd1 = fix1.getUserData();
+        Object fd2 = fix2.getUserData();
+
+        try {
+            Obstacle bd1 = (Obstacle) body1.getUserData();
+            Obstacle bd2 = (Obstacle) body2.getUserData();
+
+            if (umbrella == bd2  || umbrella == bd1) {
+                contact.setEnabled(false);
+            }
+
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !(bd1 instanceof StaticHazard)) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !(bd2 instanceof StaticHazard))))) {
+                contact.setEnabled(false);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

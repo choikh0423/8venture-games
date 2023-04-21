@@ -287,7 +287,7 @@ public class InputController {
         zoomPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
 
         // W for using the lighter
-        lighter = Gdx.input.isKeyPressed(Input.Keys.W);
+        lighter = Gdx.input.isKeyJustPressed(Input.Keys.W);
     }
 
     /**

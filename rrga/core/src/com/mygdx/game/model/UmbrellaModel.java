@@ -76,8 +76,8 @@ public class UmbrellaModel extends BoxObstacle {
         setFixedRotation(false);
         //if we don't do this, the umbrella doesn't stay in position
         setGravityScale(0);
-        //makes sure the umbrella doesn't collide with platforms
-        setSensor(true);
+        //makes sure the umbrella doesn't collide with platforms. Handled in gamplaycontroller presolve
+        //setSensor(true);
         setBodyType(BodyDef.BodyType.StaticBody);
 
         force = data.getFloat("force", 0);

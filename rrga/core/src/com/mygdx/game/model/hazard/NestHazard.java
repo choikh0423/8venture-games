@@ -1,16 +1,17 @@
 package com.mygdx.game.model.hazard;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import org.w3c.dom.Text;
-import sun.util.resources.cldr.ext.TimeZoneNames_en_ZA;
+import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.utility.obstacle.SimpleObstacle;
 
-public class NestHazard {
-    private int x;
-    private int y;
-    private Vector2 birdDir;
+public class NestHazard extends PolygonObstacle {
+    private float[] path;
     private float birdSpeed;
     private final int spawnDelay;
     private int countdown;
@@ -19,17 +20,10 @@ public class NestHazard {
     private final Vector2 scale;
     private final Texture birdTex;
 
-    public int getX() {
-        return x;
-    }
-    public int getY() {
-        return y;
-    }
+    public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
+        super(points, x, y);
 
-    public NestHazard(int x, int y, Vector2 dir, float spd, int delay, int dam, float kb, Vector2 scl, Texture tex){
-        this.x = x;
-        this.y = y;
-        birdDir = dir.nor();
+        this.path = path;
         birdSpeed = spd;
         spawnDelay = delay;
         countdown = spawnDelay;
@@ -37,7 +31,7 @@ public class NestHazard {
         birdDamage = dam;
         birdKnockback = kb;
         scale = scl;
-        birdTex = tex;
+        this.birdTex = birdTex;
     }
 
     public BirdHazard update(){
@@ -54,24 +48,26 @@ public class NestHazard {
             //filmstripheight
             //aabb
             //points
-            JsonValue path = new JsonValue(JsonValue.ValueType.array);
-            float dirX = birdDir.x*Integer.MAX_VALUE;
-            float dirY = birdDir.y*Integer.MAX_VALUE;
-            path.addChild(new JsonValue(dirX));
-            path.addChild(new JsonValue(dirY));
-            data.addChild("points", path);
+            JsonValue p = new JsonValue(JsonValue.ValueType.array);
+            for(int i=0; i<path.length; i++) {
+                p.addChild(new JsonValue(path[i]));
+            }
+            data.addChild("path", p);
             data.addChild("loop", new JsonValue(false));
             data.addChild("movespeed", new JsonValue(birdSpeed));
             data.addChild("atkspeed", new JsonValue(0));
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(birdTex);
-
-            return null;
+            return obj;
         }
         else{
             countdown--;
             return null;
         }
+    }
+
+    public void draw(GameCanvas canvas){
+        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
     }
 }
