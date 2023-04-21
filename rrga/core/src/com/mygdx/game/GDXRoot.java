@@ -166,7 +166,11 @@ public class GDXRoot extends Game implements ScreenListener {
 					playing.setCanvas(canvas);
 					// TODO: use exit codes to determine level.
 					//  reserve exit codes 1 to 30 for levels.
-					playing.setLevel(1);
+
+					// Transferring menu mode information to game modedd
+					playing.setLevel(menu.getCurrentLevel());
+					playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
+					playing.setSecondaryControlMode(menu.getControlToggle());
 					playing.reset();
 					setScreen(playing);
 					break;
