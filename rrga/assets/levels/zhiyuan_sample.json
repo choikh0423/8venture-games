@@ -389,7 +389,7 @@
                  "y":1216.50506457185
                 }, 
                 {
-                 "gid":262,
+                 "gid":263,
                  "height":250.811884346789,
                  "id":95,
                  "template":"templates\/blue_bird.json",
@@ -427,7 +427,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":96,
+ "nextobjectid":97,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -450,7 +450,7 @@
          "source":"tilesets\/objs.json"
         }, 
         {
-         "firstgid":262,
+         "firstgid":263,
          "source":"objects\/blue_bird_tile.json"
         }],
  "tilewidth":128,

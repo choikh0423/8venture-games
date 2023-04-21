@@ -3,7 +3,7 @@
      "gid":1,
      "height":232,
      "id":101,
-     "name":"",
+     "name":"blue_bird",
      "properties":[
             {
              "name":"atk_speed",
@@ -11,7 +11,7 @@
              "value":20
             }],
      "rotation":0,
-     "type":"",
+     "type":"bird",
      "visible":true,
      "width":232
     },
