@@ -84,7 +84,7 @@ public class UmbrellaModel extends BoxObstacle {
     float boostElapsedTime;
 
     private boolean isBoosting;
-    private int BOOST_ANIMATION_FRAMECOUNT = 40;
+    private int BOOST_ANIMATION_FRAMECOUNT = 22;
 
 
     public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
@@ -295,7 +295,7 @@ public class UmbrellaModel extends BoxObstacle {
             }
         }
 
-        this.boostAnimation = new Animation<>(1f/10f, boostAnimationFrames);
+        this.boostAnimation = new Animation<>(1f/18f, boostAnimationFrames);
         boostAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 
