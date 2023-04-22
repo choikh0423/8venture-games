@@ -485,7 +485,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             TextureRegion warningRegion = warningAnimation.getKeyFrame(warningElapsedTime, true);
 
             int flip = faceRight ? 1 : -1;
-            float eye = color == "blue" ? 7.5f : 6f;
+            float eye = color == BirdColor.BLUE ? 7.5f : 6f;
             canvas.draw(warningRegion, Color.WHITE, warningRegion.getRegionWidth()/2f, warningRegion.getRegionHeight()/2f,
                     (getX()) * drawScale.x + flip*birdRegion.getRegionWidth()/eye, (getY()) * drawScale.y, getAngle(),
                     dimensions.x/textureAABB.x * drawScale.x, dimensions.y/textureAABB.y * drawScale.y);
@@ -507,11 +507,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             }
         }
 
-        /*
+
         if (attack) {
-            //canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
+            CircleShape sensorShape = new CircleShape();
+            sensorShape.setRadius(sensorRadius);
+            canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), drawScale.x, drawScale.y);
             //CAN CRASH THE GAME
             //JUST FOR VISUALIZATION
+            /*
             Vector2 targ = new Vector2();
             Vector2 third = new Vector2();
             Vector2 pos = new Vector2();
@@ -525,9 +528,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
                 line.set(new Vector2[]{pos, targ, third});
                 canvas.drawPhysics(line, Color.RED, 0, 0, 0, drawScale.x, drawScale.y);
             }
+            */
         }
-        */
-
     }
 
     /**

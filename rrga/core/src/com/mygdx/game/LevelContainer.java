@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.mygdx.game.model.*;
+import com.mygdx.game.model.hazard.NestHazard;
 import com.mygdx.game.model.hazard.StaticHazard;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.model.hazard.BirdHazard;
@@ -141,6 +142,7 @@ public class LevelContainer{
      */
     private Texture warningTexture;
 
+    /**
      * Texture asset for goal animation
      */
     private Texture goalAnimationTexture;
