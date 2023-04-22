@@ -1,29 +1,29 @@
 { "object":
     {
-     "gid":2147483651,
-     "height":229,
-     "id":99,
-     "name":"red_bird",
+     "gid":1,
+     "height":142.088965253914,
+     "id":124,
+     "name":"cloud0",
      "properties":[
             {
              "name":"move_speed",
              "type":"float",
-             "value":4
+             "value":1
             }, 
             {
              "name":"path",
              "type":"object",
-             "value":71
+             "value":0
             }],
      "rotation":0,
-     "type":"bird",
+     "type":"cloud",
      "visible":true,
-     "width":237
+     "width":568.355861015654
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/objects\/red_bird_tile.json"
+     "source":"..\/..\/objects\/json\/clouds.json"
     },
  "type":"template"
 }

@@ -1,0 +1,15 @@
+{ "columns":4,
+ "image":"..\/asset\/gale34_filmstrip_walking.png",
+ "imageheight":704,
+ "imagewidth":1008,
+ "margin":0,
+ "name":"gale_walking",
+ "objectalignment":"center",
+ "spacing":0,
+ "tilecount":8,
+ "tiledversion":"1.10.0",
+ "tileheight":352,
+ "tilewidth":252,
+ "type":"tileset",
+ "version":"1.10"
+}

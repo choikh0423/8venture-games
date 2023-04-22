@@ -1,18 +1,18 @@
 { "object":
     {
-     "gid":3,
-     "height":176,
-     "id":20,
+     "gid":1,
+     "height":128,
+     "id":142,
      "name":"spawn",
      "rotation":0,
      "type":"spawn",
      "visible":true,
-     "width":82
+     "width":91.64
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/tilesets\/objs.json"
+     "source":"..\/objects\/json\/gale_walking.json"
     },
  "type":"template"
 }

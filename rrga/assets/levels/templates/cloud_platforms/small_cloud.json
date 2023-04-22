@@ -1,19 +1,14 @@
 { "object":
     {
-     "gid":1,
-     "height":375,
-     "id":115,
-     "name":"brown_bird",
+     "gid":3,
+     "height":130.052765952597,
+     "id":126,
+     "name":"cloud2",
      "properties":[
-            {
-             "name":"atk_speed",
-             "type":"float",
-             "value":20
-            },
             {
              "name":"move_speed",
              "type":"float",
-             "value":20
+             "value":2
             }, 
             {
              "name":"path",
@@ -21,14 +16,14 @@
              "value":0
             }],
      "rotation":0,
-     "type":"bird",
+     "type":"cloud",
      "visible":true,
-     "width":231
+     "width":245.451699121802
     },
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/objects\/brown_bird_tile.json"
+     "source":"..\/..\/objects\/json\/clouds.json"
     },
  "type":"template"
 }
