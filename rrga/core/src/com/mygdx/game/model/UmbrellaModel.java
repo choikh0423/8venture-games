@@ -290,7 +290,7 @@ public class UmbrellaModel extends BoxObstacle {
             }
         }
 
-        this.boostAnimation = new Animation<>(1f/20f, boostAnimationFrames);
+        this.boostAnimation = new Animation<>(1f/10f, boostAnimationFrames);
         boostAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 
