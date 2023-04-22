@@ -3,6 +3,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -573,8 +574,10 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
-                    || bird.getAABBx() + bird.getWidth() < 0 || bird.getAABBy() - bird.getHeight() > bounds.height) {
+            if(bird.getAABBx() + bird.getX() > bounds.width
+                    || bird.getAABBy() + bird.getY() < 0
+                    || bird.getAABBx() + bird.getWidth() + + bird.getX() < 0
+                    || bird.getAABBy() - bird.getHeight() + bird.getY() > bounds.height) {
                 //IS THIS SUFFICIENT FOR DELETION?
                 objects.remove(bird);
                 birds.remove(bird);
@@ -618,7 +621,7 @@ public class GameplayController implements ContactListener {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / birdRays);
+                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/16) + (float) (Math.PI/8) * i / birdRays);
                     //DEPRECIATED
                     // target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f * i / birdRays);
                     world.rayCast(rccb, pos, target);

@@ -512,8 +512,32 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             float x = getX();
             float y = getY();
             pos.set(x, y);
-            for (int i = 0; i < 60; i++) {
-                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 60f * i);;
+
+            //need px. py
+            temp.set(0, 0);
+            temp.sub(x, y);
+            temp.nor();
+            float angle;
+
+            //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+            if (temp.x == 0) {
+                angle =  (temp.y > 0) ? (float) Math.PI/2 : (temp. y == 0) ? 0 : 3 * (float) Math.PI/2;
+            }
+            else if (temp.y == 0){
+                angle = (temp.x >= 0) ? 0 : (float) Math.PI;
+            }
+            else {
+                angle = (float) Math.atan(temp.y / temp.x);
+                if (temp.x < 0 && temp.y < 0) // quadrant Ⅲ
+                    angle += Math.PI;
+                else if (temp.x < 0) // quadrant Ⅱ
+                    angle += Math.PI;
+                else if (temp.y < 0) // quadrant Ⅳ
+                    angle += 2*Math.PI;
+            }
+
+            for (int i = 0; i < 5; i++) {
+                targ.set(x + getSensorRadius(), y).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / 5);
                 third.set(targ).add(.01f, .01f);;
                 PolygonShape line = new PolygonShape();
                 line.set(new Vector2[]{pos, targ, third});
