@@ -80,8 +80,11 @@ public class UmbrellaModel extends BoxObstacle {
     /** Umbrella boost animation*/
     private Animation<TextureRegion> boostAnimation;
 
+    /** Umbrella boost animation elapsed time */
+    float boostElapsedTime;
+
     private boolean isBoosting;
-    private int BOOST_ANIMATION_FRAMECOUNT = 18;
+    private int BOOST_ANIMATION_FRAMECOUNT = 40;
 
 
     public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
@@ -209,13 +212,15 @@ public class UmbrellaModel extends BoxObstacle {
         }
         //boosting
         else{
-            openElapsedTime += Gdx.graphics.getDeltaTime();
-            t = boostAnimation.getKeyFrame(openElapsedTime, false);
+            boostElapsedTime += Gdx.graphics.getDeltaTime();
+            System.out.println(boostElapsedTime);
+            t = boostAnimation.getKeyFrame(boostElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),
                     effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
             if (currentFrameCount == 0) {
                 isBoosting = false;
+                boostElapsedTime = 0;
             }
         }
     }
