@@ -25,4 +25,8 @@ public interface HazardModel {
      */
     Vector2 getKnockBackForce();
 
+    /**
+     * Set the vector of the knock-back force in the x and y direction
+     */
+    void setKnockBackForce(Vector2 in);
 }

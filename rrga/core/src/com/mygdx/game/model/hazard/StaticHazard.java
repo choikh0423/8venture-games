@@ -13,7 +13,6 @@ public class StaticHazard extends PolygonHazard{
 
     public StaticHazard(JsonValue data) {
         super(data, STATIC_DAMAGE, STATIC_KNOCKBACK);
-        setKnockBackForce(new Vector2(0, 1));
     }
 
 }

@@ -62,11 +62,6 @@ public class LightningHazard extends PolygonHazard {
 
     }
 
-    @Override
-    public Vector2 getKnockBackForce() {
-        return new Vector2(0,1);
-    }
-
     public void draw(GameCanvas canvas) {
         if(isActive()) {
             canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
