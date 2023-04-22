@@ -613,7 +613,7 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Applies lighter force to the body of this player.
 	 */
-	public void applyLighterForce(float umbAng) {
+	public boolean applyLighterForce(float umbAng) {
 		if(lighterFuel == maxLighterFuel) {
 			lighterFuel = 0;
 			float umbrellaX = (float) Math.cos(umbAng);
@@ -654,7 +654,9 @@ public class PlayerModel extends CapsuleObstacle {
 				}
 				body.setLinearVelocity(forceCache);
 			}
+			return true;
 		}
+		return false;
 	}
 
 	public void refillLighter(){

@@ -66,6 +66,23 @@ public class UmbrellaModel extends BoxObstacle {
      *  NOTE: This needs to change if animation frame duration changes */
     private int OPEN_ANIMATION_FRAMECOUNT = 18;
 
+    //Boost animation
+
+    /** Umbrella boost film texture */
+    private Texture boostAnimationTexture;
+
+    /** Umbrella boost animation frames */
+    private TextureRegion[][] boostTmpFrames;
+
+    /** Umbrella boost animation frames */
+    private TextureRegion[] boostAnimationFrames;
+
+    /** Umbrella boost animation*/
+    private Animation<TextureRegion> boostAnimation;
+
+    private boolean isBoosting;
+    private int BOOST_ANIMATION_FRAMECOUNT = 18;
+
 
     public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
         super(	pos.x, pos.y,
@@ -87,6 +104,7 @@ public class UmbrellaModel extends BoxObstacle {
         faceRight = true;
         setName("umbrella");
         open = false;
+        isBoosting = false;
     }
 
     public boolean activatePhysics(World world) {
@@ -147,45 +165,59 @@ public class UmbrellaModel extends BoxObstacle {
         float effect = faceRight ? 1.0f : -1.0f;
         //canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
         TextureRegion t;
-        if (openMode == -1) {
-            // Playing umbrella close animation
-            openElapsedTime += Gdx.graphics.getDeltaTime();
-            t = closeAnimation.getKeyFrame(openElapsedTime, false);
-            canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
-
-            // Reset to default openMode
-            if (currentFrameCount == 0) {
-                openMode = 0;
-            }
-        } else if (openMode == 1) {
-            // Playing umbrella open animation
-            openElapsedTime += Gdx.graphics.getDeltaTime();
-            t = openAnimation.getKeyFrame(openElapsedTime, false);
-            canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
-
-            // Reset to default openMode
-            if (currentFrameCount == 0) {
-                openMode = 0;
-            }
-        } else if (openMode == 0) {
-            if (texture == openTexture){
-                t=openAnimationFrames[openAnimationFrames.length - 1];
-                canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+        //not boosting
+        if(!isBoosting) {
+            if (openMode == -1) {
+                // Playing umbrella close animation
+                openElapsedTime += Gdx.graphics.getDeltaTime();
+                t = closeAnimation.getKeyFrame(openElapsedTime, false);
+                canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
-            }else {
-                t = openAnimationFrames[0];
-                canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+                        effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
+
+                // Reset to default openMode
+                if (currentFrameCount == 0) {
+                    openMode = 0;
+                }
+            } else if (openMode == 1) {
+                // Playing umbrella open animation
+                openElapsedTime += Gdx.graphics.getDeltaTime();
+                t = openAnimation.getKeyFrame(openElapsedTime, false);
+                canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                        effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
+
+                // Reset to default openMode
+                if (currentFrameCount == 0) {
+                    openMode = 0;
+                }
+            } else if (openMode == 0) {
+                if (texture == openTexture) {
+                    t = openAnimationFrames[openAnimationFrames.length - 1];
+                    canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+                            getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                            effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
+                } else {
+                    t = openAnimationFrames[0];
+                    canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+                            getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                            effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
+                }
+            }
+            canvas.draw(texture, Color.BLUE, getX() * drawScale.x, getY() * drawScale.y, 1, 1);
+            canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+        }
+        //boosting
+        else{
+            openElapsedTime += Gdx.graphics.getDeltaTime();
+            t = boostAnimation.getKeyFrame(openElapsedTime, false);
+            canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                    effect * size / t.getRegionWidth() * drawScale.x, size / t.getRegionHeight() * drawScale.y);
+            if (currentFrameCount == 0) {
+                isBoosting = false;
             }
         }
-        canvas.draw(texture, Color.BLUE,  getX()*drawScale.x,getY()*drawScale.y, 1, 1);
-        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
     }
 
     /**
@@ -241,6 +273,28 @@ public class UmbrellaModel extends BoxObstacle {
     }
 
     /**
+     * Sets umbrella boost animation
+     * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+     * */
+    public void setBoostAnimation(Texture texture) {
+        this.boostAnimationTexture = texture;
+        this.boostTmpFrames = TextureRegion.split(boostAnimationTexture, boostAnimationTexture.getWidth()/6, boostAnimationTexture.getHeight() );
+        this.boostAnimationFrames = new TextureRegion[6];
+
+        // Setting animation frames
+        int index = 0;
+        for (int i=0; i<1; i++) {
+            for (int j=0; j<6; j++) {
+                this.boostAnimationFrames[index] = boostTmpFrames[i][j];
+                index++;
+            }
+        }
+
+        this.boostAnimation = new Animation<>(1f/20f, boostAnimationFrames);
+        boostAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+    }
+
+    /**
      * sets the texture to be opened umbrella for drawing purposes.
      *
      * No update occurs if the current texture is already the opened texture.
@@ -266,5 +320,10 @@ public class UmbrellaModel extends BoxObstacle {
             openMode = -1;
             openElapsedTime = 0;
         }
+    }
+
+    public void startBoost(){
+        currentFrameCount = BOOST_ANIMATION_FRAMECOUNT;
+        isBoosting = true;
     }
 }

@@ -142,6 +142,11 @@ public class LevelContainer{
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
+
+    /**
+     * Texture asset for umbrella boost animation
+     */
+    private Texture umbrellaBoostAnimationTexture;
     /**
 
      * Texture asset for a bird warning
@@ -251,6 +256,7 @@ public class LevelContainer{
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
         avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+        umbrellaBoostAnimationTexture =  directory.getEntry("game:umbrella_dodge_animation", Texture.class);
         goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
 
         // Fonts
@@ -463,6 +469,7 @@ public class LevelContainer{
         umbrella.setClosedTexture(umbrellaClosedTexture);
         umbrella.useClosedTexture();
         umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
+        umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
     }
