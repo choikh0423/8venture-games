@@ -53,7 +53,11 @@
         "tileset:cliffs": "levels/tilesets/cliffs.png",
         "tileset:bushes_flipped": "levels/tilesets/bushes_flipped.png",
         "tileset:trees_flipped": "levels/tilesets/trees_flipped.png",
-        "tileset:cliffs_flipped": "levels/tilesets/cliffs_flipped.png"
+        "tileset:cliffs_flipped": "levels/tilesets/cliffs_flipped.png",
+        "platform:cloud0": "levels/objects/asset/clouds/obj_cloud_0.png",
+        "platform:cloud1": "levels/objects/asset/clouds/obj_cloud_1.png",
+        "platform:cloud2": "levels/objects/asset/clouds/obj_cloud_2.png",
+        "platform:cloud3": "levels/objects/asset/clouds/obj_cloud_3.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -66,15 +70,19 @@
         "lightning:template": "levels/templates/lightning.json",
         "platform:template": "levels/templates/platform.json",
         "static_hazard:template": "levels/templates/static_hazard.json",
+        "cloud0:template": "levels/templates/cloud_platforms/large_cloud.json",
+        "cloud1:template": "levels/templates/cloud_platforms/medium_cloud.json",
+        "cloud2:template": "levels/templates/cloud_platforms/small_cloud.json",
+        "cloud3:template": "levels/templates/cloud_platforms/smaller_cloud.json",
         "wind:template": "levels/templates/wind.json",
-        "moving_platform:template": "levels/templates/moving_platform.json",
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json",
         "red_bird:tiles": "levels/objects/json/red_bird_tile.json",
         "blue_bird:tiles": "levels/objects/json/blue_bird_tile.json",
         "green_bird:tiles": "levels/objects/json/green_bird_tile.json",
-        "brown_bird:tiles": "levels/objects/json/brown_bird_tile.json"
+        "brown_bird:tiles": "levels/objects/json/brown_bird_tile.json",
+        "cloud:tiles": "levels/objects/json/clouds.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"

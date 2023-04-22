@@ -72,12 +72,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
      */
     private int currentPathIndex;
 
-    /**
-     * If loop is true, bird will go from last point in path to first.
-     * If loop is false, bird will turn around after last point and reverse its path
-     */
-    private final boolean loop = false;
-
     /** if valid, this is the path index that follows the very last path point. */
     private int loopTo;
 
@@ -116,15 +110,10 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final float knockBack;
 
-    /** the dimensions of filmstrip AABB.
-     * Together with this object's AABB dimensions, this gives a texture scale ratio.
-     */
-    private final Vector2 textureAABB = new Vector2();
-
-    /** the dimensions of object's AABB */
+    /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
 
-    /** the top left corner coordinate of object AABB */
+    /** the top left corner coordinate of object AABB (coordinate is relative to entity) */
     private final Vector2 boxCoordinate = new Vector2();
 
     /** the dimensions of a single animation frame */
@@ -263,10 +252,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         float[] aabb = data.get("AABB").asFloatArray();
         boxCoordinate.x = aabb[0];
         boxCoordinate.y = aabb[1];
-        textureAABB.x = aabb[2];
-        textureAABB.y = aabb[3];
-        dimensions.x = textureAABB.x * aabb[4];
-        dimensions.y = textureAABB.y * aabb[5];
+        dimensions.x = aabb[2];
+        dimensions.y = aabb[3];
         filmStripSize.x = data.getInt("filmStripWidth");
         filmStripSize.y = data.getInt("filmStripHeight");
 
@@ -432,8 +419,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
         canvas.draw(region, Color.WHITE, region.getRegionWidth()/2f, region.getRegionHeight()/2f,
                 (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
-                effect * dimensions.x/textureAABB.x * drawScale.x,
-                dimensions.y/textureAABB.y * drawScale.y);
+                effect * dimensions.x/region.getRegionWidth() * drawScale.x,
+                dimensions.y/region.getRegionHeight() * drawScale.y);
     }
 
     /**

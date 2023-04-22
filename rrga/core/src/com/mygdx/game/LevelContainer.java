@@ -60,7 +60,7 @@ public class LevelContainer{
     /**
      * The set of all moving platforms currently in the level
      */
-    private ObjectSet<MovingPlatformModel> movingPlats;
+    private final ObjectSet<MovingPlatformModel> movingPlats;
 
     /**
      * The set of all lightning currently in the level
@@ -72,6 +72,12 @@ public class LevelContainer{
      * The texture for walls and platforms
      */
     protected TextureRegion platformTile;
+
+    /**
+     * The textures for movable cloud platforms
+     */
+    private TextureRegion[] cloudPlatformTextures;
+
     /**
      * Texture asset for character front avatar
      */
@@ -234,6 +240,14 @@ public class LevelContainer{
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
+
+        // Movable Platforms (clouds)
+        cloudPlatformTextures = new TextureRegion[]{
+                new TextureRegion(directory.getEntry("platform:cloud0", Texture.class)),
+                new TextureRegion(directory.getEntry("platform:cloud1", Texture.class)),
+                new TextureRegion(directory.getEntry("platform:cloud2", Texture.class)),
+                new TextureRegion(directory.getEntry("platform:cloud3", Texture.class))
+        };
     }
     /**
      * Resets the level container (emptying the container)
@@ -287,18 +301,20 @@ public class LevelContainer{
             addObject(obj);
         }
 
-        String mpname = "movingplatform";
+        String mpname = "moving_platform";
         JsonValue[] mPlats = parser.getMovingPlatformData();
         for (int ii = 0; ii < mPlats.length; ii++) {
             cur = mPlats[ii];
-            MovingPlatformModel obj = new MovingPlatformModel(cur, cur.get("points").asFloatArray(), cur.getFloat("x"), cur.getFloat("y"));
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
+            MovingPlatformModel obj = new MovingPlatformModel( cur, cur.get("points").asFloatArray(),
+                    cur.getFloat("x"), cur.getFloat("y")
+            );
+            obj.setBodyType(BodyDef.BodyType.KinematicBody);
+
             obj.setDensity(defaults.getFloat("density", 0.0f));
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
-            //temporary texture - might have to get this from parsing
-            obj.setTexture(lightningTexture);
+            obj.setTexture(cloudPlatformTextures[cur.getInt("tileIndex")]);
             obj.setName(mpname + ii);
             addObject(obj);
             movingPlats.add(obj);
