@@ -51,6 +51,11 @@ public class LevelParser {
      */
     private JsonValue[] movingPlatformData;
 
+    /** list of nest json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue[] nestData;
+
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
@@ -106,6 +111,11 @@ public class LevelParser {
 
     /** the default JSON polygon of a moving platform object */
     private final JsonValue movingPlatformDefaultPoly;
+    /** the default JSON properties of a nest object */
+    private final JsonValue nestDefault;
+
+    /** the default JSON polygon of a nest object */
+    private final JsonValue nestDefaultPoly;
 
     /** the default direction of a wind object */
     private final float windDirDefault = 0;
@@ -133,6 +143,13 @@ public class LevelParser {
      */
     public JsonValue[] getBirdData() {
         return birdData;
+    }
+
+    /**
+     * @return processed nest data that is ready for consumption
+     */
+    public JsonValue[] getNestData(){
+        return nestData;
     }
 
     /**
@@ -191,6 +208,7 @@ public class LevelParser {
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
         JsonValue movingPlatformTemplate = directory.getEntry("moving_platform:template", JsonValue.class);
+        JsonValue nestTemplate = directory.getEntry("nest:template", JsonValue.class);
 
         redBirdDefaults = redBirdTemplate.get("object");
         blueBirdDefaults = blueBirdTemplate.get("object");
@@ -205,6 +223,8 @@ public class LevelParser {
         windDefaultPoly = windTemplate.get("object").get("polygon");
         movingPlatformDefault = movingPlatformTemplate.get("object").get("properties");
         movingPlatformDefaultPoly = movingPlatformTemplate.get("object").get("polygon");
+        nestDefault = nestTemplate.get("object").get("properties");
+        nestDefaultPoly = nestTemplate.get("object").get("polygon");
 
         // save tileset textures and their corresponding JSON tileset data
         textureMap = new HashMap<>();
@@ -269,6 +289,7 @@ public class LevelParser {
         HashMap<Integer, JsonValue> windDirs = new HashMap<>();
         ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
         ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
+        ArrayList<JsonValue> nestRawData = new ArrayList<>();
 
         JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together)
@@ -277,7 +298,7 @@ public class LevelParser {
         for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, movingPlatRawData, staticHazardRawData);
+                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, movingPlatRawData, staticHazardRawData, nestRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -294,6 +315,7 @@ public class LevelParser {
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
         processMovingPlats(movingPlatRawData, trajectory);
+        processNests(nestRawData, trajectory);
     }
 
     /**
@@ -306,7 +328,8 @@ public class LevelParser {
                                   ArrayList<JsonValue> windRawData,
                                   HashMap<Integer, JsonValue> windDirs,
                                   ArrayList<JsonValue> movingPlatRawData,
-                                  ArrayList<JsonValue> staticHazardRawData)
+                                  ArrayList<JsonValue> staticHazardRawData,
+                                  ArrayList<JsonValue> nestRawData)
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
@@ -331,6 +354,8 @@ public class LevelParser {
                 windDirs.put(obj.getInt("id"), obj);
             } else if (template.contains("moving_platform.json")){
                 movingPlatRawData.add(obj);
+            } else if (template.contains("nest.json")){
+                nestRawData.add(obj);
             }
         }
     }
@@ -566,7 +591,9 @@ public class LevelParser {
 
     private void processMovingPlats(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         movingPlatformData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < movingPlatformData.length; ii++) {
+            seen.clear();
             //data we pass in to platform constructor
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //moving platform raw data
@@ -586,13 +613,13 @@ public class LevelParser {
             // update properties
             loop = getFromProperties(props, "loop", movingPlatformDefault).asBoolean();
             moveSpeed = getFromProperties(props, "move_speed", movingPlatformDefault).asFloat();
-            // using custom properties to find rest of path
-            HashSet<Integer> seen = new HashSet<>();
             // this takes either the platform's next point along its path or take from default (which should be 0)
             JsonValue jsonId = getFromProperties(props, "path", movingPlatformDefault);
             int next = jsonId.asInt();
-            while (next != 0 && !seen.contains(next) && trajectory.get(next) != null) {
-                seen.add(next);
+            int idx = 1;
+            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                seen.put(next, idx);
+                idx++;
                 JsonValue nodeData = trajectory.get(next);
                 // put path point (x,y) into vector cache and perform conversion
                 readPositionAndConvert(nodeData, temp);
@@ -611,6 +638,53 @@ public class LevelParser {
             movingPlatformData[ii] = data;
         }
     }
+
+    private void processNests(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+        nestData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
+        for (int ii = 0; ii < nestData.length; ii++) {
+            seen.clear();
+            //data we pass in to nest constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //nest raw data
+            JsonValue n = rawData.get(ii);
+            JsonValue props = n.get("properties");
+
+            // set position data
+            readPositionAndConvert(n, temp);
+            addPosition(data, temp);
+
+            // the resulting path should be stored as a list of floats which is Json array of Json floats.
+            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+            // implicitly, the platform's location is the FIRST point on its path.
+            pathJson.addChild(new JsonValue(temp.x));
+            pathJson.addChild(new JsonValue(temp.y));
+
+            // this takes either the platform's next point along its path or take from default (which should be 0)
+            JsonValue jsonId = getFromProperties(props, "path", movingPlatformDefault);
+            int next = jsonId.asInt();
+            int idx = 1;
+            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                seen.put(next, idx);
+                idx++;
+                JsonValue nodeData = trajectory.get(next);
+                // put path point (x,y) into vector cache and perform conversion
+                readPositionAndConvert(nodeData, temp);
+                // add this node to bird's path
+                pathJson.addChild(new JsonValue(temp.x));
+                pathJson.addChild(new JsonValue(temp.y));
+                // get next
+                nodeData = nodeData.get("properties");
+                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
+                next = jsonId.asInt();
+            }
+            data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
+            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
+            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            nestData[ii] = data;
+        }
+    }
+
 
     /**
      * loads into p an (x,y) pair that are direct properties of the given JsonValue into vector cache

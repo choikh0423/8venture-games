@@ -23,7 +23,7 @@ public class NestHazard extends PolygonObstacle {
     private final Texture birdTex;
     private PooledList<BirdHazard> birdList;
 
-    public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
+    public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
         super(points, x, y);
 
         this.path = path;
