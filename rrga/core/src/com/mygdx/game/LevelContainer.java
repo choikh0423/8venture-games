@@ -377,6 +377,8 @@ public class LevelContainer{
             obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
                     jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
                     birdDamage, birdKnockback, scale, getFlapAnimationTexture("blue"), blueData);
+            addObject(obj);
+            nests.add(obj);
         }
 
         //create lightning

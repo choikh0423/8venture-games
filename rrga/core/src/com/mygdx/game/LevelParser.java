@@ -249,9 +249,6 @@ public class LevelParser {
         tileSetJsonMap.put("red_bird", directory.getEntry("red_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("green_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("brown_bird", directory.getEntry("brown_bird:tiles", JsonValue.class));
-
-        //get blue bird data
-        blueBirdData = processBird(blueBirdTemplate, new HashMap<Integer, JsonValue>());
     }
 
     /**
@@ -271,6 +268,8 @@ public class LevelParser {
         worldSize.y = levelData.getInt("height", 18);
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
+        //get blue bird data for nests
+        blueBirdData = processBird(getBirdDefaults("blue"), new HashMap<Integer, JsonValue>());
 
         layers = new ArrayList<>();
         // prepare texture/tileset parsing, get all tilesets used by current level
@@ -378,7 +377,7 @@ public class LevelParser {
     }
 
     private boolean doesBirdAttack(String color){
-        return color.equals("blue") || color.equals("green") || color.equals("brown");
+        return color.equals("green") || color.equals("brown");
     }
 
     /**
@@ -698,6 +697,7 @@ public class LevelParser {
             data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
             data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
             data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            data.addChild("path", pathJson);
             nestData[ii] = data;
         }
     }

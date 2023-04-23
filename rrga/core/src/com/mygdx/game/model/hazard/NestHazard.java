@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool;
-import com.ibm.j9ddr.vm29.pointer.generated._jdoubleArrayPointer;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
@@ -37,6 +36,7 @@ public class NestHazard extends PolygonObstacle {
         birdSpeed = spd;
         spawnDelay = delay;
         countdown = spawnDelay;
+        System.out.println("countdown initial: " + countdown );
 
         birdDamage = dam;
         birdKnockback = kb;
@@ -52,7 +52,7 @@ public class NestHazard extends PolygonObstacle {
                 blueData.getInt("filmStripHeight"));
         int columns = flapTmpFrames.length == 0? 0 : flapTmpFrames[0].length;
         TextureRegion[] flapAnimationFrames = new TextureRegion[flapTmpFrames.length * columns];
-        birdTex = flapAnimationFrames[0];
+        birdTex = flapTmpFrames[0][0];
     }
 
     public BirdHazard update(){
@@ -63,14 +63,13 @@ public class NestHazard extends PolygonObstacle {
             //data.addChild("color", new JsonValue("blue"));
             //data.addChild("attack", new JsonValue(false));
 
-
             data.addChild("x", new JsonValue(getX()));
             data.addChild("y", new JsonValue(getY()));
-            JsonValue p = new JsonValue(JsonValue.ValueType.array);
-            for(int i=0; i<path.length; i++) {
-                p.addChild(new JsonValue(path[i]));
-            }
-            data.addChild("path", p);
+//            JsonValue p = new JsonValue(JsonValue.ValueType.array);
+//            for(int i=0; i<path.length; i++) {
+//                p.addChild(new JsonValue(path[i]));
+//            }
+//            data.addChild("path", p);
 
             boolean right = path[2] - getX() > 0;
             data.addChild("facing_right", new JsonValue(right));
@@ -79,6 +78,8 @@ public class NestHazard extends PolygonObstacle {
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(birdFlapAnimation);
+            obj.setPath(path, -1);
+            obj.setName("blue_bird");
             return obj;
         }
         else{
@@ -88,7 +89,7 @@ public class NestHazard extends PolygonObstacle {
     }
 
     public void draw(GameCanvas canvas){
-        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+        //canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
 
         if(countdown<22 && countdown>0){
             if (spawnInCountdown == 0){
@@ -96,6 +97,7 @@ public class NestHazard extends PolygonObstacle {
                 drawSpawnIn = !drawSpawnIn;
             }
             if(drawSpawnIn){
+                System.out.println(birdTex);
                 canvas.draw(birdTex, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
             }
             spawnInCountdown--;

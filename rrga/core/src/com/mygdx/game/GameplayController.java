@@ -815,8 +815,8 @@ public class GameplayController implements ContactListener {
             }
         }
 
-        if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
-                (umbrella == bd1 && bd2.getName().contains("wind"))) {
+        if ((umbrella == bd2 && bd1 instanceof WindModel) ||
+                (umbrella == bd1 && bd2 instanceof WindModel)) {
             Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
             contactWindFix.remove(windFix);
         }
