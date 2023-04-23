@@ -103,7 +103,7 @@ public class LevelContainer{
     /**
      * Texture assets for the wind animation
      */
-    private TextureRegion[] windAnimation;
+    private TextureRegion[] windAnimation = new TextureRegion[9];
     /**
      * Texture asset for opened umbrella
      */
@@ -367,6 +367,7 @@ public class LevelContainer{
             obj = new WindModel(windjv[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(windTexture);
+            obj.setAnimation(windAnimation);
             obj.setName(windName + ii);
             addObject(obj);
         }
