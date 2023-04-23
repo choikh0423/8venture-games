@@ -1,7 +1,11 @@
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -38,6 +42,9 @@ public class WindModel extends PolygonObstacle {
      * The direction of this wind's force in radians. Value within [0, 2pi).
      */
     private float direction;
+
+    private Animation<TextureRegion> animation;
+    private float elapsedTime;
 
     private PolygonRegion drawRegion;
     private float xOffset;
@@ -128,16 +135,50 @@ public class WindModel extends PolygonObstacle {
         else return dot*magnitude;
     }
 
+    public void setAnimation(TextureRegion[] frames){
+        this.animation = new Animation<>(1f/8f, frames);
+    }
+
     /**
      * Draws the wind object.
      *
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        if (region != null) {
-            canvas.draw(drawRegion, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
-                    direction-((float) Math.PI/2),1,1);
-            //direction-((float) Math.PI/2)
+        //TODO fix wrapping issue
+        elapsedTime += Gdx.graphics.getDeltaTime();
+
+        float angle = -direction+((float) Math.PI/2);
+        float[] verts = new float[region.getVertices().length];
+        for(int i = 0; i<region.getVertices().length; i+=2){
+            float rotatedX = (float) Math.cos(angle) * region.getVertices()[i]
+                    - (float) Math.sin(angle) * region.getVertices()[i+1];
+            float rotatedY = (float) Math.sin(angle) * region.getVertices()[i]
+                    + (float) Math.cos(angle) * region.getVertices()[i+1];
+            verts[i] = rotatedX;
+            verts[i+1] = rotatedY;
         }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0 && verts[i]<xOffset){
+                xOffset = verts[i];
+            }
+            if(i%2==1 && verts[i]<yOffset){
+                yOffset = verts[i];
+            }
+        }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0){
+                verts[i] -= xOffset;
+            }
+            if(i%2==1){
+                verts[i] -= yOffset;
+            }
+        }
+        TextureRegion t = animation.getKeyFrame(elapsedTime, true);
+
+        PolygonRegion p = new PolygonRegion(t, verts,region.getTriangles());
+
+        canvas.draw(p, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
+                    direction-((float) Math.PI/2),1,1);
     }
 }

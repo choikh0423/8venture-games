@@ -101,6 +101,10 @@ public class LevelContainer{
      */
     private TextureRegion windTexture;
     /**
+     * Texture assets for the wind animation
+     */
+    private TextureRegion[] windAnimation = new TextureRegion[9];
+    /**
      * Texture asset for opened umbrella
      */
     private TextureRegion umbrellaOpenTexture;
@@ -267,7 +271,10 @@ public class LevelContainer{
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
         umbrellaBoostAnimationTexture =  directory.getEntry("game:umbrella_dodge_animation", Texture.class);
         goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
-        windAnimationTexture = directory.getEntry("game:wind_animation", Texture.class);
+        for(int i = 0; i < 9; i++){
+            windAnimation[i] = new TextureRegion(directory.getEntry("game:wind_frame"+i, Texture.class));
+        }
+
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
@@ -360,6 +367,7 @@ public class LevelContainer{
             obj = new WindModel(windjv[ii]);
             obj.setDrawScale(scale);
             obj.setTexture(windTexture);
+            obj.setAnimation(windAnimation);
             obj.setName(windName + ii);
             addObject(obj);
         }

@@ -24,6 +24,51 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
+        "game:wind_frame0" : {
+          "file":   "game/wind00.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame1" : {
+          "file":   "game/wind10.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame2" : {
+          "file":   "game/wind20.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame3" : {
+          "file":   "game/wind01.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame4" : {
+          "file":   "game/wind11.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame5" : {
+          "file":   "game/wind21.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame6" : {
+          "file":   "game/wind02.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame7" : {
+          "file":   "game/wind12.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:wind_frame8" : {
+          "file":   "game/wind22.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
         "game:red_bird_flapping" : "levels/objects/asset/bird_nice_flapping.png",
         "game:blue_bird_flapping" : "levels/objects/asset/blue_bird_flapping.png",
         "game:green_bird_flapping" : "levels/objects/asset/bird_nest_flapping.png",
