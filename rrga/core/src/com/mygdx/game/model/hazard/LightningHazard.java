@@ -4,8 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
-public class LightningHazard extends HazardModel{
+public class LightningHazard extends PolygonHazard {
 
     /** Damage of a lightning hazard */
     private static final int LIGHTNING_DAMAGE = 1;
@@ -27,7 +28,7 @@ public class LightningHazard extends HazardModel{
     private int strikeTimer;
 
     public LightningHazard(JsonValue data) {
-        super(data, data.get("points").asFloatArray(),LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
+        super(data, LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
         waitDuration = data.getInt("strike_timer");
         waitTimer = waitDuration + data.getInt("strike_timer_offset");
         strikeTimer = -1;
@@ -59,11 +60,6 @@ public class LightningHazard extends HazardModel{
             strikeTimer--;
         }
 
-    }
-
-    @Override
-    public Vector2 getKnockbackForce() {
-        return new Vector2(0,1);
     }
 
     public void draw(GameCanvas canvas) {

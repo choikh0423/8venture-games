@@ -8,46 +8,25 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 /**
  * A model for hazard objects.
  */
-public abstract class HazardModel extends PolygonObstacle {
+public interface HazardModel {
 
     /**
-     * The damage done to the player when colliding with this hazard
-     */
-    private final int damage;
-
-    /** The scale of this hazard's knockback */
-    private final float knockback;
-
-    /**
-     * Returns this hazard's damage
      * @return This hazard's damage
      */
-    public int getDamage(){
-        return damage;
-    }
+    int getDamage();
 
     /**
-     * Returns this hazard's knockback scale
-     * @return This hazard's knockback scale
+     * @return This hazard's knock back scale
      */
-    public float getKnockbackScl(){
-        return knockback;
-    }
-
-    public HazardModel(JsonValue data, float[] points, int dam, float kb) {
-        super(points, data.getFloat("x"), data.getFloat("y"));
-        setBodyType(BodyDef.BodyType.StaticBody);
-        setDensity(0);
-        setFriction(0);
-        setRestitution(0);
-        this.damage = dam;
-        this.knockback = kb;
-    }
+    float getKnockBackScl();
 
     /**
-     * Gives the normalized vector of the knockback force in the x and y direction
-     * getKnockbackForce()[1] = x knockback force
-     * getKnockbackForce()[1] = y knockback force
-     * */
-    public abstract Vector2 getKnockbackForce();
+     * Gives the normalized vector of the knock-back force in the x and y direction
+     */
+    Vector2 getKnockBackForce();
+
+    /**
+     * Set the vector of the knock-back force in the x and y direction
+     */
+    void setKnockBackForce(Vector2 in);
 }

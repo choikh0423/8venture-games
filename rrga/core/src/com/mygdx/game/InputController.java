@@ -118,6 +118,11 @@ public class InputController {
         return lighter;
     }
 
+    /** Set secondary control mode */
+    public void setSecondaryControlMode(boolean toggleOn) {
+        this.secondaryControlMode = toggleOn;
+    }
+
     /**
      * Returns true if the reset button was pressed.
      *
@@ -287,7 +292,7 @@ public class InputController {
         zoomPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
 
         // W for using the lighter
-        lighter = Gdx.input.isKeyPressed(Input.Keys.W);
+        lighter = Gdx.input.isKeyJustPressed(Input.Keys.W);
     }
 
     /**

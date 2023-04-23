@@ -1,9 +1,9 @@
 { "columns":4,
- "image":"bird_nice_flapping.png",
+ "image":"..\/asset\/bird_nice_flapping.png",
  "imageheight":229,
  "imagewidth":948,
  "margin":0,
- "name":"red_bird_tile",
+ "name":"red_bird",
  "spacing":0,
  "tilecount":4,
  "tiledversion":"1.10.0",
@@ -17,17 +17,6 @@
              "id":2,
              "name":"",
              "objects":[
-                    {
-                     "height":222,
-                     "id":1,
-                     "name":"AABB",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":230,
-                     "x":3,
-                     "y":3
-                    }, 
                     {
                      "height":0,
                      "id":3,

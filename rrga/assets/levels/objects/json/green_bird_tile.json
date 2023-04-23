@@ -1,9 +1,9 @@
 { "columns":6,
- "image":"bird_nest_flapping.png",
+ "image":"..\/asset\/bird_nest_flapping.png",
  "imageheight":242,
  "imagewidth":1194,
  "margin":0,
- "name":"bird_nest_flapping",
+ "name":"green_bird",
  "objectalignment":"center",
  "spacing":0,
  "tilecount":6,
@@ -15,19 +15,9 @@
          "objectgroup":
             {
              "draworder":"index",
+             "id":2,
              "name":"",
              "objects":[
-                    {
-                     "height":238,
-                     "id":1,
-                     "name":"AABB",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":2
-                    }, 
                     {
                      "height":0,
                      "id":2,
@@ -123,131 +113,6 @@
                      "width":0,
                      "x":18.4708753875585,
                      "y":133.254172438815
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":1,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":154,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":15
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":2,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":136,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":33
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":3,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":84,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":116
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":4,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":124,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":116
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":5,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":119,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":194,
-                     "x":2,
-                     "y":50
                     }],
              "opacity":1,
              "type":"objectgroup",

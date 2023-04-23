@@ -1,9 +1,9 @@
 { "columns":5,
- "image":"blue_bird_flapping.png",
+ "image":"..\/asset\/blue_bird_flapping.png",
  "imageheight":232,
  "imagewidth":1160,
  "margin":0,
- "name":"blue_bird_flapping",
+ "name":"blue_bird",
  "objectalignment":"center",
  "spacing":0,
  "tilecount":5,
@@ -15,19 +15,9 @@
          "objectgroup":
             {
              "draworder":"index",
+             "id":2,
              "name":"",
              "objects":[
-                    {
-                     "height":225,
-                     "id":1,
-                     "name":"AABB",
-                     "rotation":0,
-                     "type":"",
-                     "visible":false,
-                     "width":226,
-                     "x":3,
-                     "y":2
-                    }, 
                     {
                      "height":0,
                      "id":3,
@@ -131,106 +121,6 @@
                      "width":0,
                      "x":41,
                      "y":100.61
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":1,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":138,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":215,
-                     "x":3,
-                     "y":22
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":2,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":120,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":225,
-                     "x":4,
-                     "y":40
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":3,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":92,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":224,
-                     "x":3,
-                     "y":98
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }, 
-        {
-         "id":4,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":129,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":212,
-                     "x":4,
-                     "y":98
                     }],
              "opacity":1,
              "type":"objectgroup",
