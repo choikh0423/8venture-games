@@ -420,6 +420,12 @@ public class GameMode implements Screen {
         for(Obstacle obj : gameplayController.getObjects()) {
             obj.draw(canvas);
         }
+
+        // draw all stickers
+        for (Sticker sticker : parser.getStickers()){
+            sticker.draw(canvas, scale);
+        }
+
         canvas.end();
 
         if (debug) {

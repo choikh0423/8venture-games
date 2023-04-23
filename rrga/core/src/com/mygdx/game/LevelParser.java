@@ -54,6 +54,9 @@ public class LevelParser {
      */
     private ArrayList<TextureRegion[]> layers;
 
+    /** the list of Sticker objects */
+    private ArrayList<Sticker> stickers = new ArrayList<>();
+
     /** vector position cache for player */
     private final Vector2 playerPos = new Vector2();
 
@@ -110,6 +113,12 @@ public class LevelParser {
 
     /** the list of texture region cutters, one for each tileset */
     private ArrayList<TileSetMaker> tileSetMakers;
+
+    /** the texture producer for stickers */
+    private TileSetMaker stickerMaker;
+
+    /** list of all sticker textures in THE ORDER as given by sticker.json in levels/tilesets/ */
+    private final Texture[] stickerTextures;
 
     private static final int LOWER28BITMASK = 0xFFFFFFF;
 
@@ -173,6 +182,8 @@ public class LevelParser {
 
     public Vector2 getWorldSize(){ return worldSize; }
 
+    public ArrayList<Sticker> getStickers(){ return stickers; }
+
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
 
@@ -210,7 +221,6 @@ public class LevelParser {
 
         // save tileset textures and their corresponding JSON tileset data
         textureMap = new HashMap<>();
-        tileSetJsonMap = new HashMap<>();
         textureMap.put("bushes", directory.getEntry( "tileset:bushes", Texture.class ));
         textureMap.put("bushes_flipped", directory.getEntry("tileset:bushes_flipped", Texture.class));
         textureMap.put("trees", directory.getEntry( "tileset:trees", Texture.class ));
@@ -219,6 +229,7 @@ public class LevelParser {
         textureMap.put("cliffs_flipped", directory.getEntry("tileset:cliffs_flipped", Texture.class));
 
         // add tile layer tile-sets (artwork)
+        tileSetJsonMap = new HashMap<>();
         tileSetJsonMap.put("bushes", directory.getEntry("data:bushes", JsonValue.class));
         tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
         tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
@@ -231,6 +242,14 @@ public class LevelParser {
 
         // add cloud object tile-sets
         tileSetJsonMap.put("clouds", directory.getEntry("cloud:tiles", JsonValue.class));
+
+        // load all stickers
+        stickerTextures = new Texture[]{
+                directory.getEntry("stickers:dcloud0", Texture.class),
+                directory.getEntry("stickers:dcloud1", Texture.class),
+                directory.getEntry("stickers:dcloud2", Texture.class),
+                directory.getEntry("stickers:dcloud3", Texture.class)
+        };
     }
 
     /**
@@ -255,17 +274,22 @@ public class LevelParser {
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
         tileSetMakers = new ArrayList<>();
+        stickerMaker = null;
         JsonValue tileSets = levelData.get("tilesets");
         for (JsonValue ts : tileSets){
             String source = ts.getString("source");
+            if (source.endsWith("stickers.json")){
+                stickerMaker = new CollectionTileSetMaker(stickerTextures, ts.getInt("firstgid"));
+            }
             JsonValue j = getTileLayerTileSetJson(source);
             if (j == null){
                 continue;
             }
             tileSetMakers.add(
-                    new TileSetMaker(j, ts.getInt("firstgid"))
+                    new ImageTileSetMaker(j, ts.getInt("firstgid"))
             );
         }
+        stickers.clear();
 
         // containers for unprocessed JSON data
         HashMap<Integer, JsonValue> trajectory = new HashMap<>();
@@ -338,8 +362,32 @@ public class LevelParser {
                 windDirs.put(obj.getInt("id"), obj);
             } else if (template.contains("cloud.json")){
                 movingPlatRawData.add(obj);
+            } else if (obj.has("gid")){
+                // treat as possibly a sticker, process it
+                parseSticker(obj);
             }
         }
+    }
+
+    private void parseSticker(JsonValue obj) {
+        int gid = obj.getInt("gid");
+        TextureRegion texture = getTileFromImages(gid);
+        if (texture == null){
+            if (stickerMaker != null){
+                int id = (int) (gid & LOWER28BITMASK);
+                boolean flipX = (gid & (1L << 31)) != 0;
+                boolean flipY = (gid & (1L << 30)) != 0;
+                texture = stickerMaker.getRegionFromId(id, false, flipX, flipY);
+            }
+            else {
+                return;
+            }
+        }
+        readPositionAndConvert(obj, temp);
+        float x = temp.x;
+        float y = temp.y;
+        JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
+        stickers.add(new Sticker(x,y, AABB, texture));
     }
 
     /**
@@ -886,7 +934,29 @@ public class LevelParser {
         return new JsonValue(ang);
     }
 
-    // ============================= BEGIN TILED LAYER PARSING HELPERS =============================
+    // ============================= BEGIN TILED PARSING HELPERS =============================
+
+    /**
+     * @param gid raw grid tile id (possibly with flipping bits enabled)
+     * @return texture (possibly null) for the corresponding gid
+     */
+    private TextureRegion getTileFromImages(long gid){
+        // the Tiled ID is a 32-bit UNSIGNED integer
+        // actual ID is the lower 28 bits of the Tiled ID
+        int id = (int) (gid & LOWER28BITMASK);
+        // Bit 32 is used for storing whether the tile is horizontally flipped
+        // Bit 31 is used for storing whether the tile is vertically flipped
+        // Bit 30 is used for storing whether the tile is diagonally flipped
+        boolean flipX = (gid & (1L << 31)) != 0;
+        boolean flipY = (gid & (1L << 30)) != 0;
+        boolean flipD = (gid & (1L << 29)) != 0;
+        // this loop should be fast with small number of tilesets
+        for (TileSetMaker tsm : tileSetMakers) {
+            if (tsm.contains(id)) return tsm.getRegionFromId(id, flipD, flipX, flipY);
+        }
+        return null;
+    }
+
     private void parseTileLayer(JsonValue layer){
         // loop over array data and make texture regions
         JsonValue data = layer.get("data");
@@ -897,43 +967,28 @@ public class LevelParser {
             if (rawId == 0){
                 continue;
             }
-            // actual ID is the lower 28 bits of the Tiled ID
-            int id = (int) (rawId & LOWER28BITMASK);
-            // Bit 32 is used for storing whether the tile is horizontally flipped
-            // Bit 31 is used for storing whether the tile is vertically flipped
-            // Bit 30 is used for storing whether the tile is diagonally flipped
-            boolean flipX = (rawId & (1L << 31)) != 0;
-            boolean flipY = (rawId & (1L << 30)) != 0;
-            boolean flipD = (rawId & (1L << 29)) != 0;
-
-            // this loop should be fast with small number of tilesets
-            for (TileSetMaker tsm : tileSetMakers) {
-                if (id <= tsm.maxId && id >= tsm.minId) {
-                    int col = i % (int) worldSize.x;
-                    int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
-                    int idx = row * (int) worldSize.x + col;
-                    textures[idx] = tsm.getRegionFromId(id, flipD, flipX, flipY);
-                    break;
-                }
-            }
+            int col = i % (int) worldSize.x;
+            int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
+            int idx = row * (int) worldSize.x + col;
+            textures[idx] = getTileFromImages(rawId);
         }
         layers.add(textures);
     }
 
     /**
-     * Given the relative path of a tileset (that is used only for tile layers), find the Json Data that corresponds to
+     * Given the relative path of a tileset (that can be used for tile layers), find the Json Data that corresponds to
      * the tileset used. Example: level data contains "source":"tilesets\/bushes.json" so bushes JSON is returned.
      * @param name the source path of a tileset
-     * @return the tileset JSON
+     * @return the tileset JSON (possibly null)
      */
     private JsonValue getTileLayerTileSetJson(String name){
-        if (name.contains("bushes")){
+        if (name.endsWith("bushes.json")){
             return tileSetJsonMap.get("bushes");
         }
-        else if (name.contains("trees")){
+        else if (name.endsWith("trees.json")){
             return tileSetJsonMap.get("trees");
         }
-        else if (name.contains("cliffs")){
+        else if (name.endsWith("cliffs.json")){
             return tileSetJsonMap.get("cliffs");
         }
         return null;
@@ -943,12 +998,37 @@ public class LevelParser {
      * A TileSetMaker produces texture regions upon request.
      * This class is useful when converting Tile IDs into textures.
      */
-    private class TileSetMaker {
+    private abstract static class TileSetMaker {
 
         /** the tile ID assigned to the FIRST tile in this set*/
         public int minId;
         /** the tile ID assigned to the LAST tile in this set*/
         public int maxId;
+
+        /**
+         * @param gid tile grid id
+         * @return whether this tileset contains the given tile gid
+         */
+        public boolean contains(int gid){
+            return gid <= maxId && gid >= minId;
+        }
+
+        /**
+         * for single image tilesets: returns a subregion of the texture<br>
+         * for collection-based tilesets: returns a complete texture from set
+         * @param id the associated id of the desired Tile, where contains(id) is true.
+         * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
+         * @return a texture from the tile set corresponding to the given id
+         */
+        public abstract TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY);
+    }
+
+    /**
+     * A ImageTileSetMaker produces texture regions upon request by cutting texture regions from a single texture.
+     */
+    private class ImageTileSetMaker extends TileSetMaker {
         private final int columns;
         private final Texture texture;
 
@@ -957,7 +1037,7 @@ public class LevelParser {
         private final  int width;
         private final int height;
 
-        TileSetMaker(JsonValue tileSetJson, int firstGid){
+        ImageTileSetMaker(JsonValue tileSetJson, int firstGid){
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
@@ -971,15 +1051,7 @@ public class LevelParser {
             columns = tileSetJson.getInt("columns");
         }
 
-        /**
-         * cuts out a region of the texture tileset
-         * @param id the associated id of the desired Tile, where minId <= id <= maxId
-         * @param flipD whether to flip the resulting region anti-diagonally
-         * @param flipX whether to flip the resulting region horizontally
-         * @param flipY whether to flip the resulting region vertically
-         * @return a region of the entire texture corresponding to the given id
-         */
-        TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY){
+        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
             int col = index % columns;
@@ -994,5 +1066,28 @@ public class LevelParser {
             return tile;
         }
     }
-    // ========================== END of FUNCTIONS for TILED LAYER PARSING =================================
+
+    /**
+     * A CollectionTileSetMaker produces texture regions upon request by retrieving texture regions from a list of
+     * textures. This is particularly useful for retrieving unrelated textures (stickers).
+     */
+    private static class CollectionTileSetMaker extends TileSetMaker {
+
+        private final Texture[] collection;
+        CollectionTileSetMaker(Texture[] collection, int firstGid){
+            minId = firstGid;
+            maxId = collection.length - 1 + minId;
+            this.collection = collection;
+        }
+
+        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY) {
+            TextureRegion tile = new TextureRegion(collection[id - minId]);
+            tile.flip(flipX, flipY);
+            return tile;
+        }
+    }
+
+
+
+    // ========================== END of FUNCTIONS for TILE PARSING =================================
 }
