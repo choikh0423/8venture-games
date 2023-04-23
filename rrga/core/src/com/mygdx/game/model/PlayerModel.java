@@ -24,7 +24,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.graphics.g2d.Animation;
 
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
 
 import java.text.DecimalFormat;
@@ -78,7 +77,7 @@ public class PlayerModel extends CapsuleObstacle {
 	public BitmapFont healthFont;
 
 	private static final DecimalFormat formatter = new DecimalFormat("0.00");
-	
+
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
@@ -146,9 +145,12 @@ public class PlayerModel extends CapsuleObstacle {
 	/** Player fall animation elapsed time */
 	private float fallElapsedTime;
 
+	/** Player idle animation texture */
+	private TextureRegion idleTexture;
+
 	/**
 	 * Returns left/right movement of this character.
-	 * 
+	 *
 	 * This is the result of input times player force.
 	 *
 	 * @return left/right movement of this character.
@@ -156,16 +158,16 @@ public class PlayerModel extends CapsuleObstacle {
 	public float getMovement() {
 		return movement;
 	}
-	
+
 	/**
 	 * Sets left/right movement of this character.
-	 * 
+	 *
 	 * This is the result of input times player force.
 	 *
 	 * @param value left/right movement of this character.
 	 */
 	public void setMovement(float value) {
-		movement = value; 
+		movement = value;
 		// Change facing if appropriate
 		if (movement < 0) {
 			faceRight = false;
@@ -201,14 +203,14 @@ public class PlayerModel extends CapsuleObstacle {
 	public boolean isGrounded() {
 		return isGrounded;
 	}
-	
+
 	/**
 	 * Sets whether the player is on the ground.
 	 *
 	 * @param value whether the player is on the ground.
 	 */
 	public void setGrounded(boolean value) {
-		isGrounded = value; 
+		isGrounded = value;
 	}
 
 	/**
@@ -236,7 +238,7 @@ public class PlayerModel extends CapsuleObstacle {
 	public float getDamping() {
 		return damping;
 	}
-	
+
 	/**
 	 * Returns the upper limit on player left-right movement.
 	 *
@@ -280,7 +282,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 *
 	 * @return the name of the ground sensor
 	 */
-	public String getSensorName() { 
+	public String getSensorName() {
 		return sensorName;
 	}
 
@@ -428,6 +430,10 @@ public class PlayerModel extends CapsuleObstacle {
 		this.fallAnimation = new Animation<>(1f/12f, fallAnimationFrames);
 	}
 
+	public void setIdleAnimation(TextureRegion texture){
+		idleTexture = texture;
+	}
+
 	/**
 	 * sets the texture to be frontal view for drawing purposes.
 	 *
@@ -453,8 +459,8 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Creates a new player avatar with the given physics data
 	 *
-	 * The size is expressed in physics units NOT pixels.  In order for 
-	 * drawing to work properly, you MUST set the drawScale. The drawScale 
+	 * The size is expressed in physics units NOT pixels.  In order for
+	 * drawing to work properly, you MUST set the drawScale. The drawScale
 	 * converts the physics units to pixels.
 	 *
 	 * @param data  	The physics constants for this player
@@ -523,7 +529,7 @@ public class PlayerModel extends CapsuleObstacle {
 		// Double jumping is not allowed.
 		//
 		// To determine whether or not the player is on the ground,
-		// we create a thin sensor under his feet, which reports 
+		// we create a thin sensor under his feet, which reports
 		// collisions with the world but has no collision response.
 		Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
 		FixtureDef sensorDef = new FixtureDef();
@@ -532,16 +538,16 @@ public class PlayerModel extends CapsuleObstacle {
 		sensorShape = new PolygonShape();
 		JsonValue sensorjv = data.get("sensor");
 		sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
-								 sensorjv.getFloat("height",0), sensorCenter, 0.0f);
+				sensorjv.getFloat("height",0), sensorCenter, 0.0f);
 		sensorDef.shape = sensorShape;
 
 		// Ground sensor to represent our feet
 		Fixture sensorFixture = body.createFixture( sensorDef );
 		sensorFixture.setUserData(getSensorName());
-		
+
 		return true;
 	}
-	
+
 
 	/**
 	 * Applies force to the body of this player as given by movement.
@@ -679,8 +685,11 @@ public class PlayerModel extends CapsuleObstacle {
 			walkElapsedTime = 0f;
 
 			fallElapsedTime += Gdx.graphics.getDeltaTime();
-			//TODO put an idle animation here. I just picked a frame that looked like Gale was standing
-			t = isGrounded() ? walkAnimationFrames[2] : fallAnimation.getKeyFrame(fallElapsedTime, true);
+			t = isGrounded() ? idleTexture : fallAnimation.getKeyFrame(fallElapsedTime, true);
+			if (isGrounded()){
+				t = idleTexture;
+
+			}
 			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
 					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 					effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
@@ -728,7 +737,7 @@ public class PlayerModel extends CapsuleObstacle {
 
 		// TODO: HP Texture is manually scaled at the moment
 		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
-					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+				canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
 
 		// draw lighter info
 		float lighter_capac = lighterFuel / maxLighterFuel;
@@ -736,7 +745,7 @@ public class PlayerModel extends CapsuleObstacle {
 		canvas.drawText(formatter.format(lighter_capac), healthFont, 10,
 				canvas.getHeight() - 90);
 	}
-	
+
 	/**
 	 * Draws the outline of the physics body.
 	 *
