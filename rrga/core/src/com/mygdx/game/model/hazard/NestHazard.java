@@ -2,6 +2,7 @@ package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
@@ -20,10 +21,17 @@ public class NestHazard extends PolygonObstacle {
     private final int birdDamage;
     private final float birdKnockback;
     private final Vector2 scale;
-    private final Texture birdTex;
+    private final Texture birdFlapAnimation;
+    private TextureRegion birdTex;
     private PooledList<BirdHazard> birdList;
+    private int spawnInCountdown;
+    private boolean drawSpawnIn;
 
+<<<<<<< Updated upstream
     public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
+=======
+    public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdAnimation){
+>>>>>>> Stashed changes
         super(points, x, y);
 
         this.path = path;
@@ -34,9 +42,16 @@ public class NestHazard extends PolygonObstacle {
         birdDamage = dam;
         birdKnockback = kb;
         scale = scl;
-        this.birdTex = birdTex;
+        this.birdFlapAnimation = birdAnimation;
         // TODO: better memory allocation with PooledList
         birdList = new PooledList<>();
+
+        spawnInCountdown = 7;
+        drawSpawnIn = false;
+        //TextureRegion[][] flapTmpFrames = TextureRegion.split(birdTex, (int) filmStripSize.x, (int) filmStripSize.y);
+        //int columns = flapTmpFrames.length == 0? 0 : flapTmpFrames[0].length;
+        //TextureRegion[] flapAnimationFrames = new TextureRegion[flapTmpFrames.length * columns];
+        //birdTex = flapAnimationFrames[0];
     }
 
     public BirdHazard update(){
@@ -63,7 +78,7 @@ public class NestHazard extends PolygonObstacle {
             data.addChild("atkspeed", new JsonValue(0));
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
-            obj.setFlapAnimation(birdTex);
+            obj.setFlapAnimation(birdFlapAnimation);
             return obj;
         }
         else{
@@ -74,5 +89,16 @@ public class NestHazard extends PolygonObstacle {
 
     public void draw(GameCanvas canvas){
         canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+
+        if(countdown<22 && countdown>0){
+            if (spawnInCountdown == 0){
+                spawnInCountdown = 7;
+                drawSpawnIn = !drawSpawnIn;
+            }
+            if(drawSpawnIn){
+                canvas.draw(birdTex, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+            }
+            spawnInCountdown--;
+        }
     }
 }
