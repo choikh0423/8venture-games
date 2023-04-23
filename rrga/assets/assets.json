@@ -60,7 +60,11 @@
         "platform:cloud0": "levels/objects/asset/clouds/obj_cloud_0.png",
         "platform:cloud1": "levels/objects/asset/clouds/obj_cloud_1.png",
         "platform:cloud2": "levels/objects/asset/clouds/obj_cloud_2.png",
-        "platform:cloud3": "levels/objects/asset/clouds/obj_cloud_3.png"
+        "platform:cloud3": "levels/objects/asset/clouds/obj_cloud_3.png",
+        "stickers:dcloud0": "levels/objects/asset/dclouds/obj_dcloud_0.png",
+        "stickers:dcloud1": "levels/objects/asset/dclouds/obj_dcloud_1.png",
+        "stickers:dcloud2": "levels/objects/asset/dclouds/obj_dcloud_2.png",
+        "stickers:dcloud3": "levels/objects/asset/dclouds/obj_dcloud_3.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
