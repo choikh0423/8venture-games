@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.utility.obstacle.*;
@@ -21,6 +23,31 @@ import com.mygdx.game.utility.util.ScreenListener;
 public class GameMode implements Screen {
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
+
+    /** Texture asset for SKY parallax layer A*/
+    private Texture skyLayerTextureA;
+
+    /** Texture asset for SKY parallax layer B*/
+    private Texture skyLayerTextureB;
+
+    /** Texture asset for SKY parallax layer C*/
+    private Texture skyLayerTextureC;
+
+    //TODO: Want to move this to constant.json later
+    /** Horizontal Parallax Constant A*/
+    private float horizontalA = 0.9f;
+    /** Horizontal Parallax Constant B*/
+    private float horizontalB = 0.7f;
+    /** Horizontal Parallax Constant C*/
+    private float horizontalC = 0.5f;
+
+    /** Vertical Parallax Constant A*/
+    private float verticalA = 0.5f;
+    /** Vertical Parallax Constant B*/
+    private float verticalB = 0.75f;
+    /** Vertical Parallax Constant C*/
+    private float verticalC = 1.0f;
+
     /** The font for giving messages to the player */
     protected BitmapFont displayFont;
 
@@ -171,9 +198,9 @@ public class GameMode implements Screen {
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      *
-     * @param width  	The width in Box2d coordinates
-     * @param height	The height in Box2d coordinates
-     * @param gravity	The downward gravity
+     * @param width      The width in Box2d coordinates
+     * @param height    The height in Box2d coordinates
+     * @param gravity    The downward gravity
      */
     protected GameMode(float width, float height, float gravity) {
         this(new Rectangle(0,0,width,height), new Vector2(0,gravity));
@@ -186,8 +213,8 @@ public class GameMode implements Screen {
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      *
-     * @param bounds	The game bounds in Box2d coordinates
-     * @param gravity	The gravitational force on this Box2d world
+     * @param bounds    The game bounds in Box2d coordinates
+     * @param gravity    The gravitational force on this Box2d world
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
         debug  = false;
@@ -227,7 +254,7 @@ public class GameMode implements Screen {
      * This method extracts the asset variables from the given asset directory. It
      * should only be called after the asset directory is completed.
      *
-     * @param directory	Reference to global asset manager.
+     * @param directory    Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
         this.directory = directory;
@@ -239,6 +266,10 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
+        skyLayerTextureA = directory.getEntry("game:skylayerA", Texture.class);
+        skyLayerTextureB = directory.getEntry("game:skylayerB", Texture.class);
+        skyLayerTextureC = directory.getEntry("game:skylayerC", Texture.class);
+
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
         // instantiate level parser for loading levels
@@ -279,7 +310,7 @@ public class GameMode implements Screen {
      * to switch to a new game mode.  If not, the update proceeds
      * normally.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      *
      * @return whether to process the update loop
      */
@@ -340,7 +371,7 @@ public class GameMode implements Screen {
      * made about updating the game state. This method should be followed by a call
      * to draw the elements of the world.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      */
     public void update(float dt) {
 
@@ -368,7 +399,7 @@ public class GameMode implements Screen {
      * The method draws all objects in the order that they were added.
      * Heads-up display (HUD) content is drawn on top of these physics objects.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      */
     public void draw(float dt) {
         canvas.clear();
@@ -382,11 +413,19 @@ public class GameMode implements Screen {
         canvas.begin();
 
         // center a background on player
-        // TODO: replace with repeating background?
+        // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
                 backgroundTexture.getRegionHeight()/2f, px , py, 0,
                 canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
                 canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
+
+        float worldHeight = physicsHeight * scale.y;
+
+        // Parallax Drawing
+        //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
+//        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA , -py * verticalA, px, py, worldHeight, zoomScl);
+//        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl);
+//        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl);
 
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
@@ -475,8 +514,8 @@ public class GameMode implements Screen {
      * is the purpose of this method.  It stops the current instance playing (if
      * any) and then returns the id of the new instance for tracking.
      *
-     * @param sound		The sound asset to play
-     * @param soundId	The previously playing sound instance
+     * @param sound        The sound asset to play
+     * @param soundId    The previously playing sound instance
      *
      * @return the new sound instance for this asset.
      */
@@ -494,9 +533,9 @@ public class GameMode implements Screen {
      * is the purpose of this method.  It stops the current instance playing (if
      * any) and then returns the id of the new instance for tracking.
      *
-     * @param sound		The sound asset to play
-     * @param soundId	The previously playing sound instance
-     * @param volume	The sound volume
+     * @param sound        The sound asset to play
+     * @param soundId    The previously playing sound instance
+     * @param volume    The sound volume
      *
      * @return the new sound instance for this asset.
      */
