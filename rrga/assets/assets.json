@@ -41,6 +41,7 @@
         },
         "game:player": "game/player.png",
         "game:player_walk_animation": "game/gale34_filmstrip_walking.png",
+        "game:player_idle_animation": "game/gale_idle_animation.png",
         "game:umbrella_open_animation": "game/umbrella_filmstrip_opening.png",
         "game:umbrella_dodge_animation": "game/umbrella_filmstrip_dodge.png",
         "game:player_falling_animation": "game/gale_filmstrip_falling.png",
