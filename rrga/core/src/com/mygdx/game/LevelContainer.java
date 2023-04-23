@@ -373,9 +373,10 @@ public class LevelContainer{
         for(int ii = 0; ii<nestData.length; ii++){
             NestHazard obj;
             JsonValue jv = nestData[ii];
+            JsonValue blueData = parser.getBlueBirdData();
             obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
                     jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
-                    birdDamage, birdKnockback, scale, getFlapAnimationTexture("blue"));
+                    birdDamage, birdKnockback, scale, getFlapAnimationTexture("blue"), blueData);
         }
 
         //create lightning

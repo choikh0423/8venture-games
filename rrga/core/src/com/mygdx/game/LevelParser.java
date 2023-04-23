@@ -84,6 +84,7 @@ public class LevelParser {
 
     private final JsonValue greenBirdDefaults;
     private final JsonValue brownBirdDefaults;
+    private JsonValue blueBirdData;
 
     /** the default JSON of path point. */
     private final JsonValue pointDefault;
@@ -143,6 +144,10 @@ public class LevelParser {
      */
     public JsonValue[] getBirdData() {
         return birdData;
+    }
+
+    public JsonValue getBlueBirdData(){
+        return blueBirdData;
     }
 
     /**
@@ -244,6 +249,9 @@ public class LevelParser {
         tileSetJsonMap.put("red_bird", directory.getEntry("red_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("green_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
         tileSetJsonMap.put("brown_bird", directory.getEntry("brown_bird:tiles", JsonValue.class));
+
+        //get blue bird data
+        blueBirdData = processBird(blueBirdTemplate, new HashMap<Integer, JsonValue>());
     }
 
     /**
@@ -390,130 +398,139 @@ public class LevelParser {
     }
 
     /**
+     * Convert single raw bird JSON into game-expected JSON format.
+     * @param rawData the unprocessed bird object data
+     * @param trajectory map of path node Ids to raw JSON
+     */
+    private JsonValue processBird(JsonValue rawData, HashMap<Integer, JsonValue> trajectory){
+        IntIntMap seen = new IntIntMap(16);
+        // b = raw bird data
+        JsonValue b = rawData;
+        seen.put(b.getInt("id", -1), 0);
+        // data = the bird JSON that game will read
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        String variant = b.getString("template", "blue_bird.json");
+        String color = computeColor(variant);
+        JsonValue properties = b.get("properties");
+        JsonValue defaultObj = getBirdDefaults(color);
+        JsonValue defaults = defaultObj.get("properties");
+        // set deterministic trivial properties
+        data.addChild("color", new JsonValue(color));
+        data.addChild("attack", new JsonValue(doesBirdAttack(color)));
+        // add whether facing right
+        boolean facingRight = isBirdInitiallyFacingRight(color);
+        boolean horizontalFlipped = (b.getLong("gid", 0) & 1L << 31) != 0;
+        // XOR(flip, facingRight) => if flip then !facingRight else facingRight
+        facingRight = horizontalFlipped ^ facingRight;
+        data.addChild("facing_right", new JsonValue(facingRight));
+
+        // The following is procedure to: set position, hit-box, AABB data
+        readPositionAndConvert(b, temp);
+        addPosition(data, temp);
+        JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+        // implicitly, the bird's location is the FIRST point on their path.
+        pathJson.addChild(new JsonValue(temp.x));
+        pathJson.addChild(new JsonValue(temp.y));
+
+        // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
+        JsonValue tsJson = tileSetJsonMap.get(color + "_bird");
+        int assetWidth = tsJson.getInt("tilewidth");
+        int assetHeight = tsJson.getInt("tileheight");
+        data.addChild("filmStripWidth", new JsonValue(assetWidth));
+        data.addChild("filmStripHeight", new JsonValue(assetHeight));
+        // the first objects section contains AABB and hitbox information in order of AABB then hitbox.
+        JsonValue tileSetJson = tsJson.get("tiles").get(0).get("objectgroup").get("objects");
+        JsonValue assetAABB = tileSetJson.get(0);
+        // load the AABB top left corner position and then convert it to have origin centered on bird's position
+        readPosition(assetAABB, temp);
+        // the asset's origin is the asset's top corner which is exactly half of the texture to the left and up.
+        changeOrigins(temp, -0.5f * assetWidth, 0.5f * assetHeight);
+        // the dimension of the bird (in pixel coordinates), which is a scaled version of the original
+        float tileWidth = getFromObject(b, "width", defaultObj).asFloat();
+        float tileHeight = getFromObject(b, "height", defaultObj).asFloat();
+        // compute the scale factors of both dimensions to yield correct AABB starting location and dimensions
+        scalars.set(tileWidth/assetWidth/tileScale.x, tileHeight/assetHeight/tileScale.y);
+
+        // the AABB is specified entirely in game coordinates relative to the bird's position
+        // AABB[0 ... 5] = {corner x, corner y, asset AABB width, asset AABB height, width scl, height scl}
+        JsonValue AABB = new JsonValue(JsonValue.ValueType.array);
+        AABB.addChild(new JsonValue(temp.x * scalars.x));
+        AABB.addChild(new JsonValue(temp.y * scalars.y));
+        AABB.addChild(new JsonValue(assetAABB.getFloat("width")));
+        AABB.addChild(new JsonValue(assetAABB.getFloat("height")));
+        AABB.addChild(new JsonValue(scalars.x));
+        AABB.addChild(new JsonValue(scalars.y));
+        data.addChild("AABB", AABB);
+
+        // load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
+        JsonValue hitboxPoints = tileSetJson.get(1);
+        JsonValue polygon = hitboxPoints.get("polygon");
+        JsonValue shape = new JsonValue(JsonValue.ValueType.array);
+        float ox = hitboxPoints.getFloat("x");
+        float oy = hitboxPoints.getFloat("y");
+        scalars.x *= horizontalFlipped ? -1 : 1;
+        for (int idx = 0; idx < polygon.size; idx++){
+            JsonValue jv = polygon.get(idx);
+            readPosition(jv, temp);
+            // adding the points of polygon onto polygon origin converts the vertex position to asset coordinates
+            temp.add(ox, oy);
+            // now change to cartesian coordinates centered on bird
+            changeOrigins(temp,-0.5f * assetWidth, 0.5f * assetHeight);
+            temp.scl(scalars);
+            shape.addChild(new JsonValue(temp.x));
+            shape.addChild(new JsonValue(temp.y));
+        }
+        data.addChild("points", shape);
+
+        // Remaining: set bird properties and complete their path
+        // the resulting path should be stored as a list of floats which is Json array of Json floats.
+        float moveSpeed = 0;
+        float atkSpeed = 0;
+        // path birds are red and brown
+        if (color.equals("red") || color.equals("brown")){
+            // update properties
+            moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
+            // using custom properties to find rest of path
+            // this takes either the bird's next point along its path or take from default (which should be 0)
+            int next = getFromProperties(properties, "path", defaults).asInt();
+            int idx = 1;
+            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                seen.put(next, idx);
+                idx++;
+                JsonValue nodeData = trajectory.get(next);
+                // put path point (x,y) into vector cache and perform conversion
+                readPositionAndConvert(nodeData, temp);
+                // add this node to bird's path
+                pathJson.addChild(new JsonValue(temp.x));
+                pathJson.addChild(new JsonValue(temp.y));
+                // get next
+                nodeData = nodeData.get("properties");
+                next = getFromProperties(nodeData, "next_trajectory", pointDefault).asInt();
+            }
+            if (seen.containsKey(next)){
+                // -1 if no loop otherwise last node on path points to a node already on path
+                data.addChild("loopTo", new JsonValue(seen.get(next, -1)));
+            }
+        }
+
+        if (doesBirdAttack(color)){
+            atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
+        }
+        data.addChild("path", pathJson);
+        data.addChild("movespeed", new JsonValue(moveSpeed));
+        data.addChild("atkspeed", new JsonValue(atkSpeed));
+        return data;
+    }
+
+    /**
      * Convert raw bird JSON into game-expected JSON format.
      * @param rawData the unprocessed bird object data
      * @param trajectory map of path node Ids to raw JSON
      */
     private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         birdData = new JsonValue[rawData.size()];
-        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < birdData.length; ii++) {
-            seen.clear();
-            // b = raw bird data
-            JsonValue b = rawData.get(ii);
-            seen.put(b.getInt("id"), 0);
-            // data = the bird JSON that game will read
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            String variant = b.getString("template", "UNKNOWN");
-            String color = computeColor(variant);
-            JsonValue properties = b.get("properties");
-            JsonValue defaultObj = getBirdDefaults(color);
-            JsonValue defaults = defaultObj.get("properties");
-            // set deterministic trivial properties
-            data.addChild("color", new JsonValue(color));
-            data.addChild("attack", new JsonValue(doesBirdAttack(color)));
-            // add whether facing right
-            boolean facingRight = isBirdInitiallyFacingRight(color);
-            boolean horizontalFlipped = (b.getLong("gid", 0) & 1L << 31) != 0;
-            // XOR(flip, facingRight) => if flip then !facingRight else facingRight
-            facingRight = horizontalFlipped ^ facingRight;
-            data.addChild("facing_right", new JsonValue(facingRight));
-
-            // The following is procedure to: set position, hit-box, AABB data
-            readPositionAndConvert(b, temp);
-            addPosition(data, temp);
-            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
-            // implicitly, the bird's location is the FIRST point on their path.
-            pathJson.addChild(new JsonValue(temp.x));
-            pathJson.addChild(new JsonValue(temp.y));
-
-            // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
-            JsonValue tsJson = tileSetJsonMap.get(color + "_bird");
-            int assetWidth = tsJson.getInt("tilewidth");
-            int assetHeight = tsJson.getInt("tileheight");
-            data.addChild("filmStripWidth", new JsonValue(assetWidth));
-            data.addChild("filmStripHeight", new JsonValue(assetHeight));
-            // the first objects section contains AABB and hitbox information in order of AABB then hitbox.
-            JsonValue tileSetJson = tsJson.get("tiles").get(0).get("objectgroup").get("objects");
-            JsonValue assetAABB = tileSetJson.get(0);
-            // load the AABB top left corner position and then convert it to have origin centered on bird's position
-            readPosition(assetAABB, temp);
-            // the asset's origin is the asset's top corner which is exactly half of the texture to the left and up.
-            changeOrigins(temp, -0.5f * assetWidth, 0.5f * assetHeight);
-            // the dimension of the bird (in pixel coordinates), which is a scaled version of the original
-            float tileWidth = getFromObject(b, "width", defaultObj).asFloat();
-            float tileHeight = getFromObject(b, "height", defaultObj).asFloat();
-            // compute the scale factors of both dimensions to yield correct AABB starting location and dimensions
-            scalars.set(tileWidth/assetWidth/tileScale.x, tileHeight/assetHeight/tileScale.y);
-
-            // the AABB is specified entirely in game coordinates relative to the bird's position
-            // AABB[0 ... 5] = {corner x, corner y, asset AABB width, asset AABB height, width scl, height scl}
-            JsonValue AABB = new JsonValue(JsonValue.ValueType.array);
-            AABB.addChild(new JsonValue(temp.x * scalars.x));
-            AABB.addChild(new JsonValue(temp.y * scalars.y));
-            AABB.addChild(new JsonValue(assetAABB.getFloat("width")));
-            AABB.addChild(new JsonValue(assetAABB.getFloat("height")));
-            AABB.addChild(new JsonValue(scalars.x));
-            AABB.addChild(new JsonValue(scalars.y));
-            data.addChild("AABB", AABB);
-
-            // load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
-            JsonValue hitboxPoints = tileSetJson.get(1);
-            JsonValue polygon = hitboxPoints.get("polygon");
-            JsonValue shape = new JsonValue(JsonValue.ValueType.array);
-            float ox = hitboxPoints.getFloat("x");
-            float oy = hitboxPoints.getFloat("y");
-            scalars.x *= horizontalFlipped ? -1 : 1;
-            for (int idx = 0; idx < polygon.size; idx++){
-                JsonValue jv = polygon.get(idx);
-                readPosition(jv, temp);
-                // adding the points of polygon onto polygon origin converts the vertex position to asset coordinates
-                temp.add(ox, oy);
-                // now change to cartesian coordinates centered on bird
-                changeOrigins(temp,-0.5f * assetWidth, 0.5f * assetHeight);
-                temp.scl(scalars);
-                shape.addChild(new JsonValue(temp.x));
-                shape.addChild(new JsonValue(temp.y));
-            }
-            data.addChild("points", shape);
-
-            // Remaining: set bird properties and complete their path
-            // the resulting path should be stored as a list of floats which is Json array of Json floats.
-            float moveSpeed = 0;
-            float atkSpeed = 0;
-            // path birds are red and brown
-            if (color.equals("red") || color.equals("brown")){
-                // update properties
-                moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
-                // using custom properties to find rest of path
-                // this takes either the bird's next point along its path or take from default (which should be 0)
-                int next = getFromProperties(properties, "path", defaults).asInt();
-                int idx = 1;
-                while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
-                    seen.put(next, idx);
-                    idx++;
-                    JsonValue nodeData = trajectory.get(next);
-                    // put path point (x,y) into vector cache and perform conversion
-                    readPositionAndConvert(nodeData, temp);
-                    // add this node to bird's path
-                    pathJson.addChild(new JsonValue(temp.x));
-                    pathJson.addChild(new JsonValue(temp.y));
-                    // get next
-                    nodeData = nodeData.get("properties");
-                    next = getFromProperties(nodeData, "next_trajectory", pointDefault).asInt();
-                }
-                if (seen.containsKey(next)){
-                    // -1 if no loop otherwise last node on path points to a node already on path
-                    data.addChild("loopTo", new JsonValue(seen.get(next, -1)));
-                }
-            }
-
-            if (doesBirdAttack(color)){
-                atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
-            }
-            data.addChild("path", pathJson);
-            data.addChild("movespeed", new JsonValue(moveSpeed));
-            data.addChild("atkspeed", new JsonValue(atkSpeed));
+            JsonValue data = processBird(rawData.get(ii), trajectory);
             birdData[ii] = data;
         }
     }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool;
+import com.ibm.j9ddr.vm29.pointer.generated._jdoubleArrayPointer;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
@@ -26,12 +27,10 @@ public class NestHazard extends PolygonObstacle {
     private PooledList<BirdHazard> birdList;
     private int spawnInCountdown;
     private boolean drawSpawnIn;
+    private JsonValue blueData;
 
-<<<<<<< Updated upstream
-    public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
-=======
-    public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdAnimation){
->>>>>>> Stashed changes
+    public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb,
+                      Vector2 scl, Texture birdAnimation, JsonValue blueData){
         super(points, x, y);
 
         this.path = path;
@@ -45,37 +44,38 @@ public class NestHazard extends PolygonObstacle {
         this.birdFlapAnimation = birdAnimation;
         // TODO: better memory allocation with PooledList
         birdList = new PooledList<>();
+        this.blueData = blueData;
 
         spawnInCountdown = 7;
         drawSpawnIn = false;
-        //TextureRegion[][] flapTmpFrames = TextureRegion.split(birdTex, (int) filmStripSize.x, (int) filmStripSize.y);
-        //int columns = flapTmpFrames.length == 0? 0 : flapTmpFrames[0].length;
-        //TextureRegion[] flapAnimationFrames = new TextureRegion[flapTmpFrames.length * columns];
-        //birdTex = flapAnimationFrames[0];
+        TextureRegion[][] flapTmpFrames = TextureRegion.split(birdAnimation, blueData.getInt("filmStripWidth"),
+                blueData.getInt("filmStripHeight"));
+        int columns = flapTmpFrames.length == 0? 0 : flapTmpFrames[0].length;
+        TextureRegion[] flapAnimationFrames = new TextureRegion[flapTmpFrames.length * columns];
+        birdTex = flapAnimationFrames[0];
     }
 
     public BirdHazard update(){
         if(countdown == 0){
             countdown = spawnDelay;
             BirdHazard obj;
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            data.addChild("color", new JsonValue("blue"));
-            data.addChild("attack", new JsonValue(false));
-            data.addChild("facing_right", new JsonValue(false));
+            JsonValue data = blueData;
+            //data.addChild("color", new JsonValue("blue"));
+            //data.addChild("attack", new JsonValue(false));
+
+
             data.addChild("x", new JsonValue(getX()));
             data.addChild("y", new JsonValue(getY()));
-            //filmstripwdith
-            //filmstripheight
-            //aabb
-            //points
             JsonValue p = new JsonValue(JsonValue.ValueType.array);
             for(int i=0; i<path.length; i++) {
                 p.addChild(new JsonValue(path[i]));
             }
             data.addChild("path", p);
-            data.addChild("loop", new JsonValue(false));
+
+            boolean right = path[2] - getX() > 0;
+            data.addChild("facing_right", new JsonValue(right));
+
             data.addChild("movespeed", new JsonValue(birdSpeed));
-            data.addChild("atkspeed", new JsonValue(0));
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(birdFlapAnimation);
