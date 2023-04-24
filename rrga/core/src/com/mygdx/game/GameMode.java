@@ -12,12 +12,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.util.*;
-import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
-import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
 
 public class GameMode implements Screen {
@@ -453,23 +450,37 @@ public class GameMode implements Screen {
         }
 
 
-        // draw all game objects, these objects are "dynamic"
+        // draw all game objects + stickers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
-        PooledList<Obstacle> objects = gameplayController.getObjects();
-        for(Obstacle obj : gameplayController.getObjects()) {
-            obj.draw(canvas);
-        }
-
-        // draw all stickers
-        for (Sticker sticker : parser.getStickers()){
-            sticker.draw(canvas, scale);
+        float ax = avatar.getX();
+        float ay = avatar.getY();
+        int count = 0;
+        for(Drawable drawable : gameplayController.getDrawables()) {
+            if (drawable instanceof PlayerModel){
+                drawable.draw(canvas);
+                gameplayController.getLevelContainer().getUmbrella().draw(canvas);
+            }
+            else {
+                cache.set(drawable.getBoxCorner());
+                float bx = cache.x;
+                float by = cache.y;
+                cache.set(drawable.getDimensions());
+                float width = cache.x;
+                float height = cache.y;
+                if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
+                    || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+                    continue;
+                }
+                drawable.draw(canvas);
+            }
+            count++;
         }
 
         canvas.end();
 
         if (debug) {
             canvas.beginDebug();
-            for(Obstacle obj : objects) {
+            for(Obstacle obj : gameplayController.getObjects()) {
                 obj.drawDebug(canvas);
             }
             canvas.endDebug();
@@ -504,6 +515,8 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
             canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
                     debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
+            canvas.drawText("Objects Drawn:" + (count + 1),
+                    debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
         }
         canvas.end();
     }

@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
-
+import com.mygdx.game.utility.util.Sticker;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -125,6 +125,13 @@ public class LevelParser {
     /** map used to track visited trajectory */
     private final IntIntMap seen = new IntIntMap(16);
 
+    /** the depth of the current layer being parsed*/
+    private int currentObjectDepth;
+
+    private int playerDepth;
+
+    private int goalDepth;
+
     /**
      * @return tile texture layers
      */
@@ -183,6 +190,10 @@ public class LevelParser {
     public Vector2 getWorldSize(){ return worldSize; }
 
     public ArrayList<Sticker> getStickers(){ return stickers; }
+
+    public int getPlayerDrawDepth(){ return playerDepth; }
+
+    public int getGoalDrawDepth(){ return goalDepth; }
 
     public LevelParser(AssetDirectory directory){
         globalConstants = directory.getEntry("global:constants", JsonValue.class);
@@ -302,13 +313,15 @@ public class LevelParser {
         ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
 
         JsonValue rawLayers = levelData.get("layers");
-        // flatten all layers (all object layers are put together)
+        // flatten all layers (all object layers are put together WITH depth considered)
         // - hazards and obstacle data are placed into their respective containers
         // - processing begins after all data is collected.
+        currentObjectDepth = rawLayers.size;
         for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData, windDirs, movingPlatRawData, staticHazardRawData);
+                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData,
+                        windDirs, movingPlatRawData, staticHazardRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -316,6 +329,7 @@ public class LevelParser {
             else {
                 System.err.println("LEVEL DATA JSON FORMATTING VIOLATED");
             }
+            currentObjectDepth--;
         }
 
         // begin object processing
@@ -341,6 +355,7 @@ public class LevelParser {
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
+            obj.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
             String template = obj.getString("template", "IGNORE");
             if (template.contains("bird.json")) {
                 birdRawData.add(obj);
@@ -352,8 +367,10 @@ public class LevelParser {
                 trajectory.put(obj.getInt("id"), obj);
             } else if (template.contains("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
+                playerDepth = currentObjectDepth;
             } else if (template.contains("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
+                goalDepth = currentObjectDepth;
             } else if (template.contains("static_hazard.json")){
                 staticHazardRawData.add(obj);
             } else if (template.contains("wind.json")){
@@ -387,7 +404,7 @@ public class LevelParser {
         float x = temp.x;
         float y = temp.y;
         JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
-        stickers.add(new Sticker(x,y, AABB, texture));
+        stickers.add(new Sticker(x,y, obj.getInt("__DEPTH__", -1), AABB, texture));
     }
 
     /**
@@ -554,6 +571,7 @@ public class LevelParser {
             JsonValue defaultObj = getBirdDefaultObj(color);
             JsonValue defaults = defaultObj.get("properties");
             // set deterministic trivial properties
+            data.addChild("depth", new JsonValue(b.getInt("__DEPTH__", -1)));
             data.addChild("color", new JsonValue(color));
             data.addChild("attack", new JsonValue(doesBirdAttack(color)));
             // add whether facing right
@@ -632,6 +650,7 @@ public class LevelParser {
             data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
             data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
             data.addChild("strike_timer_offset", new JsonValue(getFromProperties(props, "strike_timer_offset", lightningDefault).asInt()));
+            data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
             lightningData[ii] = data;
         }
     }
@@ -647,6 +666,7 @@ public class LevelParser {
             readPositionAndConvert(p, temp);
             addPosition(data, temp);
             data.addChild("points", polyPoints(p.get("polygon"), platformDefaultPoly));
+            data.addChild("depth", new JsonValue(p.getInt("__DEPTH__", -1)));
             platformData[ii] = data;
         }
     }
@@ -662,6 +682,7 @@ public class LevelParser {
             readPositionAndConvert(sh, temp);
             addPosition(data, temp);
             data.addChild("points", polyPoints(sh.get("polygon"), staticHazardDefaultPoly));
+            data.addChild("depth", new JsonValue(sh.getInt("__DEPTH__", -1)));
             staticHazardData[ii] = data;
         }
     }
@@ -685,6 +706,7 @@ public class LevelParser {
             JsonValue props = w.get("properties");
             data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
             data.addChild("direction", computeWindDirection(props, windDirs));
+            data.addChild("depth", new JsonValue(w.getInt("__DEPTH__", -1)));
             windData[ii] = data;
         }
     }
@@ -712,6 +734,7 @@ public class LevelParser {
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //moving platform raw data
             JsonValue mp = rawData.get(ii);
+            data.addChild("depth", new JsonValue(mp.getInt("__DEPTH__", -1)));
             //set position and load position into path.
             readPositionAndConvert(mp, temp);
             addPosition(data, temp);

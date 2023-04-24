@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.util.Drawable;
 
 import java.util.Arrays;
 
@@ -22,7 +23,7 @@ import java.util.Arrays;
  * Currently extends PolygonObstacle to allow for different shaped wind gusts, but may want to change later
  * to make drawing manageable/easier
  */
-public class WindModel extends PolygonObstacle {
+public class WindModel extends PolygonObstacle implements Drawable {
 
     private static final float STRONG_WIND_SPEED = 20.0f;
     private static final float MED_WIND_SPEED = 15.0f;
@@ -49,6 +50,14 @@ public class WindModel extends PolygonObstacle {
     private PolygonRegion drawRegion;
     private float xOffset;
     private float yOffset;
+
+    /** draw depth */
+    private final int depth;
+
+    private final Vector2 temp = new Vector2();
+
+    /** (x,y) offset of the AABB top corner from polygon origin */
+    private Vector2 boxCoordinate;
 
     public WindModel(JsonValue data) {
         super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
@@ -82,6 +91,24 @@ public class WindModel extends PolygonObstacle {
         setRestitution(0);
         fixture.isSensor = true;
         this.data = data;
+        this.depth = data.getInt("depth");
+
+        // compute tight AABB top right corner
+        boxCoordinate = new Vector2();
+        float[] points = data.get("dimensions").asFloatArray();
+        float minx = points[0];
+        float maxy = points[1];
+
+        for(int ii = 2; ii < points.length; ii += 2) {
+            if (points[ii] < minx) {
+                minx = points[ii];
+            }
+            if (points[ii+1] > maxy) {
+                maxy = points[ii+1];
+            }
+        }
+        boxCoordinate.set(minx, maxy);
+
     }
 
     public boolean activatePhysics(World world) {
@@ -180,5 +207,20 @@ public class WindModel extends PolygonObstacle {
 
         canvas.draw(p, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
                     direction-((float) Math.PI/2),1,1);
+    }
+
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(super.getDimension());
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return this.depth;
     }
 }

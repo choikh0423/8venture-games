@@ -19,6 +19,7 @@ import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
 
@@ -59,7 +60,7 @@ public class GameplayController implements ContactListener {
     /**
      * All the objects in the world.
      */
-    protected PooledList<Obstacle> objects = new PooledList<>();
+    protected PooledList<Obstacle> objects;
 
     /**
      * Queue for adding objects
@@ -565,15 +566,12 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            if(bird.getAABBx() + bird.getX() > bounds.width
-                    || bird.getAABBy() + bird.getY() < 0
-                    || bird.getAABBx() + bird.getWidth() + + bird.getX() < 0
-                    || bird.getAABBy() - bird.getHeight() + bird.getY() > bounds.height) {
-                //IS THIS SUFFICIENT FOR DELETION?
-                objects.remove(bird);
-                birds.remove(bird);
-                bird.deactivatePhysics(world);
+            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
+                    || bird.getAABBx() + bird.getWidth() < 0
+                    || bird.getAABBy() - bird.getHeight() > bounds.height) {
+                //mark removed so that it is garbage collected at end of update loop
                 bird.markRemoved(true);
+                continue;
             }
 
             float bx = bird.getX();
@@ -691,14 +689,25 @@ public class GameplayController implements ContactListener {
             }
         }
 
+        // delete from drawables if some object has been deleted
+        // INVARIANT: sorted list after removals is still sorted.
+        Iterator<PooledList<Drawable>.Entry> iterator2 = levelContainer.getDrawables().entryIterator();
+        while (iterator2.hasNext()){
+            PooledList<Drawable>.Entry entry = iterator2.next();
+            Drawable drawable = entry.getValue();
+            if (drawable instanceof Obstacle && ((Obstacle) drawable).isRemoved()) {
+                entry.remove();
+            }
+        }
+
         // Set objects from level container
         // TODO: (review) Delete the following, object properties are changed but references are not.
-        levelContainer.setWorld(world);
-        levelContainer.setAvatar(avatar);
-        levelContainer.setObjects(objects);
-        levelContainer.setUmbrella(umbrella);
-        levelContainer.setLightnings(lightnings);
-        levelContainer.setBirds(birds);
+//        levelContainer.setWorld(world);
+//        levelContainer.setAvatar(avatar);
+//        levelContainer.setObjects(objects);
+//        levelContainer.setUmbrella(umbrella);
+//        levelContainer.setLightnings(lightnings);
+//        levelContainer.setBirds(birds);
     }
 
     /**
@@ -907,6 +916,10 @@ public class GameplayController implements ContactListener {
      */
     public PooledList<Obstacle> getObjects() {
         return levelContainer.getObjects();
+    }
+
+    public PooledList<Drawable> getDrawables(){
+        return levelContainer.getDrawables();
     }
 
     public void setScale(Vector2 scale) {
