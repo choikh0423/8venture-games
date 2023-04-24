@@ -89,7 +89,8 @@ public class NestHazard extends PolygonObstacle {
     }
 
     public void draw(GameCanvas canvas){
-        //canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
+                getAngle(), scale.x, scale.y);
 
         if(countdown<22 && countdown>0){
             if (spawnInCountdown == 0){
@@ -97,8 +98,8 @@ public class NestHazard extends PolygonObstacle {
                 drawSpawnIn = !drawSpawnIn;
             }
             if(drawSpawnIn){
-                System.out.println(birdTex);
-                canvas.draw(birdTex, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+                canvas.draw(birdTex, Color.WHITE, birdTex.getRegionWidth()/2f, birdTex.getRegionHeight()/2f,
+                        getX() * drawScale.x, getY() * drawScale.y, getAngle(), scale.x, scale.x);
             }
             spawnInCountdown--;
         }
