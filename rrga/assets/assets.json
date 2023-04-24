@@ -18,6 +18,9 @@
         "menu:sliderBar": "menu/slider_bar.png",
         "menu:sliderKnob": "menu/slider_dot.png",
         "game:background" : "game/background.png",
+        "game:skylayerA" : "game/parallax/skylayerA.png",
+        "game:skylayerB" : "game/parallax/skylayerB.png",
+        "game:skylayerC" : "game/parallax/skylayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
           "file":   "game/windgust_waves.png",
@@ -72,7 +75,7 @@
         "game:red_bird_flapping" : "levels/objects/asset/bird_nice_flapping.png",
         "game:blue_bird_flapping" : "levels/objects/asset/blue_bird_flapping.png",
         "game:green_bird_flapping" : "levels/objects/asset/bird_nest_flapping.png",
-        "game:brown_bird_flapping" : "levels/objects/asset/bird_hard_brown.png",
+        "game:brown_bird_flapping" : "levels/objects/asset/bird_brown_flapping.png",
         "game:bird_warning" : "game/hazard/annoy.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
