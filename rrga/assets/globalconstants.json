@@ -33,7 +33,7 @@
     "maxhealth": 3,
     "drag_x" : 10,
     "drag_y" : 5,
-    "lighter_force": 8,
+    "lighter_force": 5,
     "lighter_fuel": 150,
     "lighter_change_rate": 1
   },
