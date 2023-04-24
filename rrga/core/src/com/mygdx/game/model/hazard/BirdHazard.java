@@ -198,9 +198,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         return depth;
     }
 
-    public float getAABBx(){ return boxCoordinate.x; }
+    public float getAABBx(){ return boxCoordinate.x + getX(); }
 
-    public float getAABBy(){ return boxCoordinate.y; }
+    public float getAABBy(){ return boxCoordinate.y + getY(); }
 
     /** the radius of player detection */
     public int getSensorRadius() {return sensorRadius;}

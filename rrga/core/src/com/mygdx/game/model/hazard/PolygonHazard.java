@@ -105,7 +105,7 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
             if (points[ii] < minx) {
                 minx = points[ii];
             }
-            if (points[ii] > maxy) {
+            if (points[ii+1] > maxy) {
                 maxy = points[ii+1];
             }
         }

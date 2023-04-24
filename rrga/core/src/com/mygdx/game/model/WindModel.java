@@ -103,7 +103,7 @@ public class WindModel extends PolygonObstacle implements Drawable {
             if (points[ii] < minx) {
                 minx = points[ii];
             }
-            if (points[ii] > maxy) {
+            if (points[ii+1] > maxy) {
                 maxy = points[ii+1];
             }
         }

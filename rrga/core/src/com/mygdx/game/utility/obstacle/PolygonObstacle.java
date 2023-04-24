@@ -181,7 +181,7 @@ public class PolygonObstacle extends SimpleObstacle {
 			}
 			if (vertices[ii+1] < miny) {
 				miny = vertices[ii+1];
-			} else if (vertices[ii] > maxy) {
+			} else if (vertices[ii+1] > maxy) {
 				maxy = vertices[ii+1];
 			}
 		}
