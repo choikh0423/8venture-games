@@ -122,6 +122,10 @@ public class LevelContainer{
      * Texture asset for lightning
      */
     private TextureRegion lightningTexture;
+    /**
+     * Texture asset for nests
+     */
+    private TextureRegion nestTexture;
 
     // Start of animation texture
     /**
@@ -238,6 +242,7 @@ public class LevelContainer{
         brownBirdAnimationTexture = directory.getEntry("game:brown_bird_flapping", Texture.class);
         
         warningTexture = directory.getEntry("game:bird_warning", Texture.class);
+        nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
 
         lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
 
@@ -377,6 +382,9 @@ public class LevelContainer{
             obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
                     jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
                     birdDamage, birdKnockback, scale, getFlapAnimationTexture("blue"), blueData);
+            obj.setDrawScale(scale);
+            obj.setTexture(nestTexture);
+            obj.setName("nest" + ii);
             addObject(obj);
             nests.add(obj);
         }

@@ -31,6 +31,11 @@ public class NestHazard extends PolygonObstacle {
     public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb,
                       Vector2 scl, Texture birdAnimation, JsonValue blueData){
         super(points, x, y);
+        setGravityScale(0);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
+        setSensor(true);
 
         this.path = path;
         birdSpeed = spd;
@@ -46,7 +51,7 @@ public class NestHazard extends PolygonObstacle {
         birdList = new PooledList<>();
         this.blueData = blueData;
 
-        spawnInCountdown = 7;
+        spawnInCountdown = 0;
         drawSpawnIn = false;
         TextureRegion[][] flapTmpFrames = TextureRegion.split(birdAnimation, blueData.getInt("filmStripWidth"),
                 blueData.getInt("filmStripHeight"));
@@ -62,7 +67,8 @@ public class NestHazard extends PolygonObstacle {
             JsonValue data = blueData;
             //data.addChild("color", new JsonValue("blue"));
             //data.addChild("attack", new JsonValue(false));
-
+            data.remove("x");
+            data.remove("y");
             data.addChild("x", new JsonValue(getX()));
             data.addChild("y", new JsonValue(getY()));
 //            JsonValue p = new JsonValue(JsonValue.ValueType.array);
@@ -71,9 +77,11 @@ public class NestHazard extends PolygonObstacle {
 //            }
 //            data.addChild("path", p);
 
+            data.remove("facing_right");
             boolean right = path[2] - getX() > 0;
             data.addChild("facing_right", new JsonValue(right));
 
+            data.remove("movespeed");
             data.addChild("movespeed", new JsonValue(birdSpeed));
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
@@ -89,17 +97,20 @@ public class NestHazard extends PolygonObstacle {
     }
 
     public void draw(GameCanvas canvas){
-        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
-                getAngle(), scale.x, scale.y);
+        canvas.draw(texture, Color.WHITE, texture.getRegionWidth()/2f, texture.getRegionHeight()/2f,
+                getX() * drawScale.x, getY() * drawScale.y, getAngle(), .1f, .1f);
 
-        if(countdown<22 && countdown>0){
+        int duration = 20;
+        int num_flashes = 3;
+        if(countdown < duration * num_flashes * 2 + 1 && countdown>0){
             if (spawnInCountdown == 0){
-                spawnInCountdown = 7;
+                spawnInCountdown = duration;
                 drawSpawnIn = !drawSpawnIn;
             }
             if(drawSpawnIn){
+                //TODO size birds automatically
                 canvas.draw(birdTex, Color.WHITE, birdTex.getRegionWidth()/2f, birdTex.getRegionHeight()/2f,
-                        getX() * drawScale.x, getY() * drawScale.y, getAngle(), scale.x, scale.x);
+                        getX() * scale.x, getY() * scale.y, getAngle(), .5f, .5f);
             }
             spawnInCountdown--;
         }

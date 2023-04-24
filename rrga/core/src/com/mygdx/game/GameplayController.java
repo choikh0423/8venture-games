@@ -575,7 +575,7 @@ public class GameplayController implements ContactListener {
 
             if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
                     || bird.getAABBx() + bird.getWidth() < 0 || bird.getAABBy() - bird.getHeight() > bounds.height) {
-                //IS THIS SUFFICIENT FOR DELETION?
+                //TODO IS THIS SUFFICIENT FOR DELETION?
                 objects.remove(bird);
                 birds.remove(bird);
                 bird.deactivatePhysics(world);
@@ -652,9 +652,10 @@ public class GameplayController implements ContactListener {
         for(NestHazard n: nests){
             BirdHazard b = n.update();
             if(b != null){
-                objects.add(b);
+                //TODO if references to level container change, need to add to gameplay controller lists
+                levelContainer.objects.add(b);
                 b.activatePhysics(world);
-                birds.add(b);
+                levelContainer.getBirds().add(b);
             }
         }
     }

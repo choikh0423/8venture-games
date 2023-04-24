@@ -1184,9 +1184,31 @@
                 }, 
                 {
                  "id":140,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":5
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":142
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":400
+                        }],
                  "template":"templates\/nest.json",
-                 "x":2327.54784156653,
-                 "y":3711.61548731642
+                 "x":2561.33699022114,
+                 "y":3773.37111148934
+                }, 
+                {
+                 "id":142,
+                 "template":"templates\/path_point.json",
+                 "x":-16612.7082317321,
+                 "y":3097.12495028985
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1195,7 +1217,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":141,
+ "nextobjectid":143,
  "orientation":"orthogonal",
  "renderorder":"right-up",
  "tiledversion":"1.10.1",

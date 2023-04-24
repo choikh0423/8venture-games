@@ -45,7 +45,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         LOOP,
         FORWARD,
         REVERSE,
-        STATIONARY
+        STATIONARY,
     }
 
     private final int ATTACK_WAIT_TIME = 50;
