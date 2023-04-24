@@ -6,7 +6,7 @@
       "name": "blue_bird",
       "properties": [
          {
-            "name": "atk_speed",
+            "name": "move_speed",
             "type": "float",
             "value": 20
          }

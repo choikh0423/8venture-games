@@ -49,7 +49,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         STATIONARY
     }
 
-    private final int ATTACK_WAIT_TIME = 50;
+    private static final int ATTACK_WAIT_TIME = 80;
 
     /**
      * Attack speed of this bird
@@ -131,6 +131,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
 
     /** Bird flap animation*/
     private Animation<TextureRegion> flapAnimation;
+
+    /** Still Frame */
+    private TextureRegion stillFrame;
 
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
@@ -227,7 +230,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     /**
      * Sets bird flapping animation
      */
-    public void setFlapAnimation(Texture flapTexture) {
+    public void setFlapAnimation(Texture flapTexture, int stillFrameIndex) {
         if (flapTexture == null) {
             return;
         }
@@ -247,6 +250,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         }
         // Adjust frame duration here
         this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
+        this.stillFrame = flapAnimationFrames[stillFrameIndex];
     }
 
     public void setWarningAnimation(Texture warningTexture){
@@ -481,14 +485,24 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
             effect = faceRight ? -1.0f : 1f;
         }
 
-        flapElapsedTime += Gdx.graphics.getDeltaTime();
-        TextureRegion birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
+        TextureRegion birdRegion = stillFrame;
+        if (!seesTarget && moveSpeed == 0){
+            // not angry + not moving => still
+            canvas.draw(birdRegion, Color.WHITE, stillFrame.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                    effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
+                    dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+        }
+        else {
+            // moving/angry => flapping
+            flapElapsedTime += Gdx.graphics.getDeltaTime();
+            birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
 
-        canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth()/2f, birdRegion.getRegionHeight()/2f,
-                (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
-                effect * dimensions.x/birdRegion.getRegionWidth() * drawScale.x,
-                dimensions.y/birdRegion.getRegionHeight() * drawScale.y);
-
+            canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                    effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
+                    dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+        }
 
         if(warning){
             warningElapsedTime += Gdx.graphics.getDeltaTime();

@@ -213,7 +213,6 @@ public class UmbrellaModel extends BoxObstacle {
         //boosting
         else{
             boostElapsedTime += Gdx.graphics.getDeltaTime();
-            System.out.println(boostElapsedTime);
             t = boostAnimation.getKeyFrame(boostElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),

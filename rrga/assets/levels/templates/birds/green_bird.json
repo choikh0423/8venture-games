@@ -1,24 +1,24 @@
-{
-   "object": {
-      "gid": 1,
-      "height": 242,
-      "id": 109,
-      "name": "green_bird",
-      "properties": [
-         {
-            "name": "atk_speed",
-            "type": "float",
-            "value": 15
-         }
-      ],
-      "rotation": 0,
-      "type": "bird",
-      "visible": true,
-      "width": 199
-   },
-   "tileset": {
-      "firstgid": 1,
-      "source": "..\/..\/objects\/json\/green_bird_tile.json"
-   },
-   "type": "template"
+{ "object":
+    {
+     "gid":1,
+     "height":242,
+     "id":138,
+     "name":"green_bird",
+     "properties":[
+            {
+             "name":"atk_speed",
+             "type":"float",
+             "value":15
+            }],
+     "rotation":0,
+     "type":"bird",
+     "visible":true,
+     "width":199
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/..\/objects\/json\/green_bird_tile.json"
+    },
+ "type":"template"
 }

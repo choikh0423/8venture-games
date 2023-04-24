@@ -236,12 +236,12 @@ public class LevelContainer{
      * @param color the color of the bird
      * @return texture of bird for the given value color.
      */
-    private Texture getFlapAnimationTexture(String color){
+    private Texture getFlapAnimationTexture(BirdHazard.BirdColor color){
         switch(color){
-            case "red": return redBirdAnimationTexture;
-            case "blue": return blueBirdAnimationTexture;
-            case "green": return greenBirdAnimationTexture;
-            case "brown": return brownBirdAnimationTexture;
+            case RED: return redBirdAnimationTexture;
+            case BLUE: return blueBirdAnimationTexture;
+            case GREEN: return greenBirdAnimationTexture;
+            case BROWN: return brownBirdAnimationTexture;
             default: return null;
         }
     }
@@ -413,12 +413,14 @@ public class LevelContainer{
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
         float birdKnockback = hazardsjv.getInt("birdKnockback");
+        // indices for each bird type indicating the preferred still frame.
+        int[] indices = hazardsjv.get("stillFrames").asIntArray();
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
             obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback, warningTexture);
             obj.setDrawScale(scale);
-            obj.setFlapAnimation(getFlapAnimationTexture(jv.getString("color", "red")));
+            obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
             obj.setName(birdName + ii);
             addObject(obj);

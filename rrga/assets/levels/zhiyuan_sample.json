@@ -14,7 +14,6 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":9,
          "id":6,
-         "locked":true,
          "name":"background",
          "opacity":1,
          "type":"tilelayer",

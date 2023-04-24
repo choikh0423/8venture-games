@@ -15,6 +15,7 @@
         "menu:toggle_check": "menu/toggle_check.png",
         "menu:level1_button": "menu/level1_button.png",
         "menu:level2_button": "menu/level2_button.png",
+        "menu:level3_button": "menu/level3_button.png",
         "menu:sliderBar": "menu/slider_bar.png",
         "menu:sliderKnob": "menu/slider_dot.png",
         "game:background" : "game/background.png",

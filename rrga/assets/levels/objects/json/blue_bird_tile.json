@@ -15,7 +15,6 @@
          "objectgroup":
             {
              "draworder":"index",
-             "id":2,
              "name":"",
              "objects":[
                     {
@@ -130,6 +129,13 @@
             }
         }],
  "tilewidth":232,
+ "transformations":
+    {
+     "hflip":true,
+     "preferuntransformed":false,
+     "rotate":false,
+     "vflip":false
+    },
  "type":"tileset",
  "version":"1.10"
 }

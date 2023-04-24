@@ -265,7 +265,7 @@ public class MenuMode extends MenuScreen {
         TextureRegion levelButtonTexture1 = new TextureRegion(directory.getEntry("menu:level1_button", Texture.class));
         TextureRegion levelButtonTexture2 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
         // TODO: Change this to level 3 button
-        TextureRegion levelButtonTexture3 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
+        TextureRegion levelButtonTexture3 = new TextureRegion(directory.getEntry("menu:level3_button", Texture.class));
 
         levelButton1.setTexture(levelButtonTexture1);
         levelButton2.setTexture(levelButtonTexture2);
