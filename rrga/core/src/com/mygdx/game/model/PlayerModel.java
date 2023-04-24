@@ -94,6 +94,14 @@ public class PlayerModel extends CapsuleObstacle {
 
 	/** health point texture region film strip */
 	private Texture hpFilmStrip;
+	/** Boost texture */
+	private TextureRegion[] boostTexture;
+
+	/** Boost temporary texture */
+	private TextureRegion[][] boostTempTexture;
+
+	/** boost texture region film strip */
+	private Texture boostFilmStrip;
 
 	/** The player's front view texture (this is the main texture for air) */
 	private TextureRegion frontTexture;
@@ -367,7 +375,25 @@ public class PlayerModel extends CapsuleObstacle {
 				count ++;
 			}
 		}
+	}
 
+	/**
+	 * sets the player's boost texture.
+	 * @param texture the boost texture
+	 */
+	public void setBoostTexture(Texture texture){
+		this.boostFilmStrip = texture;
+		boostTempTexture = TextureRegion.split(boostFilmStrip, boostFilmStrip.getWidth()/5, boostFilmStrip.getHeight()/2);
+		boostTexture = new TextureRegion[10];
+
+		// Ordering Texture Tile
+		int count = 0;
+		for (int i = 1; i > -1; i--){
+			for (int j = 4; j > -1; j--) {
+				boostTexture[count] = boostTempTexture[i][j];
+				count ++;
+			}
+		}
 	}
 
 	/**
@@ -761,11 +787,12 @@ public class PlayerModel extends CapsuleObstacle {
 		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
 				canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
 
-		// draw lighter info
-		float lighter_capac = lighterFuel / maxLighterFuel;
-		healthFont.setColor(Color.WHITE);
-		canvas.drawText(formatter.format(lighter_capac), healthFont, 10,
-				canvas.getHeight() - 90);
+		// TODO: Boost Texture is manually scaled at the moment
+		int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
+		canvas.draw(boostTexture[boost_capac],Color.WHITE,boostTexture[health].getRegionWidth()/2f,
+				boostTexture[health].getRegionHeight()/2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
+				0,0.3f,0.3f);
+
 	}
 
 	/**

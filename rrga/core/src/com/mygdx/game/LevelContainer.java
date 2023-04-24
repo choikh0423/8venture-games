@@ -133,6 +133,10 @@ public class LevelContainer{
      */
     private Texture hpTexture;
     /**
+     * Texture asset for boost timer
+     */
+    private Texture boostTexture;
+    /**
      * Texture asset for lightning
      */
     private TextureRegion lightningTexture;
@@ -253,6 +257,7 @@ public class LevelContainer{
         windTexture = new TextureRegion(directory.getEntry("game:wind", Texture.class));
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
+        boostTexture = directory.getEntry("game:boost", Texture.class);
         avatarIdleTexture = new TextureRegion(directory.getEntry("game:player_idle_animation", Texture.class));
 
         // Hazard Textures
@@ -469,6 +474,7 @@ public class LevelContainer{
         avatar.useSideTexture();
         // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(hpTexture);
+        avatar.setBoostTexture(boostTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
         avatar.setFallingAnimation(avatarFallingAnimationTexture);
         avatar.setIdleAnimation(avatarIdleTexture);
