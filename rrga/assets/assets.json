@@ -114,6 +114,8 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "tiled:level1" : "levels/level1.json",
+        "tiled:level2" : "levels/level2.json",
+        "tiled:level3" : "levels/level3.json",
         "red_bird:template": "levels/templates/birds/red_bird.json",
         "blue_bird:template": "levels/templates/birds/blue_bird.json",
         "green_bird:template": "levels/templates/birds/green_bird.json",
