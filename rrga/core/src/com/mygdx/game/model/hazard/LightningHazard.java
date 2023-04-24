@@ -29,10 +29,10 @@ public class LightningHazard extends PolygonHazard implements Drawable {
     private int strikeTimer;
 
     /** vector cache for computations, getters, etc */
-    private Vector2 temp;
+    private final Vector2 temp = new Vector2();
 
     /** draw depth */
-    private int depth;
+    private final int depth;
 
     public LightningHazard(JsonValue data) {
         super(data, LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
