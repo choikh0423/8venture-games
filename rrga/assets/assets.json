@@ -18,6 +18,9 @@
         "menu:sliderBar": "menu/slider_bar.png",
         "menu:sliderKnob": "menu/slider_dot.png",
         "game:background" : "game/background.png",
+        "game:skylayerA" : "game/parallax/skylayerA.png",
+        "game:skylayerB" : "game/parallax/skylayerB.png",
+        "game:skylayerC" : "game/parallax/skylayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
           "file":   "game/windgust_waves.png",
@@ -96,6 +99,7 @@
         "game:goal": "game/goal.png",
         "game:goal_animation": "game/goal_scarf_filmstrip.png",
         "game:hp_indicator": "game/health_indicator.png",
+        "game:boost": "game/dodge_timer.png",
         "tileset:bushes": "levels/tilesets/bushes.png",
         "tileset:trees": "levels/tilesets/trees.png",
         "tileset:cliffs": "levels/tilesets/cliffs.png",
@@ -114,6 +118,8 @@
     "jsons"  : {
         "global:constants" :"globalconstants.json",
         "tiled:level1" : "levels/level1.json",
+        "tiled:level2" : "levels/level2.json",
+        "tiled:level3" : "levels/level3.json",
         "red_bird:template": "levels/templates/birds/red_bird.json",
         "blue_bird:template": "levels/templates/birds/blue_bird.json",
         "green_bird:template": "levels/templates/birds/green_bird.json",
