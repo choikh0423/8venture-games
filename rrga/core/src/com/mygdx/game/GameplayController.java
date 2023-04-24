@@ -895,7 +895,7 @@ public class GameplayController implements ContactListener {
      */
     public void dispose() {
         // deactivate physics from remaining live objects
-        for (Obstacle obj : objects) {
+        for (Obstacle obj : levelContainer.getObjects()) {
             obj.deactivatePhysics(world);
         }
         // empty out of level container and world
