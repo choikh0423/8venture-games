@@ -259,7 +259,7 @@ public class GameplayController implements ContactListener {
     /** The background music volume */
     private float musicVolume = 0.5f;
     /** The sound effects volume */
-    private float SFXVolume = 0.5f;
+    private float SFXVolume = 0.0f;
 
     // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
 
