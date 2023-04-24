@@ -63,7 +63,8 @@ public class NestHazard extends PolygonObstacle {
             data.addChild("atkspeed", new JsonValue(0));
             obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
             obj.setDrawScale(scale);
-            obj.setFlapAnimation(birdTex);
+            // the 0 is temporary
+            obj.setFlapAnimation(birdTex, 0);
             return obj;
         }
         else{

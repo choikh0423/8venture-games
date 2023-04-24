@@ -14,7 +14,6 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":9,
          "id":6,
-         "locked":true,
          "name":"background",
          "opacity":1,
          "type":"tilelayer",
@@ -155,7 +154,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":235,
+ "nextobjectid":236,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
