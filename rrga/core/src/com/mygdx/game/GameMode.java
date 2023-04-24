@@ -12,9 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.util.*;
-import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.util.PooledList;
@@ -453,23 +451,21 @@ public class GameMode implements Screen {
         }
 
 
-        // draw all game objects, these objects are "dynamic"
+        // draw all game objects + stickers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
-        PooledList<Obstacle> objects = gameplayController.getObjects();
-        for(Obstacle obj : gameplayController.getObjects()) {
-            obj.draw(canvas);
-        }
 
-        // draw all stickers
-        for (Sticker sticker : parser.getStickers()){
-            sticker.draw(canvas, scale);
+        for(Drawable drawable : gameplayController.getDrawables()) {
+            drawable.draw(canvas);
+            if (drawable instanceof PlayerModel){
+                gameplayController.getLevelContainer().getUmbrella().draw(canvas);
+            }
         }
 
         canvas.end();
 
         if (debug) {
             canvas.beginDebug();
-            for(Obstacle obj : objects) {
+            for(Obstacle obj : gameplayController.getObjects()) {
                 obj.drawDebug(canvas);
             }
             canvas.endDebug();

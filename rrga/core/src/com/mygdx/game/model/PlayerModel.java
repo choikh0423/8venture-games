@@ -25,6 +25,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
+import com.mygdx.game.utility.util.Drawable;
 
 import java.text.DecimalFormat;
 
@@ -34,7 +35,7 @@ import java.text.DecimalFormat;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle {
+public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -76,7 +77,11 @@ public class PlayerModel extends CapsuleObstacle {
 	private int health;
 	public BitmapFont healthFont;
 
-	private static final DecimalFormat formatter = new DecimalFormat("0.00");
+	/** draw depth */
+	private int depth;
+
+	/** Cache for getters */
+	private final Vector2 temp = new Vector2();
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -493,7 +498,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public PlayerModel(JsonValue data, Vector2 pos, float width, float height, int maxHp) {
+	public PlayerModel(JsonValue data, Vector2 pos, float width, float height, int maxHp, int drawDepth) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	pos.x,
 				pos.y,
@@ -532,6 +537,7 @@ public class PlayerModel extends CapsuleObstacle {
 		iFrames = 0;
 
 		walkElapsedTime = 0f;
+		depth = drawDepth;
 	}
 
 	/**
@@ -807,5 +813,18 @@ public class PlayerModel extends CapsuleObstacle {
 		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
 
+	@Override
+	public Vector2 getDimensions() {
+		return temp.set(size[0], size[1]);
+	}
 
+	@Override
+	public int getDepth() {
+		return this.depth;
+	}
+
+	@Override
+	public Vector2 getBoxCorner() {
+		return temp.set(getX() - size[0]/2f, getY() + size[1]/2f);
+	}
 }

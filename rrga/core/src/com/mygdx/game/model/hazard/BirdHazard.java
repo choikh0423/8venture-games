@@ -11,11 +11,12 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.Drawable;
 
 /**
  * A multi-hit-box bird hazard.
  */
-public class BirdHazard extends ComplexObstacle implements HazardModel {
+public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable {
 
     public enum BirdColor {
         RED,
@@ -123,6 +124,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final Vector2 temp = new Vector2();
 
+    /** the bird's draw depth */
+    private final int depth;
+
     // <=============================== Animation objects start here ===============================>
 
     /** Bird flap animation*/
@@ -177,6 +181,21 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     public float getHeight(){
         return dimensions.y;
+    }
+
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(dimensions);
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return depth;
     }
 
     public float getAABBx(){ return boxCoordinate.x; }
@@ -303,6 +322,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         filmStripSize.y = data.getInt("filmStripHeight");
 
         // set remaining properties
+        depth = data.getInt("depth");
         path = data.get("path").asFloatArray();
         setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
         attack = data.getBoolean("attack");
@@ -581,11 +601,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         for (Obstacle o : bodies){
             o.setName(value + "_hitbox");
         }
-    }
-
-    @Override
-    public void setDrawScale(Vector2 value) {
-        super.setDrawScale(value);
     }
 
     @Override

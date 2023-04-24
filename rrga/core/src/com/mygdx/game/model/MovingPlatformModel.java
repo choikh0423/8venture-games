@@ -5,10 +5,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.utility.util.Drawable;
 
-import java.util.Arrays;
-
-public class MovingPlatformModel extends PolygonObstacle {
+public class MovingPlatformModel extends PolygonObstacle implements Drawable {
 
     // TODO: redesign class hierarchy. MovingPlatform is nothing but a REAL passive moving bird
     // TODO: too much code duplication from Bird class.
@@ -40,9 +39,8 @@ public class MovingPlatformModel extends PolygonObstacle {
         return dimensions.y;
     }
 
-    public float getAABBx(){ return boxCoordinate.x; }
-
-    public float getAABBy(){ return boxCoordinate.y; }
+    /** draw depth */
+    private final int depth;
 
     /** whether to horizontally flip */
     private final boolean flipped;
@@ -79,6 +77,8 @@ public class MovingPlatformModel extends PolygonObstacle {
      */
     private final Vector2 moveDir = new Vector2();
 
+    private final Vector2 temp = new Vector2();
+
 
     public MovingPlatformModel(JsonValue data, float[] points, float x, float y) {
         super(points, x, y);
@@ -87,6 +87,7 @@ public class MovingPlatformModel extends PolygonObstacle {
         currentPathIndex = 0;
         flipped = data.getBoolean("flipped");
         prevPos.set(getX(), getY());
+        depth = data.getInt("depth");
 
         // this is the bounding box dimensions of the cloud.
         // aabb = [x,y, width, height] where x,y is relative to bird coordinate
@@ -171,14 +172,18 @@ public class MovingPlatformModel extends PolygonObstacle {
                 dimensions.y/texture.getRegionHeight() * drawScale.y);
     }
 
-    /**
-     * Draws the outline of the physics body.
-     * <p>
-     * This method can be helpful for understanding issues with collisions.
-     *
-     * @param canvas Drawing context
-     */
-    public void drawDebug(GameCanvas canvas) {
-        super.drawDebug(canvas);
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(dimensions);
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return depth;
     }
 }

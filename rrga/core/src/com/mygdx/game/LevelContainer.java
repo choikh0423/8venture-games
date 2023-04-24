@@ -19,7 +19,11 @@ import com.mygdx.game.model.hazard.LightningHazard;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
+import com.mygdx.game.utility.util.Sticker;
+
+import java.util.*;
 
 public class LevelContainer{
     /**
@@ -48,6 +52,10 @@ public class LevelContainer{
      * Queue for adding objects
      */
     protected PooledList<Obstacle> addQueue;
+
+    /** A sorted list of drawbles by depth. */
+    protected PooledList<Drawable> drawables;
+
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
@@ -215,6 +223,7 @@ public class LevelContainer{
         nests = new ObjectSet<>();
 
         objects = new PooledList<Obstacle>();
+        drawables = new PooledList<Drawable>();
         addQueue = new PooledList<Obstacle>();
     }
 
@@ -302,6 +311,7 @@ public class LevelContainer{
         lightnings.clear();
         movingPlats.clear();
         nests.clear();
+        drawables.clear();
     }
 
     /**
@@ -314,7 +324,7 @@ public class LevelContainer{
         Vector2 goalPos = parser.getGoalPos();
         float dwidth = goalconst.getFloat("width");
         float dheight = goalconst.getFloat("height");
-        goalDoor = new GoalDoor(goalconst, goalPos.x, goalPos.y,dwidth, dheight);
+        goalDoor = new GoalDoor(goalconst, goalPos.x, goalPos.y,dwidth, dheight, parser.getGoalDrawDepth());
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
         // doing so fits the texture onto the specified size of the object
@@ -323,6 +333,7 @@ public class LevelContainer{
                 dheight * scale.y/goalTexture.getRegionHeight());
         goalDoor.setAnimation(goalAnimationTexture);
         addObject(goalDoor);
+        drawables.add(goalDoor);
 
         // Setting Gravity on World
         JsonValue defaults = globalConstants.get("defaults");
@@ -361,6 +372,7 @@ public class LevelContainer{
             obj.setTexture(cloudPlatformTextures[cur.getInt("tileIndex")]);
             obj.setName(mpname + ii);
             addObject(obj);
+            drawables.add(obj);
             movingPlats.add(obj);
         }
 
@@ -375,6 +387,7 @@ public class LevelContainer{
             obj.setAnimation(windAnimation);
             obj.setName(windName + ii);
             addObject(obj);
+            drawables.add(obj);
         }
 
         JsonValue hazardsjv = globalConstants.get("hazards");
@@ -391,6 +404,7 @@ public class LevelContainer{
             obj.setTexture(lightningTexture);
             obj.setName("static_hazard"+ii);
             addObject(obj);
+            //drawables.add(obj); this does not typecheck yet
         }
 
         //create birds
@@ -409,6 +423,7 @@ public class LevelContainer{
             obj.setName(birdName + ii);
             addObject(obj);
             birds.add(obj);
+            drawables.add(obj);
         }
 
         //TODO
@@ -428,6 +443,7 @@ public class LevelContainer{
             obj.setName(lightningName + ii);
             addObject(obj);
             lightnings.add(obj);
+            drawables.add(obj);
         }
 
         // Create invisible |_| shaped world boundaries so player is within bounds.
@@ -467,7 +483,8 @@ public class LevelContainer{
         // Create player
         dwidth = globalConstants.get("player").get("size").getFloat(0);
         dheight = globalConstants.get("player").get("size").getFloat(1);
-        avatar = new PlayerModel(globalConstants.get("player"), new Vector2(parser.getPlayerPos()), dwidth, dheight, globalConstants.get("player").getInt("maxhealth"));
+        avatar = new PlayerModel(globalConstants.get("player"), parser.getPlayerPos(),
+                dwidth, dheight, globalConstants.get("player").getInt("maxhealth"), parser.getPlayerDrawDepth());
         avatar.setDrawScale(scale);
         avatar.setFrontTexture(avatarFrontTexture);
         avatar.setSideTexture(avatarSideTexture);
@@ -481,6 +498,7 @@ public class LevelContainer{
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
+        drawables.add(avatar);
 
         // Create the umbrella
         dwidth = globalConstants.get("umbrella").get("size").getFloat(0);
@@ -497,6 +515,19 @@ public class LevelContainer{
         umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
         umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
         addObject(umbrella);
+        // drawables.add(umbrella); unnecessary because player+umbrella always drawn together.
+
+        // Include Stickers and Sort all drawables
+        for (Sticker s : parser.getStickers()){
+            s.setDrawScale(scale);
+            drawables.add(s);
+        }
+        Collections.sort(drawables, Collections.<Drawable>reverseOrder(new Comparator<Drawable>(){
+            @Override
+            public int compare(Drawable o1, Drawable o2) {
+                return o1.getDepth() - o2.getDepth();
+            }
+        }));
     }
 
     /**
@@ -621,6 +652,13 @@ public class LevelContainer{
      */
     public ObjectSet<MovingPlatformModel> getMovingPlats(){return movingPlats;}
 
+
+    /**
+     * @return sorted list of drawables to be (possibly) drawn to game.
+     */
+    public PooledList<Drawable> getDrawables() { return drawables;}
+
+
     public void setParser(LevelParser parser) { this.parser = parser; }
 
     /**
@@ -657,7 +695,5 @@ public class LevelContainer{
     public void setLightnings(ObjectSet<LightningHazard> lightningsObj) {
         lightnings = lightningsObj;
     }
-
-
 
 }
