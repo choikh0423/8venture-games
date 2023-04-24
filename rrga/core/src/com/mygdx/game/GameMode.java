@@ -343,6 +343,18 @@ public class GameMode implements Screen {
             return true;
         }
 
+        // TODO: TEMPORARY NEXT LEVEL
+        if (inputController.didNext()) {
+            if (currentLevel < 3) {
+                currentLevel += 1;
+            } else {
+                currentLevel = 1;
+            }
+
+            reset();
+            return true;
+        }
+
         // Now it is time to maybe switch screens.
         if (inputController.didExit()) {
             pause();
