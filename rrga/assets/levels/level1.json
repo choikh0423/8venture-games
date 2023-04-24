@@ -188,6 +188,11 @@
                          "name":"dir",
                          "type":"object",
                          "value":14
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":18
                         }],
                  "template":"templates\/wind.json",
                  "x":1115.02143612782,
@@ -237,6 +242,11 @@
                          "name":"dir",
                          "type":"object",
                          "value":16
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":17
                         }],
                  "template":"templates\/wind.json",
                  "x":2705.79956340055,
@@ -400,8 +410,8 @@
                  "height":213,
                  "id":23,
                  "template":"templates\/cloud_platforms\/small_cloud.json",
-                 "width":402,
-                 "x":3621.57575757576,
+                 "width":435.333333333333,
+                 "x":3638.24242424243,
                  "y":2367.51515151515
                 }],
          "opacity":1,
@@ -418,8 +428,8 @@
                 {
                  "id":26,
                  "template":"templates\/goal.json",
-                 "x":3908,
-                 "y":2360.33333333333
+                 "x":3841.33333333333,
+                 "y":2320.93939393939
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -431,7 +441,7 @@
  "nextobjectid":28,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -448,6 +458,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":40
 }
