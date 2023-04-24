@@ -520,7 +520,7 @@ public class GameplayController implements ContactListener {
             if (avatar.getiFrames() == 0 && vulnerable) {
                 if (avatar.getHealth() - dam > 0) {
                     cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
-                    avatar.getBody().applyLinearImpulse(cache, avatar.getPosition(), true);
+                    avatar.getBody().setLinearVelocity(cache);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
                 } else {
