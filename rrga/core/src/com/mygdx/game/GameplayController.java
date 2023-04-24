@@ -921,13 +921,17 @@ public class GameplayController implements ContactListener {
         return levelContainer;
     }
 
+    private final int TEARING_VEL = 6;
+
     /**
      * @return player x-coordinate on screen, -1 if no player is found.
      * coordinates are non-negative.
      */
     public float getPlayerScreenX() {
-
-        return avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+        float out = avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+        //only round to adjust for tearing if velocity is high - otherwise, you can
+        // get some vibration-like effects on Gale for what should be smooth movement
+        return avatar.getLinearVelocity().len() > TEARING_VEL ? Math.round(out) : out;
     }
 
     /**
@@ -935,7 +939,10 @@ public class GameplayController implements ContactListener {
      * coordinates are non-negative.
      */
     public float getPlayerScreenY() {
-        return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+        float out = avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+        //only round to adjust for tearing if velocity is high - otherwise, you can
+        // get some vibration-like effects on Gale for what should be smooth movement
+        return avatar.getLinearVelocity().len() > TEARING_VEL ? Math.round(out) : out;
     }
 
     /**
