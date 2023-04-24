@@ -404,7 +404,6 @@ public class LevelParser {
         float x = temp.x;
         float y = temp.y;
         JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
-        System.out.println(obj.getInt("__DEPTH__"));
         stickers.add(new Sticker(x,y, obj.getInt("__DEPTH__", -1), AABB, texture));
     }
 
