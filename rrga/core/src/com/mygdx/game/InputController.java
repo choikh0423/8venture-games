@@ -53,6 +53,10 @@ public class InputController {
     /** Whether the debug toggle was pressed. */
     private boolean debugPressed;
     private boolean debugPrevious;
+
+    /** Whether the next level button was pressed. */
+    private boolean nextLevelPressed;
+    private boolean nextPrevious;
     /** Whether the exit button was pressed. */
     private boolean exitPressed;
     private boolean exitPrevious;
@@ -142,6 +146,15 @@ public class InputController {
     }
 
     /**
+     * Returns true if the player wants to go toggle the debug mode.
+     *
+     * @return true if the player wants to go toggle the debug mode.
+     */
+    public boolean didNext() {
+        return nextLevelPressed && !nextPrevious;
+    }
+
+    /**
      * Returns true if the exit button was pressed.
      *
      * @return true if the exit button was pressed.
@@ -210,6 +223,7 @@ public class InputController {
         resetPrevious  = resetPressed;
         debugPrevious  = debugPressed;
         exitPrevious = exitPressed;
+        nextPrevious = nextLevelPressed;
 
         // Check to see if a GamePad is connected
         if (xbox != null && xbox.isConnected()) {
@@ -254,6 +268,7 @@ public class InputController {
         resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
         debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.B));
         exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
+        nextLevelPressed = (secondary && nextLevelPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 
         // A/D for moving character
         horizontal = (secondary ? horizontal : 0.0f);
