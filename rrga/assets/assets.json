@@ -18,6 +18,9 @@
         "menu:sliderBar": "menu/slider_bar.png",
         "menu:sliderKnob": "menu/slider_dot.png",
         "game:background" : "game/background.png",
+        "game:skylayerA" : "game/parallax/skylayerA.png",
+        "game:skylayerB" : "game/parallax/skylayerB.png",
+        "game:skylayerC" : "game/parallax/skylayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
           "file":   "game/windgust_waves.png",

@@ -99,6 +99,37 @@ public class GameCanvas {
     /** Cache object to handle raw textures */
     private TextureRegion holder;
 
+    /** Cache for draw position */
+    private Vector2 positionCache = new Vector2();
+
+    /**
+     * Private method to process the wrap offset of an image.
+     *
+     * @param pos The center of the background image
+     *
+     * @return the vector, wrapped to the screen
+     *
+     */
+    private Vector2 wrapPosition(Vector2 pos, float px, float py, float worldHeight, float zoomScl) {
+        float w = getWidth();
+        float h = getHeight();
+        float leftBound = px - w/2;
+        float bottomBound = py - h/2;
+
+        if (pos.x < 0) {
+            float n = (float)Math.floor((-pos.x) / (w*zoomScl));
+            pos.x = leftBound + pos.x + (1 + n) * w;
+        } else if (pos.x > 0) {
+            pos.x = pos.x + pos.x%w;
+        }
+
+        if (pos.y < 0) {
+            pos.y = bottomBound + h * (pos.y /worldHeight);
+        }
+
+        return pos;
+    }
+
     /**
      * Creates a new GameCanvas determined by the application configuration.
      *
@@ -258,7 +289,7 @@ public class GameCanvas {
      * active (e.g. in-between a begin-end pair).
      *
      * @param fullscreen Whether this canvas should change to fullscreen.
-     * @param desktop 	 Whether to use the current desktop resolution
+     * @param desktop      Whether to use the current desktop resolution
      */
     public void setFullscreen(boolean value, boolean desktop) {
         if (active != DrawPass.INACTIVE) {
@@ -429,8 +460,8 @@ public class GameCanvas {
      *
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
      */
     public void draw(Texture image, float x, float y) {
         if (active != DrawPass.STANDARD) {
@@ -455,9 +486,9 @@ public class GameCanvas {
      *
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
-     * @param width	The texture width
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(Texture image, Color tint, float x, float y, float width, float height) {
@@ -483,11 +514,11 @@ public class GameCanvas {
      *
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
-     * @param width	The texture width
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(Texture image, Color tint, float ox, float oy, float x, float y, float width, float height) {
@@ -517,13 +548,13 @@ public class GameCanvas {
      *
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
      * @param angle The rotation angle (in degrees) about the origin.
-     * @param sx 	The x-axis scaling factor
-     * @param sy 	The y-axis scaling factor
+     * @param sx     The x-axis scaling factor
+     * @param sy     The y-axis scaling factor
      */
     public void draw(Texture image, Color tint, float ox, float oy,
                      float x, float y, float angle, float sx, float sy) {
@@ -552,8 +583,8 @@ public class GameCanvas {
      *
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
      * @param transform  The image transform
      */
     public void draw(Texture image, Color tint, float ox, float oy, Affine2 transform) {
@@ -565,6 +596,31 @@ public class GameCanvas {
         // Call the master drawing method (we have to for transforms)
         holder.setRegion(image);
         draw(holder,tint,ox,oy,transform);
+    }
+
+    /**
+     * Draw the seamless background image.
+     *
+     * The background image is drawn (with NO SCALING) at position x, y.  Width-wise,
+     * the image is seamlessly scrolled; when we reach the image we draw a second copy.
+     *
+     * To work properly, the image should be wide enough to fill the screen. However,
+     * it can be of any height.
+     *
+     * @param image  Texture to draw as an overlay
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
+     */
+    public void drawWrapped(Texture image, float x, float y, float px, float py, float worldHeight, float zoomScl) {
+        positionCache.set(x,y);
+        wrapPosition(positionCache, px, py, worldHeight,zoomScl);
+
+        int w = getWidth();
+
+        // Have to draw the background twice for continuous scrolling.
+        spriteBatch.draw(image, positionCache.x,   positionCache.y + 200);
+        spriteBatch.draw(image, positionCache.x-w, positionCache.y + 200);
+        spriteBatch.draw(image, positionCache.x+w, positionCache.y + 200);
     }
 
     /**
@@ -582,8 +638,8 @@ public class GameCanvas {
      *
      * @param region The texture to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
      */
     public void draw(TextureRegion region, float x, float y) {
         if (active != DrawPass.STANDARD) {
@@ -608,9 +664,9 @@ public class GameCanvas {
      *region
      * @param image The texture to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
-     * @param width	The texture width
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(TextureRegion region, Color tint, float x, float y, float width, float height) {
@@ -636,11 +692,11 @@ public class GameCanvas {
      *
      * @param region The texture to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
-     * @param width	The texture width
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(TextureRegion region, Color tint, float ox, float oy, float x, float y, float width, float height) {
@@ -672,13 +728,13 @@ public class GameCanvas {
      *
      * @param region The texture to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
      * @param angle The rotation angle (in degrees) about the origin.
-     * @param sx 	The x-axis scaling factor
-     * @param sy 	The y-axis scaling factor
+     * @param sx     The x-axis scaling factor
+     * @param sy     The y-axis scaling factor
      */
     public void draw(TextureRegion region, Color tint, float ox, float oy,
                      float x, float y, float angle, float sx, float sy) {
@@ -710,8 +766,8 @@ public class GameCanvas {
      *
      * @param image The region to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
      * @param transform  The image transform
      */
     public void draw(TextureRegion region, Color tint, float ox, float oy, Affine2 affine) {
@@ -744,8 +800,8 @@ public class GameCanvas {
      *
      * @param region The polygon to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
      */
     public void draw(PolygonRegion region, float x, float y) {
         if (active != DrawPass.STANDARD) {
@@ -776,9 +832,9 @@ public class GameCanvas {
      *
      * @param region The polygon to draw
      * @param tint  The color tint
-     * @param x 	The x-coordinate of the bottom left corner
-     * @param y 	The y-coordinate of the bottom left corner
-     * @param width	The texture width
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(PolygonRegion region, Color tint, float x, float y, float width, float height) {
@@ -810,11 +866,11 @@ public class GameCanvas {
      *
      * @param region The polygon to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
-     * @param width	The texture width
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
+     * @param width    The texture width
      * @param height The texture height
      */
     public void draw(PolygonRegion region, Color tint, float ox, float oy, float x, float y, float width, float height) {
@@ -846,13 +902,13 @@ public class GameCanvas {
      *
      * @param region The polygon to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
      * @param angle The rotation angle (in degrees) about the origin.
-     * @param sx 	The x-axis scaling factor
-     * @param sy 	The y-axis scaling factor
+     * @param sx     The x-axis scaling factor
+     * @param sy     The y-axis scaling factor
      */
     public void draw(PolygonRegion region, Color tint, float ox, float oy,
                      float x, float y, float angle, float sx, float sy) {
@@ -886,8 +942,8 @@ public class GameCanvas {
      *
      * @param region The polygon to draw
      * @param tint  The color tint
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
      * @param transform  The image transform
      */
     public void draw(PolygonRegion region, Color tint, float ox, float oy, Affine2 affine) {
@@ -1177,13 +1233,13 @@ public class GameCanvas {
     /**
      * Compute the affine transform (and store it in local) for this image.
      *
-     * @param ox 	The x-coordinate of texture origin (in pixels)
-     * @param oy 	The y-coordinate of texture origin (in pixels)
-     * @param x 	The x-coordinate of the texture origin (on screen)
-     * @param y 	The y-coordinate of the texture origin (on screen)
+     * @param ox     The x-coordinate of texture origin (in pixels)
+     * @param oy     The y-coordinate of texture origin (in pixels)
+     * @param x     The x-coordinate of the texture origin (on screen)
+     * @param y     The y-coordinate of the texture origin (on screen)
      * @param angle The rotation angle (in degrees) about the origin.
-     * @param sx 	The x-axis scaling factor
-     * @param sy 	The y-axis scaling factor
+     * @param sx     The x-axis scaling factor
+     * @param sy     The y-axis scaling factor
      */
     private void computeTransform(float ox, float oy, float x, float y, float angle, float sx, float sy) {
         local.setToTranslation(x,y);
