@@ -573,13 +573,16 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
-                    || bird.getAABBx() + bird.getWidth() < 0 || bird.getAABBy() - bird.getHeight() > bounds.height) {
+            if(bird.getAABBx() + bird.getX() > bounds.width
+                    || bird.getAABBy() + bird.getY() < 0
+                    || bird.getAABBx() + bird.getWidth() + bird.getX() < 0
+                    || bird.getAABBy() - bird.getHeight() + bird.getY() > bounds.height) {
                 //TODO IS THIS SUFFICIENT FOR DELETION?
-                objects.remove(bird);
-                birds.remove(bird);
+                levelContainer.objects.remove(bird);
+                levelContainer.getBirds().remove(bird);
                 bird.deactivatePhysics(world);
                 bird.markRemoved(true);
+                continue;
             }
 
             float bx = bird.getX();

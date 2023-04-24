@@ -59,7 +59,7 @@
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
-        "tiled:level1" : "levels/Nozik_Test.json",
+        "tiled:level1" : "levels/level1.json",
         "red_bird:template": "levels/templates/red_bird.json",
         "blue_bird:template": "levels/templates/blue_bird.json",
         "green_bird:template": "levels/templates/green_bird.json",
