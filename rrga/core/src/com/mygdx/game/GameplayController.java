@@ -497,6 +497,8 @@ public class GameplayController implements ContactListener {
             if (angle < Math.PI) {
                 avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
             }
+        } else if (!touching_wind && !umbrella.isOpen()) {
+            avatar.dampAirHoriz();
         }
         if (umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
