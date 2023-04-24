@@ -697,6 +697,13 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		return false;
 	}
 
+	public void dampAirHoriz(){
+		if(Math.abs(getVX()) > getMaxSpeedXAirDrag()/1.5f){
+			forceCache.set(-getDamping()*getVX(),0);
+			body.applyForce(forceCache,getPosition(),true);
+		}
+	}
+
 	public void refillLighter(){
 		if(lighterFuel != maxLighterFuel){
 			if(lighterFuel + lighterChangeRate > maxLighterFuel) lighterFuel = maxLighterFuel;
