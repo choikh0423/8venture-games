@@ -328,9 +328,9 @@ public class LevelContainer{
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
         // doing so fits the texture onto the specified size of the object
-        goalDoor.setTextureScale(
-                dwidth * scale.x/goalTexture.getRegionWidth(),
-                dheight * scale.y/goalTexture.getRegionHeight());
+//        goalDoor.setTextureScale(
+//                dwidth * scale.x/goalTexture.getRegionWidth(),
+//                dheight * scale.y/goalTexture.getRegionHeight());
         goalDoor.setAnimation(goalAnimationTexture);
         addObject(goalDoor);
         drawables.add(goalDoor);

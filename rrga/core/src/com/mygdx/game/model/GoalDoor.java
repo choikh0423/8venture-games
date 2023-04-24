@@ -17,7 +17,7 @@ public class GoalDoor extends BoxObstacle implements Drawable {
     private Animation<TextureRegion> animation;
     private float elapsedTime;
 
-    private int depth;
+    private final int depth;
 
     private final Vector2 dimensions;
 

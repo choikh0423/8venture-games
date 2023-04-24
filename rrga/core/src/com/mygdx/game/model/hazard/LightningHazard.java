@@ -28,8 +28,8 @@ public class LightningHazard extends PolygonHazard implements Drawable {
      * -1 if not currently striking */
     private int strikeTimer;
 
-    /** vector cache for computations, getters, etc */
-    private final Vector2 temp = new Vector2();
+    ///** vector cache for computations, getters, etc */
+    //    private final Vector2 temp = new Vector2();
 
     /** draw depth */
     private final int depth;
@@ -79,7 +79,7 @@ public class LightningHazard extends PolygonHazard implements Drawable {
 
     @Override
     public Vector2 getDimensions() {
-        return temp.set(super.getDimension());
+        return super.getDimension();
     }
 
     @Override

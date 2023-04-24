@@ -111,7 +111,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
 
     private final float knockBackScl;
 
-    private Vector2 knockBackVec = new Vector2();
+    private final Vector2 knockBackVec = new Vector2();
 
     /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
