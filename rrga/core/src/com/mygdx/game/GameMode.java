@@ -384,7 +384,7 @@ public class GameMode implements Screen {
      */
     public void update(float dt) {
 
-        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving()){
+        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
