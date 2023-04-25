@@ -511,7 +511,7 @@ public class GameMode implements Screen {
             Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
             canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
             debugFont.setColor(c);
-            canvas.drawText("FPS status: " + s, debugFont, 0.1f*canvas.getWidth(), 0.9f*canvas.getHeight());
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f * canvas.getWidth(), 0.9f * canvas.getHeight());
             debugFont.setColor(Color.BLACK);
             canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
             canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
@@ -529,6 +529,8 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
             canvas.drawText("Objects Drawn:" + (count + 1),
                     debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
+            canvas.drawText("Grounded:" + avatar.isGrounded(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
         }
         canvas.end();
     }

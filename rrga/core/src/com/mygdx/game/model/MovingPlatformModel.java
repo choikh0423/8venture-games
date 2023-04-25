@@ -60,7 +60,7 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
     /**
      * Move speed of this platform
      */
-    private final int moveSpeed;
+    private final float moveSpeed;
 
     /** (squared) distances traveled and distance to travel*/
     private final Vector2 distanceCache = new Vector2();
@@ -83,7 +83,7 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
     public MovingPlatformModel(JsonValue data, float[] points, float x, float y) {
         super(points, x, y);
         setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
-        moveSpeed = data.getInt("movespeed");
+        moveSpeed = data.getFloat("movespeed");
         currentPathIndex = 0;
         flipped = data.getBoolean("flipped");
         prevPos.set(getX(), getY());
