@@ -245,6 +245,7 @@ public class GameMode implements Screen {
         directory = null;
     }
 
+
     /**
      * Gather the assets for this controller.
      *
@@ -618,6 +619,10 @@ public class GameMode implements Screen {
         listener.exitScreen(this, GameMode.EXIT_PAUSE);
     }
 
+    public void screenPause() {
+        active = false;
+        gameplayController.pause();
+    }
     /**
      * Called when the Screen is resumed from a paused state.
      *

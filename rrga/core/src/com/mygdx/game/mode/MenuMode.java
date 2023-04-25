@@ -118,34 +118,8 @@ public class MenuMode extends MenuScreen {
     private int buttonWidth;
     /** Ratio of the button width to the screen */
     private static float BUTTON_WIDTH_RATIO  = 0.66f;
-    /** Ration of the button height to the screen */
-    private static float Button_X_RATIO = 0.2f;
-    /** The y-coordinate of the center of the level select button */
-    private int selectY;
-    /** The x-coordinate of the center of the level select button */
-    private int selectX;
-    /** The y-coordinate of the center of the settings button */
-    private int settingsY;
-    /** The x-coordinate of the center of the settings button */
-    private int settingsX;
-    /** The exit button angle */
-    private static float EXIT_ANGLE = 0.05f * 3.14f;
-    /** The y-coordinate of the center of the settings button */
-    private int exitY;
-    /** The x-coordinate of the center of the settings button */
-    private int exitX;
 
-    /** The y-coordinate of the center of the level 1 button */
-    private int levelY1;
-    /** The x-coordinate of the center of the level 1 button */
-    private int levelX1;
-    /** The y-coordinate of the center of the level 2 button */
-    private int levelY2;
-    /** The x-coordinate of the center of the level 2 button */
-    private int levelX2;
 
-    /** Stage for setting features */
-    private Stage settingStage;
     /** Music volume slider bar texture */
     private TextureRegion musicSliderBar;
     /** Music volume slider knob texture */
@@ -450,7 +424,7 @@ public class MenuMode extends MenuScreen {
                 listener.exitScreen(this, currentExitCode);
             } else if (startPressState == 1) {
                 currentLevel = 1;
-                levelPressState1 = 2;
+                startPressState = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
             }
@@ -651,12 +625,30 @@ public class MenuMode extends MenuScreen {
 
     @Override
     public void dispose() {
+        //TODO: Need legitimate disposing
         listener = null;
-        canvas = null;
         if (backgroundMusic != null){
             backgroundMusic.stop();
         }
-        backgroundMusic = null;
         // NEED TO ADD
+    }
+
+    public void pause() {
+        listener = null;
+        if (backgroundMusic != null){
+            backgroundMusic.stop();
+        }
+        // NEED TO ADD
+    }
+
+    public void reset() {
+        musicVolume = musicSlider.ratio;
+        sfxVolume = sfxSlider.ratio;
+        backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
+        backgroundMusic.setLooping(true);
+
+        this.screenMode = 1;
+
     }
 }
