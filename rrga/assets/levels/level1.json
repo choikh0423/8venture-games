@@ -229,7 +229,6 @@
         {
          "draworder":"topdown",
          "id":2,
-         "locked":true,
          "name":"Back",
          "objects":[
                 {
@@ -288,24 +287,10 @@
                  "y":3579.48084212805
                 }, 
                 {
-                 "height":119.026905829596,
-                 "id":8,
-                 "properties":[
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":9
-                        }],
-                 "template":"templates\/birds\/red_bird.json",
-                 "width":127,
-                 "x":957.489563400547,
-                 "y":3104.28429504285
-                }, 
-                {
                  "id":9,
                  "template":"templates\/path_point.json",
-                 "x":2347.48956340055,
-                 "y":3031.03084212805
+                 "x":773.48956340055,
+                 "y":3047.03084212805
                 }, 
                 {
                  "id":17,
@@ -415,24 +400,10 @@
                  "y":2978.12839366516
                 }, 
                 {
-                 "height":125.666666666667,
-                 "id":20,
-                 "properties":[
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":21
-                        }],
-                 "template":"templates\/birds\/red_bird.json",
-                 "width":130.056768558952,
-                 "x":3292,
-                 "y":2536
-                }, 
-                {
                  "id":21,
                  "template":"templates\/path_point.json",
-                 "x":1464,
-                 "y":2482.42424242424
+                 "x":3340,
+                 "y":2474.42424242424
                 }, 
                 {
                  "height":213,
@@ -441,6 +412,55 @@
                  "width":435.333333333333,
                  "x":3638.24242424243,
                  "y":2367.51515151515
+                }, 
+                {
+                 "id":51,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":9
+                        }],
+                 "template":"templates\/birds\/red_bird.json",
+                 "x":2288,
+                 "y":3088
+                }, 
+                {
+                 "id":52,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":21
+                        }],
+                 "template":"templates\/birds\/red_bird.json",
+                 "x":1266,
+                 "y":2534
+                }, 
+                {
+                 "height":772.897196261682,
+                 "id":53,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":2
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":54
+                        }],
+                 "template":"templates\/birds\/red_bird.json",
+                 "width":827,
+                 "x":4344,
+                 "y":3192
+                }, 
+                {
+                 "id":54,
+                 "template":"templates\/path_point.json",
+                 "x":408,
+                 "y":3416
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -451,6 +471,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"Mid",
          "objects":[
                 {
@@ -621,7 +642,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":46,
+ "nextobjectid":55,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

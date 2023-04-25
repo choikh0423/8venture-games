@@ -1,7 +1,8 @@
 { "object":
     {
+     "class":"bird",
      "gid":1,
-     "height":256,
+     "height":220,
      "id":232,
      "name":"brown_bird",
      "properties":[
@@ -21,9 +22,8 @@
              "value":0
             }],
      "rotation":0,
-     "type":"bird",
      "visible":true,
-     "width":256
+     "width":220
     },
  "tileset":
     {
