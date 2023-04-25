@@ -189,8 +189,8 @@ public class GameplayController implements ContactListener {
     /** the avatar-cloud joint */
     private WeldJoint avatarWeldJoint;
 
-    /** whether avatar is touching a cloud. */
-    private boolean touchingCloud;
+    /** whether avatar is touching a movable cloud. */
+    private boolean touchingMovingCloud;
 
     /** the cloud body that the avatar is touching (there may be several, take FIRST) */
     private Body contactedCloudBody;
@@ -327,7 +327,7 @@ public class GameplayController implements ContactListener {
             world.destroyJoint(avatarWeldJoint);
         }
         avatarWeldJoint = null;
-        touchingCloud = false;
+        touchingMovingCloud = false;
 
         Vector2 gravity = new Vector2(world.getGravity());
         objects = levelContainer.getObjects();
@@ -721,7 +721,7 @@ public class GameplayController implements ContactListener {
         }
 
         // attach player to cloud platform
-        if (avatar.isGrounded() && !avatar.isMoving() && touchingCloud && avatarWeldJoint == null){
+        if (avatar.isGrounded() && !avatar.isMoving() && touchingMovingCloud && avatarWeldJoint == null){
             weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
                     temp.set(avatar.getX(), avatar.getY()-avatar.getHeight()/2)
             );
@@ -778,15 +778,21 @@ public class GameplayController implements ContactListener {
                 //  it might be better to have platform class. Using debug name is not safe for all obstacles (sometimes
                 //  we might forget to assign object names and get unnecessary nullptr.
                 Body cloudBody = null;
+                MovingPlatformModel cloud = null;
                 if (bd1 instanceof MovingPlatformModel){
                     cloudBody = body1;
+                    cloud = (MovingPlatformModel) bd1;
                 }
                 else if (bd2 instanceof MovingPlatformModel){
                     cloudBody = body2;
+                    cloud = (MovingPlatformModel) bd2;
                 }
-                // TODO (revisit this choice): the FIRST touched cloud is the one Gale sticks to.
-                if (cloudBody != null && !touchingCloud){
-                    touchingCloud = true;
+                // TODO (revisit this choice): the FIRST cloud touched is the one Gale sticks to.
+                //  To optimize joint-create-destroy time, non-movable clouds of course don't need joints with avatar.
+                if (cloudBody != null && !touchingMovingCloud && cloud.getMoveSpeed() > 0){
+                    System.out.println(cloud.getMoveSpeed());
+                    System.out.println("moving cloud");
+                    touchingMovingCloud = true;
                     contactedCloudBody = cloudBody;
                 }
             }
@@ -871,7 +877,7 @@ public class GameplayController implements ContactListener {
             boolean isCloud2 = bd2 instanceof MovingPlatformModel;
             Body cloudBody = isCloud1 ? body1 : isCloud2 ? body2 : null;
             if (cloudBody == contactedCloudBody){
-                touchingCloud = false;
+                touchingMovingCloud = false;
                 contactedCloudBody = null;
                 destroyWeldJoint = true;
             }

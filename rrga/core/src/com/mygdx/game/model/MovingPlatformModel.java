@@ -7,6 +7,8 @@ import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 
+import java.util.Arrays;
+
 public class MovingPlatformModel extends PolygonObstacle implements Drawable {
 
     // TODO: redesign class hierarchy. MovingPlatform is nothing but a REAL passive moving bird
@@ -58,9 +60,9 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
     private int currentPathIndex;
 
     /**
-     * Move speed of this platform
+     * Move speed of this platform (if platform does not actually move, automatic override with 0
      */
-    private final float moveSpeed;
+    private float moveSpeed;
 
     /** (squared) distances traveled and distance to travel*/
     private final Vector2 distanceCache = new Vector2();
@@ -82,12 +84,12 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
 
     public MovingPlatformModel(JsonValue data, float[] points, float x, float y) {
         super(points, x, y);
-        setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
         moveSpeed = data.getFloat("movespeed");
         currentPathIndex = 0;
         flipped = data.getBoolean("flipped");
         prevPos.set(getX(), getY());
         depth = data.getInt("depth");
+        setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
 
         // this is the bounding box dimensions of the cloud.
         // aabb = [x,y, width, height] where x,y is relative to bird coordinate
@@ -98,11 +100,18 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
         dimensions.y = aabb[3];
     }
 
-    public void setPath(float[] path, int loopTo){
+    /**
+     * updates path and set move speed to 0 if path is degenerate.
+     * @param path an array of coordinates [x1,y1, x2,y2 ..]
+     * @param loopTo for a path P with n points, loopTo is valid only in range [0,n-1].<br>
+     *               Otherwise, the entity does not loop when moving around.
+     */
+    private void setPath(float[] path, int loopTo){
         this.path = path;
         this.loopTo = loopTo;
         if (path.length <= 2){
             patrol = MovingPlatformModel.MoveBehavior.STATIONARY;
+            moveSpeed = 0;
             return;
         }
         if (0 <= loopTo && loopTo <= path.length/2 - 1){
@@ -186,4 +195,11 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
     public int getDepth() {
         return depth;
     }
+
+    /**
+     * returns the assigned moving speed of this movable platform. <br>
+     * INVARIANT: if this platform does not move, this is always 0.
+     * @return platform moving speed
+     */
+    public float getMoveSpeed(){ return moveSpeed; }
 }
