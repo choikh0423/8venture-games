@@ -512,7 +512,7 @@ public class GameplayController implements ContactListener {
         }
 
         // Process Lighter Force
-        if(input.getLighter() && umbrella.isOpen()){
+        if(input.getLighter() && umbrella.isOpen() && !input.didZoom()){
             if(avatar.applyLighterForce(ang)) umbrella.startBoost();
         }
         if(avatar.isGrounded()){
