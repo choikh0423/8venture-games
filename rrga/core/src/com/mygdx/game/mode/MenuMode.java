@@ -589,11 +589,6 @@ public class MenuMode extends MenuScreen {
 
         draw();
 
-        // Screen Transition
-        if (currentExitCode >= 0){
-            listener.exitScreen(this, currentExitCode);
-            currentExitCode = Integer.MIN_VALUE;
-        }
     }
 
     @Override
