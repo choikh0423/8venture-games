@@ -391,6 +391,8 @@ public class GameMode implements Screen {
             zoomAlpha -= zoomAlphaDelta;
         }
 
+        if (gameplayController.getPlayer().getiFrames()>0) zoomAlpha = 0;
+
         // constraint zoomAlpha into [0,1] range
         if (zoomAlpha < 0){ zoomAlpha = 0; }
         else if (zoomAlpha > 1){ zoomAlpha = 1; }
