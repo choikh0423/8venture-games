@@ -422,9 +422,9 @@ public class GameMode implements Screen {
 
         // Parallax Drawing
         //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-//        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA , -py * verticalA, px, py, worldHeight, zoomScl);
-//        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl);
-//        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl);
+        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA , -py * verticalA, px, py, worldHeight, zoomScl);
+        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl);
+        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl);
 
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles

@@ -422,11 +422,13 @@ public class MenuMode extends MenuScreen {
                 exitPressState = 2;
                 currentExitCode = EXIT_QUIT;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (startPressState == 1) {
                 currentLevel = 1;
                 startPressState = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             }
         } else if (screenMode == 2) {
             if (exitPressState == 1) {
@@ -439,16 +441,19 @@ public class MenuMode extends MenuScreen {
                 levelPressState1 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (levelPressState2 == 1) {
                 currentLevel = 2;
                 levelPressState2 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (levelPressState3 == 1) {
                 currentLevel = 3;
                 levelPressState3 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             }
         } else if (screenMode == 3) {
             if (exitPressState == 1) {
@@ -502,24 +507,24 @@ public class MenuMode extends MenuScreen {
 
         if (screenMode == 1) {
             // Draw Level Select Button
-            levelSelectButton.draw(canvas, selectPressState);
+            levelSelectButton.draw(canvas, selectPressState, BUTTON_SCALE);
             // Draw Settings Button
-            settingsButton.draw(canvas, settingsPressState);
+            settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE);
             // Draw Exit Button
-            exitButton.draw(canvas, exitPressState);
+            exitButton.draw(canvas, exitPressState, BUTTON_SCALE);
             // Draw Start Button
-            startButton.draw(canvas, startPressState);
+            startButton.draw(canvas, startPressState, BUTTON_SCALE);
         } else if (screenMode == 2){
             // Draw Back Button
-            backButton.draw(canvas, exitPressState);
+            backButton.draw(canvas, exitPressState, BUTTON_SCALE);
             // Temporary Implementation - Will change to iterables once we get proper textures
-            levelButton1.draw(canvas, levelPressState1);
-            levelButton2.draw(canvas, levelPressState2);
-            levelButton3.draw(canvas, levelPressState3);
+            levelButton1.draw(canvas, levelPressState1, BUTTON_SCALE);
+            levelButton2.draw(canvas, levelPressState2, BUTTON_SCALE);
+            levelButton3.draw(canvas, levelPressState3, BUTTON_SCALE);
 
         } else if (screenMode == 3) {
             // Draw Back Button
-            backButton.draw(canvas, exitPressState);
+            backButton.draw(canvas, exitPressState, BUTTON_SCALE);
 
             // Draw sliders
             musicSlider.draw(canvas);
@@ -554,6 +559,8 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
+
+        System.out.println("render-menu");
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
@@ -562,7 +569,6 @@ public class MenuMode extends MenuScreen {
         backgroundMusic.setLooping(true);
 
         draw();
-
     }
 
     @Override
@@ -634,13 +640,12 @@ public class MenuMode extends MenuScreen {
     }
 
     public void pause() {
-        listener = null;
         if (backgroundMusic != null){
             backgroundMusic.stop();
         }
-        // NEED TO ADD
     }
 
+    /** Reset is for transitioning from other mode to current mode*/
     public void reset() {
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
