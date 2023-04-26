@@ -62,7 +62,7 @@ public class PauseMode extends MenuScreen {
     private MenuButton restartButton;
 
     /** Height of the button */
-    private static float BUTTON_SCALE  = 1.2f;
+    private static float BUTTON_SCALE  = 1.0f;
     /** Touch range constant */
     private static float TOUCH_AREA_RATIO = 0.95f;
     private float TAG_SCL = 1;
@@ -83,11 +83,11 @@ public class PauseMode extends MenuScreen {
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(0,0,0,0.9f);
+        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
-        this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.2f, 0.05f * 3.14f);
-        this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.2f, -0.05f * 3.14f);
+        this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.2f, 0);
+        this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.2f, 0);
     }
 
     /**
@@ -99,9 +99,7 @@ public class PauseMode extends MenuScreen {
      */
     public void gatherAssets(AssetDirectory directory) {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
-        foregroundTexture = new TextureRegion(directory.getEntry( "game:platform", Texture.class ));
-        bigFont = directory.getEntry("shared:retro", BitmapFont.class);
-        smallFont = directory.getEntry("shared:minecraft", BitmapFont.class);
+        foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
         TextureRegion menuTexture = new TextureRegion(directory.getEntry("pause:menu_button", Texture.class));
         TextureRegion restartTexture = new TextureRegion(directory.getEntry("pause:restart_button", Texture.class));
@@ -133,10 +131,12 @@ public class PauseMode extends MenuScreen {
             currentExitCode = EXIT_MENU;
             menuPressState = 2;
             listener.exitScreen(this, currentExitCode);
+            currentExitCode = Integer.MIN_VALUE;
         } else if (restartPressState == 1) {
             currentExitCode = EXIT_RESTART;
             restartPressState = 2;
             listener.exitScreen(this, currentExitCode);
+            currentExitCode = Integer.MIN_VALUE;
         }
         return true;
     }
@@ -180,10 +180,6 @@ public class PauseMode extends MenuScreen {
 //        }
         gameScreen.draw(delta);
         draw(delta);
-        if (currentExitCode >= 0){
-            listener.exitScreen(this, currentExitCode);
-            currentExitCode = Integer.MIN_VALUE;
-        }
     }
 
     /**
@@ -199,16 +195,9 @@ public class PauseMode extends MenuScreen {
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
                 pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
         // Draw Level Select Button
-        menuButton.draw(canvas, menuPressState);
+        menuButton.draw(canvas, menuPressState, BUTTON_SCALE);
         // Draw Settings Button
-        restartButton.draw(canvas, restartPressState);
-
-
-
-        bigFont.setColor(Color.WHITE);
-        canvas.drawTextCentered("Paused", bigFont, 0);
-        smallFont.setColor(Color.WHITE);
-        canvas.drawTextCentered("Press  P  to  Unpause", smallFont, -canvas.getHeight()/5f);
+        restartButton.draw(canvas, restartPressState, BUTTON_SCALE);
 
 
 
@@ -268,8 +257,7 @@ public class PauseMode extends MenuScreen {
     }
 
     public void reset() {
-        this.canvas = canvas;
-        overlayTint = new Color(0,0,0,0.9f);
+        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
     }

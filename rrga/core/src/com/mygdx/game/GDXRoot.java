@@ -188,7 +188,7 @@ public class GDXRoot extends Game implements ScreenListener {
 				case PauseMode.EXIT_MENU:
 					menu.setScreenListener(this);
 					menu.reset();
-					playing.screenPause();
+					playing.pause();
 					setScreen(menu);
 					break;
 				default:
@@ -207,7 +207,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
 				case GameMode.EXIT_PAUSE:
 					pausing.setBackgroundScreen(playing);
-					pausing.reset();
 					setScreen(pausing);
 					break;
 				case GameMode.EXIT_QUIT:

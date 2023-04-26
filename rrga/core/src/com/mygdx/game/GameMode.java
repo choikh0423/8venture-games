@@ -94,9 +94,6 @@ public class GameMode implements Screen {
     /** The world scale */
     protected Vector2 scale;
 
-    /** Whether or not this is an active controller */
-    private boolean active;
-
     private boolean debug;
 
     private LevelParser parser;
@@ -215,7 +212,6 @@ public class GameMode implements Screen {
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
         debug  = false;
-        active = false;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
         this.currentLevel = 1;
@@ -317,12 +313,6 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
-        //  screen modes that use GameMode as background can just avoid render()...
-        if (!active) {
-            return false;
-        }
-
         if (gameplayController.isCompleted()) {
             listener.exitScreen(this, EXIT_VICTORY);
             return false;
@@ -358,7 +348,6 @@ public class GameMode implements Screen {
 
         // Now it is time to maybe switch screens.
         if (inputController.didExit()) {
-            pause();
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
@@ -607,20 +596,10 @@ public class GameMode implements Screen {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when transitioning to other modes
      *
-     * This is usually when it's not active or visible on screen. An Application is
-     * also paused before it is destroyed.
      */
     public void pause() {
-        // does nothing
-        // this only gets called when we minimize the application, we can switch to pause mode that way.
-        active = false;
-        listener.exitScreen(this, GameMode.EXIT_PAUSE);
-    }
-
-    public void screenPause() {
-        active = false;
         gameplayController.pause();
     }
     /**
@@ -637,7 +616,6 @@ public class GameMode implements Screen {
      */
     public void show() {
         // Useless if called in outside animation loop
-        active = true;
     }
 
     /**
@@ -645,7 +623,6 @@ public class GameMode implements Screen {
      */
     public void hide() {
         // Useless if called in outside animation loop
-        active = false;
     }
 
     /**
