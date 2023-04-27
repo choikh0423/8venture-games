@@ -70,62 +70,28 @@
                  "y":703.557312252964
                 }, 
                 {
-                 "id":230,
-                 "polygon":[
-                        {
-                         "x":2.68096514745321,
-                         "y":77.7479892761394
-                        }, 
-                        {
-                         "x":-140.255630172991,
-                         "y":344.984852693098
-                        }, 
-                        {
-                         "x":-55.656836461126,
-                         "y":446.666417183905
-                        }, 
-                        {
-                         "x":-84.847886656863,
-                         "y":541.412789694802
-                        }, 
-                        {
-                         "x":-148.178844056707,
-                         "y":765.094874591058
-                        }, 
-                        {
-                         "x":41.4460020874685,
-                         "y":449.788440567067
-                        }, 
-                        {
-                         "x":-51.6205016357687,
-                         "y":317.430752453654
-                        }, 
-                        {
-                         "x":133.094874591058,
-                         "y":79.9781897491821
-                        }],
-                 "template":"templates\/lightning.json",
-                 "x":1493.29758713137,
-                 "y":369.973190348525
+                 "id":247,
+                 "template":"templates\/birds\/blue_bird.json",
+                 "x":285.714285714286,
+                 "y":167.857142857143
                 }, 
                 {
-                 "gid":2147483910,
-                 "id":242,
-                 "properties":[
-                        {
-                         "name":"atk_speed",
-                         "type":"float",
-                         "value":15
-                        }, 
-                        {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":10
-                        }],
-                 "rotation":0,
+                 "id":248,
                  "template":"templates\/birds\/brown_bird.json",
-                 "x":444.444444444444,
-                 "y":915.173237753883
+                 "x":600,
+                 "y":132.142857142857
+                }, 
+                {
+                 "id":250,
+                 "template":"templates\/birds\/red_bird.json",
+                 "x":840.048639573354,
+                 "y":169.620018764505
+                }, 
+                {
+                 "id":259,
+                 "template":"templates\/goal.json",
+                 "x":1598.8265493216,
+                 "y":168.683535020169
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -137,55 +103,7 @@
          "draworder":"topdown",
          "id":11,
          "name":"dark_clouds_behind",
-         "objects":[
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":237,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":664.53162055336,
-                 "y":415.51976284585
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":238,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":593.385375494071,
-                 "y":522.239130434783
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":239,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":423.424901185771,
-                 "y":545.954545454545
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":240,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":375.994071146245,
-                 "y":632.911067193676
-                }],
+         "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -198,10 +116,35 @@
          "name":"Gale",
          "objects":[
                 {
-                 "id":129,
+                 "id":260,
                  "template":"templates\/spawn.json",
-                 "x":1082.94200270817,
-                 "y":836.731578336298
+                 "x":1078.07160508712,
+                 "y":811.683987772372
+                }, 
+                {
+                 "id":266,
+                 "template":"templates\/wind_dir.json",
+                 "type":"direction",
+                 "x":192.989082733377,
+                 "y":918.34367127233
+                }, 
+                {
+                 "id":267,
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":266
+                        }],
+                 "template":"templates\/wind.json",
+                 "x":55.5435580937528,
+                 "y":730.613198593818
+                }, 
+                {
+                 "id":279,
+                 "template":"templates\/lightning\/in_lightning.json",
+                 "x":467.099918765232,
+                 "y":873.273761169781
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -215,28 +158,22 @@
          "name":"dark_clouds",
          "objects":[
                 {
-                 "gid":258,
-                 "height":466.790884718499,
-                 "id":186,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":869.87277729694,
-                 "x":1361.21669960208,
-                 "y":422.061817524854
-                }, 
-                {
-                 "gid":259,
+                 "gid":115,
                  "height":337,
-                 "id":187,
+                 "id":280,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":646,
-                 "x":1508.71636269809,
-                 "y":595.870303451887
+                 "x":393.988627132413,
+                 "y":662.563363119415
+                }, 
+                {
+                 "id":281,
+                 "template":"templates\/lightning\/one_lightning.json",
+                 "x":1513.24503311258,
+                 "y":784.76821192053
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -245,7 +182,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":243,
+ "nextobjectid":282,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -261,15 +198,11 @@
         }, 
         {
          "firstgid":114,
-         "source":"tilesets\/trees.json"
-        }, 
-        {
-         "firstgid":258,
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":262,
-         "source":"objects\/json\/brown_bird_tile.json"
+         "firstgid":118,
+         "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,
  "type":"map",

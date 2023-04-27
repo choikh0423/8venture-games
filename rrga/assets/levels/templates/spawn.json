@@ -1,6 +1,6 @@
 { "object":
     {
-     "gid":1,
+     "gid":50,
      "height":128,
      "id":142,
      "name":"spawn",
@@ -12,7 +12,7 @@
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/objects\/json\/gale_walking.json"
+     "source":"..\/objects\/json\/objects.json"
     },
  "type":"template"
 }

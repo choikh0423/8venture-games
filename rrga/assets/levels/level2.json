@@ -703,7 +703,7 @@
          "y":0
         }],
  "nextlayerid":17,
- "nextobjectid":139,
+ "nextobjectid":140,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
@@ -722,12 +722,12 @@
          "source":"tilesets\/trees.json"
         }, 
         {
-         "firstgid":258,
+         "firstgid":263,
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":262,
-         "source":"objects\/json\/green_bird_tile.json"
+         "firstgid":267,
+         "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,
  "type":"map",
