@@ -1,21 +1,18 @@
 { "object":
-{
-  "height":0,
-  "id":0,
-  "name":"",
-  "polyline":[
     {
-      "x":0,
-      "y":0
+     "gid":78,
+     "height":262.20267228581,
+     "id":266,
+     "name":"wind_direction",
+     "rotation":0,
+     "type":"direction",
+     "visible":true,
+     "width":132.880992289641
     },
+ "tileset":
     {
-      "x":0,
-      "y":-256
-    }],
-  "rotation":0,
-  "type":"wind_dir",
-  "visible":true,
-  "width":0
-},
-  "type":"template"
+     "firstgid":1,
+     "source":"..\/objects\/json\/objects.json"
+    },
+ "type":"template"
 }

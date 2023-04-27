@@ -1,6 +1,6 @@
 { "object":
     {
-     "gid":2,
+     "gid":52,
      "height":141.27147766323,
      "id":125,
      "name":"cloud1",
@@ -23,7 +23,7 @@
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/..\/objects\/json\/clouds.json"
+     "source":"..\/..\/objects\/json\/objects.json"
     },
  "type":"template"
 }

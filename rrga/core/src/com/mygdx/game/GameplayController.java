@@ -3,8 +3,8 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -22,8 +22,6 @@ import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
-
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
@@ -129,8 +127,6 @@ public class GameplayController implements ContactListener {
     private boolean prevInWind = false;
 
 
-
-
     // <=============================== Physics objects for the game BEGINS here ===============================>
     /** Physics constants for global */
     private JsonValue globalConstants;
@@ -186,6 +182,21 @@ public class GameplayController implements ContactListener {
     private ObjectSet<MovingPlatformModel> movingPlats = new ObjectSet<>();
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
+
+    /** weld joint definition struct */
+    private final WeldJointDef weldJointDef = new WeldJointDef();
+
+    /** the avatar-cloud joint */
+    private WeldJoint avatarWeldJoint;
+
+    /** whether avatar is touching a movable cloud. */
+    private boolean touchingMovingCloud;
+
+    /** the cloud body that the avatar is touching (there may be several, take FIRST) */
+    private Body contactedCloudBody;
+
+    /** whether to destroy */
+    private boolean destroyWeldJoint;
 
     // <=============================== Physics objects for the game ENDS here ===============================>
 
@@ -311,6 +322,13 @@ public class GameplayController implements ContactListener {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+
+        if (avatarWeldJoint != null){
+            world.destroyJoint(avatarWeldJoint);
+        }
+        avatarWeldJoint = null;
+        touchingMovingCloud = false;
+
         Vector2 gravity = new Vector2(world.getGravity());
         objects = levelContainer.getObjects();
 
@@ -450,6 +468,8 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();
 
+        avatar.setZooming(input.didZoom());
+
         //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
@@ -488,7 +508,6 @@ public class GameplayController implements ContactListener {
             }
             prevInWind = false;
         }
-        contactWindBod.clear();
 
         // Process player movement
         if (avatar.isGrounded() && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
@@ -706,14 +725,29 @@ public class GameplayController implements ContactListener {
             }
         }
 
-        // Set objects from level container
-        // TODO: (review) Delete the following, object properties are changed but references are not.
-//        levelContainer.setWorld(world);
-//        levelContainer.setAvatar(avatar);
-//        levelContainer.setObjects(objects);
-//        levelContainer.setUmbrella(umbrella);
-//        levelContainer.setLightnings(lightnings);
-//        levelContainer.setBirds(birds);
+        // attach player to cloud platform
+        if (avatar.isGrounded() && !avatar.isMoving() && touchingMovingCloud && avatarWeldJoint == null){
+            weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
+                    temp.set(avatar.getX(), avatar.getY()-avatar.getHeight()/2)
+            );
+            weldJointDef.collideConnected = true;
+            avatarWeldJoint = (WeldJoint) world.createJoint(weldJointDef);
+        }
+        else {
+            //player moves or touches wind, should delete joint
+            if (avatar.isMoving() || contactWindBod.size > 0) {
+                destroyWeldJoint = true;
+            }
+
+            // if deleting joint and has a joint
+            if (destroyWeldJoint && avatarWeldJoint != null) {
+                destroyWeldJoint = false;
+                world.destroyJoint(avatarWeldJoint);
+                avatarWeldJoint = null;
+            }
+        }
+
+        contactWindBod.clear();
     }
 
     /**
@@ -744,6 +778,27 @@ public class GameplayController implements ContactListener {
                     (avatar.getSensorName().equals(fd1) && bd2.getName().contains("platform"))) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
+
+                // TODO : cloud platforms are named "moving_platform" hence they have the "platform" part in their name.
+                //  it might be better to have platform class. Using debug name is not safe for all obstacles (sometimes
+                //  we might forget to assign object names and get unnecessary nullptr.
+                Body cloudBody = null;
+                MovingPlatformModel cloud = null;
+                if (bd1 instanceof MovingPlatformModel){
+                    cloudBody = body1;
+                    cloud = (MovingPlatformModel) bd1;
+                }
+                else if (bd2 instanceof MovingPlatformModel){
+                    cloudBody = body2;
+                    cloud = (MovingPlatformModel) bd2;
+                }
+                // TODO (revisit this choice): the FIRST cloud touched is the one Gale sticks to.
+                //  (revisit again): second edit, updated to the LAST CLOUD touched
+                //  To optimize joint-create-destroy time, non-movable clouds of course don't need joints with avatar.
+                if (cloudBody != null && cloud.getMoveSpeed() > 0){
+                    touchingMovingCloud = true;
+                    contactedCloudBody = cloudBody;
+                }
             }
 
             // See if umbrella touches wind
@@ -764,6 +819,8 @@ public class GameplayController implements ContactListener {
                 Vector2 norm = wm.getNormal();
                 float flip = (bd1 instanceof HazardModel ? 1 : -1);
                 h.setKnockBackForce(norm.scl(flip));
+                // this knockback force is being recomputed many times for each fixture contact,...
+                // i think that's why it's really inconsistent
                 contactHazards.add(h);
             }
 
@@ -819,6 +876,14 @@ public class GameplayController implements ContactListener {
             sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
             if (sensorFixtures.size == 0) {
                 avatar.setGrounded(false);
+            }
+            boolean isCloud1 = bd1 instanceof MovingPlatformModel;
+            boolean isCloud2 = bd2 instanceof MovingPlatformModel;
+            Body cloudBody = isCloud1 ? body1 : isCloud2 ? body2 : null;
+            if (cloudBody == contactedCloudBody){
+                touchingMovingCloud = false;
+                contactedCloudBody = null;
+                destroyWeldJoint = true;
             }
         }
 
