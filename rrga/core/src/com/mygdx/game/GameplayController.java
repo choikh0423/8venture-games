@@ -450,6 +450,8 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();
 
+        avatar.setZooming(input.didZoom());
+
         //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
