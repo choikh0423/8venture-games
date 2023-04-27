@@ -105,6 +105,10 @@ public class LevelContainer{
      */
     private Texture avatarIdleAnimationTexture;
     /**
+     * Texture asset for character look animation
+     */
+    private Texture avatarLookAnimationTexture;
+    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -288,6 +292,7 @@ public class LevelContainer{
             windAnimation[i] = new TextureRegion(directory.getEntry("game:wind_frame"+i, Texture.class));
         }
         avatarIdleAnimationTexture = directory.getEntry("game:player_idle_animation", Texture.class);
+        avatarLookAnimationTexture = directory.getEntry("game:player_look_animation", Texture.class);
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
@@ -496,6 +501,7 @@ public class LevelContainer{
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
         avatar.setFallingAnimation(avatarFallingAnimationTexture);
         avatar.setIdleAnimation(avatarIdleAnimationTexture);
+        avatar.setLookAnimation(avatarLookAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
