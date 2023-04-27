@@ -788,10 +788,9 @@ public class GameplayController implements ContactListener {
                     cloud = (MovingPlatformModel) bd2;
                 }
                 // TODO (revisit this choice): the FIRST cloud touched is the one Gale sticks to.
+                //  (revisit again): second edit, updated to the LAST CLOUD touched
                 //  To optimize joint-create-destroy time, non-movable clouds of course don't need joints with avatar.
-                if (cloudBody != null && !touchingMovingCloud && cloud.getMoveSpeed() > 0){
-                    System.out.println(cloud.getMoveSpeed());
-                    System.out.println("moving cloud");
+                if (cloudBody != null && cloud.getMoveSpeed() > 0){
                     touchingMovingCloud = true;
                     contactedCloudBody = cloudBody;
                 }
