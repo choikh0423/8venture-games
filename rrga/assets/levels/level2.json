@@ -32,6 +32,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":9,
+         "locked":true,
          "name":"Branch Layer 0",
          "opacity":1,
          "type":"tilelayer",
@@ -70,6 +71,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":10,
+         "locked":true,
          "name":"Branch Layer 1",
          "opacity":1,
          "type":"tilelayer",
@@ -108,6 +110,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 252, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":11,
+         "locked":true,
          "name":"Branch Layer 2",
          "opacity":1,
          "type":"tilelayer",
@@ -146,6 +149,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":13,
+         "locked":true,
          "name":"Middle Bushes",
          "opacity":1,
          "type":"tilelayer",
@@ -184,6 +188,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":15,
+         "locked":true,
          "name":"Front Branches",
          "opacity":1,
          "type":"tilelayer",
@@ -222,6 +227,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":14,
+         "locked":true,
          "name":"Front Bushes",
          "opacity":1,
          "type":"tilelayer",
@@ -233,6 +239,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"objects 0",
          "objects":[
                 {
@@ -435,20 +442,25 @@
                  "id":110,
                  "properties":[
                         {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
                          "name":"path",
                          "type":"object",
                          "value":112
                         }],
                  "template":"templates\/birds\/red_bird.json",
                  "width":138.900754267567,
-                 "x":798.979461969424,
+                 "x":874.979461969424,
                  "y":1655.36842105263
                 }, 
                 {
                  "id":112,
                  "template":"templates\/path_point.json",
-                 "x":102.178858759491,
-                 "y":1584.3806895602
+                 "x":18.178858759491,
+                 "y":1592.3806895602
                 }, 
                 {
                  "id":118,
@@ -630,6 +642,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"objects 1",
          "objects":[
                 {
@@ -665,6 +678,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"objects 2",
          "objects":[
                 {
@@ -674,12 +688,13 @@
                  "y":2589.19298245614
                 }, 
                 {
-                 "gid":2147483985,
-                 "id":139,
+                 "class":"bird",
+                 "gid":2147483910,
+                 "id":138,
                  "rotation":0,
                  "template":"templates\/birds\/green_bird.json",
-                 "x":2897.62057191635,
-                 "y":1216.94408877507
+                 "x":2937.16666666667,
+                 "y":1213.33333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -691,7 +706,7 @@
  "nextobjectid":140,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.10.0",
+ "tiledversion":"1.9.2",
  "tileheight":128,
  "tilesets":[
         {
@@ -716,6 +731,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.10",
+ "version":"1.9",
  "width":36
 }

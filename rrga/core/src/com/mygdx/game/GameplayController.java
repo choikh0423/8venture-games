@@ -450,6 +450,8 @@ public class GameplayController implements ContactListener {
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();
 
+        avatar.setZooming(input.didZoom());
+
         //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
         float ang = umbrella.getRotation();
@@ -873,13 +875,13 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when the gameplay controller is paused.
      * <p>
      * We need this method to stop all sounds when we pause.
      * Pausing happens when we switch game modes.
      */
     public void pause() {
-
+        backgroundMusic.pause();
     }
 
     /**

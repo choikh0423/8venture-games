@@ -41,13 +41,7 @@ public class UmbrellaModel extends BoxObstacle {
      *  -1: closed, 0: stationary, 1: opened */
     private int openMode = 0;
 
-    /** Umbrella open film texture */
-    private Texture openAnimationTexture;
-
-    /** Umbrella open animation frames */
-    private TextureRegion[][] openTmpFrames;
-
-    /** Umbrella open animation frames */
+     /** Umbrella open animation frames */
     private TextureRegion[] openAnimationFrames;
 
     /** Umbrella open animation*/
@@ -67,16 +61,6 @@ public class UmbrellaModel extends BoxObstacle {
     private int OPEN_ANIMATION_FRAMECOUNT = 18;
 
     //Boost animation
-
-    /** Umbrella boost film texture */
-    private Texture boostAnimationTexture;
-
-    /** Umbrella boost animation frames */
-    private TextureRegion[][] boostTmpFrames;
-
-    /** Umbrella boost animation frames */
-    private TextureRegion[] boostAnimationFrames;
-
     /** Umbrella boost animation*/
     private Animation<TextureRegion> boostAnimation;
 
@@ -255,15 +239,14 @@ public class UmbrellaModel extends BoxObstacle {
      * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
      * */
     public void setOpenAnimation(Texture texture) {
-        this.openAnimationTexture = texture;
-        this.openTmpFrames = TextureRegion.split(openAnimationTexture, 469, 600 );
-        this.openAnimationFrames = new TextureRegion[6];
+        TextureRegion[][] tempFrames = TextureRegion.split(texture, 469, 600 );
+        openAnimationFrames = new TextureRegion[6];
 
         // Setting animation frames
         int index = 0;
         for (int i=0; i<1; i++) {
             for (int j=0; j<6; j++) {
-                this.openAnimationFrames[index] = openTmpFrames[i][j];
+                openAnimationFrames[index] = tempFrames[i][j];
                 index++;
             }
         }
@@ -281,20 +264,19 @@ public class UmbrellaModel extends BoxObstacle {
      * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
      * */
     public void setBoostAnimation(Texture texture) {
-        this.boostAnimationTexture = texture;
-        this.boostTmpFrames = TextureRegion.split(boostAnimationTexture, boostAnimationTexture.getWidth()/6, boostAnimationTexture.getHeight() );
-        this.boostAnimationFrames = new TextureRegion[6];
+        TextureRegion[][] tempFrames = TextureRegion.split(texture, texture.getWidth()/6, texture.getHeight() );
+        TextureRegion[] frames = new TextureRegion[6];
 
         // Setting animation frames
         int index = 0;
         for (int i=0; i<1; i++) {
             for (int j=0; j<6; j++) {
-                this.boostAnimationFrames[index] = boostTmpFrames[i][j];
+                frames[index] = tempFrames[i][j];
                 index++;
             }
         }
 
-        this.boostAnimation = new Animation<>(1f/18f, boostAnimationFrames);
+        this.boostAnimation = new Animation<>(1f/18f, frames);
         boostAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 

@@ -436,31 +436,6 @@
                  "template":"templates\/birds\/red_bird.json",
                  "x":1266,
                  "y":2534
-                }, 
-                {
-                 "height":772.897196261682,
-                 "id":53,
-                 "properties":[
-                        {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":2
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":54
-                        }],
-                 "template":"templates\/birds\/red_bird.json",
-                 "width":827,
-                 "x":4344,
-                 "y":3192
-                }, 
-                {
-                 "id":54,
-                 "template":"templates\/path_point.json",
-                 "x":408,
-                 "y":3416
                 }],
          "opacity":1,
          "type":"objectgroup",
