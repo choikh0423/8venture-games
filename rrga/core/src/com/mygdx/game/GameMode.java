@@ -22,13 +22,13 @@ public class GameMode implements Screen {
     private TextureRegion backgroundTexture;
 
     /** Texture asset for SKY parallax layer A*/
-    private Texture skyLayerTextureA;
+    private TextureRegion skyLayerTextureA;
 
     /** Texture asset for SKY parallax layer B*/
-    private Texture skyLayerTextureB;
+    private TextureRegion skyLayerTextureB;
 
     /** Texture asset for SKY parallax layer C*/
-    private Texture skyLayerTextureC;
+    private TextureRegion skyLayerTextureC;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -260,9 +260,9 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
-        skyLayerTextureA = directory.getEntry("game:skylayerA", Texture.class);
-        skyLayerTextureB = directory.getEntry("game:skylayerB", Texture.class);
-        skyLayerTextureC = directory.getEntry("game:skylayerC", Texture.class);
+        skyLayerTextureA =  new TextureRegion(directory.getEntry("game:skylayerA", Texture.class));
+        skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
+        skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
 
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
@@ -413,21 +413,24 @@ public class GameMode implements Screen {
         canvas.translateCameraToPoint(px,py);
         canvas.begin();
 
+        float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
+        float sclX = canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight();
+
         // center a background on player
         // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
                 backgroundTexture.getRegionHeight()/2f, px , py, 0,
-                canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
-                canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
+                sclX, sclY);
 
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
         //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-//        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA , -py * verticalA, px, py, worldHeight, zoomScl);
-//        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl);
-//        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl);
-
+        if (currentLevel == 2) {
+            canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
+        }
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
