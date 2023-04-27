@@ -11,11 +11,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.mygdx.game.model.*;
-import com.mygdx.game.model.hazard.NestHazard;
-import com.mygdx.game.model.hazard.StaticHazard;
+import com.mygdx.game.model.hazard.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
-import com.mygdx.game.model.hazard.BirdHazard;
-import com.mygdx.game.model.hazard.LightningHazard;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
@@ -91,6 +88,11 @@ public class LevelContainer{
      * The textures for movable cloud platforms
      */
     private TextureRegion[] cloudPlatformTextures;
+
+    /**
+     * The textures for animated lightning
+     */
+    private Texture[] animatedLightningTextures;
 
     /**
      * Texture asset for character front avatar
@@ -300,6 +302,15 @@ public class LevelContainer{
                 new TextureRegion(directory.getEntry("platform:cloud2", Texture.class)),
                 new TextureRegion(directory.getEntry("platform:cloud3", Texture.class))
         };
+
+        // animated lightning
+        animatedLightningTextures = new Texture[]{
+                directory.getEntry("game:lightning0", Texture.class),
+                directory.getEntry("game:lightning1", Texture.class),
+                directory.getEntry("game:lightning2", Texture.class),
+                directory.getEntry("game:lightning3", Texture.class),
+                directory.getEntry("game:lightning4", Texture.class)
+        };
     }
     /**
      * Resets the level container (emptying the container)
@@ -364,7 +375,6 @@ public class LevelContainer{
                     cur.getFloat("x"), cur.getFloat("y")
             );
             obj.setBodyType(BodyDef.BodyType.KinematicBody);
-
             obj.setDensity(defaults.getFloat("density", 0.0f));
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
@@ -438,13 +448,14 @@ public class LevelContainer{
         String lightningName = "lightning";
         JsonValue[] lightningData = parser.getLightningData();
         for (int ii = 0; ii < lightningData.length; ii++) {
-            LightningHazard obj;
-            obj = new LightningHazard(lightningData[ii]);
+            AnimatedLightningHazard obj;
+            JsonValue data = lightningData[ii];
+            obj = new AnimatedLightningHazard(data, animatedLightningTextures[data.getInt("tileIndex")]);
             obj.setDrawScale(scale);
-            obj.setTexture(lightningTexture);
+            obj.setBodyType(BodyDef.BodyType.StaticBody);
             obj.setName(lightningName + ii);
             addObject(obj);
-            lightnings.add(obj);
+            //lightnings.add(obj);
             drawables.add(obj);
         }
 

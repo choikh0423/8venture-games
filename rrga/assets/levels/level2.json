@@ -674,13 +674,12 @@
                  "y":2589.19298245614
                 }, 
                 {
-                 "gid":2147483910,
-                 "id":138,
+                 "gid":2147483985,
+                 "id":139,
                  "rotation":0,
                  "template":"templates\/birds\/green_bird.json",
-                 "type":"bird",
-                 "x":2937.16666666667,
-                 "y":1213.33333333333
+                 "x":2897.62057191635,
+                 "y":1216.94408877507
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -689,7 +688,7 @@
          "y":0
         }],
  "nextlayerid":17,
- "nextobjectid":139,
+ "nextobjectid":140,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -708,12 +707,12 @@
          "source":"tilesets\/trees.json"
         }, 
         {
-         "firstgid":258,
+         "firstgid":263,
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":262,
-         "source":"objects\/json\/green_bird_tile.json"
+         "firstgid":267,
+         "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,
  "type":"map",

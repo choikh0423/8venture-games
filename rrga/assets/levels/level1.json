@@ -536,8 +536,8 @@
                  "id":43,
                  "rotation":0,
                  "template":"templates\/wind_dir.json",
-                 "x":2886.73,
-                 "y":2901.59
+                 "x":2932.66810444874,
+                 "y":2874.99425531915
                 }, 
                 {
                  "id":44,
@@ -614,8 +614,8 @@
                         }],
                  "rotation":24.5316,
                  "template":"templates\/wind_dir.json",
-                 "x":1265.02666666667,
-                 "y":3507.13666666667
+                 "x":1456.3438116262,
+                 "y":3499.77831493746
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -642,10 +642,10 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":55,
+ "nextobjectid":56,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -659,13 +659,9 @@
         {
          "firstgid":114,
          "source":"tilesets\/trees.json"
-        }, 
-        {
-         "firstgid":258,
-         "source":"objects\/json\/clouds.json"
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":40
 }

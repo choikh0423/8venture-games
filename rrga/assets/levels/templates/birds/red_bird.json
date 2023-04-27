@@ -1,7 +1,7 @@
 { "object":
     {
      "class":"bird",
-     "gid":2147483651,
+     "gid":75,
      "height":100,
      "id":99,
      "name":"red_bird",
@@ -23,7 +23,7 @@
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/..\/objects\/json\/red_bird_tile.json"
+     "source":"..\/..\/objects\/json\/objects.json"
     },
  "type":"template"
 }

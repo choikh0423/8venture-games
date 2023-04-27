@@ -1,6 +1,6 @@
 { "object":
     {
-     "gid":2,
+     "gid":42,
      "height":256,
      "id":98,
      "name":"goal",
@@ -12,7 +12,7 @@
  "tileset":
     {
      "firstgid":1,
-     "source":"..\/objects\/json\/goal_scarf.json"
+     "source":"..\/objects\/json\/objects.json"
     },
  "type":"template"
 }
