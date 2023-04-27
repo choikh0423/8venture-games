@@ -123,9 +123,7 @@ public class GameCanvas {
             pos.x = pos.x + pos.x%w;
         }
 
-        if (pos.y < 0) {
-            pos.y = bottomBound + h * (pos.y /worldHeight);
-        }
+        pos.y = bottomBound + h * (pos.y /worldHeight);
 
         return pos;
     }
@@ -618,9 +616,12 @@ public class GameCanvas {
         int w = getWidth();
 
         // Have to draw the background twice for continuous scrolling.
-        spriteBatch.draw(image, positionCache.x,   positionCache.y + 200);
-        spriteBatch.draw(image, positionCache.x-w, positionCache.y + 200);
-        spriteBatch.draw(image, positionCache.x+w, positionCache.y + 200);
+        spriteBatch.draw(image, positionCache.x,   positionCache.y);
+        spriteBatch.draw(image, positionCache.x-w, positionCache.y);
+        spriteBatch.draw(image, positionCache.x+w, positionCache.y);
+
+
+
     }
 
     /**
