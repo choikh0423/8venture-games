@@ -103,7 +103,7 @@ public class LevelContainer{
     /**
      * Texture asset for character idle animation
      */
-    private TextureRegion avatarIdleTexture;
+    private Texture avatarIdleAnimationTexture;
     /**
      * Texture asset for the wind gust
      */
@@ -267,7 +267,6 @@ public class LevelContainer{
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
         boostTexture = directory.getEntry("game:boost", Texture.class);
-        avatarIdleTexture = new TextureRegion(directory.getEntry("game:player_idle_animation", Texture.class));
 
         // Hazard Textures
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
@@ -288,7 +287,7 @@ public class LevelContainer{
         for(int i = 0; i < 9; i++){
             windAnimation[i] = new TextureRegion(directory.getEntry("game:wind_frame"+i, Texture.class));
         }
-
+        avatarIdleAnimationTexture = directory.getEntry("game:player_idle_animation", Texture.class);
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
@@ -496,7 +495,7 @@ public class LevelContainer{
         avatar.setBoostTexture(boostTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
         avatar.setFallingAnimation(avatarFallingAnimationTexture);
-        avatar.setIdleAnimation(avatarIdleTexture);
+        avatar.setIdleAnimation(avatarIdleAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
