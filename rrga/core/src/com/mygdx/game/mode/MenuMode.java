@@ -560,7 +560,6 @@ public class MenuMode extends MenuScreen {
      */
     public void render(float delta) {
 
-        System.out.println("render-menu");
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
