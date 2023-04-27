@@ -47,7 +47,6 @@
         {
          "draworder":"topdown",
          "id":13,
-         "locked":true,
          "name":"wind",
          "objects":[
                 {
@@ -78,7 +77,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":10
+                         "value":14
                         }],
                  "template":"templates\/wind.json",
                  "x":22.4561403508771,
@@ -112,7 +111,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":15
+                         "value":16
                         }],
                  "template":"templates\/wind.json",
                  "x":558.928229665076,
@@ -147,7 +146,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":10
+                         "value":16
                         }],
                  "template":"templates\/wind.json",
                  "width":256,
@@ -183,7 +182,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":12
+                         "value":16
                         }],
                  "template":"templates\/wind.json",
                  "width":256,
@@ -786,72 +785,72 @@
          "name":"dark clouds",
          "objects":[
                 {
+                 "class":"",
                  "gid":258,
                  "height":466.791,
                  "id":133,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":1598.39683333333,
                  "y":2257.51359090909
                 }, 
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":134,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":2043.54545454545,
                  "y":2582.28787878788
                 }, 
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":135,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1657,
                  "y":3007.5
                 }, 
                 {
+                 "class":"",
                  "gid":258,
                  "height":466.791,
                  "id":124,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":2460.82575757576,
                  "y":1838.53651515152
                 }, 
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":132,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1931.54545454545,
                  "y":1670.89393939394
                 }, 
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":118,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":2303.47259090909,
@@ -896,36 +895,36 @@
          "name":"front dark clouds",
          "objects":[
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":136,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1877,
                  "y":3095.5
                 }, 
                 {
+                 "class":"",
                  "gid":259,
                  "height":337,
                  "id":125,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":2150.75,
                  "y":2018.40287878788
                 }, 
                 {
+                 "class":"",
                  "gid":258,
                  "height":466.791,
                  "id":117,
                  "name":"",
                  "rotation":0,
-                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":1955.97259090909,
@@ -941,7 +940,7 @@
  "nextobjectid":153,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.10.0",
+ "tiledversion":"1.9.2",
  "tileheight":128,
  "tilesets":[
         {
@@ -966,6 +965,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.10",
+ "version":"1.9",
  "width":40
 }

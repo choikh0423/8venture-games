@@ -917,20 +917,6 @@
                  "y":3640.30123925317
                 }, 
                 {
-                 "height":198.499162479062,
-                 "id":106,
-                 "template":"templates\/birds\/blue_bird.json",
-                 "width":198.499162479062,
-                 "x":3769.91789673558,
-                 "y":2955.17720881771
-                }, 
-                {
-                 "id":109,
-                 "template":"templates\/birds\/green_bird.json",
-                 "x":701,
-                 "y":2422.53846153846
-                }, 
-                {
                  "id":142,
                  "template":"templates\/spawn.json",
                  "x":1845.01812211792,
@@ -965,6 +951,55 @@
                  "template":"templates\/path_point.json",
                  "x":996.771589991929,
                  "y":3478.61178369653
+                }, 
+                {
+                 "gid":0,
+                 "id":148,
+                 "template":"templates\/birds\/green_bird.json",
+                 "x":3766.66666666667,
+                 "y":2939.39393939394
+                }, 
+                {
+                 "id":149,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":150
+                        }],
+                 "template":"templates\/birds\/brown_bird.json",
+                 "x":1218.18181818182,
+                 "y":2633.33333333333
+                }, 
+                {
+                 "id":150,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":151
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":1018.18181818182,
+                 "y":2612.12121212121
+                }, 
+                {
+                 "id":151,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":152
+                        }],
+                 "template":"templates\/path_point.json",
+                 "x":754.545454545455,
+                 "y":2360.60606060606
+                }, 
+                {
+                 "id":152,
+                 "template":"templates\/path_point.json",
+                 "x":1481.81818181818,
+                 "y":2354.54545454545
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -985,10 +1020,10 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":148,
+ "nextobjectid":153,
  "orientation":"orthogonal",
  "renderorder":"right-up",
- "tiledversion":"1.10.0",
+ "tiledversion":"1.9.2",
  "tileheight":128,
  "tilesets":[
         {
@@ -1005,6 +1040,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.10",
+ "version":"1.9",
  "width":32
 }
