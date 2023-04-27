@@ -875,13 +875,13 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when the gameplay controller is paused.
      * <p>
      * We need this method to stop all sounds when we pause.
      * Pausing happens when we switch game modes.
      */
     public void pause() {
-
+        backgroundMusic.pause();
     }
 
     /**
