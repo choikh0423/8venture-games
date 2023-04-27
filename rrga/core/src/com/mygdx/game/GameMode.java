@@ -336,12 +336,7 @@ public class GameMode implements Screen {
 
         // TODO: TEMPORARY NEXT LEVEL
         if (inputController.didNext()) {
-            if (currentLevel < 3) {
-                currentLevel += 1;
-            } else {
-                currentLevel = 1;
-            }
-
+            setNextLevel();
             reset();
             return true;
         }
@@ -647,6 +642,20 @@ public class GameMode implements Screen {
     public void setLevel(int level){
         currentLevel = level;
     }
+
+    /**
+     * Sets current level of the game
+     */
+    public void setNextLevel(){
+        if (currentLevel < 3) {
+            currentLevel += 1;
+        } else {
+            currentLevel = 1;
+        }
+
+    }
+
+
 
     /**
      * Sets current level of the game

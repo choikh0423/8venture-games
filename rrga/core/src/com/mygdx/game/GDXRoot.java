@@ -214,7 +214,8 @@ public class GDXRoot extends Game implements ScreenListener {
 				default:
 					break;
 			}
-		} else if (screen == victory && exitCode == VictoryScreen.EXIT_RESTART){
+		} else if (screen == victory && exitCode == VictoryScreen.EXIT_NEXT){
+			playing.setNextLevel();
 			playing.reset();
 			setScreen(playing);
 		} else if (screen == defeat && exitCode == LoseScreen.EXIT_RESTART){
