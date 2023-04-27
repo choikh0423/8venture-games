@@ -549,6 +549,7 @@ public class GameplayController implements ContactListener {
                     avatar.getBody().setLinearVelocity(cache);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
+                    if(h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
                 } else {
                     avatar.setHealth(0);
                     // start iframes even when we die, otherwise player being damaged is not so apparent.
@@ -811,16 +812,15 @@ public class GameplayController implements ContactListener {
             // Check for hazard collision
             // Is there any way to add fixture data to all fixtures in a polygon obstacle without changing the
             // implementation? If so, want to change to fd1 == "damage"
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
+            if (((fd2 == "umbrellaSensor" || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                    ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 //norm from a to b
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = wm.getNormal();
                 float flip = (bd1 instanceof HazardModel ? 1 : -1);
                 h.setKnockBackForce(norm.scl(flip));
-                // this knockback force is being recomputed many times for each fixture contact,...
-                // i think that's why it's really inconsistent
+                //same for static hazards?
                 contactHazards.add(h);
             }
 

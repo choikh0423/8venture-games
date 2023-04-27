@@ -686,6 +686,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 			lighterFuel = 0;
 			float umbrellaX = (float) Math.cos(umbAng);
 			float umbrellaY = (float) Math.sin(umbAng);
+			float yscl = 1.05f;
 
 			//switch between lighter boost as a force or setting velocity directly
 			boolean force = false;
@@ -703,7 +704,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 					setVY(Math.signum(getVY()) * getMaxSpeedUp());
 					forceCache.y = 0;
 				} else {
-					forceCache.y = umbrellaY * lighterForce;
+					forceCache.y = umbrellaY * lighterForce * yscl;
 				}
 				body.applyLinearImpulse(forceCache, getPosition(), true);
 			}
@@ -712,13 +713,20 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 					forceCache.x = getMaxSpeedXAirWind();
 				} else {
-					forceCache.x = umbrellaX * lighterForce;
+					if(Math.signum(umbrellaX) == Math.signum(getVX()) && getVX() > umbrellaX * lighterForce) {
+						forceCache.x = getVX();
+					}
+					else forceCache.x = umbrellaX * lighterForce;
 				}
 				//determine Y
 				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
 					forceCache.y = getMaxSpeedUp();
 				} else {
-					forceCache.y = umbrellaY * lighterForce;
+					if(getVY() > umbrellaY * lighterForce){
+						forceCache.y = getVY();
+					}
+					else forceCache.y = umbrellaY * lighterForce * yscl;
+
 				}
 				body.setLinearVelocity(forceCache);
 			}
