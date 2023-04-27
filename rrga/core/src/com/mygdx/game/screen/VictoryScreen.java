@@ -40,6 +40,8 @@ public class VictoryScreen extends MenuScreen{
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
 
+    private int nextPressed;
+
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(0,0,0,0.8f);
@@ -115,10 +117,23 @@ public class VictoryScreen extends MenuScreen{
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.N) {
-            currentExitCode = VictoryScreen.EXIT_NEXT;
+            nextPressed = 1;
             return true;
         }
 
         return false;
     }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        if (nextPressed == 1) {
+            currentExitCode = VictoryScreen.EXIT_NEXT;
+            listener.exitScreen(this, currentExitCode);
+            currentExitCode = Integer.MIN_VALUE;
+            return true;
+        }
+
+        return false;
+    }
+
 }
