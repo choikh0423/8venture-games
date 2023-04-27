@@ -32,11 +32,11 @@ public class GameMode implements Screen {
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
-    private float horizontalA = 0.9f;
+    private float horizontalA = 0.5f;
     /** Horizontal Parallax Constant B*/
     private float horizontalB = 0.7f;
     /** Horizontal Parallax Constant C*/
-    private float horizontalC = 0.5f;
+    private float horizontalC = 0.9f;
 
     /** Vertical Parallax Constant A*/
     private float verticalA = 0.5f;
@@ -374,12 +374,14 @@ public class GameMode implements Screen {
      */
     public void update(float dt) {
 
-        if (inputController.didZoom()){
+        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
             zoomAlpha -= zoomAlphaDelta;
         }
+
+        if (gameplayController.getPlayer().getiFrames()>0) zoomAlpha = 0;
 
         // constraint zoomAlpha into [0,1] range
         if (zoomAlpha < 0){ zoomAlpha = 0; }

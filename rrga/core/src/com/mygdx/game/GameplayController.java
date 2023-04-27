@@ -343,6 +343,7 @@ public class GameplayController implements ContactListener {
         backgroundMusic.setLooping(true);
     }
 
+    private boolean canZoom;
 
     /**
      * The core gameplay loop of this world.
@@ -381,70 +382,73 @@ public class GameplayController implements ContactListener {
             countdown--;
         }
 
-        // Check for whether the player toggled the umbrella being open/closed
-        if(!input.secondaryControlMode){
-            if (input.didToggle()) {
-                umbrella.setOpen(!umbrella.isOpen());
-                if (umbrella.isOpen()) {
+        //UMBRELLA
+        //only allow control when not zooming
+        if (!input.didZoom()){
+            // Check for whether the player toggled the umbrella being open/closed
+            if(!input.secondaryControlMode){
+                if (input.didToggle()) {
+                    umbrella.setOpen(!umbrella.isOpen());
+                    if (umbrella.isOpen()) {
+                        umbrella.useOpenedTexture();
+                        //TODO: apply some force to the player so the floatiness comes back
+                    } else {
+                        umbrella.useClosedTexture();
+                        Body body = avatar.getBody();
+                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    }
+                }
+            } else {
+                if (input.isToggleHeld()) {
+                    umbrella.setOpen(true);
                     umbrella.useOpenedTexture();
-                    //TODO: apply some force to the player so the floatiness comes back
+                    wasOpen = true;
                 } else {
+                    umbrella.setOpen(false);
                     umbrella.useClosedTexture();
                     Body body = avatar.getBody();
-                    body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    wasOpen = false;
                 }
             }
-        } else {
-            if (input.isToggleHeld()) {
-                umbrella.setOpen(true);
-                umbrella.useOpenedTexture();
-                wasOpen = true;
+
+            //umbrella points towards mouse pointer
+            center.x = Gdx.graphics.getWidth() / 2f;
+            center.y = Gdx.graphics.getHeight() / 2f;
+            mousePos.x = input.getMousePos().x;
+            mousePos.y = input.getMousePos().y;
+            //convert from screen coordinates to canvas coordinates
+            mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
+            //convert to player coordinates
+            mousePos.sub(center);
+            //normalize manually because Vector2.nor() is less accurate
+            float l = mousePos.len();
+            mousePos.x /= l;
+            mousePos.y /= l;
+            //compute new angle
+            float mouseAng = (float) Math.acos(mousePos.dot(up));
+            if (input.getMousePos().x > center.x) mouseAng *= -1;
+            angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
+            if (angInBounds) {
+                umbrella.setAngle(mouseAng);
+                lastValidAng = mouseAng;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            } else if (lastValidAng >= 0) {
+                umbrella.setAngle((float) Math.PI / 2);
+                mousePos.x = -1;
+                mousePos.y = 0;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             } else {
-                umbrella.setOpen(false);
-                umbrella.useClosedTexture();
-                Body body = avatar.getBody();
-                if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
-                wasOpen = false;
+                umbrella.setAngle(-(float) Math.PI / 2);
+                mousePos.x = 1;
+                mousePos.y = 0;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             }
         }
-
 
         //make player face forward in air
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();
-
-        //umbrella points towards mouse pointer
-        center.x = Gdx.graphics.getWidth() / 2f;
-        center.y = Gdx.graphics.getHeight() / 2f;
-        mousePos.x = input.getMousePos().x;
-        mousePos.y = input.getMousePos().y;
-        //convert from screen coordinates to canvas coordinates
-        mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
-        //convert to player coordinates
-        mousePos.sub(center);
-        //normalize manually because Vector2.nor() is less accurate
-        float l = mousePos.len();
-        mousePos.x /= l;
-        mousePos.y /= l;
-        //compute new angle
-        float mouseAng = (float) Math.acos(mousePos.dot(up));
-        if (input.getMousePos().x > center.x) mouseAng *= -1;
-        angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
-        if (angInBounds) {
-            umbrella.setAngle(mouseAng);
-            lastValidAng = mouseAng;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-        } else if (lastValidAng >= 0) {
-            umbrella.setAngle((float) Math.PI / 2);
-            mousePos.x = -1;
-            mousePos.y = 0;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
-        } else {
-            umbrella.setAngle(-(float) Math.PI / 2);
-            mousePos.x = 1;
-            mousePos.y = 0;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
-        }
 
         //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
@@ -487,7 +491,7 @@ public class GameplayController implements ContactListener {
         contactWindBod.clear();
 
         // Process player movement
-        if (avatar.isGrounded()) {
+        if (avatar.isGrounded() && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
@@ -508,7 +512,7 @@ public class GameplayController implements ContactListener {
         }
 
         // Process Lighter Force
-        if(input.getLighter() && umbrella.isOpen()){
+        if(input.getLighter() && umbrella.isOpen() && !input.didZoom()){
             if(avatar.applyLighterForce(ang)) umbrella.startBoost();
         }
         if(avatar.isGrounded()){
