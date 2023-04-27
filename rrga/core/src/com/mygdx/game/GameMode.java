@@ -32,11 +32,11 @@ public class GameMode implements Screen {
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
-    private float horizontalA = 0.9f;
+    private float horizontalA = 0.5f;
     /** Horizontal Parallax Constant B*/
     private float horizontalB = 0.7f;
     /** Horizontal Parallax Constant C*/
-    private float horizontalC = 0.5f;
+    private float horizontalC = 0.9f;
 
     /** Vertical Parallax Constant A*/
     private float verticalA = 0.5f;
@@ -93,9 +93,6 @@ public class GameMode implements Screen {
 
     /** The world scale */
     protected Vector2 scale;
-
-    /** Whether or not this is an active controller */
-    private boolean active;
 
     private boolean debug;
 
@@ -215,7 +212,6 @@ public class GameMode implements Screen {
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
         debug  = false;
-        active = false;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
         this.currentLevel = 1;
@@ -244,6 +240,7 @@ public class GameMode implements Screen {
         // GameMode does not own the directory, so it does not unload assets
         directory = null;
     }
+
 
     /**
      * Gather the assets for this controller.
@@ -316,12 +313,6 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
-        //  screen modes that use GameMode as background can just avoid render()...
-        if (!active) {
-            return false;
-        }
-
         if (gameplayController.isCompleted()) {
             listener.exitScreen(this, EXIT_VICTORY);
             return false;
@@ -357,7 +348,6 @@ public class GameMode implements Screen {
 
         // Now it is time to maybe switch screens.
         if (inputController.didExit()) {
-            pause();
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
@@ -384,12 +374,14 @@ public class GameMode implements Screen {
      */
     public void update(float dt) {
 
-        if (inputController.didZoom()){
+        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
             zoomAlpha -= zoomAlphaDelta;
         }
+
+        if (gameplayController.getPlayer().getiFrames()>0) zoomAlpha = 0;
 
         // constraint zoomAlpha into [0,1] range
         if (zoomAlpha < 0){ zoomAlpha = 0; }
@@ -608,18 +600,12 @@ public class GameMode implements Screen {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when transitioning to other modes
      *
-     * This is usually when it's not active or visible on screen. An Application is
-     * also paused before it is destroyed.
      */
     public void pause() {
-        // does nothing
-        // this only gets called when we minimize the application, we can switch to pause mode that way.
-        active = false;
-        listener.exitScreen(this, GameMode.EXIT_PAUSE);
+        gameplayController.pause();
     }
-
     /**
      * Called when the Screen is resumed from a paused state.
      *
@@ -634,7 +620,6 @@ public class GameMode implements Screen {
      */
     public void show() {
         // Useless if called in outside animation loop
-        active = true;
     }
 
     /**
@@ -642,7 +627,6 @@ public class GameMode implements Screen {
      */
     public void hide() {
         // Useless if called in outside animation loop
-        active = false;
     }
 
     /**

@@ -18,65 +18,68 @@
         "menu:level3_button": "menu/level3_button.png",
         "menu:sliderBar": "menu/slider_bar.png",
         "menu:sliderKnob": "menu/slider_dot.png",
+        "pause:pause_tag": "pause/pause_tag.png",
+        "pause:restart_button": "pause/restart_button.png",
+        "pause:menu_button": "pause/menu_button.png",
         "game:background" : "game/background.png",
         "game:skylayerA" : "game/parallax/skylayerA.png",
         "game:skylayerB" : "game/parallax/skylayerB.png",
         "game:skylayerC" : "game/parallax/skylayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
-          "file":   "game/windgust_waves.png",
+          "file":   "game/wind/windgust_waves.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame0" : {
-          "file":   "game/wind00.png",
+          "file":   "game/wind/wind00.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame1" : {
-          "file":   "game/wind10.png",
+          "file":   "game/wind/wind10.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame2" : {
-          "file":   "game/wind20.png",
+          "file":   "game/wind/wind20.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame3" : {
-          "file":   "game/wind01.png",
+          "file":   "game/wind/wind01.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame4" : {
-          "file":   "game/wind11.png",
+          "file":   "game/wind/wind11.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame5" : {
-          "file":   "game/wind21.png",
+          "file":   "game/wind/wind21.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame6" : {
-          "file":   "game/wind02.png",
+          "file":   "game/wind/wind02.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame7" : {
-          "file":   "game/wind12.png",
+          "file":   "game/wind/wind12.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame8" : {
-          "file":   "game/wind22.png",
+          "file":   "game/wind/wind22.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
-        "game:red_bird_flapping" : "levels/objects/asset/bird_nice_flapping.png",
-        "game:blue_bird_flapping" : "levels/objects/asset/blue_bird_flapping.png",
-        "game:green_bird_flapping" : "levels/objects/asset/bird_nest_flapping.png",
-        "game:brown_bird_flapping" : "levels/objects/asset/bird_brown_flapping.png",
+        "game:red_bird_flapping" : "game/hazard/red_bird_flapping.png",
+        "game:blue_bird_flapping" : "game/hazard/blue_bird_flapping.png",
+        "game:green_bird_flapping" : "game/hazard/bird_nest_flapping.png",
+        "game:brown_bird_flapping" : "game/hazard/bird_brown_flapping.png",
         "game:bird_warning" : "game/hazard/annoy.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
@@ -89,11 +92,12 @@
             "wrapV": "repeated"
         },
         "game:player": "game/player.png",
-        "game:player_walk_animation": "game/gale34_filmstrip_walking.png",
-        "game:player_idle_animation": "game/gale_idle_animation.png",
-        "game:umbrella_open_animation": "game/umbrella_filmstrip_opening.png",
-        "game:umbrella_dodge_animation": "game/umbrella_filmstrip_dodge.png",
-        "game:player_falling_animation": "game/gale_filmstrip_falling.png",
+        "game:player_walk_animation": "game/gale/gale34_filmstrip_walking.png",
+        "game:player_idle_animation": "game/gale/gale_filmstrip_idle.png",
+        "game:player_look_animation": "game/gale/gale_filmstrip_look.png",
+        "game:umbrella_open_animation": "game/umbrella/umbrella_filmstrip_opening.png",
+        "game:umbrella_dodge_animation": "game/umbrella/umbrella_filmstrip_dodge.png",
+        "game:player_falling_animation": "game/gale/gale_filmstrip_falling.png",
         "game:front": "game/player_front.png",
         "game:umbrella": "game/umbrella.png",
         "game:closed": "game/closed_umbrella.png",
@@ -107,14 +111,19 @@
         "tileset:bushes_flipped": "levels/tilesets/bushes_flipped.png",
         "tileset:trees_flipped": "levels/tilesets/trees_flipped.png",
         "tileset:cliffs_flipped": "levels/tilesets/cliffs_flipped.png",
-        "platform:cloud0": "levels/objects/asset/clouds/obj_cloud_0.png",
-        "platform:cloud1": "levels/objects/asset/clouds/obj_cloud_1.png",
-        "platform:cloud2": "levels/objects/asset/clouds/obj_cloud_2.png",
-        "platform:cloud3": "levels/objects/asset/clouds/obj_cloud_3.png",
-        "stickers:dcloud0": "levels/objects/asset/dclouds/obj_dcloud_0.png",
-        "stickers:dcloud1": "levels/objects/asset/dclouds/obj_dcloud_1.png",
-        "stickers:dcloud2": "levels/objects/asset/dclouds/obj_dcloud_2.png",
-        "stickers:dcloud3": "levels/objects/asset/dclouds/obj_dcloud_3.png"
+        "platform:cloud0": "game/clouds/obj_cloud_0.png",
+        "platform:cloud1": "game/clouds/obj_cloud_1.png",
+        "platform:cloud2": "game/clouds/obj_cloud_2.png",
+        "platform:cloud3": "game/clouds/obj_cloud_3.png",
+        "stickers:dcloud0": "game/dclouds/obj_dcloud_0.png",
+        "stickers:dcloud1": "game/dclouds/obj_dcloud_1.png",
+        "stickers:dcloud2": "game/dclouds/obj_dcloud_2.png",
+        "stickers:dcloud3": "game/dclouds/obj_dcloud_3.png",
+        "game:lightning0": "game/lightning/obj_lightning_filmstrip_0.png",
+        "game:lightning1": "game/lightning/obj_lightning_filmstrip_1.png",
+        "game:lightning2": "game/lightning/obj_lightning_filmstrip_2.png",
+        "game:lightning3": "game/lightning/obj_lightning_filmstrip_3.png",
+        "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -133,15 +142,16 @@
         "cloud1:template": "levels/templates/cloud_platforms/medium_cloud.json",
         "cloud2:template": "levels/templates/cloud_platforms/small_cloud.json",
         "cloud3:template": "levels/templates/cloud_platforms/smaller_cloud.json",
+        "lightning0:template": "levels/templates/lightning/out_lightning.json",
+        "lightning1:template": "levels/templates/lightning/two_lightning.json",
+        "lightning2:template": "levels/templates/lightning/in_lightning.json",
+        "lightning3:template": "levels/templates/lightning/one_lightning.json",
+        "lightning4:template": "levels/templates/lightning/left_lightning.json",
         "wind:template": "levels/templates/wind.json",
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json",
-        "red_bird:tiles": "levels/objects/json/red_bird_tile.json",
-        "blue_bird:tiles": "levels/objects/json/blue_bird_tile.json",
-        "green_bird:tiles": "levels/objects/json/green_bird_tile.json",
-        "brown_bird:tiles": "levels/objects/json/brown_bird_tile.json",
-        "cloud:tiles": "levels/objects/json/clouds.json"
+        "data:objects": "levels/objects/json/objects.json",
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"

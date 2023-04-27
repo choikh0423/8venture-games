@@ -22,12 +22,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.graphics.g2d.Animation;
-
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
 import com.mygdx.game.utility.util.Drawable;
-
-import java.text.DecimalFormat;
 
 /**
  * Player avatar for the plaform game.
@@ -65,6 +62,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	private boolean isJumping;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
+	/** Whether we are zooming out or not */
+	private boolean isZooming;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 	/** The size of the player in physics units (up to scaling by shrink factor) */
@@ -93,20 +92,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 	/** health point texture */
 	private TextureRegion[] hpTexture;
-
-	/** health point temporary texture */
-	private TextureRegion[][] hpTempTexture;
-
-	/** health point texture region film strip */
-	private Texture hpFilmStrip;
 	/** Boost texture */
 	private TextureRegion[] boostTexture;
-
-	/** Boost temporary texture */
-	private TextureRegion[][] boostTempTexture;
-
-	/** boost texture region film strip */
-	private Texture boostFilmStrip;
 
 	/** The player's front view texture (this is the main texture for air) */
 	private TextureRegion frontTexture;
@@ -128,29 +115,11 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	private float lighterChangeRate;
 
 	// <=============================== Animation objects start here ===============================>
-	/** Player walk animation filmstrip texture */
-	private Texture walkTexture;
-
-	/** Player walk animation frames */
-	private TextureRegion[][] walkTmpFrames;
-
-	/** Player walk animation frames */
-	private TextureRegion[] walkAnimationFrames;
-
 	/** Player walk animation*/
 	private Animation<TextureRegion> walkAnimation;
 
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
-
-	/** Player fall animation filmstrip texture */
-	private Texture fallTexture;
-
-	/** Player fall animation frames */
-	private TextureRegion[][] fallTmpFrames;
-
-	/** Player fall animation frames */
-	private TextureRegion[] fallAnimationFrames;
 
 	/** Player fall animation*/
 	private Animation<TextureRegion> fallAnimation;
@@ -159,7 +128,16 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	private float fallElapsedTime;
 
 	/** Player idle animation texture */
-	private TextureRegion idleTexture;
+	private Animation<TextureRegion> idleAnimation;
+
+	/** Player idle animation elapsed time */
+	private float idleElapsedTime;
+
+	/** Player look animation texture */
+	private Animation<TextureRegion> lookAnimation;
+
+	/** Player look animation elapsed time */
+	private float lookElapsedTime;
 
 	/**
 	 * Returns left/right movement of this character.
@@ -224,6 +202,24 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 */
 	public void setGrounded(boolean value) {
 		isGrounded = value;
+	}
+
+	/**
+	 * Returns true if the player is zooming out.
+	 *
+	 * @return true if the player is zooming out.
+	 */
+	public boolean isZooming() {
+		return isZooming;
+	}
+
+	/**
+	 * Sets whether the player is zooming out.
+	 *
+	 * @param value whether the player is zooming out.
+	 */
+	public void setZooming(boolean value) {
+		isZooming = value;
 	}
 
 	/**
@@ -368,15 +364,14 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * @param texture the HP texture
 	 */
 	public void setHpTexture(Texture texture){
-		this.hpFilmStrip = texture;
-		hpTempTexture = TextureRegion.split(hpFilmStrip, 250, 250);
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, 250, 250);
 		hpTexture = new TextureRegion[4];
 
 		// Ordering Texture Tile
 		int count = 0;
 		for (int i = 1; i > -1; i--) {
 			for (int j = 1; j > -1; j--){
-				hpTexture[count] = hpTempTexture[i][j];
+				hpTexture[count] = tempTexture[i][j];
 				count ++;
 			}
 		}
@@ -387,15 +382,14 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * @param texture the boost texture
 	 */
 	public void setBoostTexture(Texture texture){
-		this.boostFilmStrip = texture;
-		boostTempTexture = TextureRegion.split(boostFilmStrip, boostFilmStrip.getWidth()/5, boostFilmStrip.getHeight()/2);
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, texture.getWidth()/5, texture.getHeight()/2);
 		boostTexture = new TextureRegion[10];
 
 		// Ordering Texture Tile
 		int count = 0;
 		for (int i = 1; i > -1; i--){
 			for (int j = 4; j > -1; j--) {
-				boostTexture[count] = boostTempTexture[i][j];
+				boostTexture[count] = tempTexture[i][j];
 				count ++;
 			}
 		}
@@ -420,22 +414,21 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setWalkAnimation(Texture texture) {
-		this.walkTexture = texture;
 		//TODO maybe find a way to do this without constants?
-		this.walkTmpFrames = TextureRegion.split(walkTexture, 252, 352);
-		this.walkAnimationFrames = new TextureRegion[8];
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[8];
 
-		// PLacing animation frames in order
+		// Placing animation frames in order
 		int index = 0;
-		for (int i=0; i<walkTmpFrames.length; i++) {
-			for (int j=0; j<walkTmpFrames[0].length; j++) {
-				this.walkAnimationFrames[index] = walkTmpFrames[i][j];
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
 				index++;
 			}
 		}
 
-		// Adjust walk speed here
-		this.walkAnimation = new Animation<>(1f/12f, walkAnimationFrames);
+		// Adjust walk animation speed here
+		this.walkAnimation = new Animation<>(1f/12f, frames);
 	}
 
 	/**
@@ -443,26 +436,63 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setFallingAnimation(Texture texture) {
-		this.fallTexture = texture;
 		//TODO maybe find a way to do this without constants?
-		this.fallTmpFrames = TextureRegion.split(fallTexture, 252, 352);
-		this.fallAnimationFrames = new TextureRegion[4];
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[4];
 
-		// PLacing animation frames in order
+		// Placing animation frames in order
 		int index = 0;
-		for (int i=0; i<fallTmpFrames.length; i++) {
-			for (int j=0; j<fallTmpFrames[0].length; j++) {
-				this.fallAnimationFrames[index] = fallTmpFrames[i][j];
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
 				index++;
 			}
 		}
 
-		// Adjust walk speed here
-		this.fallAnimation = new Animation<>(1f/12f, fallAnimationFrames);
+		// Adjust fall animation speed here
+		this.fallAnimation = new Animation<>(1f/12f, frames);
 	}
 
-	public void setIdleAnimation(TextureRegion texture){
-		idleTexture = texture;
+	/**
+	 * Sets player idle animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setIdleAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[15];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		idleAnimation = new Animation<>(1f/15f, frames);
+	}
+
+	/**
+	 * Sets player look animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setLookAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[32];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		lookAnimation = new Animation<>(1f/12f, frames);
 	}
 
 	/**
@@ -733,28 +763,43 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		float effect = faceRight ? -1.0f : 1.0f;
 		TextureRegion t;
 		if (isGrounded() && isMoving()) {
+			// Reset other animation elapsed time
 			fallElapsedTime = 0;
+			idleElapsedTime = 0;
+			lookElapsedTime = 0;
 
 			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
-			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
-		} else {
-			// Reset walk animation elapsed time
+		} else if (isGrounded() && !isMoving()) {
+			// Reset other animation elapsed time
 			walkElapsedTime = 0f;
+			fallElapsedTime = 0;
 
-			fallElapsedTime += Gdx.graphics.getDeltaTime();
-			t = isGrounded() ? idleTexture : fallAnimation.getKeyFrame(fallElapsedTime, true);
-			if (isGrounded()){
-				t = idleTexture;
-
+			if (isZooming() && getLinearVelocity().epsilonEquals(0, 0)) {
+				idleElapsedTime = 0;
+				//look animation
+				lookElapsedTime += Gdx.graphics.getDeltaTime();
+				t = lookAnimation.getKeyFrame(lookElapsedTime, true);
+			} else {
+				lookElapsedTime = 0;
+				//idle animation
+				idleElapsedTime += Gdx.graphics.getDeltaTime();
+				t = idleAnimation.getKeyFrame(idleElapsedTime, true);
 			}
-			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
+		} else {
+			// Reset other animation elapsed time
+			walkElapsedTime = 0f;
+			idleElapsedTime = 0;
+			lookElapsedTime = 0;
+
+			//falling animation
+			fallElapsedTime += Gdx.graphics.getDeltaTime();
+			t = fallAnimation.getKeyFrame(fallElapsedTime, true);
 		}
+		canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+				getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+				effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 	}
 
 	/**
