@@ -47,6 +47,7 @@
         {
          "draworder":"topdown",
          "id":13,
+         "locked":true,
          "name":"wind",
          "objects":[
                 {
@@ -753,12 +754,6 @@
                  "width":286.592609373588,
                  "x":477.272727272727,
                  "y":1329.06450396077
-                }, 
-                {
-                 "id":152,
-                 "template":"templates\/cloud_platforms\/smaller_cloud.json",
-                 "x":2709.67741935484,
-                 "y":2431.45161290323
                 }],
          "opacity":1,
          "type":"objectgroup",

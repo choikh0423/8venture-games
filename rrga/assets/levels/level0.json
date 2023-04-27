@@ -176,6 +176,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"Object Layer 1",
          "objects":[
                 {
@@ -953,7 +954,6 @@
                  "y":3478.61178369653
                 }, 
                 {
-                 "gid":0,
                  "id":148,
                  "template":"templates\/birds\/green_bird.json",
                  "x":3766.66666666667,

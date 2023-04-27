@@ -32,6 +32,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":9,
+         "locked":true,
          "name":"Branch Layer 0",
          "opacity":1,
          "type":"tilelayer",
@@ -70,6 +71,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":10,
+         "locked":true,
          "name":"Branch Layer 1",
          "opacity":1,
          "type":"tilelayer",
@@ -108,6 +110,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 252, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":11,
+         "locked":true,
          "name":"Branch Layer 2",
          "opacity":1,
          "type":"tilelayer",
@@ -146,6 +149,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":13,
+         "locked":true,
          "name":"Middle Bushes",
          "opacity":1,
          "type":"tilelayer",
@@ -184,6 +188,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":15,
+         "locked":true,
          "name":"Front Branches",
          "opacity":1,
          "type":"tilelayer",
@@ -222,6 +227,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":27,
          "id":14,
+         "locked":true,
          "name":"Front Bushes",
          "opacity":1,
          "type":"tilelayer",
@@ -233,6 +239,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"objects 0",
          "objects":[
                 {
@@ -635,6 +642,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"objects 1",
          "objects":[
                 {
@@ -670,6 +678,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"objects 2",
          "objects":[
                 {
