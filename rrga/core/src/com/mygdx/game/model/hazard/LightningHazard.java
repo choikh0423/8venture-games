@@ -5,8 +5,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
+import com.mygdx.game.utility.util.Drawable;
 
-public class LightningHazard extends PolygonHazard {
+public class LightningHazard extends PolygonHazard implements Drawable {
 
     /** Damage of a lightning hazard */
     private static final int LIGHTNING_DAMAGE = 1;
@@ -27,12 +28,19 @@ public class LightningHazard extends PolygonHazard {
      * -1 if not currently striking */
     private int strikeTimer;
 
+    ///** vector cache for computations, getters, etc */
+    //    private final Vector2 temp = new Vector2();
+
+    /** draw depth */
+    private final int depth;
+
     public LightningHazard(JsonValue data) {
         super(data, LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
         waitDuration = data.getInt("strike_timer");
         waitTimer = waitDuration + data.getInt("strike_timer_offset");
         strikeTimer = -1;
         fixture.isSensor = true;
+        depth = data.getInt("depth");
         setActive(false);
     }
 
@@ -62,9 +70,25 @@ public class LightningHazard extends PolygonHazard {
 
     }
 
+
     public void draw(GameCanvas canvas) {
         if(isActive()) {
             canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
         }
+    }
+
+    @Override
+    public Vector2 getDimensions() {
+        return super.getDimension();
+    }
+
+    @Override
+    public int getDepth() {
+        return depth;
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return super.getBoxCoordinate();
     }
 }

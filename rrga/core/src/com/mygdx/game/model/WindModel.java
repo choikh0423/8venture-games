@@ -1,7 +1,11 @@
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -9,6 +13,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.util.Drawable;
 
 import java.util.Arrays;
 
@@ -18,7 +23,7 @@ import java.util.Arrays;
  * Currently extends PolygonObstacle to allow for different shaped wind gusts, but may want to change later
  * to make drawing manageable/easier
  */
-public class WindModel extends PolygonObstacle {
+public class WindModel extends PolygonObstacle implements Drawable {
 
     private static final float STRONG_WIND_SPEED = 20.0f;
     private static final float MED_WIND_SPEED = 15.0f;
@@ -39,9 +44,20 @@ public class WindModel extends PolygonObstacle {
      */
     private float direction;
 
+    private Animation<TextureRegion> animation;
+    private float elapsedTime;
+
     private PolygonRegion drawRegion;
     private float xOffset;
     private float yOffset;
+
+    /** draw depth */
+    private final int depth;
+
+    private final Vector2 temp = new Vector2();
+
+    /** (x,y) offset of the AABB top corner from polygon origin */
+    private Vector2 boxCoordinate;
 
     public WindModel(JsonValue data) {
         super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
@@ -75,6 +91,24 @@ public class WindModel extends PolygonObstacle {
         setRestitution(0);
         fixture.isSensor = true;
         this.data = data;
+        this.depth = data.getInt("depth");
+
+        // compute tight AABB top right corner
+        boxCoordinate = new Vector2();
+        float[] points = data.get("dimensions").asFloatArray();
+        float minx = points[0];
+        float maxy = points[1];
+
+        for(int ii = 2; ii < points.length; ii += 2) {
+            if (points[ii] < minx) {
+                minx = points[ii];
+            }
+            if (points[ii+1] > maxy) {
+                maxy = points[ii+1];
+            }
+        }
+        boxCoordinate.set(minx, maxy);
+
     }
 
     public boolean activatePhysics(World world) {
@@ -128,16 +162,65 @@ public class WindModel extends PolygonObstacle {
         else return dot*magnitude;
     }
 
+    public void setAnimation(TextureRegion[] frames){
+        this.animation = new Animation<>(1f/8f, frames);
+    }
+
     /**
      * Draws the wind object.
      *
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        if (region != null) {
-            canvas.draw(drawRegion, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
-                    direction-((float) Math.PI/2),1,1);
-            //direction-((float) Math.PI/2)
+        //TODO fix wrapping issue
+        elapsedTime += Gdx.graphics.getDeltaTime();
+
+        float angle = -direction+((float) Math.PI/2);
+        float[] verts = new float[region.getVertices().length];
+        for(int i = 0; i<region.getVertices().length; i+=2){
+            float rotatedX = (float) Math.cos(angle) * region.getVertices()[i]
+                    - (float) Math.sin(angle) * region.getVertices()[i+1];
+            float rotatedY = (float) Math.sin(angle) * region.getVertices()[i]
+                    + (float) Math.cos(angle) * region.getVertices()[i+1];
+            verts[i] = rotatedX;
+            verts[i+1] = rotatedY;
         }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0 && verts[i]<xOffset){
+                xOffset = verts[i];
+            }
+            if(i%2==1 && verts[i]<yOffset){
+                yOffset = verts[i];
+            }
+        }
+        for(int i = 0; i<verts.length; i++){
+            if(i%2==0){
+                verts[i] -= xOffset;
+            }
+            if(i%2==1){
+                verts[i] -= yOffset;
+            }
+        }
+        TextureRegion t = animation.getKeyFrame(elapsedTime, true);
+
+        PolygonRegion p = new PolygonRegion(t, verts,region.getTriangles());
+
+        canvas.draw(p, Color.WHITE, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
+                    direction-((float) Math.PI/2),1,1);
+    }
+
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(super.getDimension());
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return this.depth;
     }
 }

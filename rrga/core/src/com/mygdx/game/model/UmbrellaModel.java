@@ -26,7 +26,7 @@ public class UmbrellaModel extends BoxObstacle {
     /** The current angular rotation of the umbrella */
     private float turning;
     /** The size of the umbrella in physics units (up to scaling by shrink factor) */
-    private float size;
+    private float[] size;
     /** Ratio of horizontal speed to conserve when closing the umbrella */
     private float closedMomentum = 0;
 
@@ -41,13 +41,7 @@ public class UmbrellaModel extends BoxObstacle {
      *  -1: closed, 0: stationary, 1: opened */
     private int openMode = 0;
 
-    /** Umbrella open film texture */
-    private Texture openAnimationTexture;
-
-    /** Umbrella open animation frames */
-    private TextureRegion[][] openTmpFrames;
-
-    /** Umbrella open animation frames */
+     /** Umbrella open animation frames */
     private TextureRegion[] openAnimationFrames;
 
     /** Umbrella open animation*/
@@ -66,6 +60,16 @@ public class UmbrellaModel extends BoxObstacle {
      *  NOTE: This needs to change if animation frame duration changes */
     private int OPEN_ANIMATION_FRAMECOUNT = 18;
 
+    //Boost animation
+    /** Umbrella boost animation*/
+    private Animation<TextureRegion> boostAnimation;
+
+    /** Umbrella boost animation elapsed time */
+    float boostElapsedTime;
+
+    private boolean isBoosting;
+    private int BOOST_ANIMATION_FRAMECOUNT = 22;
+
 
     public UmbrellaModel(JsonValue data, Vector2 pos, float width, float height) {
         super(	pos.x, pos.y,
@@ -81,12 +85,13 @@ public class UmbrellaModel extends BoxObstacle {
         setBodyType(BodyDef.BodyType.StaticBody);
 
         force = data.getFloat("force", 0);
-        size = data.getFloat("size", 1.0f);
+        size = data.get("size").asFloatArray();
         sensorName = "umbrellaSensor";
         this.data = data;
         faceRight = true;
         setName("umbrella");
         open = false;
+        isBoosting = false;
     }
 
     public boolean activatePhysics(World world) {
@@ -96,7 +101,7 @@ public class UmbrellaModel extends BoxObstacle {
         }
 
         FixtureDef sensorDef = new FixtureDef();
-        Vector2 sensorCenter = new Vector2(0, 1*getHeight()/8);
+        Vector2 sensorCenter = new Vector2(0, 3*getHeight()/8);
         sensorDef.density = 0;
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
@@ -147,13 +152,15 @@ public class UmbrellaModel extends BoxObstacle {
         float effect = faceRight ? 1.0f : -1.0f;
         //canvas.setBlendState(GameCanvas.BlendState.OPAQUE);
         TextureRegion t;
-        if (openMode == -1) {
+        //not boosting
+        if(!isBoosting) {
+            if (openMode == -1) {
             // Playing umbrella close animation
             openElapsedTime += Gdx.graphics.getDeltaTime();
             t = closeAnimation.getKeyFrame(openElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                    effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -165,7 +172,7 @@ public class UmbrellaModel extends BoxObstacle {
             t = openAnimation.getKeyFrame(openElapsedTime, false);
             canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                     getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                    effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                    effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 
             // Reset to default openMode
             if (currentFrameCount == 0) {
@@ -176,16 +183,29 @@ public class UmbrellaModel extends BoxObstacle {
                 t=openAnimationFrames[openAnimationFrames.length - 1];
                 canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                        effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
             }else {
                 t = openAnimationFrames[0];
                 canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
                         getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-                        effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+                        effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
+                }
+            }
+            canvas.draw(texture, Color.BLUE, getX() * drawScale.x, getY() * drawScale.y, 1, 1);
+            canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+        }
+        //boosting
+        else{
+            boostElapsedTime += Gdx.graphics.getDeltaTime();
+            t = boostAnimation.getKeyFrame(boostElapsedTime, false);
+            canvas.draw(t, Color.WHITE, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+                    getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+                    effect * size[0] / t.getRegionWidth() * drawScale.x, size[1] / t.getRegionHeight() * drawScale.y);
+            if (currentFrameCount == 0) {
+                isBoosting = false;
+                boostElapsedTime = 0;
             }
         }
-        canvas.draw(texture, Color.BLUE,  getX()*drawScale.x,getY()*drawScale.y, 1, 1);
-        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
     }
 
     /**
@@ -219,15 +239,14 @@ public class UmbrellaModel extends BoxObstacle {
      * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
      * */
     public void setOpenAnimation(Texture texture) {
-        this.openAnimationTexture = texture;
-        this.openTmpFrames = TextureRegion.split(openAnimationTexture, 469, 600 );
-        this.openAnimationFrames = new TextureRegion[6];
+        TextureRegion[][] tempFrames = TextureRegion.split(texture, 469, 600 );
+        openAnimationFrames = new TextureRegion[6];
 
         // Setting animation frames
         int index = 0;
         for (int i=0; i<1; i++) {
             for (int j=0; j<6; j++) {
-                this.openAnimationFrames[index] = openTmpFrames[i][j];
+                openAnimationFrames[index] = tempFrames[i][j];
                 index++;
             }
         }
@@ -238,6 +257,27 @@ public class UmbrellaModel extends BoxObstacle {
 
         this.closeAnimation = new Animation<>(1f/20f, openAnimationFrames);
         closeAnimation.setPlayMode(Animation.PlayMode.REVERSED);
+    }
+
+    /**
+     * Sets umbrella boost animation
+     * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+     * */
+    public void setBoostAnimation(Texture texture) {
+        TextureRegion[][] tempFrames = TextureRegion.split(texture, texture.getWidth()/6, texture.getHeight() );
+        TextureRegion[] frames = new TextureRegion[6];
+
+        // Setting animation frames
+        int index = 0;
+        for (int i=0; i<1; i++) {
+            for (int j=0; j<6; j++) {
+                frames[index] = tempFrames[i][j];
+                index++;
+            }
+        }
+
+        this.boostAnimation = new Animation<>(1f/18f, frames);
+        boostAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 
     /**
@@ -266,5 +306,10 @@ public class UmbrellaModel extends BoxObstacle {
             openMode = -1;
             openElapsedTime = 0;
         }
+    }
+
+    public void startBoost(){
+        currentFrameCount = BOOST_ANIMATION_FRAMECOUNT;
+        isBoosting = true;
     }
 }

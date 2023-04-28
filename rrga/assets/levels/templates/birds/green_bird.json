@@ -1,0 +1,24 @@
+{ "object":
+    {
+     "class":"bird",
+     "gid":71,
+     "height":217,
+     "id":138,
+     "name":"green_bird",
+     "properties":[
+            {
+             "name":"atk_speed",
+             "type":"float",
+             "value":15
+            }],
+     "rotation":0,
+     "visible":true,
+     "width":179
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/..\/objects\/json\/objects.json"
+    },
+ "type":"template"
+}

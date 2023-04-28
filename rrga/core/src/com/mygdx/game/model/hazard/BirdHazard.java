@@ -11,11 +11,12 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.Drawable;
 
 /**
  * A multi-hit-box bird hazard.
  */
-public class BirdHazard extends ComplexObstacle implements HazardModel {
+public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable {
 
     public enum BirdColor {
         RED,
@@ -48,7 +49,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         STATIONARY,
     }
 
-    private final int ATTACK_WAIT_TIME = 50;
+    private static final int ATTACK_WAIT_TIME = 80;
 
     /**
      * Attack speed of this bird
@@ -71,12 +72,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
      * Invariant: currentPath index is even
      */
     private int currentPathIndex;
-
-    /**
-     * If loop is true, bird will go from last point in path to first.
-     * If loop is false, bird will turn around after last point and reverse its path
-     */
-    private final boolean loop = false;
 
     /** if valid, this is the path index that follows the very last path point. */
     private int loopTo;
@@ -116,17 +111,12 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final float knockBackScl;
 
-    private Vector2 knockBackVec = new Vector2();
+    private final Vector2 knockBackVec = new Vector2();
 
-    /** the dimensions of filmstrip AABB.
-     * Together with this object's AABB dimensions, this gives a texture scale ratio.
-     */
-    private final Vector2 textureAABB = new Vector2();
-
-    /** the dimensions of object's AABB */
+    /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
 
-    /** the top left corner coordinate of object AABB */
+    /** the top left corner coordinate of object AABB (coordinate is relative to entity) */
     private final Vector2 boxCoordinate = new Vector2();
 
     /** the dimensions of a single animation frame */
@@ -134,10 +124,16 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
 
     private final Vector2 temp = new Vector2();
 
+    /** the bird's draw depth */
+    private final int depth;
+
     // <=============================== Animation objects start here ===============================>
 
     /** Bird flap animation*/
     private Animation<TextureRegion> flapAnimation;
+
+    /** Still Frame */
+    private TextureRegion stillFrame;
 
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
@@ -190,9 +186,24 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         return dimensions.y;
     }
 
-    public float getAABBx(){ return boxCoordinate.x; }
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(dimensions);
+    }
 
-    public float getAABBy(){ return boxCoordinate.y; }
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return depth;
+    }
+
+    public float getAABBx(){ return boxCoordinate.x + getX(); }
+
+    public float getAABBy(){ return boxCoordinate.y + getY(); }
 
     /** the radius of player detection */
     public int getSensorRadius() {return sensorRadius;}
@@ -219,7 +230,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
     /**
      * Sets bird flapping animation
      */
-    public void setFlapAnimation(Texture flapTexture) {
+    public void setFlapAnimation(Texture flapTexture, int stillFrameIndex) {
         if (flapTexture == null) {
             return;
         }
@@ -239,6 +250,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         }
         // Adjust frame duration here
         this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
+        this.stillFrame = flapAnimationFrames[stillFrameIndex];
     }
 
     public void setWarningAnimation(Texture warningTexture){
@@ -308,14 +320,13 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         float[] aabb = data.get("AABB").asFloatArray();
         boxCoordinate.x = aabb[0];
         boxCoordinate.y = aabb[1];
-        textureAABB.x = aabb[2];
-        textureAABB.y = aabb[3];
-        dimensions.x = textureAABB.x * aabb[4];
-        dimensions.y = textureAABB.y * aabb[5];
+        dimensions.x = aabb[2];
+        dimensions.y = aabb[3];
         filmStripSize.x = data.getInt("filmStripWidth");
         filmStripSize.y = data.getInt("filmStripHeight");
 
         // set remaining properties
+        depth = data.getInt("depth");
         path = data.get("path").asFloatArray();
         setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
         attack = data.getBoolean("attack");
@@ -404,7 +415,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         else setX(getX() + move.x);
         if (Math.abs(move.y) > Math.abs(deltaY)) setY(pathY);
         else setY(getY() + move.y);
-        setFaceRight(move.x > 0);
+        if (move.x != 0){
+            setFaceRight(move.x > 0);
+        }
         if (Math.abs(deltaX) < .001 && Math.abs(deltaY) < .001){
             // determine next point to move to
             switch (patrol){
@@ -472,13 +485,24 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             effect = faceRight ? -1.0f : 1f;
         }
 
-        flapElapsedTime += Gdx.graphics.getDeltaTime();
-        TextureRegion birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
+        TextureRegion birdRegion = stillFrame;
+        if (!seesTarget && moveSpeed == 0){
+            // not angry + not moving => still
+            canvas.draw(birdRegion, Color.WHITE, stillFrame.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                    effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
+                    dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+        }
+        else {
+            // moving/angry => flapping
+            flapElapsedTime += Gdx.graphics.getDeltaTime();
+            birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
 
-        canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth()/2f, birdRegion.getRegionHeight()/2f,
-                (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
-                effect * dimensions.x/textureAABB.x * drawScale.x,
-                dimensions.y/textureAABB.y * drawScale.y);
+            canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
+                    (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                    effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
+                    dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+        }
 
         if(warning){
             warningElapsedTime += Gdx.graphics.getDeltaTime();
@@ -488,7 +512,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             float eye = color == BirdColor.BLUE ? 7.5f : 6f;
             canvas.draw(warningRegion, Color.WHITE, warningRegion.getRegionWidth()/2f, warningRegion.getRegionHeight()/2f,
                     (getX()) * drawScale.x + flip*birdRegion.getRegionWidth()/eye, (getY()) * drawScale.y, getAngle(),
-                    dimensions.x/textureAABB.x * drawScale.x, dimensions.y/textureAABB.y * drawScale.y);
+                    dimensions.x/birdRegion.getRegionWidth() * drawScale.x,
+                    dimensions.y/birdRegion.getRegionHeight() * drawScale.y);
             }
     }
 
@@ -521,8 +546,32 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
             float x = getX();
             float y = getY();
             pos.set(x, y);
-            for (int i = 0; i < 60; i++) {
-                targ.set(x, y + 7).rotateAroundDeg(pos, 360 / 60f * i);;
+
+            //need px. py
+            temp.set(0, 0);
+            temp.sub(x, y);
+            temp.nor();
+            float angle;
+
+            //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+            if (temp.x == 0) {
+                angle =  (temp.y > 0) ? (float) Math.PI/2 : (temp. y == 0) ? 0 : 3 * (float) Math.PI/2;
+            }
+            else if (temp.y == 0){
+                angle = (temp.x >= 0) ? 0 : (float) Math.PI;
+            }
+            else {
+                angle = (float) Math.atan(temp.y / temp.x);
+                if (temp.x < 0 && temp.y < 0) // quadrant Ⅲ
+                    angle += Math.PI;
+                else if (temp.x < 0) // quadrant Ⅱ
+                    angle += Math.PI;
+                else if (temp.y < 0) // quadrant Ⅳ
+                    angle += 2*Math.PI;
+            }
+
+            for (int i = 0; i < 5; i++) {
+                targ.set(x + getSensorRadius(), y).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / 5);
                 third.set(targ).add(.01f, .01f);;
                 PolygonShape line = new PolygonShape();
                 line.set(new Vector2[]{pos, targ, third});
@@ -566,11 +615,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel {
         for (Obstacle o : bodies){
             o.setName(value + "_hitbox");
         }
-    }
-
-    @Override
-    public void setDrawScale(Vector2 value) {
-        super.setDrawScale(value);
     }
 
     @Override

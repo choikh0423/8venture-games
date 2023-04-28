@@ -4,6 +4,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -18,10 +19,9 @@ import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
-
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class GameplayController implements ContactListener {
@@ -58,7 +58,7 @@ public class GameplayController implements ContactListener {
     /**
      * All the objects in the world.
      */
-    protected PooledList<Obstacle> objects = new PooledList<>();
+    protected PooledList<Obstacle> objects;
 
     /**
      * Queue for adding objects
@@ -127,8 +127,6 @@ public class GameplayController implements ContactListener {
     private boolean prevInWind = false;
 
 
-
-
     // <=============================== Physics objects for the game BEGINS here ===============================>
     /** Physics constants for global */
     private JsonValue globalConstants;
@@ -166,7 +164,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all birds currently in the level
      */
-    private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+    private PooledList<BirdHazard> birds = new PooledList<>();
 
     /**
      * The set of all lightning currently in the level
@@ -185,6 +183,21 @@ public class GameplayController implements ContactListener {
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
+    /** weld joint definition struct */
+    private final WeldJointDef weldJointDef = new WeldJointDef();
+
+    /** the avatar-cloud joint */
+    private WeldJoint avatarWeldJoint;
+
+    /** whether avatar is touching a movable cloud. */
+    private boolean touchingMovingCloud;
+
+    /** the cloud body that the avatar is touching (there may be several, take FIRST) */
+    private Body contactedCloudBody;
+
+    /** whether to destroy */
+    private boolean destroyWeldJoint;
+
     // <=============================== Physics objects for the game ENDS here ===============================>
 
     /**
@@ -198,11 +211,6 @@ public class GameplayController implements ContactListener {
     Vector2 temp = new Vector2();
 
     //THESE ARE USED FOR MAKING THE UMBRELLA FOLLOW THE MOUSE POINTER
-
-    /**
-     * difference in initial position between umbrella and player
-     */
-    private final Vector2 diff = new Vector2();
 
     /**
      * center of the screen in canvas coordinates
@@ -262,7 +270,7 @@ public class GameplayController implements ContactListener {
     /** The background music volume */
     private float musicVolume = 0.5f;
     /** The sound effects volume */
-    private float SFXVolume = 0.5f;
+    private float SFXVolume = 0.0f;
 
     // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
 
@@ -314,6 +322,13 @@ public class GameplayController implements ContactListener {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+
+        if (avatarWeldJoint != null){
+            world.destroyJoint(avatarWeldJoint);
+        }
+        avatarWeldJoint = null;
+        touchingMovingCloud = false;
+
         Vector2 gravity = new Vector2(world.getGravity());
         objects = levelContainer.getObjects();
 
@@ -337,19 +352,19 @@ public class GameplayController implements ContactListener {
         levelContainer.populateLevel();
         goalDoor = levelContainer.getGoalDoor();
 
-        // Calculate Diff for Umbrella Position
         avatar = levelContainer.getAvatar();
         umbrella = levelContainer.getUmbrella();
-
-        diff.x = umbrella.getX()-avatar.getX();
-        diff.y = umbrella.getY()-avatar.getY();
 
         backgroundMusic.stop();
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
+
+        resetCounter++;
     }
 
+    public boolean showGoal = true;
+    public int resetCounter = 0;
 
     /**
      * The core gameplay loop of this world.
@@ -388,70 +403,78 @@ public class GameplayController implements ContactListener {
             countdown--;
         }
 
-        // Check for whether the player toggled the umbrella being open/closed
-        if(!input.secondaryControlMode){
-            if (input.didToggle()) {
-                umbrella.setOpen(!umbrella.isOpen());
-                if (umbrella.isOpen()) {
+        if (levelContainer.getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
+
+        //UMBRELLA
+        //only allow control when not zooming and not showing goal
+        if (!input.didZoom() && !showGoal){
+            // Check for whether the player toggled the umbrella being open/closed
+            if(!input.secondaryControlMode){
+                if (input.didToggle()) {
+                    umbrella.setOpen(!umbrella.isOpen());
+                    if (umbrella.isOpen()) {
+                        umbrella.useOpenedTexture();
+                        //TODO: apply some force to the player so the floatiness comes back
+                    } else {
+                        umbrella.useClosedTexture();
+                        Body body = avatar.getBody();
+                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    }
+                }
+            } else {
+                if (input.isToggleHeld()) {
+                    umbrella.setOpen(true);
                     umbrella.useOpenedTexture();
-                    //TODO: apply some force to the player so the floatiness comes back
+                    wasOpen = true;
                 } else {
+                    umbrella.setOpen(false);
                     umbrella.useClosedTexture();
                     Body body = avatar.getBody();
-                    body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    wasOpen = false;
                 }
             }
-        } else {
-            if (input.isToggleHeld()) {
-                umbrella.setOpen(true);
-                umbrella.useOpenedTexture();
-                wasOpen = true;
+
+            //umbrella points towards mouse pointer
+            center.x = Gdx.graphics.getWidth() / 2f;
+            center.y = Gdx.graphics.getHeight() / 2f;
+            mousePos.x = input.getMousePos().x;
+            mousePos.y = input.getMousePos().y;
+            //convert from screen coordinates to canvas coordinates
+            mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
+            //convert to player coordinates
+            mousePos.sub(center);
+            //normalize manually because Vector2.nor() is less accurate
+            float l = mousePos.len();
+            mousePos.x /= l;
+            mousePos.y /= l;
+            //compute new angle
+            float mouseAng = (float) Math.acos(mousePos.dot(up));
+            if (input.getMousePos().x > center.x) mouseAng *= -1;
+            angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
+            if (angInBounds) {
+                umbrella.setAngle(mouseAng);
+                lastValidAng = mouseAng;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+            } else if (lastValidAng >= 0) {
+                umbrella.setAngle((float) Math.PI / 2);
+                mousePos.x = -1;
+                mousePos.y = 0;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             } else {
-                umbrella.setOpen(false);
-                umbrella.useClosedTexture();
-                Body body = avatar.getBody();
-                if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
-                wasOpen = false;
+                umbrella.setAngle(-(float) Math.PI / 2);
+                mousePos.x = 1;
+                mousePos.y = 0;
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             }
         }
-
 
         //make player face forward in air
         if (avatar.isGrounded()) avatar.useSideTexture();
         else avatar.useFrontTexture();
 
-        //umbrella points towards mouse pointer
-        center.x = Gdx.graphics.getWidth() / 2f;
-        center.y = Gdx.graphics.getHeight() / 2f;
-        mousePos.x = input.getMousePos().x;
-        mousePos.y = input.getMousePos().y;
-        //convert from screen coordinates to canvas coordinates
-        mousePos.y = Gdx.graphics.getHeight() - mousePos.y;
-        //convert to player coordinates
-        mousePos.sub(center);
-        //normalize manually because Vector2.nor() is less accurate
-        float l = mousePos.len();
-        mousePos.x /= l;
-        mousePos.y /= l;
-        //compute new angle
-        float mouseAng = (float) Math.acos(mousePos.dot(up));
-        if (input.getMousePos().x > center.x) mouseAng *= -1;
-        angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
-        if (angInBounds) {
-            umbrella.setAngle(mouseAng);
-            lastValidAng = mouseAng;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-        } else if (lastValidAng >= 0) {
-            umbrella.setAngle((float) Math.PI / 2);
-            mousePos.x = -1;
-            mousePos.y = 0;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
-        } else {
-            umbrella.setAngle(-(float) Math.PI / 2);
-            mousePos.x = 1;
-            mousePos.y = 0;
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
-        }
+        avatar.setZooming(input.didZoom());
 
         //average the force of touched winds
         boolean touching_wind = contactWindFix.size > 0;
@@ -473,8 +496,8 @@ public class GameplayController implements ContactListener {
             // TODO: We might want to make a separate update loop for sounds
             // Play Strong Wind SFX
             if (windStrongFrame < 0 && !prevInWind) {
-                windStrongSFX.stop();
-                windStrongSFX.play(SFXVolume);
+//                windStrongSFX.stop();
+//                windStrongSFX.play(SFXVolume);
                 windStrongFrame = WIND_STRONG_DURATION;
 
                 // To prevent repeat all the time - only if you go out and come back in
@@ -491,10 +514,9 @@ public class GameplayController implements ContactListener {
             }
             prevInWind = false;
         }
-        contactWindBod.clear();
 
         // Process player movement
-        if (avatar.isGrounded()) {
+        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
@@ -504,6 +526,8 @@ public class GameplayController implements ContactListener {
             if (angle < Math.PI) {
                 avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
             }
+        } else if (!umbrella.isOpen()) {
+            avatar.dampAirHoriz();
         }
         if (umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
@@ -513,8 +537,8 @@ public class GameplayController implements ContactListener {
         }
 
         // Process Lighter Force
-        if(input.getLighter() && umbrella.isOpen()){
-            avatar.applyLighterForce(ang);
+        if(input.getLighter() && umbrella.isOpen() && !input.didZoom()){
+            if(avatar.applyLighterForce(ang)) umbrella.startBoost();
         }
         if(avatar.isGrounded()){
             avatar.refillLighter();
@@ -528,7 +552,7 @@ public class GameplayController implements ContactListener {
             if (avatar.getiFrames() == 0 && vulnerable) {
                 if (avatar.getHealth() - dam > 0) {
                     cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
-                    avatar.getBody().applyLinearImpulse(cache, avatar.getPosition(), true);
+                    avatar.getBody().setLinearVelocity(cache);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
                 } else {
@@ -573,14 +597,10 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            if(bird.getAABBx() + bird.getX() > bounds.width
-                    || bird.getAABBy() + bird.getY() < 0
-                    || bird.getAABBx() + bird.getWidth() + bird.getX() < 0
-                    || bird.getAABBy() - bird.getHeight() + bird.getY() > bounds.height) {
-                //TODO IS THIS SUFFICIENT FOR DELETION?
-                levelContainer.objects.remove(bird);
-                levelContainer.getBirds().remove(bird);
-                bird.deactivatePhysics(world);
+            if(bird.getAABBx() > bounds.width || bird.getAABBy() < 0
+                    || bird.getAABBx() + bird.getWidth() < 0
+                    || bird.getAABBy() - bird.getHeight() > bounds.height * bounds.height ) {
+                //mark removed so that it is garbage collected at end of update loop
                 bird.markRemoved(true);
                 continue;
             }
@@ -621,7 +641,7 @@ public class GameplayController implements ContactListener {
                     rccb.collisions.clear();
                     float minDist = Integer.MAX_VALUE;
                     // load ray target into temporary cache
-                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/8) + (float) (Math.PI/4) * i / birdRays);
+                    target.set(bx + bird.getSensorRadius(), by).rotateAroundRad(pos, angle - (float) (Math.PI/16) + (float) (Math.PI/8) * i / birdRays);
                     //DEPRECIATED
                     // target.set(bx, by + bird.getSensorRadius()).rotateAroundDeg(pos, 360f * i / birdRays);
                     world.rayCast(rccb, pos, target);
@@ -647,9 +667,9 @@ public class GameplayController implements ContactListener {
         }
 
         //update the lightnings
-        for (LightningHazard light : lightnings) {
-            light.strike();
-        }
+//        for (LightningHazard light : lightnings) {
+//            light.strike();
+//        }
 
         //update nests
         for(NestHazard n: nests){
@@ -663,6 +683,10 @@ public class GameplayController implements ContactListener {
         }
     }
 
+    private int framesSpent = 0;
+    private Vector2 init = new Vector2();
+    private Vector2 dest = new Vector2();
+    private int frames = 120;
     /**
      * Processes physics
      * <p>
@@ -682,8 +706,6 @@ public class GameplayController implements ContactListener {
         world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
         //make umbrella follow player position. since it is a static body, we update
         //its position after the world step so that it properly follows the player
-        cache.x = avatar.getX() + diff.len()* mousePos.x;
-        cache.y = avatar.getY() + diff.len()*mousePos.y;
         umbrella.setPosition(avatar.getX(), avatar.getY());
 
         // Garbage collect the deleted objects.
@@ -696,21 +718,54 @@ public class GameplayController implements ContactListener {
             if (obj.isRemoved()) {
                 obj.deactivatePhysics(world);
                 entry.remove();
-                if (obj.getClass() == BirdHazard.class) birds.remove((BirdHazard) obj);
             } else {
                 // Note that update is called last!
                 obj.update(dt);
             }
         }
 
-        // Set objects from level container
-        // TODO: (review) Delete the following, object properties are changed but references are not.
-        levelContainer.setWorld(world);
-        levelContainer.setAvatar(avatar);
-        levelContainer.setObjects(objects);
-        levelContainer.setUmbrella(umbrella);
-        levelContainer.setLightnings(lightnings);
-        levelContainer.setBirds(birds);
+        // clean-up the list of active birds
+        Iterator<PooledList<BirdHazard>.Entry> birdIterator = birds.entryIterator();
+        while (iterator.hasNext()) {
+            PooledList<BirdHazard>.Entry entry = birdIterator.next();
+            BirdHazard bird = entry.getValue();
+            if (bird.isRemoved()) {
+                entry.remove();
+            }
+        }
+
+        // delete from drawables if some object has been deleted
+        // INVARIANT: sorted list after removals is still sorted.
+        Iterator<PooledList<Drawable>.Entry> iterator2 = levelContainer.getDrawables().entryIterator();
+        while (iterator2.hasNext()){
+            PooledList<Drawable>.Entry entry = iterator2.next();
+            Drawable drawable = entry.getValue();
+            if (drawable instanceof Obstacle && ((Obstacle) drawable).isRemoved()) {
+                entry.remove();
+            }
+        }
+
+        // attach player to cloud platform
+        if (avatar.isGrounded() && !avatar.isMoving() && touchingMovingCloud && avatarWeldJoint == null){
+            weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
+                    temp.set(avatar.getX(), avatar.getY()-avatar.getHeight()/2)
+            );
+            weldJointDef.collideConnected = true;
+            avatarWeldJoint = (WeldJoint) world.createJoint(weldJointDef);
+        }
+        else {
+            //player moves or touches wind or gets hit, should delete joint
+            if (avatar.isMoving() || contactWindBod.size > 0 || contactHazards.size > 0) {
+                destroyWeldJoint = true;
+            }
+
+            if (destroyWeldJoint && avatarWeldJoint != null) {
+                world.destroyJoint(avatarWeldJoint);
+                destroyWeldJoint = false;
+                avatarWeldJoint = null;
+            }
+        }
+        contactWindBod.clear();
     }
 
     /**
@@ -741,6 +796,27 @@ public class GameplayController implements ContactListener {
                     (avatar.getSensorName().equals(fd1) && bd2.getName().contains("platform"))) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
+
+                // TODO : cloud platforms are named "moving_platform" hence they have the "platform" part in their name.
+                //  it might be better to have platform class. Using debug name is not safe for all obstacles (sometimes
+                //  we might forget to assign object names and get unnecessary nullptr.
+                Body cloudBody = null;
+                MovingPlatformModel cloud = null;
+                if (bd1 instanceof MovingPlatformModel){
+                    cloudBody = body1;
+                    cloud = (MovingPlatformModel) bd1;
+                }
+                else if (bd2 instanceof MovingPlatformModel){
+                    cloudBody = body2;
+                    cloud = (MovingPlatformModel) bd2;
+                }
+                // TODO (revisit this choice): the FIRST cloud touched is the one Gale sticks to.
+                //  (revisit again): second edit, updated to the LAST CLOUD touched
+                //  To optimize joint-create-destroy time, non-movable clouds of course don't need joints with avatar.
+                if (cloudBody != null && cloud.getMoveSpeed() > 0){
+                    touchingMovingCloud = true;
+                    contactedCloudBody = cloudBody;
+                }
             }
 
             // See if umbrella touches wind
@@ -761,6 +837,8 @@ public class GameplayController implements ContactListener {
                 Vector2 norm = wm.getNormal();
                 float flip = (bd1 instanceof HazardModel ? 1 : -1);
                 h.setKnockBackForce(norm.scl(flip));
+                // this knockback force is being recomputed many times for each fixture contact,...
+                // i think that's why it's really inconsistent
                 contactHazards.add(h);
             }
 
@@ -817,6 +895,14 @@ public class GameplayController implements ContactListener {
             if (sensorFixtures.size == 0) {
                 avatar.setGrounded(false);
             }
+            boolean isCloud1 = bd1 instanceof MovingPlatformModel;
+            boolean isCloud2 = bd2 instanceof MovingPlatformModel;
+            Body cloudBody = isCloud1 ? body1 : isCloud2 ? body2 : null;
+            if (cloudBody == contactedCloudBody){
+                touchingMovingCloud = false;
+                contactedCloudBody = null;
+                destroyWeldJoint = true;
+            }
         }
 
         if ((umbrella == bd2 && bd1 instanceof WindModel) ||
@@ -870,13 +956,13 @@ public class GameplayController implements ContactListener {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when the gameplay controller is paused.
      * <p>
      * We need this method to stop all sounds when we pause.
      * Pausing happens when we switch game modes.
      */
     public void pause() {
-
+        backgroundMusic.pause();
     }
 
     /**
@@ -898,7 +984,7 @@ public class GameplayController implements ContactListener {
      */
     public void dispose() {
         // deactivate physics from remaining live objects
-        for (Obstacle obj : objects) {
+        for (Obstacle obj : levelContainer.getObjects()) {
             obj.deactivatePhysics(world);
         }
         // empty out of level container and world
@@ -921,6 +1007,10 @@ public class GameplayController implements ContactListener {
         return levelContainer.getObjects();
     }
 
+    public PooledList<Drawable> getDrawables(){
+        return levelContainer.getDrawables();
+    }
+
     public void setScale(Vector2 scale) {
         this.scale = scale;
         levelContainer.setScale(scale);
@@ -933,13 +1023,17 @@ public class GameplayController implements ContactListener {
         return levelContainer;
     }
 
+    private final int TEARING_VEL = 6;
+
     /**
      * @return player x-coordinate on screen, -1 if no player is found.
      * coordinates are non-negative.
      */
     public float getPlayerScreenX() {
-
-        return avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+        float out = avatar != null ? avatar.getDrawScale().x * avatar.getX() : -1;
+        //only round to adjust for tearing if velocity is high - otherwise, you can
+        // get some vibration-like effects on Gale for what should be smooth movement
+        return avatar.getLinearVelocity().len() > TEARING_VEL ? Math.round(out) : out;
     }
 
     /**
@@ -947,7 +1041,10 @@ public class GameplayController implements ContactListener {
      * coordinates are non-negative.
      */
     public float getPlayerScreenY() {
-        return avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+        float out = avatar != null ? avatar.getDrawScale().y * avatar.getY() : -1;
+        //only round to adjust for tearing if velocity is high - otherwise, you can
+        // get some vibration-like effects on Gale for what should be smooth movement
+        return avatar.getLinearVelocity().len() > TEARING_VEL ? Math.round(out) : out;
     }
 
     /**

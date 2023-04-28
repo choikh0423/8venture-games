@@ -1,0 +1,17 @@
+Dev: Erik
+Date: 4/26/23
+Comments:
+
+Each filmstrip is 6 frames, arranged horizontally. Each has unique dimensions as they have been cropped to save space.
+
+Filmstrip frame Dimensions---
+
+obj_lightning_filmstrip_0: 	W454px X H504px
+
+obj_lightning_filmstrip_1: 	W349px X H501px
+
+obj_lightning_filmstrip_2: 	W453px X H472px
+
+obj_lightning_filmstrip_3: 	W135px X H505px
+
+obj_lightning_filmstrip_4: 	W374px X H485

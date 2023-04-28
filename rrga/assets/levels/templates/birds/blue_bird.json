@@ -1,0 +1,24 @@
+{ "object":
+    {
+     "class":"bird",
+     "gid":59,
+     "height":180,
+     "id":101,
+     "name":"blue_bird",
+     "properties":[
+            {
+             "name":"move_speed",
+             "type":"float",
+             "value":20
+            }],
+     "rotation":0,
+     "visible":true,
+     "width":180
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/..\/objects\/json\/objects.json"
+    },
+ "type":"template"
+}

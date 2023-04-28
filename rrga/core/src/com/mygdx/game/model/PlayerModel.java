@@ -22,12 +22,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.graphics.g2d.Animation;
-
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
-
-import java.text.DecimalFormat;
+import com.mygdx.game.utility.util.Drawable;
 
 /**
  * Player avatar for the plaform game.
@@ -35,7 +32,7 @@ import java.text.DecimalFormat;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class PlayerModel extends CapsuleObstacle {
+public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -65,10 +62,12 @@ public class PlayerModel extends CapsuleObstacle {
 	private boolean isJumping;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
+	/** Whether we are zooming out or not */
+	private boolean isZooming;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 	/** The size of the player in physics units (up to scaling by shrink factor) */
-	private float size;
+	private float[] size;
 	/** Player Mass */
 	private float FINAL_MASS = 1.8f;
 	/** Max player hp */
@@ -77,8 +76,12 @@ public class PlayerModel extends CapsuleObstacle {
 	private int health;
 	public BitmapFont healthFont;
 
-	private static final DecimalFormat formatter = new DecimalFormat("0.00");
-	
+	/** draw depth */
+	private int depth;
+
+	/** Cache for getters */
+	private final Vector2 temp = new Vector2();
+
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
@@ -89,12 +92,8 @@ public class PlayerModel extends CapsuleObstacle {
 
 	/** health point texture */
 	private TextureRegion[] hpTexture;
-
-	/** health point temporary texture */
-	private TextureRegion[][] hpTempTexture;
-
-	/** health point texture region film strip */
-	private Texture hpFilmStrip;
+	/** Boost texture */
+	private TextureRegion[] boostTexture;
 
 	/** The player's front view texture (this is the main texture for air) */
 	private TextureRegion frontTexture;
@@ -116,29 +115,11 @@ public class PlayerModel extends CapsuleObstacle {
 	private float lighterChangeRate;
 
 	// <=============================== Animation objects start here ===============================>
-	/** Player walk animation filmstrip texture */
-	private Texture walkTexture;
-
-	/** Player walk animation frames */
-	private TextureRegion[][] walkTmpFrames;
-
-	/** Player walk animation frames */
-	private TextureRegion[] walkAnimationFrames;
-
 	/** Player walk animation*/
 	private Animation<TextureRegion> walkAnimation;
 
 	/** Player walk animation elapsed time */
 	float walkElapsedTime;
-
-	/** Player fall animation filmstrip texture */
-	private Texture fallTexture;
-
-	/** Player fall animation frames */
-	private TextureRegion[][] fallTmpFrames;
-
-	/** Player fall animation frames */
-	private TextureRegion[] fallAnimationFrames;
 
 	/** Player fall animation*/
 	private Animation<TextureRegion> fallAnimation;
@@ -146,9 +127,21 @@ public class PlayerModel extends CapsuleObstacle {
 	/** Player fall animation elapsed time */
 	private float fallElapsedTime;
 
+	/** Player idle animation texture */
+	private Animation<TextureRegion> idleAnimation;
+
+	/** Player idle animation elapsed time */
+	private float idleElapsedTime;
+
+	/** Player look animation texture */
+	private Animation<TextureRegion> lookAnimation;
+
+	/** Player look animation elapsed time */
+	private float lookElapsedTime;
+
 	/**
 	 * Returns left/right movement of this character.
-	 * 
+	 *
 	 * This is the result of input times player force.
 	 *
 	 * @return left/right movement of this character.
@@ -156,16 +149,16 @@ public class PlayerModel extends CapsuleObstacle {
 	public float getMovement() {
 		return movement;
 	}
-	
+
 	/**
 	 * Sets left/right movement of this character.
-	 * 
+	 *
 	 * This is the result of input times player force.
 	 *
 	 * @param value left/right movement of this character.
 	 */
 	public void setMovement(float value) {
-		movement = value; 
+		movement = value;
 		// Change facing if appropriate
 		if (movement < 0) {
 			faceRight = false;
@@ -201,14 +194,32 @@ public class PlayerModel extends CapsuleObstacle {
 	public boolean isGrounded() {
 		return isGrounded;
 	}
-	
+
 	/**
 	 * Sets whether the player is on the ground.
 	 *
 	 * @param value whether the player is on the ground.
 	 */
 	public void setGrounded(boolean value) {
-		isGrounded = value; 
+		isGrounded = value;
+	}
+
+	/**
+	 * Returns true if the player is zooming out.
+	 *
+	 * @return true if the player is zooming out.
+	 */
+	public boolean isZooming() {
+		return isZooming;
+	}
+
+	/**
+	 * Sets whether the player is zooming out.
+	 *
+	 * @param value whether the player is zooming out.
+	 */
+	public void setZooming(boolean value) {
+		isZooming = value;
 	}
 
 	/**
@@ -236,7 +247,7 @@ public class PlayerModel extends CapsuleObstacle {
 	public float getDamping() {
 		return damping;
 	}
-	
+
 	/**
 	 * Returns the upper limit on player left-right movement.
 	 *
@@ -280,7 +291,7 @@ public class PlayerModel extends CapsuleObstacle {
 	 *
 	 * @return the name of the ground sensor
 	 */
-	public String getSensorName() { 
+	public String getSensorName() {
 		return sensorName;
 	}
 
@@ -353,19 +364,35 @@ public class PlayerModel extends CapsuleObstacle {
 	 * @param texture the HP texture
 	 */
 	public void setHpTexture(Texture texture){
-		this.hpFilmStrip = texture;
-		hpTempTexture = TextureRegion.split(hpFilmStrip, 250, 250);
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, 250, 250);
 		hpTexture = new TextureRegion[4];
 
 		// Ordering Texture Tile
 		int count = 0;
 		for (int i = 1; i > -1; i--) {
 			for (int j = 1; j > -1; j--){
-				hpTexture[count] = hpTempTexture[i][j];
+				hpTexture[count] = tempTexture[i][j];
 				count ++;
 			}
 		}
+	}
 
+	/**
+	 * sets the player's boost texture.
+	 * @param texture the boost texture
+	 */
+	public void setBoostTexture(Texture texture){
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, texture.getWidth()/5, texture.getHeight()/2);
+		boostTexture = new TextureRegion[10];
+
+		// Ordering Texture Tile
+		int count = 0;
+		for (int i = 1; i > -1; i--){
+			for (int j = 4; j > -1; j--) {
+				boostTexture[count] = tempTexture[i][j];
+				count ++;
+			}
+		}
 	}
 
 	/**
@@ -387,22 +414,21 @@ public class PlayerModel extends CapsuleObstacle {
 	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setWalkAnimation(Texture texture) {
-		this.walkTexture = texture;
 		//TODO maybe find a way to do this without constants?
-		this.walkTmpFrames = TextureRegion.split(walkTexture, 252, 352);
-		this.walkAnimationFrames = new TextureRegion[8];
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[8];
 
-		// PLacing animation frames in order
+		// Placing animation frames in order
 		int index = 0;
-		for (int i=0; i<walkTmpFrames.length; i++) {
-			for (int j=0; j<walkTmpFrames[0].length; j++) {
-				this.walkAnimationFrames[index] = walkTmpFrames[i][j];
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
 				index++;
 			}
 		}
 
-		// Adjust walk speed here
-		this.walkAnimation = new Animation<>(1f/12f, walkAnimationFrames);
+		// Adjust walk animation speed here
+		this.walkAnimation = new Animation<>(1f/12f, frames);
 	}
 
 	/**
@@ -410,22 +436,63 @@ public class PlayerModel extends CapsuleObstacle {
 	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
 	 * */
 	public void setFallingAnimation(Texture texture) {
-		this.fallTexture = texture;
 		//TODO maybe find a way to do this without constants?
-		this.fallTmpFrames = TextureRegion.split(fallTexture, 252, 352);
-		this.fallAnimationFrames = new TextureRegion[4];
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[4];
 
-		// PLacing animation frames in order
+		// Placing animation frames in order
 		int index = 0;
-		for (int i=0; i<fallTmpFrames.length; i++) {
-			for (int j=0; j<fallTmpFrames[0].length; j++) {
-				this.fallAnimationFrames[index] = fallTmpFrames[i][j];
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
 				index++;
 			}
 		}
 
-		// Adjust walk speed here
-		this.fallAnimation = new Animation<>(1f/12f, fallAnimationFrames);
+		// Adjust fall animation speed here
+		this.fallAnimation = new Animation<>(1f/12f, frames);
+	}
+
+	/**
+	 * Sets player idle animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setIdleAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[15];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		idleAnimation = new Animation<>(1f/15f, frames);
+	}
+
+	/**
+	 * Sets player look animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setLookAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, 252, 352);
+		TextureRegion[] frames = new TextureRegion[32];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		lookAnimation = new Animation<>(1f/12f, frames);
 	}
 
 	/**
@@ -453,15 +520,15 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Creates a new player avatar with the given physics data
 	 *
-	 * The size is expressed in physics units NOT pixels.  In order for 
-	 * drawing to work properly, you MUST set the drawScale. The drawScale 
+	 * The size is expressed in physics units NOT pixels.  In order for
+	 * drawing to work properly, you MUST set the drawScale. The drawScale
 	 * converts the physics units to pixels.
 	 *
 	 * @param data  	The physics constants for this player
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public PlayerModel(JsonValue data, Vector2 pos, float width, float height, int maxHp) {
+	public PlayerModel(JsonValue data, Vector2 pos, float width, float height, int maxHp, int drawDepth) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	pos.x,
 				pos.y,
@@ -481,7 +548,7 @@ public class PlayerModel extends CapsuleObstacle {
 		maxspeed_down_closed = data.getFloat("maxspeed_down_closed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
-		size = data.getFloat("size", 1f);
+		size = data.get("size").asFloatArray();
 		sensorName = "PlayerGroundSensor";
 		lighterForce = data.getFloat("lighter_force");
 		maxLighterFuel = data.getFloat("lighter_fuel");
@@ -500,6 +567,7 @@ public class PlayerModel extends CapsuleObstacle {
 		iFrames = 0;
 
 		walkElapsedTime = 0f;
+		depth = drawDepth;
 	}
 
 	/**
@@ -523,7 +591,7 @@ public class PlayerModel extends CapsuleObstacle {
 		// Double jumping is not allowed.
 		//
 		// To determine whether or not the player is on the ground,
-		// we create a thin sensor under his feet, which reports 
+		// we create a thin sensor under his feet, which reports
 		// collisions with the world but has no collision response.
 		Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
 		FixtureDef sensorDef = new FixtureDef();
@@ -532,16 +600,16 @@ public class PlayerModel extends CapsuleObstacle {
 		sensorShape = new PolygonShape();
 		JsonValue sensorjv = data.get("sensor");
 		sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
-								 sensorjv.getFloat("height",0), sensorCenter, 0.0f);
+				sensorjv.getFloat("height",0), sensorCenter, 0.0f);
 		sensorDef.shape = sensorShape;
 
 		// Ground sensor to represent our feet
 		Fixture sensorFixture = body.createFixture( sensorDef );
 		sensorFixture.setUserData(getSensorName());
-		
+
 		return true;
 	}
-	
+
 
 	/**
 	 * Applies force to the body of this player as given by movement.
@@ -613,7 +681,7 @@ public class PlayerModel extends CapsuleObstacle {
 	/**
 	 * Applies lighter force to the body of this player.
 	 */
-	public void applyLighterForce(float umbAng) {
+	public boolean applyLighterForce(float umbAng) {
 		if(lighterFuel == maxLighterFuel) {
 			lighterFuel = 0;
 			float umbrellaX = (float) Math.cos(umbAng);
@@ -654,6 +722,15 @@ public class PlayerModel extends CapsuleObstacle {
 				}
 				body.setLinearVelocity(forceCache);
 			}
+			return true;
+		}
+		return false;
+	}
+
+	public void dampAirHoriz(){
+		if(Math.abs(getVX()) > getMaxSpeedXAirDrag()/1.5f){
+			forceCache.set(-getDamping()*getVX(),0);
+			body.applyForce(forceCache,getPosition(),true);
 		}
 	}
 
@@ -686,25 +763,43 @@ public class PlayerModel extends CapsuleObstacle {
 		float effect = faceRight ? -1.0f : 1.0f;
 		TextureRegion t;
 		if (isGrounded() && isMoving()) {
+			// Reset other animation elapsed time
 			fallElapsedTime = 0;
+			idleElapsedTime = 0;
+			lookElapsedTime = 0;
 
 			// Walk animation
 			walkElapsedTime += Gdx.graphics.getDeltaTime();
 			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
-			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
-		} else {
-			// Reset walk animation elapsed time
+		} else if (isGrounded() && !isMoving()) {
+			// Reset other animation elapsed time
 			walkElapsedTime = 0f;
+			fallElapsedTime = 0;
 
+			if (isZooming() && getLinearVelocity().epsilonEquals(0, 0)) {
+				idleElapsedTime = 0;
+				//look animation
+				lookElapsedTime += Gdx.graphics.getDeltaTime();
+				t = lookAnimation.getKeyFrame(lookElapsedTime, true);
+			} else {
+				lookElapsedTime = 0;
+				//idle animation
+				idleElapsedTime += Gdx.graphics.getDeltaTime();
+				t = idleAnimation.getKeyFrame(idleElapsedTime, true);
+			}
+		} else {
+			// Reset other animation elapsed time
+			walkElapsedTime = 0f;
+			idleElapsedTime = 0;
+			lookElapsedTime = 0;
+
+			//falling animation
 			fallElapsedTime += Gdx.graphics.getDeltaTime();
-			//TODO put an idle animation here. I just picked a frame that looked like Gale was standing
-			t = isGrounded() ? walkAnimationFrames[2] : fallAnimation.getKeyFrame(fallElapsedTime, true);
-			canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-					effect * size/ t.getRegionWidth() * drawScale.x, size/t.getRegionHeight() * drawScale.y);
+			t = fallAnimation.getKeyFrame(fallElapsedTime, true);
 		}
+		canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
+				getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+				effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 	}
 
 	/**
@@ -748,15 +843,16 @@ public class PlayerModel extends CapsuleObstacle {
 
 		// TODO: HP Texture is manually scaled at the moment
 		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
-					canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+				canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
 
-		// draw lighter info
-		float lighter_capac = lighterFuel / maxLighterFuel;
-		healthFont.setColor(Color.WHITE);
-		canvas.drawText(formatter.format(lighter_capac), healthFont, 10,
-				canvas.getHeight() - 90);
+		// TODO: Boost Texture is manually scaled at the moment
+		int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
+		canvas.draw(boostTexture[boost_capac],Color.WHITE,boostTexture[health].getRegionWidth()/2f,
+				boostTexture[health].getRegionHeight()/2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
+				0,0.3f,0.3f);
+
 	}
-	
+
 	/**
 	 * Draws the outline of the physics body.
 	 *
@@ -769,5 +865,18 @@ public class PlayerModel extends CapsuleObstacle {
 		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
 
+	@Override
+	public Vector2 getDimensions() {
+		return temp.set(size[0], size[1]);
+	}
 
+	@Override
+	public int getDepth() {
+		return this.depth;
+	}
+
+	@Override
+	public Vector2 getBoxCorner() {
+		return temp.set(getX() - size[0]/2f, getY() + size[1]/2f);
+	}
 }

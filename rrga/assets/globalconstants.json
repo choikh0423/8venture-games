@@ -10,8 +10,8 @@
     "density": 0.0,
     "friction": 0.0,
     "restitution": 0.0,
-    "width": 1,
-    "height": 1.5
+    "width": 1.2,
+    "height": 1.2
   },
   "player": {
     "shrink": [0.7, 0.95],
@@ -29,11 +29,11 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "size": 0.75,
+    "size": [0.7159,1],
     "maxhealth": 3,
     "drag_x" : 10,
     "drag_y" : 5,
-    "lighter_force": 8,
+    "lighter_force": 5,
     "lighter_fuel": 150,
     "lighter_change_rate": 1
   },
@@ -48,7 +48,7 @@
       "shrink" : 0.6,
       "height" : 0.05
     },
-    "size": 1,
+    "size": [0.97708333, 1.25],
     "closedmomentum": 0.35
   },
   "world": {
@@ -58,6 +58,7 @@
   "hazards": {
     "birdDamage": 1,
     "birdSensorRadius": 7,
-    "birdKnockback": 8
+    "birdKnockback": 6,
+    "stillFrames": [ 3, 2, 3, 4]
   }
 }

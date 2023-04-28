@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -8,19 +9,43 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.utility.obstacle.*;
 import com.mygdx.game.utility.util.*;
-import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
-import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.ScreenListener;
 
 public class GameMode implements Screen {
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
+
+    /** Texture asset for SKY parallax layer A*/
+    private TextureRegion skyLayerTextureA;
+
+    /** Texture asset for SKY parallax layer B*/
+    private TextureRegion skyLayerTextureB;
+
+    /** Texture asset for SKY parallax layer C*/
+    private TextureRegion skyLayerTextureC;
+
+    //TODO: Want to move this to constant.json later
+    /** Horizontal Parallax Constant A*/
+    private float horizontalA = 0.5f;
+    /** Horizontal Parallax Constant B*/
+    private float horizontalB = 0.7f;
+    /** Horizontal Parallax Constant C*/
+    private float horizontalC = 0.9f;
+
+    /** Vertical Parallax Constant A*/
+    private float verticalA = 0.5f;
+    /** Vertical Parallax Constant B*/
+    private float verticalB = 0.75f;
+    /** Vertical Parallax Constant C*/
+    private float verticalC = 1.0f;
+
     /** The font for giving messages to the player */
     protected BitmapFont displayFont;
 
@@ -69,9 +94,6 @@ public class GameMode implements Screen {
 
     /** The world scale */
     protected Vector2 scale;
-
-    /** Whether or not this is an active controller */
-    private boolean active;
 
     private boolean debug;
 
@@ -171,9 +193,9 @@ public class GameMode implements Screen {
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      *
-     * @param width  	The width in Box2d coordinates
-     * @param height	The height in Box2d coordinates
-     * @param gravity	The downward gravity
+     * @param width      The width in Box2d coordinates
+     * @param height    The height in Box2d coordinates
+     * @param gravity    The downward gravity
      */
     protected GameMode(float width, float height, float gravity) {
         this(new Rectangle(0,0,width,height), new Vector2(0,gravity));
@@ -186,12 +208,11 @@ public class GameMode implements Screen {
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      *
-     * @param bounds	The game bounds in Box2d coordinates
-     * @param gravity	The gravitational force on this Box2d world
+     * @param bounds    The game bounds in Box2d coordinates
+     * @param gravity    The gravitational force on this Box2d world
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
         debug  = false;
-        active = false;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
         this.currentLevel = 1;
@@ -221,13 +242,14 @@ public class GameMode implements Screen {
         directory = null;
     }
 
+
     /**
      * Gather the assets for this controller.
      *
      * This method extracts the asset variables from the given asset directory. It
      * should only be called after the asset directory is completed.
      *
-     * @param directory	Reference to global asset manager.
+     * @param directory    Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
         this.directory = directory;
@@ -239,6 +261,10 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
+        skyLayerTextureA =  new TextureRegion(directory.getEntry("game:skylayerA", Texture.class));
+        skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
+        skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
+
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
         // instantiate level parser for loading levels
@@ -247,6 +273,8 @@ public class GameMode implements Screen {
         gameplayController.getLevelContainer().setParser(parser);
     }
 
+    public int resetCounter = -1;
+    private Vector2 camPos = new Vector2();
     /**
      * Resets the status of the game so that we can play again.
      *
@@ -270,7 +298,9 @@ public class GameMode implements Screen {
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
-    };
+
+        resetCounter++;
+    }
 
     /**
      * Returns whether to process the update loop
@@ -279,19 +309,13 @@ public class GameMode implements Screen {
      * to switch to a new game mode.  If not, the update proceeds
      * normally.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      *
      * @return whether to process the update loop
      */
     public boolean preUpdate(float dt) {
         if (listener == null) {
             return true;
-        }
-
-        // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
-        //  screen modes that use GameMode as background can just avoid render()...
-        if (!active) {
-            return false;
         }
 
         if (gameplayController.isCompleted()) {
@@ -315,9 +339,15 @@ public class GameMode implements Screen {
             return true;
         }
 
+        // TODO: TEMPORARY NEXT LEVEL
+        if (inputController.didNext()) {
+            setNextLevel();
+            reset();
+            return true;
+        }
+
         // Now it is time to maybe switch screens.
         if (inputController.didExit()) {
-            pause();
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
@@ -340,16 +370,18 @@ public class GameMode implements Screen {
      * made about updating the game state. This method should be followed by a call
      * to draw the elements of the world.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      */
     public void update(float dt) {
 
-        if (inputController.didZoom()){
+        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
             zoomAlpha -= zoomAlphaDelta;
         }
+
+        if (gameplayController.getPlayer().getiFrames()>0) zoomAlpha = 0;
 
         // constraint zoomAlpha into [0,1] range
         if (zoomAlpha < 0){ zoomAlpha = 0; }
@@ -362,13 +394,14 @@ public class GameMode implements Screen {
         gameplayController.postUpdate(dt);
     };
 
+    public boolean showGoal = true;
     /**
      * Draw the physics objects to the canvas
      *
      * The method draws all objects in the order that they were added.
      * Heads-up display (HUD) content is drawn on top of these physics objects.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt    Number of seconds since last animation frame
      */
     public void draw(float dt) {
         canvas.clear();
@@ -376,22 +409,44 @@ public class GameMode implements Screen {
         // focus camera on player
         float px = gameplayController.getPlayerScreenX();
         float py = gameplayController.getPlayerScreenY();
+        float gx = gameplayController.getLevelContainer().getShowGoal().getX();
+        float gy = gameplayController.getLevelContainer().getShowGoal().getY();
 
         canvas.setCameraDynamic();
-        canvas.translateCameraToPoint(px,py);
+        Vector2 scl = gameplayController.getPlayer().getDrawScale();
+
+        //camera starts at the goal door then moves to the player the
+        //first time we reset the level (i.e. when loading in)
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        if (showGoal){
+            camPos.set(gx*scl.x, gy*scl.y);
+        } else {
+            camPos.set(px,py);
+        }
+        canvas.translateCameraToPoint(camPos.x,camPos.y);
         canvas.begin();
 
-        // center a background on player
-        // TODO: replace with repeating background?
-        canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
-                backgroundTexture.getRegionHeight()/2f, px , py, 0,
-                canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
-                canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
+        float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
+        float sclX = canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight();
 
+        // center a background on player
+        // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
+        canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
+                backgroundTexture.getRegionHeight()/2f, camPos.x,camPos.y, 0, sclX, sclY);
+
+        float worldHeight = physicsHeight * scale.y;
+
+        // Parallax Drawing
+        //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
+        if (currentLevel == 2) {
+            canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
+        }
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
-        int centerTileX = (int) (avatar.getX());
-        int centerTileY = (int) avatar.getY();
+        int centerTileX = (int) (camPos.x/scl.x);
+        int centerTileY = (int) (camPos.y/scl.y);
         int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
         int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
         int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);
@@ -414,17 +469,37 @@ public class GameMode implements Screen {
         }
 
 
-        // draw all game objects, these objects are "dynamic"
+        // draw all game objects + stickers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
-        PooledList<Obstacle> objects = gameplayController.getObjects();
-        for(Obstacle obj : gameplayController.getObjects()) {
-            obj.draw(canvas);
+        float ax = camPos.x/scl.x;
+        float ay = camPos.y/scl.y;
+        int count = 0;
+        for(Drawable drawable : gameplayController.getDrawables()) {
+            if (drawable instanceof PlayerModel){
+                drawable.draw(canvas);
+                gameplayController.getLevelContainer().getUmbrella().draw(canvas);
+            }
+            else {
+                cache.set(drawable.getBoxCorner());
+                float bx = cache.x;
+                float by = cache.y;
+                cache.set(drawable.getDimensions());
+                float width = cache.x;
+                float height = cache.y;
+                if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
+                    || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+                    continue;
+                }
+                drawable.draw(canvas);
+            }
+            count++;
         }
+
         canvas.end();
 
         if (debug) {
             canvas.beginDebug();
-            for(Obstacle obj : objects) {
+            for(Obstacle obj : gameplayController.getObjects()) {
                 obj.drawDebug(canvas);
             }
             canvas.endDebug();
@@ -443,7 +518,7 @@ public class GameMode implements Screen {
             Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
             canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
             debugFont.setColor(c);
-            canvas.drawText("FPS status: " + s, debugFont, 0.1f*canvas.getWidth(), 0.9f*canvas.getHeight());
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f * canvas.getWidth(), 0.9f * canvas.getHeight());
             debugFont.setColor(Color.BLACK);
             canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
             canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
@@ -459,6 +534,10 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
             canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
                     debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
+            canvas.drawText("Objects Drawn:" + (count + 1),
+                    debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
+            canvas.drawText("Grounded:" + avatar.isGrounded(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
         }
         canvas.end();
     }
@@ -475,8 +554,8 @@ public class GameMode implements Screen {
      * is the purpose of this method.  It stops the current instance playing (if
      * any) and then returns the id of the new instance for tracking.
      *
-     * @param sound		The sound asset to play
-     * @param soundId	The previously playing sound instance
+     * @param sound        The sound asset to play
+     * @param soundId    The previously playing sound instance
      *
      * @return the new sound instance for this asset.
      */
@@ -494,9 +573,9 @@ public class GameMode implements Screen {
      * is the purpose of this method.  It stops the current instance playing (if
      * any) and then returns the id of the new instance for tracking.
      *
-     * @param sound		The sound asset to play
-     * @param soundId	The previously playing sound instance
-     * @param volume	The sound volume
+     * @param sound        The sound asset to play
+     * @param soundId    The previously playing sound instance
+     * @param volume    The sound volume
      *
      * @return the new sound instance for this asset.
      */
@@ -536,18 +615,12 @@ public class GameMode implements Screen {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when transitioning to other modes
      *
-     * This is usually when it's not active or visible on screen. An Application is
-     * also paused before it is destroyed.
      */
     public void pause() {
-        // does nothing
-        // this only gets called when we minimize the application, we can switch to pause mode that way.
-        active = false;
-        listener.exitScreen(this, GameMode.EXIT_PAUSE);
+        gameplayController.pause();
     }
-
     /**
      * Called when the Screen is resumed from a paused state.
      *
@@ -562,7 +635,6 @@ public class GameMode implements Screen {
      */
     public void show() {
         // Useless if called in outside animation loop
-        active = true;
     }
 
     /**
@@ -570,7 +642,6 @@ public class GameMode implements Screen {
      */
     public void hide() {
         // Useless if called in outside animation loop
-        active = false;
     }
 
     /**
@@ -587,6 +658,30 @@ public class GameMode implements Screen {
      */
     public void setLevel(int level){
         currentLevel = level;
+        resetShowGoal();
+        resetCounter--;
+        gameplayController.resetCounter--;
+    }
+
+    /**
+     * Sets current level of the game
+     */
+    public void setNextLevel(){
+        if (currentLevel < 3) {
+            currentLevel += 1;
+        } else {
+            currentLevel = 1;
+        }
+        resetShowGoal();
+        resetCounter--;
+        gameplayController.resetCounter--;
+    }
+
+    public void resetShowGoal(){
+        resetCounter = 0;
+        showGoal = true;
+        gameplayController.resetCounter = 0;
+        gameplayController.showGoal = true;
     }
 
     /**
