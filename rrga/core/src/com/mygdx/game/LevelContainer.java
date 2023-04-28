@@ -329,6 +329,9 @@ public class LevelContainer{
         drawables.clear();
     }
 
+    private MovingPlatformModel showGoal;
+    public MovingPlatformModel getShowGoal(){return showGoal;}
+
     /**
      * Lays out the game geography.
      */
@@ -517,6 +520,28 @@ public class LevelContainer{
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
         drawables.add(avatar);
+
+        //initialize the invisible object the camera follows to move from goal
+        //to player when first entering level
+        JsonValue showGoalData = new JsonValue(JsonValue.ValueType.object);
+        showGoalData.addChild("movespeed", new JsonValue(5f));
+        showGoalData.addChild("flipped", new JsonValue(false));
+        showGoalData.addChild("depth", new JsonValue(0));
+        showGoalData.addChild("path", new JsonValue(JsonValue.ValueType.array));
+        showGoalData.get("path").addChild(new JsonValue(goalDoor.getX()));
+        showGoalData.get("path").addChild(new JsonValue(goalDoor.getY()));
+        showGoalData.get("path").addChild(new JsonValue(avatar.getX()));
+        showGoalData.get("path").addChild(new JsonValue(avatar.getY()));
+        showGoalData.addChild("AABB", new JsonValue(JsonValue.ValueType.array));
+        showGoalData.get("AABB").addChild(new JsonValue(-0.1f));
+        showGoalData.get("AABB").addChild(new JsonValue(0.1f));
+        showGoalData.get("AABB").addChild(new JsonValue(0.2f));
+        showGoalData.get("AABB").addChild(new JsonValue(0.2f));
+        float[] p = {-0.1f,-0.1f,0.1f,-0.1f,-0.1f,0.1f,0.1f,0.1f};
+        showGoal = new MovingPlatformModel(showGoalData, p, goalDoor.getX(), goalDoor.getY());
+        showGoal.setSensor(true);
+        showGoal.setName("show goal");
+        addObject(showGoal);
 
         // Create the umbrella
         dwidth = globalConstants.get("umbrella").get("size").getFloat(0);

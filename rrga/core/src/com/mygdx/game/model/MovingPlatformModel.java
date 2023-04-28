@@ -18,7 +18,7 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
      * A platform is either looping, moving forward, or reverse movement.
      * platforms that don't follow a path are said to be stationary.
      */
-    private enum MoveBehavior {
+    public enum MoveBehavior {
         LOOP,
         FORWARD,
         REVERSE,
@@ -58,6 +58,8 @@ public class MovingPlatformModel extends PolygonObstacle implements Drawable {
      * Invariant: currentPath index is even or 0
      */
     private int currentPathIndex;
+
+    public MoveBehavior getPatrol(){return patrol;}
 
     /**
      * Move speed of this platform (if platform does not actually move, automatic override with 0

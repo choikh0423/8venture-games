@@ -359,9 +359,12 @@ public class GameplayController implements ContactListener {
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
+
+        resetCounter++;
     }
 
-    private boolean canZoom;
+    public boolean showGoal = true;
+    public int resetCounter = 0;
 
     /**
      * The core gameplay loop of this world.
@@ -400,9 +403,12 @@ public class GameplayController implements ContactListener {
             countdown--;
         }
 
+        if (levelContainer.getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
+
         //UMBRELLA
-        //only allow control when not zooming
-        if (!input.didZoom()){
+        //only allow control when not zooming and not showing goal
+        if (!input.didZoom() && !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
             if(!input.secondaryControlMode){
                 if (input.didToggle()) {
@@ -510,7 +516,7 @@ public class GameplayController implements ContactListener {
         }
 
         // Process player movement
-        if (avatar.isGrounded() && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
+        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
@@ -676,6 +682,10 @@ public class GameplayController implements ContactListener {
         }
     }
 
+    private int framesSpent = 0;
+    private Vector2 init = new Vector2();
+    private Vector2 dest = new Vector2();
+    private int frames = 120;
     /**
      * Processes physics
      * <p>
