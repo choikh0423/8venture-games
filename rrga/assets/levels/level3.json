@@ -343,7 +343,7 @@
                  "y":2552.4246395806
                 }, 
                 {
-                 "gid":2147483915,
+                 "gid":2147483920,
                  "height":2569.84,
                  "id":157,
                  "rotation":0,
@@ -394,14 +394,6 @@
                  "width":365.451699121802,
                  "x":3293.33333333333,
                  "y":1549.12437810945
-                }, 
-                {
-                 "height":153.316103672651,
-                 "id":127,
-                 "template":"templates\/cloud_platforms\/smaller_cloud.json",
-                 "width":244.69656281529,
-                 "x":2827.83985550873,
-                 "y":1701.09090909091
                 }, 
                 {
                  "height":193.088965253914,
@@ -479,6 +471,7 @@
                  "y":1844.24561403509
                 }, 
                 {
+                 "gid":2147483989,
                  "height":174.122362869198,
                  "id":115,
                  "properties":[
@@ -552,6 +545,7 @@
                  "y":779.757575757576
                 }, 
                 {
+                 "gid":2147483989,
                  "height":119.909090909091,
                  "id":138,
                  "properties":[
@@ -569,13 +563,13 @@
                  "template":"templates\/birds\/red_bird.json",
                  "width":124.098054783644,
                  "x":2961.09090909091,
-                 "y":2088.9696969697
+                 "y":2071.44428512252
                 }, 
                 {
                  "id":140,
                  "template":"templates\/path_point.json",
-                 "x":3022.66666666667,
-                 "y":2138.66666666667
+                 "x":3026.19462574235,
+                 "y":2182.7661551126
                 }, 
                 {
                  "id":141,
@@ -612,6 +606,18 @@
                  "width":286.592609373588,
                  "x":477.272727272727,
                  "y":1329.06450396077
+                }, 
+                {
+                 "id":169,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":140
+                        }],
+                 "template":"templates\/birds\/red_bird.json",
+                 "x":2785.32369024519,
+                 "y":2115.011465867
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -625,79 +631,79 @@
          "name":"dark clouds",
          "objects":[
                 {
-                 "class":"",
-                 "gid":258,
+                 "gid":263,
                  "height":466.791,
                  "id":133,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":1762.22383202271,
                  "y":2041.2619526391
                 }, 
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":134,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":2246.69093292029,
                  "y":2359.48316057032
                 }, 
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":135,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1938.78243774574,
                  "y":1854.15792922674
                 }, 
                 {
-                 "class":"",
-                 "gid":258,
+                 "gid":263,
                  "height":466.791,
                  "id":124,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":2460.82575757576,
                  "y":1838.53651515152
                 }, 
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":132,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1964.31085428333,
                  "y":1625.02237976091
                 }, 
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":118,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":710,
                  "x":2404.98034076016,
                  "y":1481.49606815203
                 }, 
                 {
-                 "gid":258,
+                 "gid":263,
                  "height":381,
                  "id":160,
                  "name":"",
@@ -709,7 +715,7 @@
                  "y":1343.88138925295
                 }, 
                 {
-                 "gid":258,
+                 "gid":263,
                  "height":381,
                  "id":161,
                  "name":"",
@@ -721,7 +727,7 @@
                  "y":1370.09370904325
                 }, 
                 {
-                 "gid":258,
+                 "gid":263,
                  "height":381,
                  "id":162,
                  "name":"",
@@ -733,7 +739,7 @@
                  "y":1705.79863321475
                 }, 
                 {
-                 "gid":258,
+                 "gid":263,
                  "height":381,
                  "id":164,
                  "name":"",
@@ -781,43 +787,43 @@
          "name":"front dark clouds",
          "objects":[
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":136,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":1877,
                  "y":3095.5
                 }, 
                 {
-                 "class":"",
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":125,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":646,
                  "x":2150.75,
                  "y":2018.40287878788
                 }, 
                 {
-                 "class":"",
-                 "gid":258,
+                 "gid":263,
                  "height":466.791,
                  "id":117,
                  "name":"",
                  "rotation":0,
+                 "type":"",
                  "visible":true,
                  "width":869.873,
                  "x":2034.60955027999,
                  "y":1181.94458413757
                 }, 
                 {
-                 "gid":259,
+                 "gid":264,
                  "height":337,
                  "id":118,
                  "name":"",
@@ -829,7 +835,7 @@
                  "y":1299.88062734819
                 }, 
                 {
-                 "gid":258,
+                 "gid":263,
                  "height":381,
                  "id":163,
                  "name":"",
@@ -847,10 +853,10 @@
          "y":0
         }],
  "nextlayerid":15,
- "nextobjectid":169,
+ "nextobjectid":170,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -866,15 +872,15 @@
          "source":"tilesets\/trees.json"
         }, 
         {
-         "firstgid":258,
+         "firstgid":263,
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":262,
+         "firstgid":267,
          "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":40
 }

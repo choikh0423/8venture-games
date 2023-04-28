@@ -81,6 +81,7 @@
         "game:green_bird_flapping" : "game/hazard/bird_nest_flapping.png",
         "game:brown_bird_flapping" : "game/hazard/bird_brown_flapping.png",
         "game:bird_warning" : "game/hazard/annoy.png",
+        "game:nest" : "game/hazard/nest.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",
@@ -148,6 +149,7 @@
         "lightning3:template": "levels/templates/lightning/one_lightning.json",
         "lightning4:template": "levels/templates/lightning/left_lightning.json",
         "wind:template": "levels/templates/wind.json",
+        "nest:template": "levels/templates/nest.json",
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json",

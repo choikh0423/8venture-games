@@ -2,6 +2,7 @@ package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
@@ -13,58 +14,72 @@ import com.mygdx.game.utility.obstacle.SimpleObstacle;
 import com.mygdx.game.utility.util.PooledList;
 
 public class NestHazard extends PolygonObstacle {
-    private float[] path;
-    private float birdSpeed;
+    private final float[] path;
+    private final float birdSpeed;
     private final int spawnDelay;
     private int countdown;
     private final int birdDamage;
-    private final float birdKnockback;
+    private final float birdKnockBack;
     private final Vector2 scale;
-    private final Texture birdTex;
-    private PooledList<BirdHazard> birdList;
+    private final TextureRegion birdTex;
+    private int spawnInCountdown;
+    private boolean drawSpawnIn;
+    private final JsonValue blueData;
+    private final float[] blueAABB;
 
-    public NestHazard(float[] points, int x, int y, float[] path, float spd, int delay, int dam, float kb, Vector2 scl, Texture birdTex){
+    public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb,
+                      Vector2 scl, Texture birdAnimation, JsonValue blueData){
         super(points, x, y);
+        setGravityScale(0);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
+        setSensor(true);
 
         this.path = path;
         birdSpeed = spd;
         spawnDelay = delay;
         countdown = spawnDelay;
+        System.out.println("countdown initial: " + countdown );
 
         birdDamage = dam;
-        birdKnockback = kb;
+        birdKnockBack = kb;
         scale = scl;
-        this.birdTex = birdTex;
         // TODO: better memory allocation with PooledList
-        birdList = new PooledList<>();
+        PooledList<BirdHazard> birdList = new PooledList<>();
+        this.blueData = blueData;
+        blueAABB = blueData.get("AABB").asFloatArray();
+
+        spawnInCountdown = 0;
+        drawSpawnIn = false;
+        TextureRegion[][] flapTmpFrames = TextureRegion.split(birdAnimation, blueData.getInt("filmStripWidth"),
+                blueData.getInt("filmStripHeight"));
+        birdTex = flapTmpFrames[0][0];
     }
 
     public BirdHazard update(){
         if(countdown == 0){
             countdown = spawnDelay;
-            BirdHazard obj;
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            data.addChild("color", new JsonValue("blue"));
-            data.addChild("attack", new JsonValue(false));
-            data.addChild("facing_right", new JsonValue(false));
+            JsonValue data = blueData;
+
+            //data.remove("x");
+            //data.remove("y");
             data.addChild("x", new JsonValue(getX()));
             data.addChild("y", new JsonValue(getY()));
-            //filmstripwdith
-            //filmstripheight
-            //aabb
-            //points
-            JsonValue p = new JsonValue(JsonValue.ValueType.array);
-            for(int i=0; i<path.length; i++) {
-                p.addChild(new JsonValue(path[i]));
-            }
-            data.addChild("path", p);
-            data.addChild("loop", new JsonValue(false));
+
+            //data.remove("facing_right");
+            boolean right = path[2] - getX() > 0;
+            data.addChild("facing_right", new JsonValue(right));
+
+            //data.remove("movespeed");
             data.addChild("movespeed", new JsonValue(birdSpeed));
-            data.addChild("atkspeed", new JsonValue(0));
-            obj = new BirdHazard(data, birdDamage, 0, birdKnockback, null);
+
+            BirdHazard obj = new BirdHazard(data, birdDamage, 0, birdKnockBack, null);
             obj.setDrawScale(scale);
-            // the 0 is temporary
-            obj.setFlapAnimation(birdTex, 0);
+            // TODO: get still frame index from global constants
+            obj.setFlapAnimation(birdTex.getTexture(), 0);
+            obj.setPath(path, -1);
+            obj.setName("blue_bird");
             return obj;
         }
         else{
@@ -74,6 +89,25 @@ public class NestHazard extends PolygonObstacle {
     }
 
     public void draw(GameCanvas canvas){
-        canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+        //TODO size nests automatically
+        canvas.draw(texture, Color.WHITE, texture.getRegionWidth()/2f, texture.getRegionHeight()/2f,
+                getX() * drawScale.x, getY() * drawScale.y, getAngle(), .1f, .1f);
+
+        float effect = path[2] - getX() > 0 ? -1.0f : 1.0f;
+        int duration = 20;
+        int num_flashes = 3;
+        if(countdown < duration * num_flashes * 2 + 1 && countdown>0){
+            if (spawnInCountdown == 0){
+                spawnInCountdown = duration;
+                drawSpawnIn = !drawSpawnIn;
+            }
+            if(drawSpawnIn){
+                canvas.draw(birdTex, Color.WHITE, birdTex.getRegionWidth()/2f, birdTex.getRegionHeight()/2f,
+                        getX() * scale.x, getY() * scale.y, getAngle(),
+                        effect * blueAABB[2]/birdTex.getRegionWidth() * drawScale.x,
+                        blueAABB[3]/birdTex.getRegionHeight() * drawScale.y);
+            }
+            spawnInCountdown--;
+        }
     }
 }
