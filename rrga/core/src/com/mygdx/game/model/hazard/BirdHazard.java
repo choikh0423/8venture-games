@@ -218,14 +218,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     @Override
     public void setKnockBackForce(Vector2 in) {
         if(setKB) {
-            if(Math.abs(in.x)<.001 && Math.abs(in.y)<.001){
-                knockBackVec.set(0, 0);
-            }
-            else {
-                knockBackVec.set(in.nor());
-            }
+            knockBackVec.set(in.nor());
             setKB = false;
-            //System.out.println(knockBackVec);
         }
     }
 

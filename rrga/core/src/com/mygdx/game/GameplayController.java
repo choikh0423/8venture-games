@@ -816,11 +816,19 @@ public class GameplayController implements ContactListener {
                     ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 //norm from a to b
+
+                //contact normal being weird, may need for static hazards
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = wm.getNormal();
                 float flip = (bd1 instanceof HazardModel ? 1 : -1);
-                h.setKnockBackForce(norm.scl(flip));
-                //same for static hazards?
+                //h.setKnockBackForce(norm.scl(flip));
+
+                //subtract position vectors for now
+                Body hazBod = (bd1 instanceof HazardModel ? body1 : body2);
+                Body playerBod = (bd1 instanceof HazardModel ? body2 : body1);
+                cache.set(playerBod.getPosition().sub(hazBod.getPosition()));
+                h.setKnockBackForce(cache);
+
                 contactHazards.add(h);
             }
 
