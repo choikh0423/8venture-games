@@ -436,31 +436,6 @@
                  "template":"templates\/birds\/red_bird.json",
                  "x":1266,
                  "y":2534
-                }, 
-                {
-                 "height":772.897196261682,
-                 "id":53,
-                 "properties":[
-                        {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":2
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":54
-                        }],
-                 "template":"templates\/birds\/red_bird.json",
-                 "width":827,
-                 "x":4344,
-                 "y":3192
-                }, 
-                {
-                 "id":54,
-                 "template":"templates\/path_point.json",
-                 "x":408,
-                 "y":3416
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -536,8 +511,8 @@
                  "id":43,
                  "rotation":0,
                  "template":"templates\/wind_dir.json",
-                 "x":2886.73,
-                 "y":2901.59
+                 "x":2932.66810444874,
+                 "y":2874.99425531915
                 }, 
                 {
                  "id":44,
@@ -614,8 +589,8 @@
                         }],
                  "rotation":24.5316,
                  "template":"templates\/wind_dir.json",
-                 "x":1265.02666666667,
-                 "y":3507.13666666667
+                 "x":1456.3438116262,
+                 "y":3499.77831493746
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -642,10 +617,10 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":55,
+ "nextobjectid":56,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -659,13 +634,9 @@
         {
          "firstgid":114,
          "source":"tilesets\/trees.json"
-        }, 
-        {
-         "firstgid":258,
-         "source":"objects\/json\/clouds.json"
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":40
 }

@@ -34,9 +34,13 @@ public class VictoryScreen extends MenuScreen{
 
     /** exit code to restart game */
     public static final int EXIT_RESTART = 0;
+    /** exit code to next level */
+    public static final int EXIT_NEXT = 1;
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
+
+    private int nextPressed;
 
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
@@ -59,7 +63,7 @@ public class VictoryScreen extends MenuScreen{
         bigFont.setColor(Color.YELLOW);
         canvas.drawTextCentered("Victory!", bigFont, 0);
         smallFont.setColor(Color.WHITE);
-        canvas.drawTextCentered("Press  R  to  Try  Again", smallFont, -canvas.getHeight()/5f);
+        canvas.drawTextCentered("Press  N  for Next Level", smallFont, -canvas.getHeight()/5f);
         canvas.end();
 
         // transition
@@ -112,11 +116,24 @@ public class VictoryScreen extends MenuScreen{
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.R) {
-            currentExitCode = VictoryScreen.EXIT_RESTART;
+        if (keycode == Input.Keys.N) {
+            nextPressed = 1;
             return true;
         }
 
         return false;
     }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        if (nextPressed == 1) {
+            currentExitCode = VictoryScreen.EXIT_NEXT;
+            listener.exitScreen(this, currentExitCode);
+            currentExitCode = Integer.MIN_VALUE;
+            return true;
+        }
+
+        return false;
+    }
+
 }

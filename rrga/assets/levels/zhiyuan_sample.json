@@ -28,104 +28,124 @@
          "name":"objects",
          "objects":[
                 {
-                 "id":133,
-                 "properties":[
-                        {
-                         "name":"next_trajectory",
-                         "type":"object",
-                         "value":235
-                        }],
-                 "template":"templates\/path_point.json",
-                 "x":1339.55911268346,
-                 "y":510.752882447832
-                }, 
-                {
                  "id":179,
                  "properties":[
                         {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":1.5
+                        }, 
+                        {
                          "name":"path",
                          "type":"object",
-                         "value":133
+                         "value":247
                         }],
                  "template":"templates\/cloud_platforms\/large_cloud.json",
-                 "x":1090.72705622219,
-                 "y":848.460189885417
+                 "x":1098.6447125959,
+                 "y":1026.60745829397
                 }, 
                 {
-                 "id":235,
+                 "id":247,
+                 "template":"templates\/birds\/blue_bird.json",
+                 "x":285.714285714286,
+                 "y":167.857142857143
+                }, 
+                {
+                 "id":243,
+                 "template":"templates\/wind.json",
+                 "x":1132.22486144101,
+                 "y":269.200316706255
+                }, 
+                {
+                 "id":245,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":0.5
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":246
+                        }],
+                 "template":"templates\/cloud_platforms\/large_cloud.json",
+                 "x":644.044291663998,
+                 "y":1024.29516278089
+                }, 
+                {
+                 "id":246,
+                 "template":"templates\/path_point.json",
+                 "x":63.8857572341225,
+                 "y":1025.93010146561
+                }, 
+                {
+                 "id":247,
                  "properties":[
                         {
                          "name":"next_trajectory",
                          "type":"object",
-                         "value":236
+                         "value":249
                         }],
                  "template":"templates\/path_point.json",
-                 "x":683.794466403162,
-                 "y":434.782608695652
+                 "x":1117.39549149175,
+                 "y":471.289020708113
                 }, 
                 {
-                 "id":236,
+                 "id":249,
                  "template":"templates\/path_point.json",
-                 "x":217.391304347826,
-                 "y":703.557312252964
+                 "x":916.736753574432,
+                 "y":164.003364171573
                 }, 
                 {
-                 "id":230,
+                 "height":82.6202419592801,
+                 "id":250,
                  "polygon":[
                         {
-                         "x":2.68096514745321,
-                         "y":77.7479892761394
+                         "x":0,
+                         "y":0
                         }, 
                         {
-                         "x":-140.255630172991,
-                         "y":344.984852693098
+                         "x":1843.49873843566,
+                         "y":0
                         }, 
                         {
-                         "x":-55.656836461126,
-                         "y":446.666417183905
+                         "x":1843.49873843566,
+                         "y":82.6202419592801
                         }, 
                         {
-                         "x":-84.847886656863,
-                         "y":541.412789694802
-                        }, 
-                        {
-                         "x":-148.178844056707,
-                         "y":765.094874591058
-                        }, 
-                        {
-                         "x":41.4460020874685,
-                         "y":449.788440567067
-                        }, 
-                        {
-                         "x":-51.6205016357687,
-                         "y":317.430752453654
-                        }, 
-                        {
-                         "x":133.094874591058,
-                         "y":79.9781897491821
+                         "x":0,
+                         "y":82.6202419592801
                         }],
-                 "template":"templates\/lightning.json",
-                 "x":1493.29758713137,
-                 "y":369.973190348525
+                 "template":"templates\/platform.json",
+                 "width":1843.49873843566,
+                 "x":197.645079899075,
+                 "y":740.117746005046
                 }, 
                 {
-                 "gid":2147483910,
-                 "id":242,
-                 "properties":[
+                 "height":276.060107392417,
+                 "id":251,
+                 "polygon":[
                         {
-                         "name":"atk_speed",
-                         "type":"float",
-                         "value":15
+                         "x":0,
+                         "y":0
                         }, 
                         {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":10
+                         "x":1280,
+                         "y":0
+                        }, 
+                        {
+                         "x":1280,
+                         "y":276.060107392417
+                        }, 
+                        {
+                         "x":0,
+                         "y":276.060107392417
                         }],
-                 "rotation":0,
-                 "template":"templates\/birds\/brown_bird.json",
-                 "x":444.444444444444,
-                 "y":915.173237753883
+                 "template":"templates\/platform.json",
+                 "width":1280,
+                 "x":1328.84777123633,
+                 "y":824.222035323801
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -137,55 +157,7 @@
          "draworder":"topdown",
          "id":11,
          "name":"dark_clouds_behind",
-         "objects":[
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":237,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":664.53162055336,
-                 "y":415.51976284585
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":238,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":593.385375494071,
-                 "y":522.239130434783
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":239,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":423.424901185771,
-                 "y":545.954545454545
-                }, 
-                {
-                 "gid":260,
-                 "height":179,
-                 "id":240,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":405,
-                 "x":375.994071146245,
-                 "y":632.911067193676
-                }],
+         "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -198,10 +170,10 @@
          "name":"Gale",
          "objects":[
                 {
-                 "id":129,
+                 "id":260,
                  "template":"templates\/spawn.json",
-                 "x":1082.94200270817,
-                 "y":836.731578336298
+                 "x":1035.99382522747,
+                 "y":946.900098452565
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -215,28 +187,22 @@
          "name":"dark_clouds",
          "objects":[
                 {
-                 "gid":258,
-                 "height":466.790884718499,
-                 "id":186,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":869.87277729694,
-                 "x":1361.21669960208,
-                 "y":422.061817524854
-                }, 
-                {
-                 "gid":259,
+                 "gid":115,
                  "height":337,
-                 "id":187,
+                 "id":280,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":646,
-                 "x":1508.71636269809,
-                 "y":595.870303451887
+                 "x":393.988627132413,
+                 "y":662.563363119415
+                }, 
+                {
+                 "id":281,
+                 "template":"templates\/lightning\/one_lightning.json",
+                 "x":1513.24503311258,
+                 "y":784.76821192053
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -245,7 +211,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":243,
+ "nextobjectid":252,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -261,15 +227,15 @@
         }, 
         {
          "firstgid":114,
-         "source":"tilesets\/trees.json"
-        }, 
-        {
-         "firstgid":258,
          "source":"tilesets\/stickers.json"
         }, 
         {
          "firstgid":262,
          "source":"objects\/json\/brown_bird_tile.json"
+        }, 
+        {
+         "firstgid":268,
+         "source":"objects\/json\/clouds.json"
         }],
  "tilewidth":128,
  "type":"map",

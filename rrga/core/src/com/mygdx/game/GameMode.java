@@ -22,21 +22,21 @@ public class GameMode implements Screen {
     private TextureRegion backgroundTexture;
 
     /** Texture asset for SKY parallax layer A*/
-    private Texture skyLayerTextureA;
+    private TextureRegion skyLayerTextureA;
 
     /** Texture asset for SKY parallax layer B*/
-    private Texture skyLayerTextureB;
+    private TextureRegion skyLayerTextureB;
 
     /** Texture asset for SKY parallax layer C*/
-    private Texture skyLayerTextureC;
+    private TextureRegion skyLayerTextureC;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
-    private float horizontalA = 0.9f;
+    private float horizontalA = 0.5f;
     /** Horizontal Parallax Constant B*/
     private float horizontalB = 0.7f;
     /** Horizontal Parallax Constant C*/
-    private float horizontalC = 0.5f;
+    private float horizontalC = 0.9f;
 
     /** Vertical Parallax Constant A*/
     private float verticalA = 0.5f;
@@ -93,9 +93,6 @@ public class GameMode implements Screen {
 
     /** The world scale */
     protected Vector2 scale;
-
-    /** Whether or not this is an active controller */
-    private boolean active;
 
     private boolean debug;
 
@@ -215,7 +212,6 @@ public class GameMode implements Screen {
      */
     protected GameMode(Rectangle bounds, Vector2 gravity) {
         debug  = false;
-        active = false;
         this.bounds = bounds;
         this.scale = new Vector2(1,1);
         this.currentLevel = 1;
@@ -245,6 +241,7 @@ public class GameMode implements Screen {
         directory = null;
     }
 
+
     /**
      * Gather the assets for this controller.
      *
@@ -263,9 +260,9 @@ public class GameMode implements Screen {
         gameplayController.gatherAssets(directory);
 
         backgroundTexture = new TextureRegion(directory.getEntry("game:background", Texture.class));
-        skyLayerTextureA = directory.getEntry("game:skylayerA", Texture.class);
-        skyLayerTextureB = directory.getEntry("game:skylayerB", Texture.class);
-        skyLayerTextureC = directory.getEntry("game:skylayerC", Texture.class);
+        skyLayerTextureA =  new TextureRegion(directory.getEntry("game:skylayerA", Texture.class));
+        skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
+        skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
 
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
@@ -316,12 +313,6 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // TODO: maybe this conditional is unnecessary since GameMode's update() and draw() are public.
-        //  screen modes that use GameMode as background can just avoid render()...
-        if (!active) {
-            return false;
-        }
-
         if (gameplayController.isCompleted()) {
             listener.exitScreen(this, EXIT_VICTORY);
             return false;
@@ -345,19 +336,13 @@ public class GameMode implements Screen {
 
         // TODO: TEMPORARY NEXT LEVEL
         if (inputController.didNext()) {
-            if (currentLevel < 3) {
-                currentLevel += 1;
-            } else {
-                currentLevel = 1;
-            }
-
+            setNextLevel();
             reset();
             return true;
         }
 
         // Now it is time to maybe switch screens.
         if (inputController.didExit()) {
-            pause();
             listener.exitScreen(this, EXIT_QUIT);
             return false;
         }
@@ -423,21 +408,24 @@ public class GameMode implements Screen {
         canvas.translateCameraToPoint(px,py);
         canvas.begin();
 
+        float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
+        float sclX = canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight();
+
         // center a background on player
         // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
                 backgroundTexture.getRegionHeight()/2f, px , py, 0,
-                canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth(),
-                canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight());
+                sclX, sclY);
 
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
         //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA , -py * verticalA, px, py, worldHeight, zoomScl);
-        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl);
-        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl);
-
+        if (currentLevel == 2) {
+            canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
+            canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
+        }
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
         int centerTileX = (int) (avatar.getX());
@@ -513,7 +501,7 @@ public class GameMode implements Screen {
             Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
             canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
             debugFont.setColor(c);
-            canvas.drawText("FPS status: " + s, debugFont, 0.1f*canvas.getWidth(), 0.9f*canvas.getHeight());
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f * canvas.getWidth(), 0.9f * canvas.getHeight());
             debugFont.setColor(Color.BLACK);
             canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
             canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
@@ -531,6 +519,8 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
             canvas.drawText("Objects Drawn:" + (count + 1),
                     debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
+            canvas.drawText("Grounded:" + avatar.isGrounded(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
         }
         canvas.end();
     }
@@ -608,18 +598,12 @@ public class GameMode implements Screen {
     }
 
     /**
-     * Called when the Screen is paused.
+     * Called when transitioning to other modes
      *
-     * This is usually when it's not active or visible on screen. An Application is
-     * also paused before it is destroyed.
      */
     public void pause() {
-        // does nothing
-        // this only gets called when we minimize the application, we can switch to pause mode that way.
-        active = false;
-        listener.exitScreen(this, GameMode.EXIT_PAUSE);
+        gameplayController.pause();
     }
-
     /**
      * Called when the Screen is resumed from a paused state.
      *
@@ -634,7 +618,6 @@ public class GameMode implements Screen {
      */
     public void show() {
         // Useless if called in outside animation loop
-        active = true;
     }
 
     /**
@@ -642,7 +625,6 @@ public class GameMode implements Screen {
      */
     public void hide() {
         // Useless if called in outside animation loop
-        active = false;
     }
 
     /**
@@ -660,6 +642,20 @@ public class GameMode implements Screen {
     public void setLevel(int level){
         currentLevel = level;
     }
+
+    /**
+     * Sets current level of the game
+     */
+    public void setNextLevel(){
+        if (currentLevel < 3) {
+            currentLevel += 1;
+        } else {
+            currentLevel = 1;
+        }
+
+    }
+
+
 
     /**
      * Sets current level of the game

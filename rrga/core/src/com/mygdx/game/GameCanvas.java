@@ -609,19 +609,16 @@ public class GameCanvas {
      * @param x     The x-coordinate of the bottom left corner
      * @param y     The y-coordinate of the bottom left corner
      */
-    public void drawWrapped(Texture image, float x, float y, float px, float py, float worldHeight, float zoomScl) {
+    public void drawWrapped(TextureRegion image, float x, float y, float px, float py, float worldHeight, float zoomScl, float sclX, float sclY) {
         positionCache.set(x,y);
         wrapPosition(positionCache, px, py, worldHeight,zoomScl);
 
         int w = getWidth();
 
         // Have to draw the background twice for continuous scrolling.
-        spriteBatch.draw(image, positionCache.x,   positionCache.y);
-        spriteBatch.draw(image, positionCache.x-w, positionCache.y);
-        spriteBatch.draw(image, positionCache.x+w, positionCache.y);
-
-
-
+        spriteBatch.draw(image, positionCache.x,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
+        spriteBatch.draw(image, positionCache.x - w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
+        spriteBatch.draw(image, positionCache.x + w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
     }
 
     /**

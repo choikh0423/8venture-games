@@ -118,34 +118,8 @@ public class MenuMode extends MenuScreen {
     private int buttonWidth;
     /** Ratio of the button width to the screen */
     private static float BUTTON_WIDTH_RATIO  = 0.66f;
-    /** Ration of the button height to the screen */
-    private static float Button_X_RATIO = 0.2f;
-    /** The y-coordinate of the center of the level select button */
-    private int selectY;
-    /** The x-coordinate of the center of the level select button */
-    private int selectX;
-    /** The y-coordinate of the center of the settings button */
-    private int settingsY;
-    /** The x-coordinate of the center of the settings button */
-    private int settingsX;
-    /** The exit button angle */
-    private static float EXIT_ANGLE = 0.05f * 3.14f;
-    /** The y-coordinate of the center of the settings button */
-    private int exitY;
-    /** The x-coordinate of the center of the settings button */
-    private int exitX;
 
-    /** The y-coordinate of the center of the level 1 button */
-    private int levelY1;
-    /** The x-coordinate of the center of the level 1 button */
-    private int levelX1;
-    /** The y-coordinate of the center of the level 2 button */
-    private int levelY2;
-    /** The x-coordinate of the center of the level 2 button */
-    private int levelX2;
 
-    /** Stage for setting features */
-    private Stage settingStage;
     /** Music volume slider bar texture */
     private TextureRegion musicSliderBar;
     /** Music volume slider knob texture */
@@ -448,11 +422,13 @@ public class MenuMode extends MenuScreen {
                 exitPressState = 2;
                 currentExitCode = EXIT_QUIT;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (startPressState == 1) {
                 currentLevel = 1;
-                levelPressState1 = 2;
+                startPressState = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             }
         } else if (screenMode == 2) {
             if (exitPressState == 1) {
@@ -465,16 +441,19 @@ public class MenuMode extends MenuScreen {
                 levelPressState1 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (levelPressState2 == 1) {
                 currentLevel = 2;
                 levelPressState2 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             } else if (levelPressState3 == 1) {
                 currentLevel = 3;
                 levelPressState3 = 2;
                 currentExitCode = EXIT_PLAY;
                 listener.exitScreen(this, currentExitCode);
+                currentExitCode = Integer.MIN_VALUE;
             }
         } else if (screenMode == 3) {
             if (exitPressState == 1) {
@@ -528,24 +507,24 @@ public class MenuMode extends MenuScreen {
 
         if (screenMode == 1) {
             // Draw Level Select Button
-            levelSelectButton.draw(canvas, selectPressState);
+            levelSelectButton.draw(canvas, selectPressState, BUTTON_SCALE);
             // Draw Settings Button
-            settingsButton.draw(canvas, settingsPressState);
+            settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE);
             // Draw Exit Button
-            exitButton.draw(canvas, exitPressState);
+            exitButton.draw(canvas, exitPressState, BUTTON_SCALE);
             // Draw Start Button
-            startButton.draw(canvas, startPressState);
+            startButton.draw(canvas, startPressState, BUTTON_SCALE);
         } else if (screenMode == 2){
             // Draw Back Button
-            backButton.draw(canvas, exitPressState);
+            backButton.draw(canvas, exitPressState, BUTTON_SCALE);
             // Temporary Implementation - Will change to iterables once we get proper textures
-            levelButton1.draw(canvas, levelPressState1);
-            levelButton2.draw(canvas, levelPressState2);
-            levelButton3.draw(canvas, levelPressState3);
+            levelButton1.draw(canvas, levelPressState1, BUTTON_SCALE);
+            levelButton2.draw(canvas, levelPressState2, BUTTON_SCALE);
+            levelButton3.draw(canvas, levelPressState3, BUTTON_SCALE);
 
         } else if (screenMode == 3) {
             // Draw Back Button
-            backButton.draw(canvas, exitPressState);
+            backButton.draw(canvas, exitPressState, BUTTON_SCALE);
 
             // Draw sliders
             musicSlider.draw(canvas);
@@ -580,6 +559,7 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
+
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
@@ -588,12 +568,6 @@ public class MenuMode extends MenuScreen {
         backgroundMusic.setLooping(true);
 
         draw();
-
-        // Screen Transition
-        if (currentExitCode >= 0){
-            listener.exitScreen(this, currentExitCode);
-            currentExitCode = Integer.MIN_VALUE;
-        }
     }
 
     @Override
@@ -656,12 +630,29 @@ public class MenuMode extends MenuScreen {
 
     @Override
     public void dispose() {
+        //TODO: Need legitimate disposing
         listener = null;
-        canvas = null;
         if (backgroundMusic != null){
             backgroundMusic.stop();
         }
-        backgroundMusic = null;
         // NEED TO ADD
+    }
+
+    public void pause() {
+        if (backgroundMusic != null){
+            backgroundMusic.stop();
+        }
+    }
+
+    /** Reset is for transitioning from other mode to current mode*/
+    public void reset() {
+        musicVolume = musicSlider.ratio;
+        sfxVolume = sfxSlider.ratio;
+        backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
+        backgroundMusic.setLooping(true);
+
+        this.screenMode = 1;
+
     }
 }

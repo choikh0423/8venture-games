@@ -52,10 +52,10 @@ public class LevelParser {
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
-    private ArrayList<TextureRegion[]> layers;
+    private ArrayList<TextureRegion[]> layers = new ArrayList<>();
 
     /** the list of Sticker objects */
-    private ArrayList<Sticker> stickers = new ArrayList<>();
+    private final ArrayList<Sticker> stickers = new ArrayList<>();
 
     /** vector position cache for player */
     private final Vector2 playerPos = new Vector2();
@@ -74,10 +74,16 @@ public class LevelParser {
     /** vector cache specifically for holding temporary scale factors */
     private final Vector2 scalars = new Vector2();
 
-    /** template object with defaults for colored birds*/
+    /** template object with defaults for red birds*/
     private final JsonValue redBirdDefaultObj;
+
+    /** template object with defaults for blue birds*/
     private final JsonValue blueBirdDefaultObj;
+
+    /** template object with defaults for green birds*/
     private final JsonValue greenBirdDefaultObj;
+
+    /** template object with defaults for brown birds*/
     private final JsonValue brownBirdDefaultObj;
 
     /** the default JSON properties of path point. */
@@ -101,15 +107,23 @@ public class LevelParser {
     /** the default JSON polygon of a wind object */
     private final JsonValue windDefaultPoly;
 
-    /** the default JSON object of movable cloud objects */
+    /** the default JSONs of movable cloud objects */
     private final JsonValue[] cloudDefaultObjects;
 
-    /** the default direction of a wind object */
-    private final float windDirDefault = 0;
+    /** the default JSONs of animated lightning objects */
+    private final JsonValue[] lightningDefaultObjects;
 
+    /** the default direction of a wind object */
+    private static final float windDirDefault = 0;
+
+    /** maps from tileset name (bushes, cliffs, etc) to its undivided texture */
     private final HashMap<String, Texture> textureMap;
 
+    /** maps from tileset name (bushes, cliffs, etc) to its JSON data */
     private final HashMap<String, JsonValue> tileSetJsonMap;
+
+    /** all objects in game that needs asset information can be found in an objects.json */
+    private final JsonValue gameObjectTiles;
 
     /** the list of texture region cutters, one for each tileset */
     private ArrayList<TileSetMaker> tileSetMakers;
@@ -128,8 +142,10 @@ public class LevelParser {
     /** the depth of the current layer being parsed*/
     private int currentObjectDepth;
 
+    /** drawing depth of Gale */
     private int playerDepth;
 
+    /** drawing depth of scarf */
     private int goalDepth;
 
     /**
@@ -207,10 +223,17 @@ public class LevelParser {
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
+        // cloud templates
         JsonValue cloud0Template = directory.getEntry("cloud0:template", JsonValue.class);
         JsonValue cloud1Template = directory.getEntry("cloud1:template", JsonValue.class);
         JsonValue cloud2Template = directory.getEntry("cloud2:template", JsonValue.class);
         JsonValue cloud3Template = directory.getEntry("cloud3:template", JsonValue.class);
+        // growing lightning templates
+        JsonValue lightning0Template = directory.getEntry("lightning0:template", JsonValue.class);
+        JsonValue lightning1Template = directory.getEntry("lightning1:template", JsonValue.class);
+        JsonValue lightning2Template = directory.getEntry("lightning2:template", JsonValue.class);
+        JsonValue lightning3Template = directory.getEntry("lightning3:template", JsonValue.class);
+        JsonValue lightning4Template = directory.getEntry("lightning4:template", JsonValue.class);
 
         redBirdDefaultObj = redBirdTemplate.get("object");
         blueBirdDefaultObj = blueBirdTemplate.get("object");
@@ -229,6 +252,13 @@ public class LevelParser {
                 cloud2Template.get("object"),
                 cloud3Template.get("object")
         };
+        lightningDefaultObjects = new JsonValue[]{
+                lightning0Template.get("object"),
+                lightning1Template.get("object"),
+                lightning2Template.get("object"),
+                lightning3Template.get("object"),
+                lightning4Template.get("object")
+        };
 
         // save tileset textures and their corresponding JSON tileset data
         textureMap = new HashMap<>();
@@ -245,14 +275,8 @@ public class LevelParser {
         tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
         tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
 
-        // add bird object tile-sets
-        tileSetJsonMap.put("blue_bird", directory.getEntry("blue_bird:tiles", JsonValue.class));
-        tileSetJsonMap.put("red_bird", directory.getEntry("red_bird:tiles", JsonValue.class));
-        tileSetJsonMap.put("green_bird", directory.getEntry("green_bird:tiles", JsonValue.class));
-        tileSetJsonMap.put("brown_bird", directory.getEntry("brown_bird:tiles", JsonValue.class));
-
-        // add cloud object tile-sets
-        tileSetJsonMap.put("clouds", directory.getEntry("cloud:tiles", JsonValue.class));
+        // add object json
+        gameObjectTiles = directory.getEntry("data:objects", JsonValue.class).get("tiles");
 
         // load all stickers
         stickerTextures = new Texture[]{
@@ -281,7 +305,6 @@ public class LevelParser {
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
 
-        layers = new ArrayList<>();
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
         tileSetMakers = new ArrayList<>();
@@ -291,6 +314,7 @@ public class LevelParser {
             String source = ts.getString("source");
             if (source.endsWith("stickers.json")){
                 stickerMaker = new CollectionTileSetMaker(stickerTextures, ts.getInt("firstgid"));
+                continue;
             }
             JsonValue j = getTileLayerTileSetJson(source);
             if (j == null){
@@ -301,6 +325,7 @@ public class LevelParser {
             );
         }
         stickers.clear();
+        layers.clear();
 
         // containers for unprocessed JSON data
         HashMap<Integer, JsonValue> trajectory = new HashMap<>();
@@ -334,7 +359,7 @@ public class LevelParser {
 
         // begin object processing
         processBirds(birdRawData, trajectory);
-        processLightning(lightningRawData);
+        processNewLightning(lightningRawData);
         processPlatforms(platformRawData);
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
@@ -554,6 +579,14 @@ public class LevelParser {
     }
 
     /**
+     * @param object game object (templates/tile objects contain gid(s))
+     * @return the indexing portion of a tile Gid (excludes flip bits).
+     */
+    private int getProcessedGid(JsonValue object){
+        return (int) (object.getLong("gid", 0) & LOWER28BITMASK);
+    }
+
+    /**
      * Convert raw bird JSON into game-expected JSON format.
      * @param rawData the unprocessed bird object data
      * @param trajectory map of path node Ids to raw JSON
@@ -565,8 +598,7 @@ public class LevelParser {
             JsonValue b = rawData.get(ii);
             // data = the bird JSON that game will read
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            String variant = b.getString("template", "UNKNOWN");
-            String color = computeColor(variant);
+            String color = computeColor(b.getString("template", "blue_bird.json"));
             JsonValue properties = b.get("properties");
             JsonValue defaultObj = getBirdDefaultObj(color);
             JsonValue defaults = defaultObj.get("properties");
@@ -590,22 +622,20 @@ public class LevelParser {
             pathJson.addChild(new JsonValue(temp.y));
 
             // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
-            JsonValue tileSetJson = tileSetJsonMap.get(color + "_bird");
             // using the first tile in the set is sufficient for birds, unless we want multi-hitbox.
-            JsonValue tileJson = tileSetJson.get("tiles").get(0);
-            int assetWidth = tileSetJson.getInt("tilewidth");
-            int assetHeight = tileSetJson.getInt("tileheight");
+            JsonValue tileJson = gameObjectTiles.get(getProcessedGid(defaultObj) - 1);
+            int assetWidth = tileJson.getInt("imagewidth");
+            int assetHeight = tileJson.getInt("imageheight");
             data.addChild("filmStripWidth", new JsonValue(assetWidth));
             data.addChild("filmStripHeight", new JsonValue(assetHeight));
 
             // add AABB
             data.addChild("AABB", processTileObjectAABB(b, defaultObj, assetWidth, assetHeight));
 
-            // the hitbox information is stored in the first tile in birds tilesets, in its objectgroup, which we then
-            // look at the objects list.
+            // the hitbox information for birds is stored in one tile (the one animated), in its objectgroup, which we then
+            // look at the first of its objects list.
             // Now, load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
-            JsonValue objectsJson = tileJson.get("objectgroup").get("objects");
-            JsonValue hitBoxPoints = objectsJson.get(0);
+            JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
             float ox = hitBoxPoints.getFloat("x");
             float oy = hitBoxPoints.getFloat("y");
             JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
@@ -636,7 +666,62 @@ public class LevelParser {
         }
     }
 
-    private void processLightning(ArrayList<JsonValue> rawData){
+    private void processNewLightning(ArrayList<JsonValue> rawData){
+        lightningData = new JsonValue[rawData.size()];
+        for (int ii = 0; ii < lightningData.length; ii++) {
+            lightningData[ii] = processNewLightning(rawData.get(ii));
+        }
+    }
+
+    /**
+     * processes a single animated lightning object into JSON data
+     * @param rawData unproecessed
+     */
+    private JsonValue processNewLightning(JsonValue rawData){
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        readPositionAndConvert(rawData, temp);
+        addPosition(data, temp);
+        data.addChild("depth", new JsonValue(rawData.getInt("__DEPTH__", -1)));
+        int tileIndex = getLightningTileIndex(rawData.getString("template"));
+        data.addChild("tileIndex", new JsonValue(tileIndex));
+        JsonValue props = rawData.get("properties");
+        JsonValue lightningDefaultObj = lightningDefaultObjects[tileIndex];
+        JsonValue lightningProps = lightningDefaultObj.get("properties");
+        data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
+        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
+        // get unscaled-size data from lightning.json file (collection of all ligntning bolts)
+        // get the AABB for the given lightning
+        int gid = getProcessedGid(lightningDefaultObj);
+        JsonValue tileJson = gameObjectTiles.get(gid - 1);
+        int assetWidth = tileJson.getInt("imagewidth");
+        int assetHeight = tileJson.getInt("imageheight");
+        data.addChild("filmStripWidth", new JsonValue(assetWidth));
+        data.addChild("filmStripHeight", new JsonValue(assetHeight));
+        data.addChild("AABB", processTileObjectAABB(rawData, lightningDefaultObj, assetWidth, assetHeight));
+
+        // add all the hit-boxes (loop over number of frames)
+        // INVARIANT: the selected tile is the last tile of the animation, so iterate ids: gid-length through gid-1
+        int frameCount = getFrameCount(tileJson,"lightning");
+        boolean horizontalFlipped = isObjectHorizontallyFlipped(rawData);
+        data.addChild("flipped", new JsonValue(horizontalFlipped));
+        JsonValue hitboxes = new JsonValue(JsonValue.ValueType.array);
+        for (int ii = gid - frameCount; ii < gid; ii++){
+            JsonValue hitBoxPoints = gameObjectTiles.get(ii).get("objectgroup").get("objects").get(0);
+            float ox = hitBoxPoints.getFloat("x");
+            float oy = hitBoxPoints.getFloat("y");
+            JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                    horizontalFlipped, assetWidth, assetHeight);
+            hitboxes.addChild(shape);
+        }
+        data.addChild("hitboxes", hitboxes);
+        return data;
+    }
+
+    /**
+     * deprecated
+     * @param rawData deprecated
+     */
+    private void processLightningOld(ArrayList<JsonValue> rawData){
         lightningData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < lightningData.length; ii++) {
             //data we pass in to lightning constructor
@@ -711,22 +796,6 @@ public class LevelParser {
         }
     }
 
-    private int getCloudTileIndex(String templateName){
-        if (templateName.endsWith("large_cloud.json")){
-            return 0;
-        }
-        else if (templateName.endsWith("medium_cloud.json")){
-            return 1;
-        }
-        else if (templateName.endsWith("small_cloud.json")){
-            return 2;
-        }
-        else if (templateName.endsWith("smaller_cloud.json")){
-            return 3;
-        }
-        return -1;
-    }
-
     private void processMovingPlats(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         movingPlatformData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < movingPlatformData.length; ii++) {
@@ -756,13 +825,11 @@ public class LevelParser {
             data.addChild("loopTo", new JsonValue(loopTo));
             data.addChild("movespeed", new JsonValue(moveSpeed));
 
-            // get data from cloud.json file (collection of all clouds, stores their sizes)
-            JsonValue tileSetJson = tileSetJsonMap.get("clouds");
             // find this cloud's corresponding tile and get the AABB for the given cloud
-            JsonValue tileJson = tileSetJson.get("tiles").get(tileIndex);
-            loadAssetTileDimensions(tileJson, tileSetJson);
-            int assetWidth = (int) temp.x;
-            int assetHeight = (int) temp.y;
+            int idx = getProcessedGid(cloudDefaultObj);
+            JsonValue tileJson = gameObjectTiles.get(idx-1);
+            int assetWidth = tileJson.getInt("imagewidth");
+            int assetHeight = tileJson.getInt("imageheight");
             data.addChild("AABB", processTileObjectAABB(mp, cloudDefaultObj, assetWidth, assetHeight));
             // add hit-box
             JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
@@ -865,19 +932,6 @@ public class LevelParser {
             return defaultObject.get(key);
         }
         return queryResult;
-    }
-
-    /**
-     * maps bird template name to color
-     * @param variant the template name of a colored bird
-     * @return the bird's color
-     */
-    private String computeColor(String variant){
-        if (variant.contains("blue_bird.json")) return "blue";
-        else if (variant.contains("brown_bird.json")) return "brown";
-        else if (variant.contains("red_bird.json")) return "red";
-        else if (variant.contains("green_bird.json")) return "green";
-        else return "UNKNOWN";
     }
 
     /**
@@ -1110,7 +1164,86 @@ public class LevelParser {
         }
     }
 
-
-
     // ========================== END of FUNCTIONS for TILE PARSING =================================
+
+    /**
+     *
+     * @param tile the tile of the game object
+     * @param type the type of game object (bird, lightning, etc)
+     * @return the number of frames this object has for animations
+     */
+    private int getFrameCount(JsonValue tile, String type) {
+        JsonValue animation = tile.get("animation");
+        if (animation == null){
+            return 0;
+        }
+        if (type.equals("lightning")){
+            // an additional frame is included to allow easy tracing of still frame
+            return animation.size - 1;
+        }
+        return animation.size;
+    }
+
+
+    // BIRD TEMPLATES ==================================================================================================
+
+    /**
+     * maps bird template name to color
+     * @param template the template name of a colored bird
+     * @return the bird's color
+     */
+    public static String computeColor(String template){
+        if (template.endsWith("blue_bird.json")) return "blue";
+        else if (template.endsWith("brown_bird.json")) return "brown";
+        else if (template.endsWith("red_bird.json")) return "red";
+        else if (template.endsWith("green_bird.json")) return "green";
+        else return "UNKNOWN";
+    }
+
+
+    // CLOUD TEMPLATES =================================================================================================
+    /**
+     * @param templateName cloud template name
+     * @return the asset index in the list of loaded cloud assets
+     */
+    public static int getCloudTileIndex(String templateName){
+        if (templateName.endsWith("large_cloud.json")){
+            return 0;
+        }
+        else if (templateName.endsWith("medium_cloud.json")){
+            return 1;
+        }
+        else if (templateName.endsWith("small_cloud.json")){
+            return 2;
+        }
+        else if (templateName.endsWith("smaller_cloud.json")){
+            return 3;
+        }
+        return -1;
+    }
+
+    // LIGHTNING TEMPLATES =============================================================================================
+    /**
+     * @param templateName lightning template name
+     * @return the asset index in the list of loaded animated lightning assets
+     */
+    public static int getLightningTileIndex(String templateName){
+        System.out.println(templateName);
+        if (templateName.endsWith("out_lightning.json")){
+            return 0;
+        }
+        else if (templateName.endsWith("two_lightning.json")){
+            return 1;
+        }
+        else if (templateName.endsWith("in_lightning.json")){
+            return 2;
+        }
+        else if (templateName.endsWith("one_lightning.json")){
+            return 3;
+        }
+        else if (templateName.endsWith("left_lightning.json")){
+            return 4;
+        }
+        return -1;
+    }
 }
