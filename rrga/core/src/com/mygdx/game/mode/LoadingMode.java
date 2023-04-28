@@ -80,7 +80,9 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	/** Middle portion of the status forground (colored region) */
 	private TextureRegion statusFrgMiddle;
 	/** Right cap to the status forground (colored region) */
-	private TextureRegion statusFrgRight;	
+	private TextureRegion statusFrgRight;
+	/** Texture for cursor */
+	private TextureRegion cursorTexture;
 
 	/** Default budget for asset loader (do nothing but load 60 fps) */
 	private static int DEFAULT_BUDGET = 15;
@@ -224,6 +226,9 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		progress = 0;
 		pressState = 0;
 
+		//get cursor texture
+		cursorTexture = new TextureRegion(internal.getEntry("cursor", Texture.class));
+
 		Gdx.input.setInputProcessor( this );
 
 		// Let ANY connected controller start the game.
@@ -263,6 +268,14 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 				playButton = new TextureRegion(internal.getEntry("play",Texture.class));
 			}
 		}
+		//conatin cursor
+		int x = Gdx.input.getX();
+		int y = Gdx.input.getY();
+		if(Gdx.input.getY()<0) y = 0;
+		if(Gdx.input.getY()>Gdx.graphics.getHeight()) y = Gdx.graphics.getHeight();
+		if(Gdx.input.getX()<0) x = 0;
+		if(Gdx.input.getX()>Gdx.graphics.getWidth()) x = Gdx.graphics.getWidth();
+		Gdx.input.setCursorPosition(x,y);
 	}
 
 	/**
@@ -279,9 +292,15 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 			drawProgress(canvas);
 		} else {
 			Color tint = (pressState == 1 ? Color.GRAY: Color.WHITE);
-			canvas.draw(playButton, tint, playButton.getRegionWidth()/2, playButton.getRegionHeight()/2,
+			canvas.draw(playButton, tint, playButton.getRegionWidth()/2f, playButton.getRegionHeight()/2f,
 						centerX, centerY, 0, BUTTON_SCALE*scale, BUTTON_SCALE*scale);
 		}
+		//draw mouse
+		int mx = Gdx.input.getX();
+		int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+		canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+				mx, my, 0, .1f, .1f);
+
 		canvas.end();
 	}
 	

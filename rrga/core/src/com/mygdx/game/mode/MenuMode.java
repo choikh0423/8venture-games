@@ -195,6 +195,9 @@ public class MenuMode extends MenuScreen {
     /** current selected level */
     private int currentLevel;
 
+    /** texture for the cursor */
+    private TextureRegion cursorTexture;
+
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
         currentExitCode = Integer.MIN_VALUE;
@@ -219,6 +222,8 @@ public class MenuMode extends MenuScreen {
 
         backgroundTexture = new TextureRegion(directory.getEntry( "menu:background", Texture.class ));
         backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
+
+        cursorTexture = new TextureRegion(directory.getEntry( "game:cursor", Texture.class ));
 
         // TODO: To reduce global variables, made temporary texture region variables, Let me know if this is too much of a bad practice
         // MENU COMPONENTS
@@ -545,8 +550,14 @@ public class MenuMode extends MenuScreen {
                 canvas.draw(toggleCheck, Color.WHITE, toggleCheck.getRegionWidth()/2f, toggleCheck.getRegionHeight()/2f,
                         toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
             }
-
         }
+
+        //draw mouse
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+                mx, my, 0, .1f, .1f);
+
         canvas.end();
     }
 
@@ -567,6 +578,7 @@ public class MenuMode extends MenuScreen {
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
 
+        conatinCursor();
         draw();
     }
 

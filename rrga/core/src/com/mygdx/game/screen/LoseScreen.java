@@ -46,6 +46,7 @@ public class LoseScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
+        conatinCursor();
         canvas.clear();
         canvas.setCameraHUD();
         canvas.begin();

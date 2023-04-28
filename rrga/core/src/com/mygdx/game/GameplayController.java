@@ -450,17 +450,17 @@ public class GameplayController implements ContactListener {
             if (angInBounds) {
                 umbrella.setAngle(mouseAng);
                 lastValidAng = mouseAng;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             } else if (lastValidAng >= 0) {
                 umbrella.setAngle((float) Math.PI / 2);
                 mousePos.x = -1;
                 mousePos.y = 0;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             } else {
                 umbrella.setAngle(-(float) Math.PI / 2);
                 mousePos.x = 1;
                 mousePos.y = 0;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             }
         }
 

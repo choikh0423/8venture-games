@@ -205,6 +205,7 @@ public class InputController {
         xbox = null;
         crosshair = new Vector2();
         crosscache = new Vector2();
+        Gdx.input.setCursorCatched(true);
     }
 
     /**

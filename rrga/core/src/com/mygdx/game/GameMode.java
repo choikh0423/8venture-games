@@ -29,6 +29,8 @@ public class GameMode implements Screen {
 
     /** Texture asset for SKY parallax layer C*/
     private TextureRegion skyLayerTextureC;
+    /** Texture for cursor */
+    private TextureRegion cursorTexture;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -264,6 +266,8 @@ public class GameMode implements Screen {
         skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
         skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
 
+        cursorTexture = new TextureRegion(directory.getEntry("game:cursor", Texture.class));
+
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
         // instantiate level parser for loading levels
@@ -387,6 +391,15 @@ public class GameMode implements Screen {
 
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
+
+        //conatin cursor
+        int x = Gdx.input.getX();
+        int y = Gdx.input.getY();
+        if(Gdx.input.getY()<0) y = 0;
+        if(Gdx.input.getY()>Gdx.graphics.getHeight()) y = Gdx.graphics.getHeight();
+        if(Gdx.input.getX()<0) x = 0;
+        if(Gdx.input.getX()>Gdx.graphics.getWidth()) x = Gdx.graphics.getWidth();
+        Gdx.input.setCursorPosition(x,y);
     };
 
     /**
@@ -493,6 +506,13 @@ public class GameMode implements Screen {
         PlayerModel p = gameplayController.getPlayer();
         canvas.begin();
         p.drawInfo(canvas);
+
+        //draw mouse
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+                mx, my, 0, .1f, .1f);
+
         // debug information on screen to track FPS, etc
         if (debug){
             debugFont.setColor(Color.BLACK);

@@ -12,6 +12,7 @@
                 "foreleft"   : [0,   40,  16, 70],
                 "foreright"  : [384, 40, 400, 70]
             }
-        }
+        },
+        "cursor": "loading/cursor.png"
 	}
 }

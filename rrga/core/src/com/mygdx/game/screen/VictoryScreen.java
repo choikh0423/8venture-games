@@ -55,6 +55,7 @@ public class VictoryScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
+        conatinCursor();
         gameScreen.update(delta);
         gameScreen.draw(delta);
         canvas.setCameraHUD();

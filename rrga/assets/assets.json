@@ -123,7 +123,8 @@
         "game:lightning1": "game/lightning/obj_lightning_filmstrip_1.png",
         "game:lightning2": "game/lightning/obj_lightning_filmstrip_2.png",
         "game:lightning3": "game/lightning/obj_lightning_filmstrip_3.png",
-        "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png"
+        "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png",
+        "game:cursor": "game/cursor.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -151,7 +152,7 @@
         "data:bushes": "levels/tilesets/bushes.json",
         "data:trees": "levels/tilesets/trees.json",
         "data:cliffs": "levels/tilesets/cliffs.json",
-        "data:objects": "levels/objects/json/objects.json",
+        "data:objects": "levels/objects/json/objects.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
