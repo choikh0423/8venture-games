@@ -660,6 +660,7 @@ public class GameMode implements Screen {
         currentLevel = level;
         resetShowGoal();
         resetCounter--;
+        gameplayController.resetCounter--;
     }
 
     /**
@@ -673,6 +674,7 @@ public class GameMode implements Screen {
         }
         resetShowGoal();
         resetCounter--;
+        gameplayController.resetCounter--;
     }
 
     public void resetShowGoal(){
