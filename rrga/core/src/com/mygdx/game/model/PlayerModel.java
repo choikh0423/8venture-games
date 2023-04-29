@@ -364,7 +364,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * @param texture the HP texture
 	 */
 	public void setHpTexture(Texture texture){
-		TextureRegion[][] tempTexture = TextureRegion.split(texture, 250, 250);
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, 304, 200);
 		hpTexture = new TextureRegion[4];
 
 		// Ordering Texture Tile
