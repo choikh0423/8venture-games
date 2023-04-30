@@ -1327,7 +1327,6 @@ public class LevelParser {
      * @return the asset index in the list of loaded animated lightning assets
      */
     public static int getLightningTileIndex(String templateName){
-        System.out.println(templateName);
         if (templateName.endsWith("out_lightning.json")){
             return 0;
         }

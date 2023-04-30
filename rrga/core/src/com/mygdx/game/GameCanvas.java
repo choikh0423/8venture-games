@@ -23,6 +23,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
  * Primary view class for the game, abstracting the basic graphics calls.
@@ -79,12 +80,6 @@ public class GameCanvas {
     /** Camera for the underlying SpriteBatch */
     private OrthographicCamera camera;
 
-    /** Dynamic Camera instance */
-    private OrthographicCamera dynamicCamera;
-
-    /** Static HUD Camera */
-    private OrthographicCamera hudCamera;
-
     /** Value to cache window width (if we are currently full screen) */
     int width;
     /** Value to cache window height (if we are currently full screen) */
@@ -102,6 +97,9 @@ public class GameCanvas {
     /** Cache for draw position */
     private Vector2 positionCache = new Vector2();
 
+    private final FitViewport viewport;
+
+
     /**
      * Private method to process the wrap offset of an image.
      *
@@ -111,8 +109,8 @@ public class GameCanvas {
      *
      */
     private Vector2 wrapPosition(Vector2 pos, float px, float py, float worldHeight, float zoomScl) {
-        float w = getWidth();
-        float h = getHeight();
+        float w = viewport.getWorldWidth();
+        float h = viewport.getWorldHeight();
         float leftBound = px - w/2;
         float bottomBound = py - h/2;
 
@@ -140,14 +138,12 @@ public class GameCanvas {
         spriteBatch = new PolygonSpriteBatch();
         debugRender = new ShapeRenderer();
 
-        // Set the projection matrix (for proper scaling)
-        dynamicCamera = new OrthographicCamera(getWidth(),getHeight());
-        dynamicCamera.setToOrtho(false);
-        hudCamera = new OrthographicCamera(getWidth(),getHeight());
-        hudCamera.setToOrtho(false);
-        setCameraDynamic();
+        camera = new OrthographicCamera(getWidth(), getHeight());
+        camera.setToOrtho(false);
         spriteBatch.setProjectionMatrix(camera.combined);
         debugRender.setProjectionMatrix(camera.combined);
+        viewport = new FitViewport(getWidth(), getHeight(), camera);
+        viewport.apply(true);
 
         // Initialize the cache objects
         holder = new TextureRegion();
@@ -311,32 +307,12 @@ public class GameCanvas {
         // Resizing screws up the spriteBatch projection matrix
         spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
 
-        // TA Vineet
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
-
-        float newWidth;
-        float newHeight;
-        float maxWidth = Gdx.graphics.getHeight() * 16f/9f;
-        if (maxWidth > Gdx.graphics.getWidth()) {
-            newWidth = Gdx.graphics.getWidth();
-            newHeight = Gdx.graphics.getWidth() * 9f / 16f;
-        }
-        else {
-            newWidth = maxWidth;
-            newHeight = maxWidth * 9f/16f;
-        }
-
-        dynamicCamera.viewportWidth = newWidth;
-        dynamicCamera.viewportHeight = newHeight;
-        dynamicCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
-        dynamicCamera.update();
-
-        hudCamera.viewportWidth = newWidth;
-        hudCamera.viewportHeight = newHeight;
-        hudCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
-        hudCamera.update();
-        //System.out.println(camera.viewportWidth);
-        //System.out.println(camera.viewportHeight);
+        viewport.update(getWidth(), getHeight());
+        viewport.apply();
+        System.out.println("viewport world width:" + viewport.getWorldWidth());
+        System.out.println("viewport world height:" + viewport.getWorldWidth());
+        System.out.println("viewport screen width:" + viewport.getScreenWidth());
+        System.out.println("viewport screen height:" + viewport.getScreenHeight());
     }
 
     /**
@@ -387,9 +363,10 @@ public class GameCanvas {
      */
     public void clear() {
         // Clear the screen
-        Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
-        //Gdx.gl.glClearColor(0,0,0,1.0f);
+        //Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
+        Gdx.gl.glClearColor(0,0,0,1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        viewport.apply();
     }
 
     /**
@@ -433,6 +410,7 @@ public class GameCanvas {
      * Nothing is flushed to the graphics card until the method end() is called.
      */
     public void begin() {
+        viewport.apply();
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         active = DrawPass.STANDARD;
@@ -1256,17 +1234,30 @@ public class GameCanvas {
         camera.update();
     }
 
-    public void setCameraDynamic(){
-        camera = dynamicCamera;
+    /**
+     * transitions camera to prepare for drawing on overlay (HUD). You still need to call
+     * begin() for spritebatch.
+     */
+    public void beginCameraHUD(){
+        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
+        camera.zoom = 1.0f;
+        camera.update();
     }
 
-    public void setCameraHUD(){
-        camera = hudCamera;
+    public void setCameraZoom(float zoom){
+        camera.zoom = zoom;
+        camera.update();
     }
 
-    public void setDynamicCameraZoom(float zoom){
-        dynamicCamera.viewportWidth = hudCamera.viewportWidth * zoom;
-        dynamicCamera.viewportHeight = hudCamera.viewportHeight * zoom;
-        dynamicCamera.update();
+    public FitViewport getViewport(){
+        return viewport;
+    }
+
+    public float getViewportWorldWidth(){
+        return viewport.getWorldWidth();
+    }
+
+    public float getViewportWorldHeight(){
+        return viewport.getWorldHeight();
     }
 }

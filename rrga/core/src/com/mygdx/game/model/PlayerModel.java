@@ -22,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.CapsuleObstacle;
 import com.mygdx.game.utility.util.Drawable;
@@ -843,12 +844,13 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 		// TODO: HP Texture is manually scaled at the moment
 		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
-				canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+				canvas.getViewportWorldHeight() - drawScale.y,0,0.3f,0.3f);
 
 		// TODO: Boost Texture is manually scaled at the moment
 		int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
 		canvas.draw(boostTexture[boost_capac],Color.WHITE,boostTexture[health].getRegionWidth()/2f,
-				boostTexture[health].getRegionHeight()/2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
+				boostTexture[health].getRegionHeight()/2f, drawScale.x,
+				canvas.getViewportWorldHeight() - drawScale.y * 2,
 				0,0.3f,0.3f);
 
 	}

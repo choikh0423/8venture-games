@@ -388,7 +388,7 @@ public class GameMode implements Screen {
         else if (zoomAlpha > 1){ zoomAlpha = 1; }
 
         zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
-        canvas.setDynamicCameraZoom(zoomScl);
+        canvas.setCameraZoom(zoomScl);
 
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
@@ -412,7 +412,6 @@ public class GameMode implements Screen {
         float gx = gameplayController.getLevelContainer().getShowGoal().getX();
         float gy = gameplayController.getLevelContainer().getShowGoal().getY();
 
-        canvas.setCameraDynamic();
         Vector2 scl = gameplayController.getPlayer().getDrawScale();
 
         //camera starts at the goal door then moves to the player the
@@ -426,11 +425,10 @@ public class GameMode implements Screen {
         canvas.translateCameraToPoint(camPos.x,camPos.y);
         canvas.begin();
 
-        float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
-        float sclX = canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight();
+        float sclY = canvas.getViewportWorldWidth() * zoomScl/backgroundTexture.getRegionWidth();
+        float sclX = canvas.getViewportWorldHeight() * zoomScl /backgroundTexture.getRegionHeight();
 
         // center a background on player
-        // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
                 backgroundTexture.getRegionHeight()/2f, camPos.x,camPos.y, 0, sclX, sclY);
 
@@ -506,7 +504,7 @@ public class GameMode implements Screen {
         }
 
         // Draw all HUD content
-        canvas.setCameraHUD();
+        canvas.beginCameraHUD();
         PlayerModel p = gameplayController.getPlayer();
         canvas.begin();
         p.drawInfo(canvas);

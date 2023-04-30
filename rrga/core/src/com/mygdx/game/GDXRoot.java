@@ -118,6 +118,9 @@ public class GDXRoot extends Game implements ScreenListener {
 	 * @param height The new height in pixels
 	 */
 	public void resize(int width, int height) {
+//		canvas.resize();
+//		super.resize(width,height);
+		Gdx.gl.glViewport(0, 0,width, height);
 		canvas.resize();
 		super.resize(width,height);
 	}
@@ -198,7 +201,6 @@ public class GDXRoot extends Game implements ScreenListener {
 			}
 
 		} else if (screen == playing) {
-			canvas.setDynamicCameraZoom(GameMode.standardZoom);
 			switch (exitCode){
 				case GameMode.EXIT_VICTORY:
 					victory.setBackgroundScreen(playing);

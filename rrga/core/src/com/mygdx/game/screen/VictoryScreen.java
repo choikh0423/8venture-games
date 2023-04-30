@@ -57,7 +57,7 @@ public class VictoryScreen extends MenuScreen{
     public void render(float delta) {
         gameScreen.update(delta);
         gameScreen.draw(delta);
-        canvas.setCameraHUD();
+        canvas.beginCameraHUD();
         canvas.begin();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
         bigFont.setColor(Color.YELLOW);

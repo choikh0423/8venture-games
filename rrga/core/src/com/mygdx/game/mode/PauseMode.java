@@ -1,6 +1,7 @@
 package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.utility.assets.*;
+
+import javax.swing.text.View;
 
 /**
  * A PauseMode is a pause menu screen. User can interact with this screen
@@ -218,10 +221,10 @@ public class PauseMode extends MenuScreen {
      * @param delta The time in seconds since the last render
      */
     private void draw(float delta){
-        canvas.setCameraHUD();
+        canvas.beginCameraHUD();
         canvas.begin();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
-
+        canvas.draw(foregroundTexture, overlayTint, 0, 0,
+                canvas.getViewportWorldWidth(), canvas.getViewportWorldHeight());
 
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
                 pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
@@ -236,7 +239,6 @@ public class PauseMode extends MenuScreen {
     }
 
     public void resize(int width, int height) {
-
         // Scaling code from Professor White's code
         float sx = ((float)width)/STANDARD_WIDTH;
         float sy = ((float)height)/STANDARD_HEIGHT;

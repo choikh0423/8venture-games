@@ -47,7 +47,7 @@ public class LoseScreen extends MenuScreen{
     @Override
     public void render(float delta) {
         canvas.clear();
-        canvas.setCameraHUD();
+        canvas.beginCameraHUD();
         canvas.begin();
         canvas.draw(foregroundTexture, Color.BLACK, 0, 0, canvas.getWidth(), canvas.getHeight());
         bigFont.setColor(Color.RED);
