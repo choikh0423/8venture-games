@@ -1,25 +1,9 @@
 { "object":
     {
-     "height":0,
-     "id":142,
-     "name":"nest",
-     "polygon":[
-            {
-             "x":-64,
-             "y":-64
-            }, 
-            {
-             "x":-64,
-             "y":64
-            }, 
-            {
-             "x":64,
-             "y":-64
-            }, 
-            {
-             "x":64,
-             "y":64
-            }],
+     "gid":79,
+     "height":70,
+     "id":255,
+     "name":"",
      "properties":[
             {
              "name":"bird_speed",
@@ -34,12 +18,17 @@
             {
              "name":"spawn_delay",
              "type":"int",
-             "value":0
+             "value":1
             }],
      "rotation":0,
-     "type":"nest",
+     "type":"",
      "visible":true,
-     "width":0
+     "width":139
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/objects\/json\/objects.json"
     },
  "type":"template"
 }

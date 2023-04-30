@@ -9,7 +9,7 @@
  "name":"objects",
  "objectalignment":"center",
  "spacing":0,
- "tilecount":76,
+ "tilecount":77,
  "tiledversion":"1.10.0",
  "tileheight":884,
  "tiles":[
@@ -3478,7 +3478,6 @@
          "objectgroup":
             {
              "draworder":"index",
-             "id":2,
              "name":"",
              "objects":[
                     {
@@ -3544,7 +3543,6 @@
          "objectgroup":
             {
              "draworder":"index",
-             "id":2,
              "name":"",
              "objects":[
                     {
@@ -3610,7 +3608,6 @@
          "objectgroup":
             {
              "draworder":"index",
-             "id":2,
              "name":"",
              "objects":[
                     {
@@ -3676,7 +3673,6 @@
          "objectgroup":
             {
              "draworder":"index",
-             "id":2,
              "name":"",
              "objects":[
                     {
@@ -4281,6 +4277,12 @@
          "image":"..\/asset\/up.png",
          "imageheight":884,
          "imagewidth":448
+        }, 
+        {
+         "id":78,
+         "image":"..\/asset\/birds\/obj_birdnest.png",
+         "imageheight":70,
+         "imagewidth":139
         }],
  "tilewidth":996,
  "transformations":
