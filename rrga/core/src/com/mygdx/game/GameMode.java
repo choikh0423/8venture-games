@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -302,6 +303,7 @@ public class GameMode implements Screen {
         resetCounter++;
     }
 
+    Preferences unlocked = Gdx.app.getPreferences("unlocked");
     /**
      * Returns whether to process the update loop
      *
@@ -320,6 +322,8 @@ public class GameMode implements Screen {
 
         if (gameplayController.isCompleted()) {
             listener.exitScreen(this, EXIT_VICTORY);
+            unlocked.putBoolean((currentLevel+1)+"unlocked", true);
+            unlocked.flush();
             return false;
         } else if (gameplayController.isFailed()) {
             listener.exitScreen(this, EXIT_FAIL);
