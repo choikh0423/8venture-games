@@ -682,8 +682,10 @@ public class MenuMode extends MenuScreen {
         backgroundMusic.setLooping(true);
 
         this.screenMode = 1;
-        for(int i = 2; i <= LEVEL_COUNT; i++){
-            levelUnlocked[i] = unlocked.getBoolean(i+"unlocked", levelUnlocked[i]);
+        if (!levelUnlocked[0]){
+            for(int i = 2; i <= LEVEL_COUNT; i++){
+                levelUnlocked[i] = unlocked.getBoolean(i+"unlocked", levelUnlocked[i]);
+            }
         }
     }
 }
