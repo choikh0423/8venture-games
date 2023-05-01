@@ -82,6 +82,9 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** Cache for getters */
 	private final Vector2 temp = new Vector2();
 
+	/** Another vector cache */
+	private final Vector2 temp2 = new Vector2();
+
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
@@ -645,21 +648,41 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if (!isActive()) {
 			return;
 		}
+		float x = 0;
+		float y = 0;
+		//determine x
 		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
-		}
-		else {
-			forceCache.set(fx,0);
-			body.applyForce(forceCache,getPosition(),true);
+			setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
+		} else {
+			x = fx;
 		}
 
+		//determine y
 		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-			setVY(Math.signum(getVY())*getMaxSpeedUp());
+			setVY(Math.signum(getVY()) * getMaxSpeedUp());
 		} else {
-			forceCache.set(0,fy);
-			body.applyForce(forceCache, getPosition(), true);
+			y = fy;
 		}
+
+		forceCache.set(x, y);
+
+		//need to fix
+		temp.set(x, y);
+		temp.nor();
+		temp2.set(getVX(), getY());
+		temp2.nor();
+		boolean flag = Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x);
+
+		float dampscl = 100;
+		if (flag) {
+			forceCache.sub((temp2.x) * dampscl, 0);
+		}
+		if (Math.signum(getVY()) != Math.signum(fy)){
+			forceCache.sub(0, (temp2.y) * dampscl);
+		}
+
+		body.applyForce(forceCache,getPosition(),true);
 	}
 
 	/**
