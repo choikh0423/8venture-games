@@ -452,7 +452,7 @@ public class GameplayController implements ContactListener {
             //compute new angle
             float mouseAng = (float) Math.acos(mousePos.dot(up));
             if (input.getMousePos().x > center.x) mouseAng *= -1;
-            angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
+            //angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
             if (angInBounds) {
                 umbrella.setAngle(mouseAng);
                 lastValidAng = mouseAng;
@@ -516,23 +516,21 @@ public class GameplayController implements ContactListener {
         }
 
         // Process player movement
+        float angle = umbrella.getRotation();
         if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
-        } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
+        } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation() % ((float) Math.PI * 2);
-            if (angle < Math.PI) {
-                avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
-            }
+            avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
         } else if (!umbrella.isOpen()) {
             avatar.dampAirHoriz();
         }
-        if (umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
+        if ((umbrella.isOpen() && angle < Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
         }
-        if (!umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
+        if ((!umbrella.isOpen() || angle > Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
             avatar.setVY(avatar.getMaxSpeedDownClosed());
         }
 
@@ -612,7 +610,6 @@ public class GameplayController implements ContactListener {
             temp.set(px, py);
             temp.sub(bx, by);
             temp.nor();
-            float angle;
 
             //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
             if (temp.x == 0) {

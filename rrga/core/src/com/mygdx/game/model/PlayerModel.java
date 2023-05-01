@@ -707,21 +707,27 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				}
 				body.applyLinearImpulse(forceCache, getPosition(), true);
 			}
-			else{
+			else {
 				//determine X
 				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 					forceCache.x = getMaxSpeedXAirWind();
 				} else {
 					forceCache.x = umbrellaX * lighterForce;
 				}
+				//fix
+
 				//determine Y
-				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+				if (umbrellaY > 0 && getVY() >= getMaxSpeedUp()) {
 					forceCache.y = getMaxSpeedUp();
-				} else {
+				}
+				else if(umbrellaY < 0 && getVY() <= getMaxSpeedDownOpen()) {
+					forceCache.y = getMaxSpeedDownOpen();
+				}
+				else {
 					forceCache.y = umbrellaY * lighterForce;
 				}
-				body.setLinearVelocity(forceCache);
 			}
+			body.setLinearVelocity(forceCache);
 			return true;
 		}
 		return false;

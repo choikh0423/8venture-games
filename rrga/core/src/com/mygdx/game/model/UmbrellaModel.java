@@ -114,7 +114,9 @@ public class UmbrellaModel extends BoxObstacle {
 
     /** Returns the angle away from the x-axis of the umbrella in radians.
      * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC. */
-    public float getRotation(){return getAngle()+(float)Math.PI/2;}
+    public float getRotation(){
+        return (getAngle() + (float) Math.PI * 5/2) % ((float) Math.PI * 2);
+    }
 
     /** Returns whether the umbrella is open */
     public boolean isOpen(){return open;}
