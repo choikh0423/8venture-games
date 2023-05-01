@@ -1,6 +1,7 @@
 package com.mygdx.game.mode;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -195,13 +196,12 @@ public class MenuMode extends MenuScreen {
     /** current selected level */
     private int currentLevel;
 
+    Preferences settings = Gdx.app.getPreferences("settings");
+
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
         currentExitCode = Integer.MIN_VALUE;
         this.screenMode = 1;
-
-        // TEMPORARY
-        toggleOn = false;
 
         // TODO: All the ratios are hard coded - these can be extracted to JSON
         this.exitButton = new MenuButton(ButtonShape.CIRCLE, 0.05f, 0.93f, 0.05f * 3.14f);
@@ -227,7 +227,6 @@ public class MenuMode extends MenuScreen {
         TextureRegion settingsTexture = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
         TextureRegion levelSelectTexture = new TextureRegion(directory.getEntry("menu:level_select_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
-
 
         exitButton.setTexture(exitTexture);
         startButton.setTexture(startTexture);
@@ -265,10 +264,11 @@ public class MenuMode extends MenuScreen {
         backgroundMusic = directory.getEntry("music:menu", Music.class);
 
         // TODO: We have to import volumes that are saved by the user
-        musicVolume = 1.0f;
-        sfxVolume = 0.0f;
-
-
+        musicVolume = settings.getFloat("musicVolume", MUSIC_X_RATIO);
+        musicSlider.ratio = musicVolume;
+        sfxVolume = settings.getFloat("sfxVolume", SFX_X_RATIO);
+        sfxSlider.ratio = sfxVolume;
+        toggleOn = settings.getBoolean("toggle", false);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -466,6 +466,10 @@ public class MenuMode extends MenuScreen {
             }
             if(musicSlider.knobFollow) musicSlider.knobFollow = false;
             if(sfxSlider.knobFollow) sfxSlider.knobFollow = false;
+            settings.putFloat("musicVolume", musicVolume);
+            settings.putFloat("sfxVolume", sfxVolume);
+            settings.putBoolean("toggle", toggleOn);
+            settings.flush();
         }
         return true;
     }
@@ -601,14 +605,10 @@ public class MenuMode extends MenuScreen {
         toggleButtonY = (int)(TOGGLE_BUTTON_Y_RATIO * height);
         toggleButtonX = (int)(TOGGLE_BUTTON_X_RATIO * width);
 
-
         musicSlider.setY(MUSIC_Y_RATIO * height);
         musicSlider.setX(MUSIC_X_RATIO * width);
         sfxSlider.setY(SFX_Y_RATIO * height);
         sfxSlider.setX(SFX_X_RATIO * width);
-
-
-
     }
     /** Returns current level selected */
     public int getCurrentLevel() {
@@ -653,6 +653,5 @@ public class MenuMode extends MenuScreen {
         backgroundMusic.setLooping(true);
 
         this.screenMode = 1;
-
     }
 }
