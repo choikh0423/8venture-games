@@ -667,19 +667,21 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 		forceCache.set(x, y);
 
-		//need to fix
+		//wind dir
 		temp.set(x, y);
 		temp.nor();
+		//vel
 		temp2.set(getVX(), getY());
 		temp2.nor();
-		boolean flag = Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x);
+		boolean apply = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
+				|| Math.signum(temp.x) != Math.signum(temp2.x);
 
-		float dampscl = 100;
-		if (flag) {
-			forceCache.sub((temp2.x) * dampscl, 0);
+		float dampscl = 150;
+		if (apply) {
+			forceCache.sub((temp2.x - temp.x) * dampscl, 0);
 		}
 		if (Math.signum(getVY()) != Math.signum(fy)){
-			forceCache.sub(0, (temp2.y) * dampscl);
+			forceCache.add(0, (temp2.y) * dampscl);
 		}
 
 		body.applyForce(forceCache,getPosition(),true);
@@ -695,7 +697,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
 				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
 			forceCache.set(fx, 0);
-			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2 + 1 : .6f;
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX()) + 1 : .6f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
 		}
