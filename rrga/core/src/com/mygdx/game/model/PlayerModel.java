@@ -650,23 +650,22 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		}
 		float x = 0;
 		float y = 0;
-		//determine x
+		//determine x of wind force
 		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 			setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
 		} else {
 			x = fx;
 		}
-
-		//determine y
+		//determine y of wind force
 		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
 			setVY(Math.signum(getVY()) * getMaxSpeedUp());
 		} else {
 			y = fy;
 		}
-
 		forceCache.set(x, y);
 
+		//Damp out velcoity not in direction of wind velocity
 		//wind dir
 		temp.set(x, y);
 		temp.nor();
@@ -675,7 +674,6 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		temp2.nor();
 		boolean apply = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
 				|| Math.signum(temp.x) != Math.signum(temp2.x);
-
 		float dampscl = 150;
 		if (apply) {
 			forceCache.sub((temp2.x - temp.x) * dampscl, 0);
@@ -683,7 +681,6 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if (Math.signum(getVY()) != Math.signum(fy)){
 			forceCache.add(0, (temp2.y) * dampscl);
 		}
-
 		body.applyForce(forceCache,getPosition(),true);
 	}
 

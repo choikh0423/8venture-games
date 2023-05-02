@@ -419,7 +419,7 @@ public class GameplayController implements ContactListener {
                     } else {
                         umbrella.useClosedTexture();
                         Body body = avatar.getBody();
-                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentumX(), body.getLinearVelocity().y * umbrella.getClosedMomentumY());
                     }
                 }
             } else {
@@ -431,7 +431,7 @@ public class GameplayController implements ContactListener {
                     umbrella.setOpen(false);
                     umbrella.useClosedTexture();
                     Body body = avatar.getBody();
-                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentumX(), body.getLinearVelocity().y * umbrella.getClosedMomentumY());
                     wasOpen = false;
                 }
             }

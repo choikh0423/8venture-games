@@ -28,7 +28,8 @@ public class UmbrellaModel extends BoxObstacle {
     /** The size of the umbrella in physics units (up to scaling by shrink factor) */
     private float[] size;
     /** Ratio of horizontal speed to conserve when closing the umbrella */
-    private float closedMomentum = 0;
+    private float closedMomentumX;
+    private float closedMomentumY;
 
     /** texture asset for open umbrella */
     private TextureRegion openTexture;
@@ -125,9 +126,13 @@ public class UmbrellaModel extends BoxObstacle {
     public void setOpen(boolean open){this.open = open;}
     public float getForce(){return force;}
     /** Returns the ratio of horizontal speed to return when closing the umbrella */
-    public float getClosedMomentum(){return closedMomentum;}
+    public float getClosedMomentumX(){return closedMomentumX;}
+    /** Returns the ratio of vertical speed to return when closing the umbrella */
+    public float getClosedMomentumY(){return closedMomentumY;}
     /** Sets the ratio of horizontal speed to return when closing the umbrella */
-    public void setClosedMomentum(float closedMomentum){this.closedMomentum = closedMomentum;}
+    public void setClosedMomentumX(float closedMomentumX){this.closedMomentumX = closedMomentumX;}
+    /** Sets the ratio of vertical speed to return when closing the umbrella */
+    public void setClosedMomentumY(float closedMomentumY){this.closedMomentumY = closedMomentumY;}
 
     /** Sets how much this umbrella is turning
      * @param value left/right turning of this umbrella.*/
