@@ -1,7 +1,9 @@
 package com.mygdx.game.screen;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -55,7 +57,8 @@ public class VictoryScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
-        conatinCursor();
+        //Gdx.input.setCursorCatched(false);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         gameScreen.update(delta);
         gameScreen.draw(delta);
         canvas.setCameraHUD();

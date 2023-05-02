@@ -31,6 +31,7 @@ public class GameMode implements Screen {
     private TextureRegion skyLayerTextureC;
     /** Texture for cursor */
     private TextureRegion cursorTexture;
+    private final float cursorScl = .1f;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -372,6 +373,23 @@ public class GameMode implements Screen {
      * @param dt    Number of seconds since last animation frame
      */
     public void update(float dt) {
+        //contain cursor
+        Gdx.input.setCursorCatched(true);
+        int x = Gdx.input.getX();
+        int y = Gdx.input.getY();
+        if(Gdx.input.getY() < 0){
+            y = 0;
+        }
+        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight() * cursorScl)){
+            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight() * cursorScl);
+        }
+        if(Gdx.input.getX() < 0){
+            x = 0;
+        }
+        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth() * cursorScl)){
+            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth() * cursorScl);
+        }
+        Gdx.input.setCursorPosition(x,y);
 
         if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
@@ -391,15 +409,6 @@ public class GameMode implements Screen {
 
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
-
-        //conatin cursor
-        int x = Gdx.input.getX();
-        int y = Gdx.input.getY();
-        if(Gdx.input.getY()<0) y = 0;
-        if(Gdx.input.getY()>Gdx.graphics.getHeight()) y = Gdx.graphics.getHeight();
-        if(Gdx.input.getX()<0) x = 0;
-        if(Gdx.input.getX()>Gdx.graphics.getWidth()) x = Gdx.graphics.getWidth();
-        Gdx.input.setCursorPosition(x,y);
     };
 
     /**
@@ -510,8 +519,8 @@ public class GameMode implements Screen {
         //draw mouse
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
-                mx, my, 0, .1f, .1f);
+        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
+                mx, my, 0, cursorScl, cursorScl);
 
         // debug information on screen to track FPS, etc
         if (debug){

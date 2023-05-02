@@ -268,14 +268,14 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 				playButton = new TextureRegion(internal.getEntry("play",Texture.class));
 			}
 		}
-		//conatin cursor
-		int x = Gdx.input.getX();
+		//contain cursor
+		/*int x = Gdx.input.getX();
 		int y = Gdx.input.getY();
 		if(Gdx.input.getY()<0) y = 0;
 		if(Gdx.input.getY()>Gdx.graphics.getHeight()) y = Gdx.graphics.getHeight();
 		if(Gdx.input.getX()<0) x = 0;
 		if(Gdx.input.getX()>Gdx.graphics.getWidth()) x = Gdx.graphics.getWidth();
-		Gdx.input.setCursorPosition(x,y);
+		Gdx.input.setCursorPosition(x,y);*/
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		//draw mouse
 		int mx = Gdx.input.getX();
 		int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-		canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+		canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
 				mx, my, 0, .1f, .1f);
 
 		canvas.end();

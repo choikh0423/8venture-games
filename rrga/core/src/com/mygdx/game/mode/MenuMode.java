@@ -3,6 +3,8 @@ package com.mygdx.game.mode;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -197,6 +199,8 @@ public class MenuMode extends MenuScreen {
 
     /** texture for the cursor */
     private TextureRegion cursorTexture;
+    /** pixmap for the cursor */
+    private Cursor newCursor;
 
     public MenuMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -224,6 +228,10 @@ public class MenuMode extends MenuScreen {
         backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
         cursorTexture = new TextureRegion(directory.getEntry( "game:cursor", Texture.class ));
+        Pixmap pm = new Pixmap(Gdx.files.internal("game/goal.png"));
+        newCursor = Gdx.graphics.newCursor(pm, 0, 0);
+        pm.dispose();
+
 
         // TODO: To reduce global variables, made temporary texture region variables, Let me know if this is too much of a bad practice
         // MENU COMPONENTS
@@ -552,10 +560,10 @@ public class MenuMode extends MenuScreen {
             }
         }
 
-        //draw mouse
+        //draw cursor
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
                 mx, my, 0, .1f, .1f);
 
         canvas.end();
@@ -570,15 +578,15 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
-
+        //DOESN'T WORK. IDK WHY
+        //Gdx.graphics.setCursor(newCursor);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
-
-        conatinCursor();
         draw();
     }
 

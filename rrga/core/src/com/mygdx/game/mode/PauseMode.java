@@ -1,6 +1,7 @@
 package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Cursor;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -212,7 +213,8 @@ public class PauseMode extends MenuScreen {
 //        if (background != null){
 //            background.render(delta);
 //        }
-        conatinCursor();
+        //Gdx.input.setCursorCatched(false);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         gameScreen.draw(delta);
         draw(delta);
     }
@@ -237,7 +239,7 @@ public class PauseMode extends MenuScreen {
         //draw mouse
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth()/2f, 3*cursorTexture.getRegionHeight()/4f,
+        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
                 mx, my, 0, .1f, .1f);
 
         canvas.end();
