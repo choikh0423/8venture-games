@@ -64,6 +64,12 @@ public class LevelContainer{
     private ObjectSet<BirdHazard> birds;
 
     /**
+     * The set of all birds currently in the level
+     */
+    private ObjectSet<NewWindModel> winds;
+
+
+    /**
      * The set of all moving platforms currently in the level
      */
     private final ObjectSet<MovingPlatformModel> movingPlats;
@@ -114,6 +120,10 @@ public class LevelContainer{
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
+    /**
+     * Texture asset for the wind particles
+     */
+    private TextureRegion windParticleTexture;
     /**
      * Texture assets for the wind animation
      */
@@ -224,6 +234,7 @@ public class LevelContainer{
 
         sensorFixtures = new ObjectSet<Fixture>();
         birds = new ObjectSet<>();
+        winds = new ObjectSet<>();
         lightnings = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
         nests = new ObjectSet<>();
@@ -273,6 +284,8 @@ public class LevelContainer{
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
         boostTexture = directory.getEntry("game:boost", Texture.class);
+
+        windParticleTexture = new TextureRegion(directory.getEntry("game:wind_particle", Texture.class));
 
         // Hazard Textures
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
@@ -396,7 +409,7 @@ public class LevelContainer{
         // Create wind gusts
         String windName = "wind";
         JsonValue[] windjv = parser.getWindData();
-        for (int ii = 0; ii < windjv.length; ii++) {
+        for (int ii = 1; ii < windjv.length; ii++) {
             WindModel obj;
             obj = new WindModel(windjv[ii]);
             obj.setDrawScale(scale);
@@ -406,6 +419,24 @@ public class LevelContainer{
             addObject(obj);
             drawables.add(obj);
         }
+
+        NewWindModel obj2;
+        obj2 = new NewWindModel(windjv[0]);
+        obj2.setDrawScale(scale);
+        obj2.setTexture(windTexture);
+        obj2.setParticleTexture(windParticleTexture);
+        obj2.setAnimation(windAnimation);
+        obj2.setName(windName + 0);
+        addObject(obj2);
+
+        for (int i = 0; i < obj2.getParticleCount(); i ++) {
+            ParticleModel particleObj = obj2.getParticles()[i];
+            particleObj.setName("particle" + i);
+            addObject(particleObj);
+        }
+        drawables.add(obj2);
+        winds.add(obj2);
+
 
         JsonValue hazardsjv = globalConstants.get("hazards");
 
@@ -447,8 +478,6 @@ public class LevelContainer{
 
         //TODO
         //create nests
-
-
 
 
         //create lightning
@@ -674,6 +703,13 @@ public class LevelContainer{
      */
     public ObjectSet<BirdHazard> getBirds() {
         return birds;
+    }
+    /**
+     * Get winds
+     * @return winds
+     */
+    public ObjectSet<NewWindModel> getWinds() {
+        return winds;
     }
     /**
      * Get lightnings

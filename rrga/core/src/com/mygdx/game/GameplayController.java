@@ -11,11 +11,8 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
-import com.mygdx.game.model.MovingPlatformModel;
+import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.*;
-import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.model.UmbrellaModel;
-import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -167,6 +164,11 @@ public class GameplayController implements ContactListener {
     private ObjectSet<BirdHazard> birds = new ObjectSet<>();
 
     /**
+     * The set of all winds currently in the level
+     */
+    private ObjectSet<NewWindModel> winds = new ObjectSet<>();
+
+    /**
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
@@ -268,7 +270,7 @@ public class GameplayController implements ContactListener {
     private long plopId = -1;
 
     /** The background music volume */
-    private float musicVolume = 0.5f;
+    private float musicVolume = 0.0f;
     /** The sound effects volume */
     private float SFXVolume = 0.0f;
 
@@ -356,7 +358,7 @@ public class GameplayController implements ContactListener {
         umbrella = levelContainer.getUmbrella();
 
         backgroundMusic.stop();
-        backgroundMusic.play();
+//        backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
 
@@ -382,6 +384,7 @@ public class GameplayController implements ContactListener {
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
+        this.winds = levelContainer.getWinds();
         this.lightnings = levelContainer.getLightnings();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();

@@ -265,7 +265,7 @@ public class MenuMode extends MenuScreen {
         backgroundMusic = directory.getEntry("music:menu", Music.class);
 
         // TODO: We have to import volumes that are saved by the user
-        musicVolume = 1.0f;
+        musicVolume = 0.0f;
         sfxVolume = 0.0f;
 
 
