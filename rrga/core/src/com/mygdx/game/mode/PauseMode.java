@@ -114,7 +114,7 @@ public class PauseMode extends MenuScreen {
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
 
-        cursorTexture = new TextureRegion(directory.getEntry("game:cursor", Texture.class));
+        cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
 
         menuButton.setTexture(menuTexture);
         restartButton.setTexture(restartTexture);
@@ -215,7 +215,7 @@ public class PauseMode extends MenuScreen {
 //        }
         //Gdx.input.setCursorCatched(false);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        gameScreen.draw(delta);
+        gameScreen.draw(delta, false);
         draw(delta);
     }
 
@@ -240,7 +240,7 @@ public class PauseMode extends MenuScreen {
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
         canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-                mx, my, 0, .1f, .1f);
+                mx, my, 0, .5f, .5f);
 
         canvas.end();
     }

@@ -227,7 +227,7 @@ public class MenuMode extends MenuScreen {
         backgroundTexture = new TextureRegion(directory.getEntry( "menu:background", Texture.class ));
         backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
-        cursorTexture = new TextureRegion(directory.getEntry( "game:cursor", Texture.class ));
+        cursorTexture = new TextureRegion(directory.getEntry( "menu:cursor_menu", Texture.class ));
         Pixmap pm = new Pixmap(Gdx.files.internal("game/goal.png"));
         newCursor = Gdx.graphics.newCursor(pm, 0, 0);
         pm.dispose();
@@ -564,7 +564,7 @@ public class MenuMode extends MenuScreen {
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
         canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-                mx, my, 0, .1f, .1f);
+                mx, my, 0, .5f, .5f);
 
         canvas.end();
     }

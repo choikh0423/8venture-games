@@ -60,7 +60,7 @@ public class VictoryScreen extends MenuScreen{
         //Gdx.input.setCursorCatched(false);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         gameScreen.update(delta);
-        gameScreen.draw(delta);
+        gameScreen.draw(delta, false);
         canvas.setCameraHUD();
         canvas.begin();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());

@@ -31,7 +31,7 @@ public class GameMode implements Screen {
     private TextureRegion skyLayerTextureC;
     /** Texture for cursor */
     private TextureRegion cursorTexture;
-    private final float cursorScl = .1f;
+    private final float cursorScl = .5f;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -267,7 +267,7 @@ public class GameMode implements Screen {
         skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
         skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
 
-        cursorTexture = new TextureRegion(directory.getEntry("game:cursor", Texture.class));
+        cursorTexture = new TextureRegion(directory.getEntry("game:cursor_ingame", Texture.class));
 
         debugFont = directory.getEntry("shared:minecraft", BitmapFont.class);
 
@@ -377,17 +377,17 @@ public class GameMode implements Screen {
         Gdx.input.setCursorCatched(true);
         int x = Gdx.input.getX();
         int y = Gdx.input.getY();
-        if(Gdx.input.getY() < 0){
-            y = 0;
+        if(Gdx.input.getY() < cursorTexture.getRegionHeight()/2f * cursorScl){
+            y = (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
         }
-        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight() * cursorScl)){
-            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight() * cursorScl);
+        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight()/2f * cursorScl)){
+            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
         }
-        if(Gdx.input.getX() < 0){
-            x = 0;
+        if(Gdx.input.getX() < cursorTexture.getRegionWidth()/2f * cursorScl){
+            x = (int) (cursorTexture.getRegionWidth()/2f * cursorScl);;
         }
-        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth() * cursorScl)){
-            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth() * cursorScl);
+        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth()/2f * cursorScl)){
+            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth()/2f * cursorScl);
         }
         Gdx.input.setCursorPosition(x,y);
 
@@ -419,7 +419,7 @@ public class GameMode implements Screen {
      *
      * @param dt    Number of seconds since last animation frame
      */
-    public void draw(float dt) {
+    public void draw(float dt, boolean cursor) {
         canvas.clear();
 
         // focus camera on player
@@ -516,11 +516,13 @@ public class GameMode implements Screen {
         canvas.begin();
         p.drawInfo(canvas);
 
-        //draw mouse
-        int mx = Gdx.input.getX();
-        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-                mx, my, 0, cursorScl, cursorScl);
+        //draw cursor
+        if(cursor) {
+            int mx = Gdx.input.getX();
+            int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+            canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
+                    mx, my, 0, cursorScl, cursorScl);
+        }
 
         // debug information on screen to track FPS, etc
         if (debug){
@@ -623,7 +625,7 @@ public class GameMode implements Screen {
             if (preUpdate(delta)) {
                 update(delta); // This is the one that must be defined.
             }
-            draw(delta);
+            draw(delta, true);
     }
 
     /**

@@ -13,6 +13,6 @@
                 "foreright"  : [384, 40, 400, 70]
             }
         },
-        "cursor": "loading/cursor.png"
+        "cursor": "loading/cursor_menu.png"
 	}
 }
