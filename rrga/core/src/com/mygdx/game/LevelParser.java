@@ -6,6 +6,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.util.Sticker;
+import com.mygdx.game.utility.util.Tile;
+import com.mygdx.game.utility.util.TiledLayer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,9 +18,6 @@ public class LevelParser {
      * This saves parsing time when a level is played immediately again.
      */
     private JsonValue prevParsed;
-
-    /** reference to game global default values */
-    private final JsonValue globalConstants;
 
     /** list of bird json data.
      * Invariant: JSON is in the format used by level-container
@@ -57,7 +57,7 @@ public class LevelParser {
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
-    private ArrayList<TextureRegion[]> layers = new ArrayList<>();
+    private ArrayList<TiledLayer> layers = new ArrayList<>();
 
     /** the list of Sticker objects */
     private final ArrayList<Sticker> stickers = new ArrayList<>();
@@ -165,7 +165,7 @@ public class LevelParser {
     /**
      * @return tile texture layers
      */
-    public ArrayList<TextureRegion[]> getLayers() {
+    public ArrayList<TiledLayer> getLayers() {
         return layers;
     }
 
@@ -237,7 +237,7 @@ public class LevelParser {
     public int getGoalDrawDepth(){ return goalDepth; }
 
     public LevelParser(AssetDirectory directory){
-        globalConstants = directory.getEntry("global:constants", JsonValue.class);
+        JsonValue globalConstants = directory.getEntry("global:constants", JsonValue.class);
 
         JsonValue redBirdTemplate = directory.getEntry("red_bird:template", JsonValue.class);
         JsonValue blueBirdTemplate = directory.getEntry("blue_bird:template", JsonValue.class);
@@ -293,20 +293,15 @@ public class LevelParser {
                 lightning4Template.get("object")
         };
 
-        // save tileset textures and their corresponding JSON tileset data
+        // save tileset textures and tileset JSON data
         textureMap = new HashMap<>();
-        textureMap.put("bushes", directory.getEntry( "tileset:bushes", Texture.class ));
-        textureMap.put("bushes_flipped", directory.getEntry("tileset:bushes_flipped", Texture.class));
-        textureMap.put("trees", directory.getEntry( "tileset:trees", Texture.class ));
-        textureMap.put("trees_flipped", directory.getEntry("tileset:trees_flipped", Texture.class));
-        textureMap.put("cliffs", directory.getEntry( "tileset:cliffs", Texture.class ));
-        textureMap.put("cliffs_flipped", directory.getEntry("tileset:cliffs_flipped", Texture.class));
-
-        // add tile layer tile-sets (artwork)
         tileSetJsonMap = new HashMap<>();
-        tileSetJsonMap.put("bushes", directory.getEntry("data:bushes", JsonValue.class));
-        tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
-        tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
+        // TODO: remove bushes_old in assets.json + globalconstants.json + Tiled levels, nothing to update here.
+        String[] tileSetFileNames = globalConstants.get("tilesets").get("filenames").asStringArray();
+        for (String tileSetName : tileSetFileNames){
+            textureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
+            tileSetJsonMap.put(tileSetName + ".json", directory.getEntry("data:"+tileSetName, JsonValue.class));
+        }
 
         // add object json
         gameObjectTiles = directory.getEntry("data:objects", JsonValue.class).get("tiles");
@@ -347,11 +342,12 @@ public class LevelParser {
         JsonValue tileSets = levelData.get("tilesets");
         for (JsonValue ts : tileSets){
             String source = ts.getString("source");
-            if (source.endsWith("stickers.json")){
+            String[] pathNames = source.split("/");
+            if (pathNames[pathNames.length - 1].equals("stickers.json")){
                 stickerMaker = new CollectionTileSetMaker(stickerTextures, ts.getInt("firstgid"));
                 continue;
             }
-            JsonValue j = getTileLayerTileSetJson(source);
+            JsonValue j = tileSetJsonMap.get(pathNames[pathNames.length - 1]);
             if (j == null){
                 continue;
             }
@@ -385,6 +381,7 @@ public class LevelParser {
                         windDirs, movingPlatRawData, staticHazardRawData, nestRawData);
             }
             else if (layerName.equals("tilelayer")){
+                layer.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
                 parseTileLayer(layer);
             }
             else {
@@ -459,7 +456,7 @@ public class LevelParser {
                 int id = (int) (gid & LOWER28BITMASK);
                 boolean flipX = (gid & (1L << 31)) != 0;
                 boolean flipY = (gid & (1L << 30)) != 0;
-                texture = stickerMaker.getRegionFromId(id, false, flipX, flipY);
+                texture = stickerMaker.getTileFromId(id, false, flipX, flipY);
             }
             else {
                 return;
@@ -1114,9 +1111,9 @@ public class LevelParser {
 
     /**
      * @param gid raw grid tile id (possibly with flipping bits enabled)
-     * @return texture (possibly null) for the corresponding gid
+     * @return tile (possibly null) for the corresponding gid
      */
-    private TextureRegion getTileFromImages(long gid){
+    private Tile getTileFromImages(long gid){
         // the Tiled ID is a 32-bit UNSIGNED integer
         // actual ID is the lower 28 bits of the Tiled ID
         int id = (int) (gid & LOWER28BITMASK);
@@ -1128,7 +1125,7 @@ public class LevelParser {
         boolean flipD = (gid & (1L << 29)) != 0;
         // this loop should be fast with small number of tilesets
         for (TileSetMaker tsm : tileSetMakers) {
-            if (tsm.contains(id)) return tsm.getRegionFromId(id, flipD, flipX, flipY);
+            if (tsm.contains(id)) return tsm.getTileFromId(id, flipD, flipX, flipY);
         }
         return null;
     }
@@ -1136,8 +1133,8 @@ public class LevelParser {
     private void parseTileLayer(JsonValue layer){
         // loop over array data and make texture regions
         JsonValue data = layer.get("data");
-        TextureRegion[] textures = new TextureRegion[data.size];
-        for (int i = 0; i < textures.length; i++){
+        Tile[] tiles = new Tile[data.size];
+        for (int i = 0; i < tiles.length; i++){
             // the Tiled ID is a 32-bit UNSIGNED integer
             long rawId = data.get(i).asLong();
             if (rawId == 0){
@@ -1146,28 +1143,9 @@ public class LevelParser {
             int col = i % (int) worldSize.x;
             int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
             int idx = row * (int) worldSize.x + col;
-            textures[idx] = getTileFromImages(rawId);
+            tiles[idx] = getTileFromImages(rawId);
         }
-        layers.add(textures);
-    }
-
-    /**
-     * Given the relative path of a tileset (that can be used for tile layers), find the Json Data that corresponds to
-     * the tileset used. Example: level data contains "source":"tilesets\/bushes.json" so bushes JSON is returned.
-     * @param name the source path of a tileset
-     * @return the tileset JSON (possibly null)
-     */
-    private JsonValue getTileLayerTileSetJson(String name){
-        if (name.endsWith("bushes.json")){
-            return tileSetJsonMap.get("bushes");
-        }
-        else if (name.endsWith("trees.json")){
-            return tileSetJsonMap.get("trees");
-        }
-        else if (name.endsWith("cliffs.json")){
-            return tileSetJsonMap.get("cliffs");
-        }
-        return null;
+        layers.add(new TiledLayer(tiles, layer.getInt("__DEPTH__"), (int) worldSize.x, (int) worldSize.y));
     }
 
     /**
@@ -1196,9 +1174,9 @@ public class LevelParser {
          * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
          * @param flipX whether to flip the resulting region horizontally
          * @param flipY whether to flip the resulting region vertically
-         * @return a texture from the tile set corresponding to the given id
+         * @return a tile from the tile set corresponding to the given id
          */
-        public abstract TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY);
+        public abstract Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY);
     }
 
     /**
@@ -1207,9 +1185,6 @@ public class LevelParser {
     private class ImageTileSetMaker extends TileSetMaker {
         private final int columns;
         private final Texture texture;
-
-        /** flipped variant */
-        private final Texture textureVariant;
         private final  int width;
         private final int height;
 
@@ -1218,27 +1193,51 @@ public class LevelParser {
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
             texture = textureMap.get(name);
-            textureVariant = textureMap.get(name + "_flipped");
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            textureVariant.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
             columns = tileSetJson.getInt("columns");
         }
 
-        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY){
+        public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
             int col = index % columns;
-            TextureRegion tile;
-            if (flipD){
-                tile = new TextureRegion(textureVariant, col * width, row * height, width, height);
+            Tile tile = new Tile(texture);
+            tile.setRegion(col * width, row * height, width, height);
+
+            // enumerate all 8 possible cases
+            if (flipD && flipY && flipX){
+                // 30, 31, 32 => flip x THEN counter-clock-wise rotate 270 deg
+                tile.flip(true, false);
+                tile.setRotation((float) Math.PI * 1.5f);
             }
-            else {
-                tile = new TextureRegion(texture, col * width, row * height, width, height);
+            else if (flipY && flipX){
+                // 31, 32 => rotate 180
+                tile.setRotation((float) Math.PI);
             }
-            tile.flip(flipX, flipY);
+            else if (flipD && flipX){
+                // 30, 32 => counter-clock-wise rotate 270 deg
+                tile.setRotation((float) Math.PI * 1.5f);
+            }
+            else if (flipD && flipY){
+                // 30, 31 => counter-clock-wise rotate 90 deg
+                tile.setRotation((float) Math.PI / 2f);
+            }
+            else if (flipX){
+                // 32 => flip x
+                tile.flip(true, false);
+            }
+            else if (flipY){
+                // 31 => flip y
+                tile.flip(false, true);
+            }
+            else if (flipD){
+                // 30 => flip x THEN counter-clock-wise rotate 90 deg
+                tile.flip(true, false);
+                tile.setRotation((float) Math.PI /2f);
+            }
             return tile;
         }
     }
@@ -1256,8 +1255,8 @@ public class LevelParser {
             this.collection = collection;
         }
 
-        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY) {
-            TextureRegion tile = new TextureRegion(collection[id - minId]);
+        public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY) {
+            Tile tile = new Tile(collection[id - minId]);
             tile.flip(flipX, flipY);
             return tile;
         }
@@ -1327,7 +1326,6 @@ public class LevelParser {
      * @return the asset index in the list of loaded animated lightning assets
      */
     public static int getLightningTileIndex(String templateName){
-        System.out.println(templateName);
         if (templateName.endsWith("out_lightning.json")){
             return 0;
         }

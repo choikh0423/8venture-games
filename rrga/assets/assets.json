@@ -106,12 +106,6 @@
         "game:goal_animation": "game/goal_scarf_filmstrip.png",
         "game:hp_indicator": "game/health_indicator.png",
         "game:boost": "game/dodge_timer.png",
-        "tileset:bushes": "levels/tilesets/bushes.png",
-        "tileset:trees": "levels/tilesets/trees.png",
-        "tileset:cliffs": "levels/tilesets/cliffs.png",
-        "tileset:bushes_flipped": "levels/tilesets/bushes_flipped.png",
-        "tileset:trees_flipped": "levels/tilesets/trees_flipped.png",
-        "tileset:cliffs_flipped": "levels/tilesets/cliffs_flipped.png",
         "platform:cloud0": "game/clouds/obj_cloud_0.png",
         "platform:cloud1": "game/clouds/obj_cloud_1.png",
         "platform:cloud2": "game/clouds/obj_cloud_2.png",
@@ -124,7 +118,10 @@
         "game:lightning1": "game/lightning/obj_lightning_filmstrip_1.png",
         "game:lightning2": "game/lightning/obj_lightning_filmstrip_2.png",
         "game:lightning3": "game/lightning/obj_lightning_filmstrip_3.png",
-        "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png"
+        "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png",
+        "tileset:bushes_old": "levels/tilesets/bushes_old.png",
+        "tileset:trees_old": "levels/tilesets/trees_old.png",
+        "tileset:cliffs_old": "levels/tilesets/cliffs_old.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -150,10 +147,10 @@
         "lightning4:template": "levels/templates/lightning/left_lightning.json",
         "wind:template": "levels/templates/wind.json",
         "nest:template": "levels/templates/nest.json",
-        "data:bushes": "levels/tilesets/bushes.json",
-        "data:trees": "levels/tilesets/trees.json",
-        "data:cliffs": "levels/tilesets/cliffs.json",
         "data:objects": "levels/objects/json/objects.json",
+        "data:bushes_old": "levels/tilesets/bushes_old.json",
+        "data:trees_old": "levels/tilesets/trees_old.json",
+        "data:cliffs_old": "levels/tilesets/cliffs_old.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
