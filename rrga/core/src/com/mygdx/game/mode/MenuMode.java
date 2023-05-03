@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -196,6 +198,10 @@ public class MenuMode extends MenuScreen {
     /** current selected level */
     private int currentLevel;
 
+    /** texture for the cursor */
+    private TextureRegion cursorTexture;
+    /** pixmap for the cursor */
+    private Cursor newCursor;
     /** number of levels in the game. NEED TO CHANGE THIS AS WE ADD MORE LEVELS */
     public final int LEVEL_COUNT = 3;
 
@@ -233,6 +239,12 @@ public class MenuMode extends MenuScreen {
 
         backgroundTexture = new TextureRegion(directory.getEntry( "menu:background", Texture.class ));
         backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
+
+        cursorTexture = new TextureRegion(directory.getEntry( "menu:cursor_menu", Texture.class ));
+        Pixmap pm = new Pixmap(Gdx.files.internal("game/goal.png"));
+        newCursor = Gdx.graphics.newCursor(pm, 0, 0);
+        pm.dispose();
+
 
         // TODO: To reduce global variables, made temporary texture region variables, Let me know if this is too much of a bad practice
         // MENU COMPONENTS
@@ -578,8 +590,14 @@ public class MenuMode extends MenuScreen {
                 canvas.draw(toggleCheck, Color.WHITE, toggleCheck.getRegionWidth()/2f, toggleCheck.getRegionHeight()/2f,
                         toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
             }
-
         }
+
+        //draw cursor
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
+                mx, my, 0, .5f, .5f);
+
         canvas.end();
     }
 
@@ -592,14 +610,15 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
-
+        //DOESN'T WORK. IDK WHY
+        //Gdx.graphics.setCursor(newCursor);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
-
         draw();
     }
 

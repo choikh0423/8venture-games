@@ -84,4 +84,15 @@ public abstract class MenuScreen implements Screen, InputProcessor, ControllerLi
     public boolean buttonUp(Controller controller, int buttonCode) {return false;}
 
     public boolean axisMoved(Controller controller, int axisCode, float value) {return false;}
+
+    public void containCursor(){
+        int x = Gdx.input.getX();
+        int y = Gdx.input.getY();
+        if(Gdx.input.getY()<0) y = 0;
+        if(Gdx.input.getY()>Gdx.graphics.getHeight()) y = Gdx.graphics.getHeight();
+        if(Gdx.input.getX()<0) x = 0;
+        if(Gdx.input.getX()>Gdx.graphics.getWidth()) x = Gdx.graphics.getWidth();
+        Gdx.input.setCursorPosition(x,y);
+    }
+
 }
