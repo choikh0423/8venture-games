@@ -169,6 +169,11 @@ public class GameplayController implements ContactListener {
     private ObjectSet<NewWindModel> winds = new ObjectSet<>();
 
     /**
+     * The set of all wind particles in the level
+     */
+    private ObjectSet<ParticleModel> windParticles = new ObjectSet<>();
+
+    /**
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
@@ -385,6 +390,7 @@ public class GameplayController implements ContactListener {
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
         this.winds = levelContainer.getWinds();
+        this.windParticles = levelContainer.getWindParticles();
         this.lightnings = levelContainer.getLightnings();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
@@ -683,6 +689,11 @@ public class GameplayController implements ContactListener {
                 birds.add(b);
             }
         }
+
+        for (NewWindModel w: winds) {
+            w.updateParticles(dt);
+        }
+
     }
 
     private int framesSpent = 0;

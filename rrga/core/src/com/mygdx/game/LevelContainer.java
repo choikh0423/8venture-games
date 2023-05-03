@@ -64,9 +64,13 @@ public class LevelContainer{
     private ObjectSet<BirdHazard> birds;
 
     /**
-     * The set of all birds currently in the level
+     * The set of all winds currently in the level
      */
     private ObjectSet<NewWindModel> winds;
+    /**
+     * The set of all particles currently in the level
+     */
+    private ObjectSet<ParticleModel> particles;
 
 
     /**
@@ -235,6 +239,7 @@ public class LevelContainer{
         sensorFixtures = new ObjectSet<Fixture>();
         birds = new ObjectSet<>();
         winds = new ObjectSet<>();
+        particles = new ObjectSet<>();
         lightnings = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
         nests = new ObjectSet<>();
@@ -421,19 +426,13 @@ public class LevelContainer{
         }
 
         NewWindModel obj2;
-        obj2 = new NewWindModel(windjv[0]);
+        obj2 = new NewWindModel(windjv[0], scale);
         obj2.setDrawScale(scale);
         obj2.setTexture(windTexture);
         obj2.setParticleTexture(windParticleTexture);
         obj2.setAnimation(windAnimation);
         obj2.setName(windName + 0);
         addObject(obj2);
-
-        for (int i = 0; i < obj2.getParticleCount(); i ++) {
-            ParticleModel particleObj = obj2.getParticles()[i];
-            particleObj.setName("particle" + i);
-            addObject(particleObj);
-        }
         drawables.add(obj2);
         winds.add(obj2);
 
@@ -710,6 +709,13 @@ public class LevelContainer{
      */
     public ObjectSet<NewWindModel> getWinds() {
         return winds;
+    }
+    /**
+     * Get wind particles
+     * @return winds
+     */
+    public ObjectSet<ParticleModel> getWindParticles() {
+        return particles;
     }
     /**
      * Get lightnings

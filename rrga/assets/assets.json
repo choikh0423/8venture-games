@@ -76,6 +76,7 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
+        "game:wind_particle" : "game/particle_cloud.png",
         "game:red_bird_flapping" : "game/hazard/red_bird_flapping.png",
         "game:blue_bird_flapping" : "game/hazard/blue_bird_flapping.png",
         "game:green_bird_flapping" : "game/hazard/bird_nest_flapping.png",

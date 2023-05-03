@@ -25,6 +25,8 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
      * The initializing data (to avoid magic numbers)
      */
     private final JsonValue data;
+    /** The centroid of the wind */
+    private Vector2 centroid;
 
     /**
      * The magnitude of this wind's force. Invariant: magnitude > 0.
@@ -37,9 +39,9 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     private float direction;
 
     /** Particle Width */
-    private float partWidth = 5f;
+    private float partWidth = 25f;
     /** Particle Heigth */
-    private float partHeight = 5f;
+    private float partHeight = 25f;
 
     private Animation<TextureRegion> animation;
     private float elapsedTime;
@@ -70,22 +72,14 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     private int particleCount;
 
 
-    public NewWindModel(JsonValue data) {
+    public NewWindModel(JsonValue data, Vector2 scale) {
         super(data.get("dimensions").asFloatArray(), data.get("pos").getFloat(0), data.get("pos").getFloat(1));
         direction = data.getFloat("direction", 0);
         magnitude = data.getFloat("magnitude");
 
-        float centerX = data.get("pos").getFloat(0);
-        float centerY = data.get("pos").getFloat(1);
+        float originX = data.get("pos").getFloat(0);
+        float originY = data.get("pos").getFloat(1);
 
-        // Particle Spawn Radius
-//        partRadius = 0;
-//        for(int i = 0; i<region.getVertices().length; i+=2) {
-//            float distX = region.getVertices()[i]-centerX;
-//            float distY = region.getVertices()[i+1]-centerY;
-//            partRadius = Math.min(partRadius, (float)Math.sqrt(distX * distX + distY * distY));
-//            System.out.println(partRadius);
-//        }
         setBodyType(BodyDef.BodyType.DynamicBody);
         setGravityScale(0);
         setDensity(0);
@@ -118,11 +112,45 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         }
         boxCoordinate.set(minx, maxy);
 
+        // Particle Spawn Radius
+        float centerX = 0;
+        float centerY = 0;
+
+        partRadius = 0;
+        for(int ii = 0; ii < points.length; ii += 2) {
+            centerX += points[ii];
+            centerY += points[ii+1];
+            float distX = points[ii];
+            float distY = points[ii+1];
+            this.partRadius = Math.max(partRadius, (float)Math.sqrt(distX * distX + distY * distY));
+        }
+
+        centerX = centerX / (points.length/2);
+        centerY = centerY / (points.length/2);
+        centroid = new Vector2(centerX, centerY);
+
+        partRadius = 0;
+        for(int ii = 0; ii < points.length; ii += 2) {
+            float distX = points[ii] - centerX;
+            float distY = points[ii+1] - centerY;
+            System.out.println("RADIUS");
+            System.out.println(distX);
+            System.out.println(distY);
+            this.partRadius = Math.max(partRadius, (float)Math.sqrt(distX * distX + distY * distY));
+            System.out.println(partRadius);
+        }
+
         // INITIALIZE WIND PARTICLES
         queue = new ParticleModel[NUM_PARTICLES];
-        float width = maxx - minx;
-        float height = maxy - miny;
+        float width = (maxx - minx);
+        float height = (maxy - miny);
         float ratio = height/width;
+
+        System.out.println("DRAW SCALE");
+        System.out.println(drawScale.x);
+        System.out.println(drawScale.y);
+        System.out.println(width);
+        System.out.println(height);
 
         float area = width * height;
         float distX = (float)Math.sqrt((area/NUM_PARTICLES) / ratio);
@@ -133,11 +161,13 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         // Revisit for precision
 
         for (int i=1; i <=(int)width/distX; i++) {
-           for (int j=1; j <= (int)height/distY; j++) {
-                float partPosX = centerX + distX * i;
-                float partPosY = centerY + distY * j;
+           for (int j=0; j <= (int)height/distY; j++) {
+               float physX = (originX + distX * i);
+               float physY = (originY + distY * j);
+               float partPosX = physX * scale.x;
+               float partPosY = physY * scale.y;
 
-                queue[particleCount] = new ParticleModel(partPosX, partPosY, partWidth, partHeight, this.direction, this.magnitude, this.depth);
+                queue[particleCount] = new ParticleModel(partPosX, partPosY, partWidth, partHeight, physX, physY, this.direction, this.magnitude, this.depth);
 
                 particleCount += 1;
 
@@ -180,6 +210,14 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         }
 
         drawRegion = new PolygonRegion(texture, verts, region.getTriangles());
+
+        // Activating Particle Physics
+        for (int i = 0; i < particleCount; i++) {
+            queue[i].setX(queue[i].getX() + xOffset);
+            queue[i].setY(queue[i].getY() + yOffset);
+            queue[i].activatePhysics(world);
+        }
+
         return true;
     }
 
@@ -214,6 +252,34 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         for (int i = 0; i < particleCount; i++) {
             queue[i].setTexture(t);
         }
+    }
+
+    public void updateParticles(float dt) {
+        // CheckInBound
+        for (int i = 0; i < particleCount; i++) {
+            checkInBound(queue[i]);
+
+        }
+
+        // If not in bound
+
+        // Loop back the particles
+
+    }
+
+    public boolean checkInBound(ParticleModel p) {
+        float distX = p.getPhysPos().x - (this.getPosition().x + this.centroid.x);
+        float distY = p.getPhysPos().y - (this.getPosition().y + this.centroid.y);
+        float dist = (float) Math.sqrt(distX * distX + distY * distY);
+        System.out.println("In BOund");
+        System.out.println(this.centroid.y);
+        System.out.println(p.getPhysPos().y);
+        System.out.println((this.getPosition().y + this.centroid.y));
+        System.out.println(dist);
+        System.out.println(partRadius);
+
+
+        return true;
     }
 
     /**

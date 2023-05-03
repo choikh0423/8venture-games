@@ -22,6 +22,12 @@ import com.mygdx.game.utility.util.Drawable;
  */
 public class ParticleModel extends BoxObstacle implements Drawable {
 
+    /** Physical Coordnate X */
+    private float physX;
+
+    /** Physical Coordnate Y */
+    private float physY;
+
     /**
      * The velocity of this wind particle. Value: [vx, vy];
      */
@@ -50,17 +56,19 @@ public class ParticleModel extends BoxObstacle implements Drawable {
     /** (x,y) offset of the AABB top corner from polygon origin */
     private Vector2 boxCoordinate;
 
-    public ParticleModel(float posX, float posY, float width, float height, float direction, float magnitude, int depth) {
+    public ParticleModel(float posX, float posY, float width, float height, float physX, float physY, float direction, float magnitude, int depth) {
         super(posX, posY, width, height);
 
         this.direction = direction;
         this.magnitude = magnitude;
+        this.physX = physX;
+        this.physY = physY;
 
         velocity.x =  magnitude * (float) Math.cos(direction);
         velocity.y =  magnitude * (float) Math.sin(direction);
 
-        System.out.println(velocity.x);
-        System.out.println(velocity.y);
+        this.setVX(velocity.x);
+        this.setVY(velocity.y);
 
         //setAngle(direction-((float) Math.PI/2));
         setBodyType(BodyDef.BodyType.DynamicBody);
@@ -80,6 +88,7 @@ public class ParticleModel extends BoxObstacle implements Drawable {
             return false;
         }
 
+
         return true;
     }
     public void setAnimation(TextureRegion[] frames){
@@ -97,7 +106,7 @@ public class ParticleModel extends BoxObstacle implements Drawable {
         float oy = texture.getRegionHeight()/2.0f;
 
         Color particleColor = new Color(1, 1, 1, 1);
-        canvas.draw(texture,particleColor,ox,oy,getX() * drawScale.x + xOffset,getY() * drawScale.y + yOffset,0,1f/texture.getRegionWidth() * drawScale.x,
+        canvas.draw(texture,particleColor,ox,oy,getX(),getY(),0,1f/texture.getRegionWidth() * drawScale.x,
                 1f/texture.getRegionHeight() * drawScale.y);
     }
 
@@ -117,4 +126,6 @@ public class ParticleModel extends BoxObstacle implements Drawable {
     public int getDepth() {
         return this.depth;
     }
+
+    public Vector2 getPhysPos() { return temp.set(physX, physY); }
 }
