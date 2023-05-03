@@ -470,40 +470,23 @@ public class GameMode implements Screen {
             canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
         }
         PlayerModel avatar = gameplayController.getPlayer();
-        // draw texture tiles
-        int centerTileX = (int) (camPos.x/scl.x);
-        int centerTileY = (int) (camPos.y/scl.y);
-        int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
-        int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
-        int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);
-        int maxY = (int) Math.min(physicsHeight - 1, centerTileY + displayHeight/2 * zoomScl + 1);
-        // texture tiles are stored row-major order in an array
-        for (TextureRegion[] tiles : parser.getLayers()){
-            // get grid around the player's tile
-            // O(dw * dh)
-            for (int j = minY; j <= maxY; j++){
-                for (int i = minX; i <= maxX; i++){
-                    int idx = j * (int) physicsWidth + i;
-                    if (tiles[idx] != null){
-                        canvas.draw(tiles[idx], Color.WHITE, 0, 0,
-                                 i * scale.x,  j * scale.y,
-                                scale.x,scale.y
-                        );
-                    }
-                }
-            }
-        }
 
-
-        // draw all game objects + stickers, these objects are "dynamic"
+        // draw all game objects + stickers + tile layers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
         float ax = camPos.x/scl.x;
         float ay = camPos.y/scl.y;
-        int count = 0;
+        int objCount = 0;
+        int tileCount = 0;
         for(Drawable drawable : gameplayController.getDrawables()) {
-            if (drawable instanceof PlayerModel){
+            if (drawable instanceof TiledLayer){
+                TiledLayer tiledLayer = (TiledLayer) drawable;
+                tiledLayer.draw(canvas, ax, ay, displayWidth/2 * zoomScl, displayHeight/2 * zoomScl);
+                tileCount += tiledLayer.lastDrawn();
+            }
+            else if (drawable instanceof PlayerModel){
                 drawable.draw(canvas);
                 gameplayController.getLevelContainer().getUmbrella().draw(canvas);
+                objCount++;
             }
             else {
                 cache.set(drawable.getBoxCorner());
@@ -517,8 +500,8 @@ public class GameMode implements Screen {
                     continue;
                 }
                 drawable.draw(canvas);
+                objCount++;
             }
-            count++;
         }
 
         canvas.end();
@@ -569,10 +552,12 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
             canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
                     debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
-            canvas.drawText("Objects Drawn:" + (count + 1),
+            canvas.drawText("Objects Drawn:" + (objCount + 1),
                     debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
-            canvas.drawText("Grounded:" + avatar.isGrounded(),
+            canvas.drawText("Tiles Drawn:" + tileCount,
                     debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
+            canvas.drawText("Grounded:" + avatar.isGrounded(),
+                    debugFont, 0.1f*canvas.getWidth(), 0.25f*canvas.getHeight());
         }
         canvas.end();
     }
