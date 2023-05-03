@@ -672,14 +672,16 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		//vel
 		temp2.set(getVX(), getY());
 		temp2.nor();
-		boolean apply = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
+		boolean applyX = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
 				|| Math.signum(temp.x) != Math.signum(temp2.x);
-		float dampscl = 150;
-		if (apply) {
-			forceCache.sub((temp2.x - temp.x) * dampscl, 0);
+		boolean applyY = (Math.signum(temp.y) == Math.signum(temp2.y) && Math.abs(temp2.y) > Math.abs(temp.y))
+				|| Math.signum(temp.y) != Math.signum(temp2.y);
+		float dampscl = 75;
+		if (applyX) {
+			forceCache.add((temp.x - temp2.x) * dampscl, 0);
 		}
-		if (Math.signum(getVY()) != Math.signum(fy)){
-			forceCache.add(0, (temp2.y) * dampscl);
+		if (applyY){
+			//forceCache.add(0, (temp.y - temp2.y) * dampscl);
 		}
 		body.applyForce(forceCache,getPosition(),true);
 	}
