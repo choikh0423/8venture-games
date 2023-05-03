@@ -954,7 +954,9 @@
                  "y":3478.61178369653
                 }, 
                 {
+                 "gid":0,
                  "id":148,
+                 "rotation":0,
                  "template":"templates\/birds\/green_bird.json",
                  "x":3766.66666666667,
                  "y":2939.39393939394
@@ -1023,7 +1025,7 @@
  "nextobjectid":153,
  "orientation":"orthogonal",
  "renderorder":"right-up",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
@@ -1040,6 +1042,6 @@
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":32
 }

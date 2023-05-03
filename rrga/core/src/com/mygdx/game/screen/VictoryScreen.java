@@ -100,7 +100,6 @@ public class VictoryScreen extends MenuScreen{
      * @param directory	Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "game:platform", Texture.class ));
         bigFont = directory.getEntry("shared:retro", BitmapFont.class);
         smallFont = directory.getEntry("shared:minecraft", BitmapFont.class);
@@ -131,6 +130,7 @@ public class VictoryScreen extends MenuScreen{
     @Override
     public boolean keyUp(int keycode) {
         if (nextPressed == 1) {
+            nextPressed = 0;
             currentExitCode = VictoryScreen.EXIT_NEXT;
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
