@@ -574,7 +574,8 @@ public class LevelContainer{
         umbrella.useClosedTexture();
         umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
         umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
-        umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentumX(globalConstants.get("umbrella").getFloat("closedmomentumX"));
+        umbrella.setClosedMomentumY(globalConstants.get("umbrella").getFloat("closedmomentumY"));
         addObject(umbrella);
         // drawables.add(umbrella); unnecessary because player+umbrella always drawn together.
 

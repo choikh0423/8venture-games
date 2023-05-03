@@ -14,6 +14,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.math.*;
 
 import com.mygdx.game.utility.util.*;
@@ -205,6 +206,7 @@ public class InputController {
         xbox = null;
         crosshair = new Vector2();
         crosscache = new Vector2();
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
     }
 
     /**
