@@ -716,7 +716,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
             if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
                 forceCache.x = getMaxSpeedXAirWind();
             } else {
-                if (Math.signum(umbrellaX) == Math.signum(getVX()) && getVX() > umbrellaX * lighterForce) {
+                if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) > Math.abs(umbrellaX * lighterForce)) {
                     forceCache.x = getVX();
                 } else forceCache.x = umbrellaX * lighterForce;
             }
@@ -727,7 +727,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 			}else if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() <= getMaxSpeedDownOpen()){
 				forceCache.y = getMaxSpeedDownOpen();
 			} else {
-                if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() > umbrellaY * lighterForce) {
+                if (Math.signum(umbrellaY) == Math.signum(getVY()) && Math.abs(getVY()) > Math.abs(umbrellaY * lighterForce)) {
                     forceCache.y = getVY();
                 } else forceCache.y = umbrellaY * lighterForce * yscl;
             }
