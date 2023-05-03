@@ -19,6 +19,7 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.Sticker;
+import com.mygdx.game.utility.util.TiledLayer;
 
 import java.util.*;
 
@@ -573,21 +574,27 @@ public class LevelContainer{
         umbrella.useClosedTexture();
         umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
         umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
-        umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentumX(globalConstants.get("umbrella").getFloat("closedmomentumX"));
+        umbrella.setClosedMomentumY(globalConstants.get("umbrella").getFloat("closedmomentumY"));
         addObject(umbrella);
         // drawables.add(umbrella); unnecessary because player+umbrella always drawn together.
 
-        // Include Stickers and Sort all drawables
+        // Include Stickers + Tiled Layers and Sort all drawables
         for (Sticker s : parser.getStickers()){
             s.setDrawScale(scale);
             drawables.add(s);
         }
-        Collections.sort(drawables, Collections.<Drawable>reverseOrder(new Comparator<Drawable>(){
+        for (TiledLayer t : parser.getLayers()){
+            t.setDrawScale(scale);
+            drawables.add(t);
+        }
+        Collections.sort(drawables, Collections.reverseOrder(new Comparator<Drawable>(){
             @Override
             public int compare(Drawable o1, Drawable o2) {
                 return o1.getDepth() - o2.getDepth();
             }
         }));
+
     }
 
     /**

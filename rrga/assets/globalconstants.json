@@ -49,7 +49,8 @@
       "height" : 0.05
     },
     "size": [0.97708333, 1.25],
-    "closedmomentum": 0.35
+    "closedmomentumX": 0.5,
+    "closedmomentumY": 0.35
   },
   "world": {
     "width": 16,
@@ -60,5 +61,8 @@
     "birdSensorRadius": 7,
     "birdKnockback": 6,
     "stillFrames": [ 3, 2, 3, 4]
+  },
+  "tilesets": {
+    "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground"]
   }
 }

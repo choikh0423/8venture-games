@@ -1,0 +1,67 @@
+{ "compressionlevel":-1,
+ "height":9,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 9, 2684354569, 0, 0, 0, 0, 0,
+            58, 2684354618, 1610612745, 3221225481, 536870921, 2147483657, 0, 0, 0,
+            1610612794, 3221225530, 0, 0, 1073741833, 3758096393, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":9,
+         "id":1,
+         "name":"Tile Layer 1",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"text",
+         "objects":[
+                {
+                 "id":22,
+                 "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
+                 "x":348.984088127295,
+                 "y":828.396572827417
+                }, 
+                {
+                 "id":23,
+                 "template":"..\/..\/templates\/spawn.json",
+                 "x":348.984088127295,
+                 "y":801.958384332925
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":4,
+ "nextobjectid":24,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.10.0",
+ "tileheight":128,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"..\/..\/tilesets\/bushes_pink.json"
+        }, 
+        {
+         "firstgid":50,
+         "source":"..\/..\/tilesets\/bushes_ground.json"
+        }],
+ "tilewidth":128,
+ "type":"map",
+ "version":"1.10",
+ "width":9
+}
