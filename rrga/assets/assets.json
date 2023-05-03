@@ -121,7 +121,9 @@
         "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png",
         "tileset:bushes_old": "levels/tilesets/bushes_old.png",
         "tileset:trees_old": "levels/tilesets/trees_old.png",
-        "tileset:cliffs_old": "levels/tilesets/cliffs_old.png"
+        "tileset:cliffs_old": "levels/tilesets/cliffs_old.png",
+        "tileset:bushes_pink": "levels/tilesets/bushes_pink.png",
+        "tileset:bushes_ground": "levels/tilesets/bushes_ground.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -150,7 +152,9 @@
         "data:objects": "levels/objects/json/objects.json",
         "data:bushes_old": "levels/tilesets/bushes_old.json",
         "data:trees_old": "levels/tilesets/trees_old.json",
-        "data:cliffs_old": "levels/tilesets/cliffs_old.json"
+        "data:cliffs_old": "levels/tilesets/cliffs_old.json",
+        "data:bushes_pink": "levels/tilesets/bushes_pink.json",
+        "data:bushes_ground": "levels/tilesets/bushes_ground.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
