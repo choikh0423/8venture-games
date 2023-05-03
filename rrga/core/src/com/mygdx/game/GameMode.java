@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.utility.util.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
@@ -277,6 +279,8 @@ public class GameMode implements Screen {
         gameplayController.getLevelContainer().setParser(parser);
     }
 
+    public int resetCounter = -1;
+    private Vector2 camPos = new Vector2();
     /**
      * Resets the status of the game so that we can play again.
      *
@@ -300,8 +304,11 @@ public class GameMode implements Screen {
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
-    };
 
+        resetCounter++;
+    }
+
+    Preferences unlocked = Gdx.app.getPreferences("unlocked");
     /**
      * Returns whether to process the update loop
      *
@@ -320,6 +327,8 @@ public class GameMode implements Screen {
 
         if (gameplayController.isCompleted()) {
             listener.exitScreen(this, EXIT_VICTORY);
+            unlocked.putBoolean((currentLevel+1)+"unlocked", true);
+            unlocked.flush();
             return false;
         } else if (gameplayController.isFailed()) {
             listener.exitScreen(this, EXIT_FAIL);
@@ -411,6 +420,7 @@ public class GameMode implements Screen {
         gameplayController.postUpdate(dt);
     };
 
+    public boolean showGoal = true;
     /**
      * Draw the physics objects to the canvas
      *
@@ -425,9 +435,21 @@ public class GameMode implements Screen {
         // focus camera on player
         float px = gameplayController.getPlayerScreenX();
         float py = gameplayController.getPlayerScreenY();
+        float gx = gameplayController.getLevelContainer().getShowGoal().getX();
+        float gy = gameplayController.getLevelContainer().getShowGoal().getY();
 
         canvas.setCameraDynamic();
-        canvas.translateCameraToPoint(px,py);
+        Vector2 scl = gameplayController.getPlayer().getDrawScale();
+
+        //camera starts at the goal door then moves to the player the
+        //first time we reset the level (i.e. when loading in)
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        if (showGoal){
+            camPos.set(gx*scl.x, gy*scl.y);
+        } else {
+            camPos.set(px,py);
+        }
+        canvas.translateCameraToPoint(camPos.x,camPos.y);
         canvas.begin();
 
         float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
@@ -436,8 +458,7 @@ public class GameMode implements Screen {
         // center a background on player
         // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
-                backgroundTexture.getRegionHeight()/2f, px , py, 0,
-                sclX, sclY);
+                backgroundTexture.getRegionHeight()/2f, camPos.x,camPos.y, 0, sclX, sclY);
 
         float worldHeight = physicsHeight * scale.y;
 
@@ -450,8 +471,8 @@ public class GameMode implements Screen {
         }
         PlayerModel avatar = gameplayController.getPlayer();
         // draw texture tiles
-        int centerTileX = (int) (avatar.getX());
-        int centerTileY = (int) avatar.getY();
+        int centerTileX = (int) (camPos.x/scl.x);
+        int centerTileY = (int) (camPos.y/scl.y);
         int minX = (int) Math.max(0, centerTileX - displayWidth/2 * zoomScl - 1);
         int maxX = (int) Math.min(physicsWidth - 1, centerTileX + displayWidth/2 * zoomScl + 1);
         int minY = (int) Math.max(0, centerTileY - displayHeight/2 * zoomScl - 1);
@@ -476,8 +497,8 @@ public class GameMode implements Screen {
 
         // draw all game objects + stickers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
-        float ax = avatar.getX();
-        float ay = avatar.getY();
+        float ax = camPos.x/scl.x;
+        float ay = camPos.y/scl.y;
         int count = 0;
         for(Drawable drawable : gameplayController.getDrawables()) {
             if (drawable instanceof PlayerModel){
@@ -672,6 +693,9 @@ public class GameMode implements Screen {
      */
     public void setLevel(int level){
         currentLevel = level;
+        resetShowGoal();
+        resetCounter--;
+        gameplayController.resetCounter--;
     }
 
     /**
@@ -683,10 +707,17 @@ public class GameMode implements Screen {
         } else {
             currentLevel = 1;
         }
-
+        resetShowGoal();
+        resetCounter--;
+        gameplayController.resetCounter--;
     }
 
-
+    public void resetShowGoal(){
+        resetCounter = 0;
+        showGoal = true;
+        gameplayController.resetCounter = 0;
+        gameplayController.showGoal = true;
+    }
 
     /**
      * Sets current level of the game

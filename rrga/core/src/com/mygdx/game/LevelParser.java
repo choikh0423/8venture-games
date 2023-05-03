@@ -49,6 +49,11 @@ public class LevelParser {
      */
     private JsonValue[] movingPlatformData;
 
+    /** list of nest json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue[] nestData;
+
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
@@ -86,6 +91,9 @@ public class LevelParser {
     /** template object with defaults for brown birds*/
     private final JsonValue brownBirdDefaultObj;
 
+    /** blue bird template data that is parsed */
+    private JsonValue blueBirdData;
+
     /** the default JSON properties of path point. */
     private final JsonValue pointDefault;
 
@@ -110,6 +118,12 @@ public class LevelParser {
     /** the default JSONs of movable cloud objects */
     private final JsonValue[] cloudDefaultObjects;
 
+    /** the default JSON properties of a nest object */
+    private final JsonValue nestDefault;
+
+    /** the default JSON polygon of a nest object */
+    private final JsonValue nestDefaultPoly;
+
     /** the default JSONs of animated lightning objects */
     private final JsonValue[] lightningDefaultObjects;
 
@@ -126,7 +140,7 @@ public class LevelParser {
     private final JsonValue gameObjectTiles;
 
     /** the list of texture region cutters, one for each tileset */
-    private ArrayList<TileSetMaker> tileSetMakers;
+    private ArrayList<TileSetMaker> tileSetMakers = new ArrayList<>();
 
     /** the texture producer for stickers */
     private TileSetMaker stickerMaker;
@@ -160,6 +174,17 @@ public class LevelParser {
      */
     public JsonValue[] getBirdData() {
         return birdData;
+    }
+
+    public JsonValue getBlueBirdData(){
+        return blueBirdData;
+    }
+
+    /**
+     * @return processed nest data that is ready for consumption
+     */
+    public JsonValue[] getNestData(){
+        return nestData;
     }
 
     /**
@@ -223,11 +248,14 @@ public class LevelParser {
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
+        JsonValue nestTemplate = directory.getEntry("nest:template", JsonValue.class);
+
         // cloud templates
         JsonValue cloud0Template = directory.getEntry("cloud0:template", JsonValue.class);
         JsonValue cloud1Template = directory.getEntry("cloud1:template", JsonValue.class);
         JsonValue cloud2Template = directory.getEntry("cloud2:template", JsonValue.class);
         JsonValue cloud3Template = directory.getEntry("cloud3:template", JsonValue.class);
+
         // growing lightning templates
         JsonValue lightning0Template = directory.getEntry("lightning0:template", JsonValue.class);
         JsonValue lightning1Template = directory.getEntry("lightning1:template", JsonValue.class);
@@ -239,6 +267,7 @@ public class LevelParser {
         blueBirdDefaultObj = blueBirdTemplate.get("object");
         greenBirdDefaultObj = greenBirdTemplate.get("object");
         brownBirdDefaultObj = brownBirdTemplate.get("object");
+
         pointDefault = pathPointTemplate.get("object").get("properties");
         lightningDefault = lightningTemplate.get("object").get("properties");
         lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
@@ -246,6 +275,10 @@ public class LevelParser {
         staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
+
+        nestDefault = nestTemplate.get("object").get("properties");
+        nestDefaultPoly = nestTemplate.get("object").get("polygon");
+
         cloudDefaultObjects = new JsonValue[]{
                 cloud0Template.get("object"),
                 cloud1Template.get("object"),
@@ -304,6 +337,8 @@ public class LevelParser {
         worldSize.y = levelData.getInt("height", 18);
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
+        //get blue bird data for nests
+        blueBirdData = processBird(getBirdDefaultObj("blue"), new HashMap<Integer, JsonValue>());
 
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
@@ -336,6 +371,7 @@ public class LevelParser {
         HashMap<Integer, JsonValue> windDirs = new HashMap<>();
         ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
         ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
+        ArrayList<JsonValue> nestRawData = new ArrayList<>();
 
         JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together WITH depth considered)
@@ -346,7 +382,7 @@ public class LevelParser {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
                 parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData,
-                        windDirs, movingPlatRawData, staticHazardRawData);
+                        windDirs, movingPlatRawData, staticHazardRawData, nestRawData);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -364,6 +400,7 @@ public class LevelParser {
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
         processMovingPlats(movingPlatRawData, trajectory);
+        processNests(nestRawData, trajectory);
     }
 
     /**
@@ -376,7 +413,8 @@ public class LevelParser {
                                   ArrayList<JsonValue> windRawData,
                                   HashMap<Integer, JsonValue> windDirs,
                                   ArrayList<JsonValue> movingPlatRawData,
-                                  ArrayList<JsonValue> staticHazardRawData)
+                                  ArrayList<JsonValue> staticHazardRawData,
+                                  ArrayList<JsonValue> nestRawData)
     {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
@@ -404,6 +442,8 @@ public class LevelParser {
                 windDirs.put(obj.getInt("id"), obj);
             } else if (template.contains("cloud.json")){
                 movingPlatRawData.add(obj);
+            } else if (template.contains("nest.json")){
+                nestRawData.add(obj);
             } else if (obj.has("gid")){
                 // treat as possibly a sticker, process it
                 parseSticker(obj);
@@ -587,83 +627,92 @@ public class LevelParser {
     }
 
     /**
-     * Convert raw bird JSON into game-expected JSON format.
-     * @param rawData the unprocessed bird object data
+     * Convert all raw bird JSON into game-expected JSON format.
+     * @param rawData the unprocessed list of bird object data
      * @param trajectory map of path node Ids to raw JSON
      */
-    private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+    private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory) {
         birdData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < birdData.length; ii++) {
-            // b = raw bird data
-            JsonValue b = rawData.get(ii);
-            // data = the bird JSON that game will read
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            String color = computeColor(b.getString("template", "blue_bird.json"));
-            JsonValue properties = b.get("properties");
-            JsonValue defaultObj = getBirdDefaultObj(color);
-            JsonValue defaults = defaultObj.get("properties");
-            // set deterministic trivial properties
-            data.addChild("depth", new JsonValue(b.getInt("__DEPTH__", -1)));
-            data.addChild("color", new JsonValue(color));
-            data.addChild("attack", new JsonValue(doesBirdAttack(color)));
-            // add whether facing right
-            boolean facingRight = isBirdInitiallyFacingRight(color);
-            boolean horizontalFlipped = isObjectHorizontallyFlipped(b);
-            // XOR(flip, facingRight) => if flip then !facingRight else facingRight
-            facingRight = horizontalFlipped ^ facingRight;
-            data.addChild("facing_right", new JsonValue(facingRight));
-
-            // The following is procedure to: set position, hit-box, AABB data
-            readPositionAndConvert(b, temp);
-            addPosition(data, temp);
-            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
-            // implicitly, the bird's location is the FIRST point on their path.
-            pathJson.addChild(new JsonValue(temp.x));
-            pathJson.addChild(new JsonValue(temp.y));
-
-            // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
-            // using the first tile in the set is sufficient for birds, unless we want multi-hitbox.
-            JsonValue tileJson = gameObjectTiles.get(getProcessedGid(defaultObj) - 1);
-            int assetWidth = tileJson.getInt("imagewidth");
-            int assetHeight = tileJson.getInt("imageheight");
-            data.addChild("filmStripWidth", new JsonValue(assetWidth));
-            data.addChild("filmStripHeight", new JsonValue(assetHeight));
-
-            // add AABB
-            data.addChild("AABB", processTileObjectAABB(b, defaultObj, assetWidth, assetHeight));
-
-            // the hitbox information for birds is stored in one tile (the one animated), in its objectgroup, which we then
-            // look at the first of its objects list.
-            // Now, load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
-            JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
-            float ox = hitBoxPoints.getFloat("x");
-            float oy = hitBoxPoints.getFloat("y");
-            JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
-                    horizontalFlipped, assetWidth, assetHeight);
-            data.addChild("points", shape);
-
-            // Remaining: set bird properties and complete their path
-            // the resulting path should be stored as a list of floats which is Json array of Json floats.
-            float moveSpeed = 0;
-            float atkSpeed = 0;
-            // path birds are red and brown
-            if (color.equals("red") || color.equals("brown")){
-                // update properties
-                moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
-                // using custom properties to find rest of path
-                // this takes either the bird's next point along its path or take from default (which should be 0)
-                int next = getFromProperties(properties, "path", defaults).asInt();
-                int loopTo = processPath(pathJson, trajectory, next, b.getInt("id"));
-                data.addChild("loopTo", new JsonValue(loopTo));
-            }
-            if (doesBirdAttack(color)){
-                atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
-            }
-            data.addChild("path", pathJson);
-            data.addChild("movespeed", new JsonValue(moveSpeed));
-            data.addChild("atkspeed", new JsonValue(atkSpeed));
+            JsonValue data = processBird(rawData.get(ii), trajectory);
             birdData[ii] = data;
         }
+    }
+
+    /**
+     * Convert a single raw bird JSON into game-expected JSON object
+     * @param b the unprocessed bird object data
+     * @param trajectory map of path node Ids to raw JSON
+     * @return game-formatted bird JSON
+     */
+    private JsonValue processBird(JsonValue b, HashMap<Integer, JsonValue> trajectory){
+        // data = the bird JSON that game will read
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        String color = computeColor(b.getString("template", "blue_bird.json"));
+        JsonValue properties = b.get("properties");
+        JsonValue defaultObj = getBirdDefaultObj(color);
+        JsonValue defaults = defaultObj.get("properties");
+        // set deterministic trivial properties
+        data.addChild("depth", new JsonValue(b.getInt("__DEPTH__", -1)));
+        data.addChild("color", new JsonValue(color));
+        data.addChild("attack", new JsonValue(doesBirdAttack(color)));
+        // add whether facing right
+        boolean horizontalFlipped = isObjectHorizontallyFlipped(b);
+        // XOR(flip, ?facingRight) => if flip then !(?facingRight) else (?facingRight)
+        boolean facingRight = horizontalFlipped ^ isBirdInitiallyFacingRight(color);
+        data.addChild("facing_right", new JsonValue(facingRight));
+
+        // The following is procedure to: set position, hit-box, AABB data
+        readPositionAndConvert(b, temp);
+        addPosition(data, temp);
+        JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+        // implicitly, the bird's location is the FIRST point on their path.
+        pathJson.addChild(new JsonValue(temp.x));
+        pathJson.addChild(new JsonValue(temp.y));
+
+        // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
+        // using the first tile in the set is sufficient for birds, unless we want multi-hitbox.
+        JsonValue tileJson = gameObjectTiles.get(getProcessedGid(defaultObj) - 1);
+        int assetWidth = tileJson.getInt("imagewidth");
+        int assetHeight = tileJson.getInt("imageheight");
+        data.addChild("filmStripWidth", new JsonValue(assetWidth));
+        data.addChild("filmStripHeight", new JsonValue(assetHeight));
+
+        // add AABB
+        data.addChild("AABB", processTileObjectAABB(b, defaultObj, assetWidth, assetHeight));
+
+        // the hitbox information for birds is stored in one tile (the one animated), in its objectgroup, which we then
+        // look at the first of its objects list.
+        // Now, load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
+        JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+        float ox = hitBoxPoints.getFloat("x");
+        float oy = hitBoxPoints.getFloat("y");
+        JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                horizontalFlipped, assetWidth, assetHeight);
+        data.addChild("points", shape);
+
+        // Remaining: set bird properties and complete their path
+        // the resulting path should be stored as a list of floats which is Json array of Json floats.
+        float moveSpeed = 0;
+        float atkSpeed = 0;
+        // path birds are red and brown
+        if (color.equals("red") || color.equals("brown")){
+            // update properties
+            moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
+            // using custom properties to find rest of path
+            // this takes either the bird's next point along its path or take from default (which should be 0)
+            int next = getFromProperties(properties, "path", defaults).asInt();
+            int loopTo = processPath(pathJson, trajectory, next, b.getInt("id"));
+            data.addChild("loopTo", new JsonValue(loopTo));
+        }
+        if (doesBirdAttack(color)){
+            atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
+        }
+        data.addChild("path", pathJson);
+        data.addChild("movespeed", new JsonValue(moveSpeed));
+        data.addChild("atkspeed", new JsonValue(atkSpeed));
+
+        return  data;
     }
 
     private void processNewLightning(ArrayList<JsonValue> rawData){
@@ -798,7 +847,9 @@ public class LevelParser {
 
     private void processMovingPlats(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         movingPlatformData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < movingPlatformData.length; ii++) {
+            seen.clear();
             //data we pass in to platform constructor
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //moving platform raw data
@@ -843,6 +894,54 @@ public class LevelParser {
             movingPlatformData[ii] = data;
         }
     }
+
+    private void processNests(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+        nestData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
+        for (int ii = 0; ii < nestData.length; ii++) {
+            seen.clear();
+            //data we pass in to nest constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //nest raw data
+            JsonValue n = rawData.get(ii);
+            JsonValue props = n.get("properties");
+
+            // set position data
+            readPositionAndConvert(n, temp);
+            addPosition(data, temp);
+
+            // the resulting path should be stored as a list of floats which is Json array of Json floats.
+            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+            // implicitly, the platform's location is the FIRST point on its path.
+            pathJson.addChild(new JsonValue(temp.x));
+            pathJson.addChild(new JsonValue(temp.y));
+
+            // this takes either the platform's next point along its path or take from default (which should be 0)
+            JsonValue jsonId = getFromProperties(props, "path", null);
+            int next = jsonId.asInt();
+            int idx = 1;
+            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                seen.put(next, idx);
+                idx++;
+                JsonValue nodeData = trajectory.get(next);
+                // put path point (x,y) into vector cache and perform conversion
+                readPositionAndConvert(nodeData, temp);
+                // add this node to bird's path
+                pathJson.addChild(new JsonValue(temp.x));
+                pathJson.addChild(new JsonValue(temp.y));
+                // get next
+                nodeData = nodeData.get("properties");
+                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
+                next = jsonId.asInt();
+            }
+            data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
+            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
+            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            data.addChild("path", pathJson);
+            nestData[ii] = data;
+        }
+    }
+
 
     /**
      * loads into p an (x,y) pair that are direct properties of the given JsonValue into vector cache

@@ -49,7 +49,8 @@
       "height" : 0.05
     },
     "size": [0.97708333, 1.25],
-    "closedmomentum": 0.35
+    "closedmomentumX": 0.5,
+    "closedmomentumY": 0.35
   },
   "world": {
     "width": 16,

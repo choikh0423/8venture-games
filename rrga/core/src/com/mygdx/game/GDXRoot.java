@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.mode.*;
@@ -172,6 +173,7 @@ public class GDXRoot extends Game implements ScreenListener {
 					playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
 					playing.setSecondaryControlMode(menu.getControlToggle());
 					playing.reset();
+					playing.resetShowGoal();
 					setScreen(playing);
 					break;
 			}
@@ -222,6 +224,6 @@ public class GDXRoot extends Game implements ScreenListener {
 			playing.reset();
 			setScreen(playing);
 		}
-
+		Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 	}
 }
