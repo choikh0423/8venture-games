@@ -112,6 +112,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     private final float knockBackScl;
 
     private final Vector2 knockBackVec = new Vector2();
+    /** Whether this bird's kockback vector should be set. Upon initial collision, set to false.
+     * Once the collision is resolved, set to true */
+    private boolean setKB;
 
     /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
@@ -214,7 +217,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     }
     @Override
     public void setKnockBackForce(Vector2 in) {
-        knockBackVec.set(in.nor());
+        if(setKB) {
+            knockBackVec.set(in.nor());
+            setKB = false;
+        }
+    }
+
+    public void setSetKB(boolean b){
+        setKB = b;
     }
 
     public BirdColor getColor() {
@@ -341,6 +351,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         seesTarget = false;
         damage = birdDamage;
         knockBackScl = birdKnockBack;
+        setKB = true;
         warning = false;
         this.warningTex = warningTex;
 
