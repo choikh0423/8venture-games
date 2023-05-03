@@ -96,9 +96,9 @@ public class MenuButton {
 
     }
 
-    public void draw(GameCanvas canvas, int pressState, float button_scl) {
+    public void draw(GameCanvas canvas, int pressState, float button_scl, com.badlogic.gdx.graphics.Color tint) {
         // Draw Exit Button
-        com.badlogic.gdx.graphics.Color exitTint = (pressState == 1 ? com.badlogic.gdx.graphics.Color.GRAY : Color.WHITE);
+        com.badlogic.gdx.graphics.Color exitTint = (pressState == 1 ? com.badlogic.gdx.graphics.Color.GRAY : tint);
         canvas.draw(texture, exitTint, texture.getRegionWidth() / 2, texture.getRegionHeight() / 2,
                 buttonX, buttonY, angle, button_scl * scale, button_scl * scale);
     }

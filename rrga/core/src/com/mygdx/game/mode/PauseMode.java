@@ -226,9 +226,9 @@ public class PauseMode extends MenuScreen {
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
                 pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
-        menuButton.draw(canvas, menuPressState, BUTTON_SCALE);
-        restartButton.draw(canvas, restartPressState, BUTTON_SCALE);
-        backButton.draw(canvas, backPressState, BUTTON_SCALE);
+        menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
+        restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
+        backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
 
 
 
