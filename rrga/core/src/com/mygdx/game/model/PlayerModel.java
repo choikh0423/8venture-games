@@ -82,6 +82,9 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** Cache for getters */
 	private final Vector2 temp = new Vector2();
 
+	/** Another vector cache */
+	private final Vector2 temp2 = new Vector2();
+
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
@@ -645,21 +648,42 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if (!isActive()) {
 			return;
 		}
+		float x = 0;
+		float y = 0;
+		//determine x of wind force
 		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
-		}
-		else {
-			forceCache.set(fx,0);
-			body.applyForce(forceCache,getPosition(),true);
-		}
-
-		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-			setVY(Math.signum(getVY())*getMaxSpeedUp());
+			setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
 		} else {
-			forceCache.set(0,fy);
-			body.applyForce(forceCache, getPosition(), true);
+			x = fx;
 		}
+		//determine y of wind force
+		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+			setVY(Math.signum(getVY()) * getMaxSpeedUp());
+		} else {
+			y = fy;
+		}
+		forceCache.set(x, y);
+
+		//Damp out velcoity not in direction of wind velocity
+		//wind dir
+		temp.set(x, y);
+		temp.nor();
+		//vel
+		temp2.set(getVX(), getY());
+		temp2.nor();
+		boolean applyX = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
+				|| Math.signum(temp.x) != Math.signum(temp2.x);
+		boolean applyY = (Math.signum(temp.y) == Math.signum(temp2.y) && Math.abs(temp2.y) > Math.abs(temp.y))
+				|| Math.signum(temp.y) != Math.signum(temp2.y);
+		float dampscl = 75;
+		if (applyX) {
+			forceCache.add((temp.x - temp2.x) * dampscl, 0);
+		}
+		if (applyY){
+			//forceCache.add(0, (temp.y - temp2.y) * dampscl);
+		}
+		body.applyForce(forceCache,getPosition(),true);
 	}
 
 	/**
@@ -672,7 +696,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
 				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
 			forceCache.set(fx, 0);
-			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2 + 1 : .6f;
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX()) + 1 : .6f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
 		}
@@ -707,21 +731,27 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				}
 				body.applyLinearImpulse(forceCache, getPosition(), true);
 			}
-			else{
+			else {
 				//determine X
 				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
 					forceCache.x = getMaxSpeedXAirWind();
 				} else {
 					forceCache.x = umbrellaX * lighterForce;
 				}
+				//fix
+
 				//determine Y
-				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+				if (umbrellaY > 0 && getVY() >= getMaxSpeedUp()) {
 					forceCache.y = getMaxSpeedUp();
-				} else {
+				}
+				else if(umbrellaY < 0 && getVY() <= getMaxSpeedDownOpen()) {
+					forceCache.y = getMaxSpeedDownOpen();
+				}
+				else {
 					forceCache.y = umbrellaY * lighterForce;
 				}
-				body.setLinearVelocity(forceCache);
 			}
+			body.setLinearVelocity(forceCache);
 			return true;
 		}
 		return false;
