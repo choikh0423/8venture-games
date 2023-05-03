@@ -726,7 +726,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				forceCache.y = getMaxSpeedUp();
 			}else if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() <= getMaxSpeedDownOpen()){
 				forceCache.y = getMaxSpeedDownOpen();
-             else {
+			} else {
                 if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() > umbrellaY * lighterForce) {
                     forceCache.y = getVY();
                 } else forceCache.y = umbrellaY * lighterForce * yscl;
