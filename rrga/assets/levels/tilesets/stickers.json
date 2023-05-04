@@ -9,7 +9,7 @@
  "name":"stickers",
  "objectalignment":"center",
  "spacing":0,
- "tilecount":8,
+ "tilecount":6,
  "tiledversion":"1.10.0",
  "tileheight":381,
  "tiles":[
@@ -48,18 +48,6 @@
          "image":"..\/objects\/asset\/static\/hazard_brambles_thin.png",
          "imageheight":256,
          "imagewidth":256
-        }, 
-        {
-         "id":6,
-         "image":"..\/objects\/asset\/static\/hazard_brambles_tiling.png",
-         "imageheight":256,
-         "imagewidth":256
-        }, 
-        {
-         "id":7,
-         "image":"..\/objects\/asset\/static\/hazard_rocks.png",
-         "imageheight":140,
-         "imagewidth":238
         }],
  "tilewidth":710,
  "transformations":

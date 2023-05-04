@@ -60,54 +60,6 @@
                  "template":"..\/..\/templates\/birds\/blue_bird.json",
                  "x":1531.03833807211,
                  "y":142.269016447702
-                }, 
-                {
-                 "gid":84,
-                 "height":256,
-                 "id":257,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":256,
-                 "x":1221.46822948797,
-                 "y":544.931112482007
-                }, 
-                {
-                 "gid":86,
-                 "height":256,
-                 "id":258,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":256,
-                 "x":838.627700127065,
-                 "y":567.556120288014
-                }, 
-                {
-                 "gid":87,
-                 "height":140,
-                 "id":259,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":238,
-                 "x":1217.70436255824,
-                 "y":825.921219822109
-                }, 
-                {
-                 "gid":85,
-                 "height":256,
-                 "id":260,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":256,
-                 "x":1461.24523506989,
-                 "y":614.14654807285
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -127,7 +79,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":262,
+ "nextobjectid":263,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -138,7 +90,7 @@
          "source":"..\/..\/objects\/json\/objects.json"
         }, 
         {
-         "firstgid":80,
+         "firstgid":79,
          "source":"..\/..\/tilesets\/stickers.json"
         }],
  "tilewidth":128,

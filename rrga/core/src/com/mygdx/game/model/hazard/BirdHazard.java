@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 
 /**
@@ -142,7 +143,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     float flapElapsedTime;
 
     /** Bird warning animation filmstrip texture */
-    private Texture warningTex;
+    private final Texture warningTex;
 
 
     /** Bird warning animation frames */
@@ -356,31 +357,25 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         this.warningTex = warningTex;
 
         // make hit-box objects
-        // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
-        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBackScl, temp);
-        // flip points and make hit-box #2:
         float x = data.getFloat("x");
         float y = data.getFloat("y");
         float[] shape = data.get("points").asFloatArray();
+        PolygonObstacle hit1 = new PolygonObstacle(shape, x, y);
+        // flip points and make hit-box #2:
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBackScl, temp);
+        PolygonObstacle hit2 = new PolygonObstacle(shape, x, y);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
             // hit1 must be right hitbox
-            bodies.add(hit2);
-            bodies.add(hit1);
+            bodies.add(hit2);   //left facing
+            bodies.add(hit1);   //right facing
         }
         else {
-            bodies.add(hit1);
-            bodies.add(hit2);
+            bodies.add(hit1);   //left facing
+            bodies.add(hit2);   //right facing
         }
-
-        // TODO: if we need birds to be sensors...
-//        for (Obstacle o : bodies){
-//            o.setSensor(true);
-//        }
     }
 
     @Override

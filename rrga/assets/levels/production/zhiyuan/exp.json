@@ -6,9 +6,9 @@
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 9, 2684354569, 0, 0, 0, 0, 0,
-            58, 2684354618, 1610612745, 3221225481, 536870921, 2147483657, 0, 0, 0,
-            1610612794, 3221225530, 0, 0, 1073741833, 3758096393, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            9, 2684354569, 0, 0, 0, 0, 0, 0, 0,
+            1610612745, 3221225481, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -25,19 +25,30 @@
         {
          "draworder":"topdown",
          "id":3,
-         "name":"object",
+         "name":"text",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"top",
          "objects":[
                 {
-                 "id":22,
-                 "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
-                 "x":348.984088127295,
-                 "y":828.396572827417
+                 "id":54,
+                 "template":"..\/..\/templates\/spawn.json",
+                 "x":456.974879743453,
+                 "y":732.228754676643
                 }, 
                 {
-                 "id":23,
-                 "template":"..\/..\/templates\/spawn.json",
-                 "x":348.984088127295,
-                 "y":801.958384332925
+                 "id":55,
+                 "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
+                 "x":459.647247461251,
+                 "y":750.935328701229
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -45,8 +56,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":5,
- "nextobjectid":24,
+ "nextlayerid":8,
+ "nextobjectid":70,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -54,11 +65,15 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/..\/tilesets\/bushes_pink.json"
+         "source":"..\/..\/tilesets\/bushes_ground.json"
         }, 
         {
          "firstgid":50,
-         "source":"..\/..\/tilesets\/bushes_ground.json"
+         "source":"..\/..\/objects\/json\/objects.json"
+        }, 
+        {
+         "firstgid":128,
+         "source":"..\/..\/tilesets\/stickers.json"
         }],
  "tilewidth":128,
  "type":"map",

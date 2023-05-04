@@ -11,12 +11,12 @@ import com.mygdx.game.GameCanvas;
  */
 public interface Drawable{
 
-    /** width and height (standardized units) <br>
+    /** width and height (game standardized units) <br>
      * NOTE: vector should not be used as an allocator because the same vector is returned each time.
      */
     Vector2 getDimensions();
 
-    /** position of top left bounding box corner. <br>
+    /** game position of top left bounding box corner. <br>
      * NOTE: vector should not be used as an allocator because the same vector is returned each time.
      * */
     Vector2 getBoxCorner();

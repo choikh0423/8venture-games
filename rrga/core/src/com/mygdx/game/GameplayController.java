@@ -167,11 +167,6 @@ public class GameplayController implements ContactListener {
     private PooledList<BirdHazard> birds = new PooledList<>();
 
     /**
-     * The set of all lightning currently in the level
-     */
-    private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
-
-    /**
      * The set of all nests currently in the level
      */
     private ObjectSet<NestHazard> nests = new ObjectSet<>();
@@ -382,7 +377,6 @@ public class GameplayController implements ContactListener {
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
-        this.lightnings = levelContainer.getLightnings();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
@@ -665,11 +659,6 @@ public class GameplayController implements ContactListener {
             }
         }
 
-        //update the lightnings
-//        for (LightningHazard light : lightnings) {
-//            light.strike();
-//        }
-
         //update nests
         for(NestHazard n: nests){
             BirdHazard b = n.update();
@@ -847,19 +836,6 @@ public class GameplayController implements ContactListener {
 
                 contactHazards.add(h);
             }
-
-            // check for bird sensor collision
-            //depreciated
-            /*
-            if ((avatar == bd1 && fd2 == "birdSensor") ||
-                    (avatar == bd2 && fd1 == "birdSensor")) {
-                BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
-                if (!bird.seesTarget) {
-                    bird.seesTarget = true;
-                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
-                }
-            }
-            */
 
             // Check for win condition
             if ((bd1 == avatar && bd2 == goalDoor) ||
