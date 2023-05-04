@@ -361,6 +361,10 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		iFrames = f;
 	}
 
+	public boolean canBoost(){
+		return lighterFuel == maxLighterFuel;
+	}
+
 
 	/**
 	 * sets the player's HP texture.

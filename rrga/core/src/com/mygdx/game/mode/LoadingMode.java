@@ -298,8 +298,10 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		//draw mouse
 		int mx = Gdx.input.getX();
 		int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-		canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-				mx, my, 0, .5f, .5f);
+		if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+			canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+					mx, my, 0, .4f, .4f);
+		}
 
 		canvas.end();
 	}

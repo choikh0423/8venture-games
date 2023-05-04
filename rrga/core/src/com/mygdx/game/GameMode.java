@@ -33,7 +33,7 @@ public class GameMode implements Screen {
     private TextureRegion skyLayerTextureC;
     /** Texture for cursor */
     private TextureRegion cursorTexture;
-    private final float cursorScl = .5f;
+    private final float cursorScl = .33f;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -524,7 +524,7 @@ public class GameMode implements Screen {
         if(cursor) {
             int mx = Gdx.input.getX();
             int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-            canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
+            canvas.draw(cursorTexture, Color.WHITE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
                     mx, my, 0, cursorScl, cursorScl);
         }
 

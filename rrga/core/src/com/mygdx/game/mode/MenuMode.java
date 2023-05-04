@@ -40,7 +40,7 @@ public class MenuMode extends MenuScreen {
 
 
     /** Types of button by shape */
-    enum ButtonShape {
+    public enum ButtonShape {
         RECTANGLE,
         CIRCLE
     }
@@ -202,7 +202,6 @@ public class MenuMode extends MenuScreen {
     private TextureRegion cursorTexture;
     /** pixmap for the cursor */
     private Cursor newCursor;
-
     /** number of levels in the game. NEED TO CHANGE THIS AS WE ADD MORE LEVELS */
     public final int LEVEL_COUNT = 3;
 
@@ -596,8 +595,10 @@ public class MenuMode extends MenuScreen {
         //draw cursor
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-                mx, my, 0, .5f, .5f);
+        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+                    mx, my, 0, .4f, .4f);
+        }
 
         canvas.end();
     }

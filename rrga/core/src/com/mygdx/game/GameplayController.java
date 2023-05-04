@@ -401,6 +401,7 @@ public class GameplayController implements ContactListener {
         if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
 
         //UMBRELLA
+        umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
         if (!input.didZoom() && !showGoal){
             // Check for whether the player toggled the umbrella being open/closed

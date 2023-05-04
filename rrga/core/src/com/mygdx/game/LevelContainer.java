@@ -168,6 +168,10 @@ public class LevelContainer{
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
+    /**
+     * Texture asset for umbrella open animation when depleted
+     */
+    private Texture umbrellaOpenEmptyAnimationTexture;
 
     /**
      * Texture asset for umbrella boost animation
@@ -288,6 +292,7 @@ public class LevelContainer{
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
         avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+        umbrellaOpenEmptyAnimationTexture = directory.getEntry("game:umbrella_open_empty_animation", Texture.class);
         umbrellaBoostAnimationTexture =  directory.getEntry("game:umbrella_dodge_animation", Texture.class);
         goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
         for(int i = 0; i < 9; i++){
@@ -566,7 +571,7 @@ public class LevelContainer{
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
         umbrella.useClosedTexture();
-        umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
+        umbrella.setOpenAnimation(umbrellaOpenAnimationTexture, umbrellaOpenEmptyAnimationTexture);
         umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
         umbrella.setClosedMomentumX(globalConstants.get("umbrella").getFloat("closedmomentumX"));
         umbrella.setClosedMomentumY(globalConstants.get("umbrella").getFloat("closedmomentumY"));
