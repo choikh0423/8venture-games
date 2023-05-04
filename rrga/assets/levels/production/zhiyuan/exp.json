@@ -26,43 +26,7 @@
          "draworder":"topdown",
          "id":3,
          "name":"text",
-         "objects":[
-                {
-                 "id":22,
-                 "properties":[
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":26
-                        }],
-                 "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
-                 "x":348.984088127295,
-                 "y":828.396572827417
-                }, 
-                {
-                 "id":23,
-                 "template":"..\/..\/templates\/spawn.json",
-                 "x":348.984088127295,
-                 "y":801.958384332925
-                }, 
-                {
-                 "id":26,
-                 "template":"..\/..\/templates\/path_point.json",
-                 "x":873.544093178037,
-                 "y":826.400443704936
-                }, 
-                {
-                 "id":36,
-                 "properties":[
-                        {
-                         "name":"strike_duration",
-                         "type":"int",
-                         "value":100
-                        }],
-                 "template":"..\/..\/templates\/lightning\/in_lightning.json",
-                 "x":494.388027792624,
-                 "y":494.388027792624
-                }],
+         "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -75,40 +39,16 @@
          "name":"top",
          "objects":[
                 {
-                 "gid":129,
-                 "height":337,
-                 "id":38,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":646,
-                 "x":502.405130946018,
-                 "y":200.927578834848
+                 "id":54,
+                 "template":"..\/..\/templates\/spawn.json",
+                 "x":456.974879743453,
+                 "y":732.228754676643
                 }, 
                 {
-                 "gid":129,
-                 "height":337,
-                 "id":39,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":646,
-                 "x":360.769641902726,
-                 "y":291.788081239979
-                }, 
-                {
-                 "gid":131,
-                 "height":146,
-                 "id":40,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":220,
-                 "x":975.414216996259,
-                 "y":366.114377338322
+                 "id":55,
+                 "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
+                 "x":459.647247461251,
+                 "y":750.935328701229
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -117,7 +57,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":41,
+ "nextobjectid":70,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

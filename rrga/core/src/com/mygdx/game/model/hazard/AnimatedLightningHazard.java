@@ -4,25 +4,17 @@ package com.mygdx.game.model.hazard;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
-import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.FilmStrip;
 
 public class AnimatedLightningHazard extends ComplexObstacle implements HazardModel, Drawable {
 
     private static final int DEFAULT_STRIKE_DURATION = 100;
-
-    /** Damage of a lightning hazard */
-    private static final int LIGHTNING_DAMAGE = 1;
-
-    /** Knockback of a lightning hazard */
-    private static final float LIGHTNING_KNOCKBACK = 0;
 
     private final Vector2 temp = new Vector2();
 
@@ -45,23 +37,27 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
     private final FilmStrip frames;
 
     /** the duration count for each frame of the animation */
-    private final int[] frameCounts = new int[]{12, 12, 13, 13, 14, 0};
+    private final int[] frameCounts = new int[]{2, 2, 3, 3, 4, 0};
 
     /** the number of display frames remaining for the current frame of the animation */
     private int frameCounter;
 
     /** the number of frames to wait until next strike cycle */
-    private int waitFrameCount;
+    private final int waitFrameCount;
 
     /** the current remaining number of frames to wait until next strike cycle */
     private int waitCounter;
+
+    private final int damage;
+
+    private final float knockBack;
 
     /**
      * Creates an animating lightning whose properties are contained within the given data.
      * @param data JSON data with properties: position, dimensions, filmstrip size
      * @param animationTexture the filmstrip containing each frame of the animation
      */
-    public AnimatedLightningHazard(JsonValue data, Texture animationTexture){
+    public AnimatedLightningHazard(JsonValue data, Texture animationTexture, int dmg, float knockBack){
         super(data.getFloat("x"), data.getFloat("y"));
         drawDepth = data.getInt("depth");
         flippedX = data.getBoolean("flipped");
@@ -89,14 +85,11 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         float y = data.getFloat("y");
         for (JsonValue hitBoxData : data.get("hitboxes")){
             float[] points = hitBoxData.asFloatArray();
-            // could also use PolygonHazard, but trying this to see if any difference.
-            Obstacle o = new PolygonObstacle(points, x, y);
+            Obstacle o = new PolygonHazard(x, y, points, dmg, knockBack, temp);
             bodies.add(o);
-            o.setBodyType(BodyDef.BodyType.StaticBody);
-            o.setDensity(0);
-            o.setFriction(0);
-            o.setRestitution(0);
         }
+        this.damage = dmg;
+        this.knockBack = knockBack;
     }
 
     @Override
@@ -105,7 +98,7 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
             return false;
         }
 
-        // NOTE: this is a N hit-box model.
+        // NOTE: this is an N hit-box model.
         // At most one of the hit-box is active at any given time.
         // initially, no hit-box is active.
         for (Obstacle hitBox : bodies){
@@ -182,19 +175,18 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
 
     @Override
     public int getDamage() {
-        return LIGHTNING_DAMAGE;
+        return damage;
     }
 
     @Override
     public float getKnockBackScl() {
-        // no knock back
-        return LIGHTNING_KNOCKBACK;
+        return knockBack;
     }
 
     @Override
     public Vector2 getKnockBackForce() {
         // no knock back
-        return temp.set(0,0);
+        return temp.set(0,-1);
     }
 
     @Override

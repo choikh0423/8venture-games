@@ -57,7 +57,7 @@ public class LevelParser {
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
-    private ArrayList<TiledLayer> layers = new ArrayList<>();
+    private final ArrayList<TiledLayer> layers = new ArrayList<>();
 
     /** the list of Sticker objects */
     private final ArrayList<Sticker> stickers = new ArrayList<>();
@@ -131,7 +131,7 @@ public class LevelParser {
     private static final float windDirDefault = 0;
 
     /** maps from tileset name (bushes, cliffs, etc) to its undivided texture */
-    private final HashMap<String, Texture> textureMap;
+    private final HashMap<String, Texture> tileSetTextureMap;
 
     /** maps from tileset name (bushes, cliffs, etc) to its JSON data */
     private final HashMap<String, JsonValue> tileSetJsonMap;
@@ -295,19 +295,18 @@ public class LevelParser {
         };
 
         // save tileset textures and tileset JSON data
-        textureMap = new HashMap<>();
+        tileSetTextureMap = new HashMap<>();
         tileSetJsonMap = new HashMap<>();
-        // TODO: remove bushes_old in assets.json + globalconstants.json + Tiled levels, nothing to update here.
         String[] tileSetFileNames = globalConstants.get("tilesets").get("filenames").asStringArray();
         for (String tileSetName : tileSetFileNames){
-            textureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
+            tileSetTextureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
             tileSetJsonMap.put(tileSetName + ".json", directory.getEntry("data:"+tileSetName, JsonValue.class));
         }
 
         // add object json
         gameObjectTiles = directory.getEntry("data:objects", JsonValue.class).get("tiles");
 
-        // load all stickers
+        // load all sticker textures
         stickerTextures = new Texture[]{
                 directory.getEntry("stickers:dcloud0", Texture.class),
                 directory.getEntry("stickers:dcloud1", Texture.class),
@@ -608,8 +607,7 @@ public class LevelParser {
      * This method is specifically used to convert a given point p whose current origin point is the point (cx,cy)
      * where (cx,cy) is already expressed in the new coordinate system. The original coordinate system where
      * (0,0) -> (cx,cy) is a standard graphics coordinate system and the new coordinate system is standard cartesian
-     * coordinate system.
-     *
+     * coordinate system.<br>
      * Note: p is modified directly.
      * @param p (x,y) expressed in relation to (cx,cy) being the origin
      * @param cx the x-offset of the old origin from the new
@@ -738,7 +736,7 @@ public class LevelParser {
 
     /**
      * processes a single animated lightning object into JSON data
-     * @param rawData unproecessed
+     * @param rawData unprocessed lightning
      */
     private JsonValue processAnimatedLightning(JsonValue rawData){
         JsonValue data = new JsonValue(JsonValue.ValueType.object);
@@ -784,21 +782,21 @@ public class LevelParser {
     }
 
     /**
-     * deprecated
-     * @param rawData deprecated
+     * processes a single still lightning object into JSON data
+     * @param l unprocessed lightning data
      */
-    private JsonValue processStillLightning(JsonValue rawData){
-        //lightning raw data
-        JsonValue l = rawData;
-        //data we pass in to lightning constructor
+    private JsonValue processStillLightning(JsonValue l){
+        // processed data
         JsonValue data = new JsonValue(JsonValue.ValueType.object);
-        // set position data
+        // set position
         readPositionAndConvert(l, temp);
         addPosition(data, temp);
         JsonValue props = l.get("properties");
         data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
         data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
         data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_duration", lightningDefault).asInt()));
+        data.addChild("initial_timer_offset",
+                new JsonValue(getFromProperties(props, "initial_timer_offset", lightningDefault).asInt()));
         data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
         data.addChild("fill_texture", new JsonValue(true));
         return data;
@@ -1200,7 +1198,7 @@ public class LevelParser {
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
-            texture = textureMap.get(name);
+            texture = tileSetTextureMap.get(name);
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             width = tileSetJson.getInt("tilewidth");
