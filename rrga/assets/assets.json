@@ -125,7 +125,11 @@
         "tileset:trees_old": "levels/tilesets/trees_old.png",
         "tileset:cliffs_old": "levels/tilesets/cliffs_old.png",
         "tileset:bushes_pink": "levels/tilesets/bushes_pink.png",
-        "tileset:bushes_ground": "levels/tilesets/bushes_ground.png"
+        "tileset:bushes_ground": "levels/tilesets/bushes_ground.png",
+        "tileset:dirt": "levels/tilesets/dirt.png",
+        "tileset:cliffs_interior": "levels/tilesets/cliffs_interior.png",
+        "tileset:cliffs_exterior": "levels/tilesets/cliffs_exterior.png",
+        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -156,7 +160,11 @@
         "data:trees_old": "levels/tilesets/trees_old.json",
         "data:cliffs_old": "levels/tilesets/cliffs_old.json",
         "data:bushes_pink": "levels/tilesets/bushes_pink.json",
-        "data:bushes_ground": "levels/tilesets/bushes_ground.json"
+        "data:bushes_ground": "levels/tilesets/bushes_ground.json",
+        "data:dirt": "levels/tilesets/dirt.json",
+        "data:cliffs_interior": "levels/tilesets/cliffs_interior.json",
+        "data:cliffs_exterior": "levels/tilesets/cliffs_exterior.json",
+        "data:trees_foreground": "levels/tilesets/trees_foreground.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
