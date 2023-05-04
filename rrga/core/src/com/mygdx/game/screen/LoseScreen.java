@@ -41,7 +41,6 @@ public class LoseScreen extends MenuScreen{
         currentExitCode = Integer.MIN_VALUE;
     }
 
-
     /**
      * Draw the victory screen. Proceed to new screen if possible.
      * @param delta The time in seconds since the last render.
@@ -50,6 +49,7 @@ public class LoseScreen extends MenuScreen{
     public void render(float delta) {
         //Gdx.input.setCursorCatched(false);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+
         canvas.clear();
         canvas.setCameraHUD();
         canvas.begin();

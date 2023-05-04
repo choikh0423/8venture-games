@@ -87,10 +87,14 @@ public class PauseMode extends MenuScreen {
     private int pauseTagY;
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
+    /** true until the first call to render*/
+    public boolean first;
+
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
+        first = true;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
@@ -214,7 +218,17 @@ public class PauseMode extends MenuScreen {
 //            background.render(delta);
 //        }
         //Gdx.input.setCursorCatched(false);
+        int x=0, y=0;
+        if(first) {
+            x = Gdx.input.getX();
+            y = Gdx.input.getY();
+        }
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        if(first){
+            Gdx.input.setCursorPosition(x, y);
+            first = false;
+        }
+
         gameScreen.draw(delta, false);
         draw(delta);
     }
@@ -239,8 +253,10 @@ public class PauseMode extends MenuScreen {
         //draw mouse
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        canvas.draw(cursorTexture, Color.ORANGE, 0, cursorTexture.getRegionHeight(),
-                mx, my, 0, .5f, .5f);
+        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+                    mx, my, 0, .5f, .5f);
+        }
 
         canvas.end();
     }
@@ -298,6 +314,7 @@ public class PauseMode extends MenuScreen {
 
     public void setBackgroundScreen(GameMode gameScreen){
         this.gameScreen = gameScreen;
+        first = true;
     }
 
     public GameMode getBackgroundScreen(){

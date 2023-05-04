@@ -524,7 +524,7 @@ public class GameMode implements Screen {
         if(cursor) {
             int mx = Gdx.input.getX();
             int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-            canvas.draw(cursorTexture, Color.ORANGE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
+            canvas.draw(cursorTexture, Color.WHITE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
                     mx, my, 0, cursorScl, cursorScl);
         }
 
