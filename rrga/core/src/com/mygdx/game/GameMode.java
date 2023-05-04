@@ -33,7 +33,7 @@ public class GameMode implements Screen {
     private TextureRegion skyLayerTextureC;
     /** Texture for cursor */
     private TextureRegion cursorTexture;
-    private final float cursorScl = .5f;
+    private final float cursorScl = .33f;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/

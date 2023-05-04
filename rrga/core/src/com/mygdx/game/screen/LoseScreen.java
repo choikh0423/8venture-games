@@ -120,7 +120,7 @@ public class LoseScreen extends MenuScreen{
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
         if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, my, 0, .5f, .5f);
+                    mx, my, 0, .4f, .4f);
         }
 
         canvas.end();
