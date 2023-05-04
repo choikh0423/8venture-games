@@ -1,0 +1,29 @@
+{ "object":
+{
+  "height":0,
+  "id":229,
+  "name":"hazard_zone",
+  "polygon":[
+    {
+      "x":0,
+      "y":0
+    },
+    {
+      "x":0,
+      "y":128
+    },
+    {
+      "x":128,
+      "y":128
+    },
+    {
+      "x":128,
+      "y":0
+    }],
+  "rotation":0,
+  "type":"static_hazard",
+  "visible":true,
+  "width":0
+},
+  "type":"template"
+}

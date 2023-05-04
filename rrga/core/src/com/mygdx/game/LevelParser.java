@@ -140,10 +140,10 @@ public class LevelParser {
     private final JsonValue gameObjectTiles;
 
     /** the list of texture region cutters, one for each tileset */
-    private ArrayList<TileSetMaker> tileSetMakers = new ArrayList<>();
+    private ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
 
     /** the texture producer for stickers */
-    private TileSetMaker stickerMaker;
+    private CollectionTileSetMaker stickerMaker;
 
     /** list of all sticker textures in THE ORDER as given by sticker.json in levels/tilesets/ */
     private final Texture[] stickerTextures;
@@ -244,9 +244,9 @@ public class LevelParser {
         JsonValue greenBirdTemplate = directory.getEntry("green_bird:template", JsonValue.class);
         JsonValue brownBirdTemplate = directory.getEntry("brown_bird:template", JsonValue.class);
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
-        JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
+
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
-        JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
+        JsonValue staticHazardTemplate = directory.getEntry("hazard_zone:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
         JsonValue nestTemplate = directory.getEntry("nest:template", JsonValue.class);
 
@@ -257,6 +257,7 @@ public class LevelParser {
         JsonValue cloud3Template = directory.getEntry("cloud3:template", JsonValue.class);
 
         // growing lightning templates
+        JsonValue fillLightningTemplate = directory.getEntry("fill_lightning:template", JsonValue.class);
         JsonValue lightning0Template = directory.getEntry("lightning0:template", JsonValue.class);
         JsonValue lightning1Template = directory.getEntry("lightning1:template", JsonValue.class);
         JsonValue lightning2Template = directory.getEntry("lightning2:template", JsonValue.class);
@@ -269,8 +270,8 @@ public class LevelParser {
         brownBirdDefaultObj = brownBirdTemplate.get("object");
 
         pointDefault = pathPointTemplate.get("object").get("properties");
-        lightningDefault = lightningTemplate.get("object").get("properties");
-        lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
+        lightningDefault = fillLightningTemplate.get("object").get("properties");
+        lightningDefaultPoly = fillLightningTemplate.get("object").get("polygon");
         platformDefaultPoly = platformTemplate.get("object").get("polygon");
         staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
         windDefault = windTemplate.get("object").get("properties");
@@ -333,7 +334,7 @@ public class LevelParser {
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
         //get blue bird data for nests
-        blueBirdData = processBird(getBirdDefaultObj("blue"), new HashMap<Integer, JsonValue>());
+        blueBirdData = processBird(getBirdDefaultObj("blue"), null);
 
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
@@ -392,7 +393,7 @@ public class LevelParser {
 
         // begin object processing
         processBirds(birdRawData, trajectory);
-        processNewLightning(lightningRawData);
+        processLightning(lightningRawData);
         processPlatforms(platformRawData);
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
@@ -417,29 +418,31 @@ public class LevelParser {
         for (JsonValue obj : objs) {
             obj.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
             String template = obj.getString("template", "IGNORE");
-            if (template.contains("bird.json")) {
+            if (template.endsWith("bird.json")) {
                 birdRawData.add(obj);
-            } else if (template.contains("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
+            } else if (template.endsWith("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
                 platformRawData.add(obj);
-            } else if (template.contains("lightning.json")) {
+            } else if (template.endsWith("lightning.json")) {
                 lightningRawData.add(obj);
-            } else if (template.contains("path_point.json")) {
+            } else if (template.endsWith("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
-            } else if (template.contains("spawn.json")) {
+            } else if (template.endsWith("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
                 playerDepth = currentObjectDepth;
-            } else if (template.contains("goal.json")) {
+            } else if (template.endsWith("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
                 goalDepth = currentObjectDepth;
-            } else if (template.contains("static_hazard.json")){
+            } else if (template.endsWith("hazard_zone.json")){
                 staticHazardRawData.add(obj);
-            } else if (template.contains("wind.json")){
+            } else if (template.endsWith("wind.json")){
                 windRawData.add(obj);
-            } else if (template.contains("wind_dir.json")){
+            } else if (template.endsWith("wind_dir.json")){
                 windDirs.put(obj.getInt("id"), obj);
-            } else if (template.contains("cloud.json")){
+            } else if (template.endsWith("cloud.json")){
                 movingPlatRawData.add(obj);
-            } else if (template.contains("nest.json")){
+            } else if (template.endsWith("nest.json")){
+                nestRawData.add(obj);
+            } else if (template.endsWith("rock.json")){
                 nestRawData.add(obj);
             } else if (obj.has("gid")){
                 // treat as possibly a sticker, process it
@@ -449,14 +452,17 @@ public class LevelParser {
     }
 
     private void parseSticker(JsonValue obj) {
-        int gid = obj.getInt("gid");
+        long gid = obj.getInt("gid");
         TextureRegion texture = getTileFromImages(gid);
         if (texture == null){
             if (stickerMaker != null){
                 int id = (int) (gid & LOWER28BITMASK);
+                if (!stickerMaker.contains(id)){
+                    return;
+                }
                 boolean flipX = (gid & (1L << 31)) != 0;
                 boolean flipY = (gid & (1L << 30)) != 0;
-                texture = stickerMaker.getTileFromId(id, false, flipX, flipY);
+                texture = stickerMaker.getRegionFromId(id, flipX, flipY);
             }
             else {
                 return;
@@ -485,6 +491,9 @@ public class LevelParser {
         int idx = 1;
         seen.clear();
         seen.put(id, 0);
+        if (trajectory == null){
+            return -1;
+        }
         while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
             seen.put(next, idx);
             idx++;
@@ -712,10 +721,18 @@ public class LevelParser {
         return  data;
     }
 
-    private void processNewLightning(ArrayList<JsonValue> rawData){
+    private void processLightning(ArrayList<JsonValue> rawData){
         lightningData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < lightningData.length; ii++) {
-            lightningData[ii] = processNewLightning(rawData.get(ii));
+            JsonValue rawLightning = rawData.get(ii);
+            String lightningTemplateName = rawLightning.getString("template", "lightning.json");
+            if (lightningTemplateName.endsWith("fill_lightning.json")){
+                lightningData[ii] = processStillLightning(rawLightning);
+            }
+            else{
+                // one of the growing lightning
+                lightningData[ii] = processAnimatedLightning(rawLightning);
+            }
         }
     }
 
@@ -723,7 +740,7 @@ public class LevelParser {
      * processes a single animated lightning object into JSON data
      * @param rawData unproecessed
      */
-    private JsonValue processNewLightning(JsonValue rawData){
+    private JsonValue processAnimatedLightning(JsonValue rawData){
         JsonValue data = new JsonValue(JsonValue.ValueType.object);
         readPositionAndConvert(rawData, temp);
         addPosition(data, temp);
@@ -734,7 +751,9 @@ public class LevelParser {
         JsonValue lightningDefaultObj = lightningDefaultObjects[tileIndex];
         JsonValue lightningProps = lightningDefaultObj.get("properties");
         data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
-        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
+        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_duration", lightningProps).asInt()));
+        data.addChild("initial_timer_offset",
+                new JsonValue(getFromProperties(props, "initial_timer_offset", lightningProps).asInt()));
         // get unscaled-size data from lightning.json file (collection of all ligntning bolts)
         // get the AABB for the given lightning
         int gid = getProcessedGid(lightningDefaultObj);
@@ -760,6 +779,7 @@ public class LevelParser {
             hitboxes.addChild(shape);
         }
         data.addChild("hitboxes", hitboxes);
+        data.addChild("fill_texture", new JsonValue(false));
         return data;
     }
 
@@ -767,23 +787,21 @@ public class LevelParser {
      * deprecated
      * @param rawData deprecated
      */
-    private void processLightningOld(ArrayList<JsonValue> rawData){
-        lightningData = new JsonValue[rawData.size()];
-        for (int ii = 0; ii < lightningData.length; ii++) {
-            //data we pass in to lightning constructor
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            //lightning raw data
-            JsonValue l = rawData.get(ii);
-            // set position data
-            readPositionAndConvert(l, temp);
-            addPosition(data, temp);
-            JsonValue props = l.get("properties");
-            data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
-            data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
-            data.addChild("strike_timer_offset", new JsonValue(getFromProperties(props, "strike_timer_offset", lightningDefault).asInt()));
-            data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
-            lightningData[ii] = data;
-        }
+    private JsonValue processStillLightning(JsonValue rawData){
+        //lightning raw data
+        JsonValue l = rawData;
+        //data we pass in to lightning constructor
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        // set position data
+        readPositionAndConvert(l, temp);
+        addPosition(data, temp);
+        JsonValue props = l.get("properties");
+        data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
+        data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
+        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_duration", lightningDefault).asInt()));
+        data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
+        data.addChild("fill_texture", new JsonValue(true));
+        return data;
     }
 
     private void processPlatforms(ArrayList<JsonValue> rawData){
@@ -831,7 +849,6 @@ public class LevelParser {
             pos.addChild(new JsonValue(temp.x));
             pos.addChild(new JsonValue(temp.y));
             data.addChild("pos", pos);
-            //points
             data.addChild("dimensions", polyPoints(w.get("polygon"), windDefaultPoly));
             //magnitude and direction
             JsonValue props = w.get("properties");
@@ -1124,8 +1141,8 @@ public class LevelParser {
         boolean flipY = (gid & (1L << 30)) != 0;
         boolean flipD = (gid & (1L << 29)) != 0;
         // this loop should be fast with small number of tilesets
-        for (TileSetMaker tsm : tileSetMakers) {
-            if (tsm.contains(id)) return tsm.getTileFromId(id, flipD, flipX, flipY);
+        for (ImageTileSetMaker imageSet : tileSetMakers) {
+            if (imageSet.contains(id)) return imageSet.getTileFromId(id, flipD, flipX, flipY);
         }
         return null;
     }
@@ -1134,23 +1151,25 @@ public class LevelParser {
         // loop over array data and make texture regions
         JsonValue data = layer.get("data");
         Tile[] tiles = new Tile[data.size];
+        int worldWidth = (int) worldSize.x;
+        int worldHeight = (int) worldSize.y;
         for (int i = 0; i < tiles.length; i++){
             // the Tiled ID is a 32-bit UNSIGNED integer
             long rawId = data.get(i).asLong();
             if (rawId == 0){
                 continue;
             }
-            int col = i % (int) worldSize.x;
-            int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
-            int idx = row * (int) worldSize.x + col;
+            int col = i % worldWidth;
+            int row = worldHeight - 1 -  i / worldWidth;
+            int idx = row * worldWidth + col;
             tiles[idx] = getTileFromImages(rawId);
         }
-        layers.add(new TiledLayer(tiles, layer.getInt("__DEPTH__"), (int) worldSize.x, (int) worldSize.y));
+        layers.add(new TiledLayer(tiles, layer.getInt("__DEPTH__"), worldWidth, worldHeight));
     }
 
     /**
      * A TileSetMaker produces texture regions upon request.
-     * This class is useful when converting Tile IDs into textures.
+     * This class is useful when associating Tile IDs with textures.
      */
     private abstract static class TileSetMaker {
 
@@ -1166,17 +1185,6 @@ public class LevelParser {
         public boolean contains(int gid){
             return gid <= maxId && gid >= minId;
         }
-
-        /**
-         * for single image tilesets: returns a subregion of the texture<br>
-         * for collection-based tilesets: returns a complete texture from set
-         * @param id the associated id of the desired Tile, where contains(id) is true.
-         * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
-         * @param flipX whether to flip the resulting region horizontally
-         * @param flipY whether to flip the resulting region vertically
-         * @return a tile from the tile set corresponding to the given id
-         */
-        public abstract Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY);
     }
 
     /**
@@ -1200,6 +1208,14 @@ public class LevelParser {
             columns = tileSetJson.getInt("columns");
         }
 
+        /**
+         * returns a subregion of the tileset texture <br>
+         * @param id the associated id of the desired Tile, where contains(id) is true.
+         * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
+         * @return a tile from the tile set corresponding to the given id
+         */
         public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
@@ -1246,7 +1262,7 @@ public class LevelParser {
      * A CollectionTileSetMaker produces texture regions upon request by retrieving texture regions from a list of
      * textures. This is particularly useful for retrieving unrelated textures (stickers).
      */
-    private static class CollectionTileSetMaker extends TileSetMaker {
+    private static class CollectionTileSetMaker extends TileSetMaker{
 
         private final Texture[] collection;
         CollectionTileSetMaker(Texture[] collection, int firstGid){
@@ -1255,10 +1271,17 @@ public class LevelParser {
             this.collection = collection;
         }
 
-        public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY) {
-            Tile tile = new Tile(collection[id - minId]);
-            tile.flip(flipX, flipY);
-            return tile;
+        /**
+         * returns one of the textures as a texture region <br>
+         * @param id the associated id of the desired Tile, where contains(id) is true.
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
+         * @return a texture from the collection set corresponding to the given id
+         */
+        public TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY) {
+            TextureRegion texture = new TextureRegion(collection[id - minId]);
+            texture.flip(flipX, flipY);
+            return texture;
         }
     }
 
