@@ -40,7 +40,7 @@ public class MenuMode extends MenuScreen {
 
 
     /** Types of button by shape */
-    enum ButtonShape {
+    public enum ButtonShape {
         RECTANGLE,
         CIRCLE
     }

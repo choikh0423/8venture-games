@@ -112,8 +112,8 @@ public class PauseMode extends MenuScreen {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
-        TextureRegion menuTexture = new TextureRegion(directory.getEntry("pause:menu_button", Texture.class));
-        TextureRegion restartTexture = new TextureRegion(directory.getEntry("pause:restart_button", Texture.class));
+        TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
+        TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
@@ -217,6 +217,7 @@ public class PauseMode extends MenuScreen {
 //        if (background != null){
 //            background.render(delta);
 //        }
+
         //Gdx.input.setCursorCatched(false);
         int x=0, y=0;
         if(first) {
@@ -314,7 +315,6 @@ public class PauseMode extends MenuScreen {
 
     public void setBackgroundScreen(GameMode gameScreen){
         this.gameScreen = gameScreen;
-        first = true;
     }
 
     public GameMode getBackgroundScreen(){
@@ -324,7 +324,6 @@ public class PauseMode extends MenuScreen {
     public void reset() {
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
-
     }
 }
 
