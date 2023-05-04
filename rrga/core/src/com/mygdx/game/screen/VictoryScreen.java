@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.GameMode;
 import com.mygdx.game.mode.MenuButton;
 import com.mygdx.game.mode.MenuMode;
 import com.mygdx.game.utility.assets.AssetDirectory;
@@ -28,6 +29,8 @@ public class VictoryScreen extends MenuScreen{
 
     /** true until the first call to render*/
     public boolean first;
+    /** The Screen to draw underneath the pause screen*/
+    private GameMode gameScreen;
 
     /////////////////////DRAWING BUTTONS AND TAGS/////////////////////////
     /** menu button*/
@@ -70,7 +73,7 @@ public class VictoryScreen extends MenuScreen{
 
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
-        //overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
         first = true;
 
@@ -96,13 +99,15 @@ public class VictoryScreen extends MenuScreen{
             first = false;
         }
 
-        canvas.clear();
+        //comment this out if opaque foreground
+        gameScreen.draw(delta, false);
+
         canvas.setCameraHUD();
         canvas.begin();
 
-        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
-        //below line for transparent foreground
-        //canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
+        //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
+        //above line for opaque foreground, below line for transparent foreground
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
 
         canvas.draw(winTag, Color.WHITE, winTag.getRegionWidth()/2f, winTag.getRegionHeight()/2f,
                 winTagX, winTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
@@ -132,6 +137,7 @@ public class VictoryScreen extends MenuScreen{
         listener = null;
         canvas = null;
         foregroundTexture = null;
+        overlayTint = null;
     }
 
     @Override
@@ -174,6 +180,10 @@ public class VictoryScreen extends MenuScreen{
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
+    }
+
+    public void setBackgroundScreen(GameMode gameScreen){
+        this.gameScreen = gameScreen;
     }
 
     @Override
@@ -234,7 +244,7 @@ public class VictoryScreen extends MenuScreen{
     }
 
     public void reset() {
-        //overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
     }
 }
