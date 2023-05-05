@@ -145,8 +145,14 @@ public class LevelParser {
     /** the texture producer for stickers */
     private CollectionTileSetMaker stickerMaker;
 
-    /** list of all sticker textures in THE ORDER as given by sticker.json in levels/tilesets/ */
-    private final Texture[] stickerTextures;
+    /** The max id in a sticker set is not necessarily size() - 1 due to deletions.*/
+    private int maxStickerSetId;
+
+    /** (name -> texture) map of all stickers as specified by sticker.json in levels/tilesets/ */
+    private final HashMap<String, TextureRegion> stickerTextureMap;
+
+    /** (id -> name) map of all stickers as specified by sticker.json in levels/tilesets/ */
+    private final IntMap<String> stickerNameMap;
 
     private static final int LOWER28BITMASK = 0xFFFFFFF;
 
@@ -306,13 +312,34 @@ public class LevelParser {
         // add object json
         gameObjectTiles = directory.getEntry("data:objects", JsonValue.class).get("tiles");
 
-        // load all sticker textures
-        stickerTextures = new Texture[]{
-                directory.getEntry("stickers:dcloud0", Texture.class),
-                directory.getEntry("stickers:dcloud1", Texture.class),
-                directory.getEntry("stickers:dcloud2", Texture.class),
-                directory.getEntry("stickers:dcloud3", Texture.class)
-        };
+        // load all sticker textures (according to atlas file)
+        stickerTextureMap = new HashMap<>();
+        JsonValue atlas = directory.getEntry("data:stickers_atlas", JsonValue.class);
+        for (JsonValue imageAtlas : atlas){
+            String textureName = imageAtlas.name;
+            Texture texture = directory.getEntry("stickers:"+textureName, Texture.class);
+            // treat as entire asset
+            if (imageAtlas.isString()){
+                stickerTextureMap.put(textureName + imageAtlas.asString(), new TextureRegion(texture));
+                continue;
+            }
+            // asset should be broken up
+            for (JsonValue region : imageAtlas){
+                String regionName = region.name;
+                int[] arr = region.asIntArray();
+                stickerTextureMap.put(textureName + "_" + regionName, new TextureRegion(texture, arr[0], arr[1], arr[2], arr[3]));
+            }
+        }
+        stickerNameMap = new IntMap<>();
+        JsonValue stickerJson = directory.getEntry("data:stickers", JsonValue.class);
+        maxStickerSetId = 0;
+        for (JsonValue stickerTile : stickerJson.get("tiles")){
+            int id = stickerTile.getInt("id");
+            maxStickerSetId = Math.max(maxStickerSetId, id);
+            String[] sourcePath = stickerTile.getString("image").split("/");
+            String sourceImageName = sourcePath[sourcePath.length - 1];
+            stickerNameMap.put(id, sourceImageName);
+        }
     }
 
     /**
@@ -344,7 +371,7 @@ public class LevelParser {
             String source = ts.getString("source");
             String[] pathNames = source.split("/");
             if (pathNames[pathNames.length - 1].equals("stickers.json")){
-                stickerMaker = new CollectionTileSetMaker(stickerTextures, ts.getInt("firstgid"));
+                stickerMaker = new CollectionTileSetMaker(stickerTextureMap, stickerNameMap, ts.getInt("firstgid"));
                 continue;
             }
             JsonValue j = tileSetJsonMap.get(pathNames[pathNames.length - 1]);
@@ -1262,11 +1289,13 @@ public class LevelParser {
      */
     private static class CollectionTileSetMaker extends TileSetMaker{
 
-        private final Texture[] collection;
-        CollectionTileSetMaker(Texture[] collection, int firstGid){
+        private final HashMap<String, TextureRegion> collection;
+        private final IntMap<String> idNameMap;
+        CollectionTileSetMaker(HashMap<String, TextureRegion> collection, IntMap<String> idNameMap, int firstGid){
             minId = firstGid;
-            maxId = collection.length - 1 + minId;
+            maxId = collection.size() - 1 + minId;
             this.collection = collection;
+            this.idNameMap = idNameMap;
         }
 
         /**
@@ -1277,7 +1306,9 @@ public class LevelParser {
          * @return a texture from the collection set corresponding to the given id
          */
         public TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY) {
-            TextureRegion texture = new TextureRegion(collection[id - minId]);
+            System.out.println(id - minId);
+            System.out.println(idNameMap.get(id-minId));
+            TextureRegion texture = new TextureRegion(collection.get(idNameMap.get(id - minId)));
             texture.flip(flipX, flipY);
             return texture;
         }
