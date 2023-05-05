@@ -615,7 +615,7 @@
                          "type":"int",
                          "value":100
                         }],
-                 "template":"templates\/lightning.json",
+                 "template":"templates\/lightning\/fill_lightning.json",
                  "x":-19.2081929380636,
                  "y":1100.81180026021
                 }, 
@@ -851,7 +851,7 @@
                          "type":"int",
                          "value":0
                         }],
-                 "template":"templates\/lightning.json",
+                 "template":"templates\/lightning\/fill_lightning.json",
                  "x":1174.82373831168,
                  "y":1366.14435085658
                 }, 
