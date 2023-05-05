@@ -77,13 +77,7 @@ public class GameCanvas {
     private BlendState blend;
 
     /** Camera for the underlying SpriteBatch */
-    private OrthographicCamera camera;
-
-    /** Dynamic Camera instance */
-    private OrthographicCamera dynamicCamera;
-
-    /** Static HUD Camera */
-    private OrthographicCamera hudCamera;
+    private CameraController camera;
 
     /** Value to cache window width (if we are currently full screen) */
     int width;
@@ -141,13 +135,9 @@ public class GameCanvas {
         debugRender = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
-        dynamicCamera = new OrthographicCamera(getWidth(),getHeight());
-        dynamicCamera.setToOrtho(false);
-        hudCamera = new OrthographicCamera(getWidth(),getHeight());
-        hudCamera.setToOrtho(false);
-        setCameraDynamic();
-        spriteBatch.setProjectionMatrix(camera.combined);
-        debugRender.setProjectionMatrix(camera.combined);
+        camera = new CameraController(getWidth(), getHeight());
+        spriteBatch.setProjectionMatrix(camera.combined());
+        debugRender.setProjectionMatrix(camera.combined());
 
         // Initialize the cache objects
         holder = new TextureRegion();
@@ -286,7 +276,7 @@ public class GameCanvas {
      * This method raises an IllegalStateException if called while drawing is
      * active (e.g. in-between a begin-end pair).
      *
-     * @param fullscreen Whether this canvas should change to fullscreen.
+     * @param value Whether this canvas should change to fullscreen.
      * @param desktop      Whether to use the current desktop resolution
      */
     public void setFullscreen(boolean value, boolean desktop) {
@@ -310,33 +300,7 @@ public class GameCanvas {
     public void resize() {
         // Resizing screws up the spriteBatch projection matrix
         spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
-
-        // TA Vineet
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
-
-        float newWidth;
-        float newHeight;
-        float maxWidth = Gdx.graphics.getHeight() * 16f/9f;
-        if (maxWidth > Gdx.graphics.getWidth()) {
-            newWidth = Gdx.graphics.getWidth();
-            newHeight = Gdx.graphics.getWidth() * 9f / 16f;
-        }
-        else {
-            newWidth = maxWidth;
-            newHeight = maxWidth * 9f/16f;
-        }
-
-        dynamicCamera.viewportWidth = newWidth;
-        dynamicCamera.viewportHeight = newHeight;
-        dynamicCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
-        dynamicCamera.update();
-
-        hudCamera.viewportWidth = newWidth;
-        hudCamera.viewportHeight = newHeight;
-        hudCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, camera.position.z);
-        hudCamera.update();
-        //System.out.println(camera.viewportWidth);
-        //System.out.println(camera.viewportHeight);
+        camera.update(getWidth(), getHeight());
     }
 
     /**
@@ -387,9 +351,10 @@ public class GameCanvas {
      */
     public void clear() {
         // Clear the screen
-        Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
-        //Gdx.gl.glClearColor(0,0,0,1.0f);
+        //Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
+        Gdx.gl.glClearColor(0,0,0,1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        camera.getViewport().apply();
     }
 
     /**
@@ -401,7 +366,7 @@ public class GameCanvas {
      */
     public void begin(Affine2 affine) {
         global.setAsAffine(affine);
-        global.mulLeft(camera.combined);
+        global.mulLeft(camera.combined());
         spriteBatch.setProjectionMatrix(global);
 
         setBlendState(BlendState.NO_PREMULT);
@@ -420,7 +385,7 @@ public class GameCanvas {
     public void begin(float sx, float sy) {
         global.idt();
         global.scl(sx,sy,1.0f);
-        global.mulLeft(camera.combined);
+        global.mulLeft(camera.combined());
         spriteBatch.setProjectionMatrix(global);
 
         spriteBatch.begin();
@@ -433,7 +398,17 @@ public class GameCanvas {
      * Nothing is flushed to the graphics card until the method end() is called.
      */
     public void begin() {
-        spriteBatch.setProjectionMatrix(camera.combined);
+        camera.setViewCenter();
+        camera.getViewport().apply();
+        spriteBatch.setProjectionMatrix(camera.combined());
+        spriteBatch.begin();
+        active = DrawPass.STANDARD;
+    }
+
+    public void beginTranslated(float tx, float ty){
+        camera.setToTargetPoint(tx, ty);
+        camera.getViewport().apply();
+        spriteBatch.setProjectionMatrix(camera.combined());
         spriteBatch.begin();
         active = DrawPass.STANDARD;
     }
@@ -1019,7 +994,7 @@ public class GameCanvas {
      */
     public void beginDebug(Affine2 affine) {
         global.setAsAffine(affine);
-        global.mulLeft(camera.combined);
+        global.mulLeft(camera.combined());
         debugRender.setProjectionMatrix(global);
 
         debugRender.begin(ShapeRenderer.ShapeType.Line);
@@ -1037,7 +1012,7 @@ public class GameCanvas {
     public void beginDebug(float sx, float sy) {
         global.idt();
         global.scl(sx,sy,1.0f);
-        global.mulLeft(camera.combined);
+        global.mulLeft(camera.combined());
         debugRender.setProjectionMatrix(global);
 
         debugRender.begin(ShapeRenderer.ShapeType.Line);
@@ -1050,7 +1025,7 @@ public class GameCanvas {
      * Nothing is flushed to the graphics card until the method end() is called.
      */
     public void beginDebug() {
-        debugRender.setProjectionMatrix(camera.combined);
+        debugRender.setProjectionMatrix(camera.combined());
         debugRender.begin(ShapeRenderer.ShapeType.Filled);
         debugRender.setColor(Color.RED);
         debugRender.circle(0, 0, 10);
@@ -1246,27 +1221,20 @@ public class GameCanvas {
         local.translate(-ox,-oy);
     }
 
-    /**
-     * updates camera to a given point (px, py) on screen.
-     * @param px nonnegative coordinate in bounds
-     * @param py nonnegative coordinate in bounds
-     */
-    public void translateCameraToPoint(float px, float py){
-        camera.translate(px - camera.position.x, py - camera.position.y);
-        camera.update();
+    public CameraController getCamera() {
+        return camera;
     }
 
-    public void setCameraDynamic(){
-        camera = dynamicCamera;
-    }
+    //    /**
+//     * updates camera to a given point (px, py) on screen.
+//     * @param px nonnegative coordinate in bounds
+//     * @param py nonnegative coordinate in bounds
+//     */
+//    public void translateCameraToPoint(float px, float py){
+//        camera.followTargetPoint(px, py);
+//    }
 
-    public void setCameraHUD(){
-        camera = hudCamera;
-    }
 
-    public void setDynamicCameraZoom(float zoom){
-        dynamicCamera.viewportWidth = hudCamera.viewportWidth * zoom;
-        dynamicCamera.viewportHeight = hudCamera.viewportHeight * zoom;
-        dynamicCamera.update();
-    }
+
+
 }

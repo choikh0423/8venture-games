@@ -102,7 +102,6 @@ public class VictoryScreen extends MenuScreen{
         //comment this out if opaque foreground
         gameScreen.draw(delta, false);
 
-        canvas.setCameraHUD();
         canvas.begin();
 
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
