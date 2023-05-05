@@ -707,7 +707,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	}
   
   /**
-     * Applies lighter force to the body of this player.
+     * Attempts to apply lighter force to the body of this player.
+   	 * @return whether force was actually applied
      */
     public boolean applyLighterForce(float umbAng) {
         if (lighterFuel == maxLighterFuel) {

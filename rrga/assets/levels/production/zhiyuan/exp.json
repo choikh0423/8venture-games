@@ -46,15 +46,26 @@
                 }, 
                 {
                  "id":55,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":2
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":74
+                        }],
                  "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
                  "x":459.647247461251,
                  "y":750.935328701229
                 }, 
                 {
-                 "id":71,
-                 "template":"..\/..\/templates\/wind.json",
-                 "x":335.022522522523,
-                 "y":427.927927927928
+                 "id":74,
+                 "template":"..\/..\/templates\/path_point.json",
+                 "x":915.492957746479,
+                 "y":770.246478873239
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -63,7 +74,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":72,
+ "nextobjectid":75,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

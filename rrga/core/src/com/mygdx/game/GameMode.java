@@ -223,7 +223,7 @@ public class GameMode implements Screen {
 
         // Create the controllers.
         inputController = new InputController();
-        gameplayController = new GameplayController(bounds, gravity, 0);
+        gameplayController = new GameplayController(bounds, gravity);
         cache = new Vector2(1,1);
     }
 

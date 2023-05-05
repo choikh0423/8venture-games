@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -41,24 +40,9 @@ public class GameplayController implements ContactListener {
     public static final int WORLD_POSIT = 2;
 
     /**
-     * Width of the game world in Box2d units
-     */
-    protected static final float DEFAULT_WIDTH = 32.0f;
-
-    /**
-     * Height of the game world in Box2d units
-     */
-    protected static final float DEFAULT_HEIGHT = 18.0f;
-
-    /**
      * the iframes effect duration
      */
     public static final int NUM_I_FRAMES = 120;
-
-    /**
-     * All the objects in the world.
-     */
-    protected PooledList<Obstacle> objects;
 
     /**
      * Queue for adding objects
@@ -162,19 +146,9 @@ public class GameplayController implements ContactListener {
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
 
     /**
-     * The set of all birds currently in the level
-     */
-    private PooledList<BirdHazard> birds = new PooledList<>();
-
-    /**
      * The set of all nests currently in the level
      */
-    private ObjectSet<NestHazard> nests = new ObjectSet<>();
-
-    /**
-     * The set of all moving platforms currently in the level
-     */
-    private ObjectSet<MovingPlatformModel> movingPlats = new ObjectSet<>();
+    private final ObjectSet<NestHazard> nests = new ObjectSet<>();
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
@@ -241,33 +215,14 @@ public class GameplayController implements ContactListener {
      */
     private LevelContainer levelContainer;
 
-    // TODO: ====================== BEGIN CURRENTLY UNUSED FIELDS =============================
-
-    /**
-     * Listener that will update the player mode when we are done.
-     */
-    private ScreenListener listener;
-
-    /**
-     * JSON value storing all level data
-     */
-    private JsonValue levels;
-
-    /**
-     * The default value of gravity (going down)
-     */
-    protected static final float DEFAULT_GRAVITY = -4.9f;
-
-    private long jumpId = -1;
-    private long fireId = -1;
-    private long plopId = -1;
+    // ====================== (BEGIN) SOUND-related fields =============================
 
     /** The background music volume */
     private float musicVolume = 0.5f;
     /** The sound effects volume */
     private float SFXVolume = 0.0f;
 
-    // TODO: ====================== (END) CURRENTLY UNUSED FIELDS =============================
+    // ====================== (END) SOUND-related fields =============================
 
 
     /**
@@ -275,7 +230,7 @@ public class GameplayController implements ContactListener {
      * <p>
      * The game has default gravity and other settings
      */
-    public GameplayController(Rectangle bounds, Vector2 gravity, int level) {
+    public GameplayController(Rectangle bounds, Vector2 gravity) {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
         this.scale = new Vector2(1, 1);
@@ -325,9 +280,8 @@ public class GameplayController implements ContactListener {
         touchingMovingCloud = false;
 
         Vector2 gravity = new Vector2(world.getGravity());
-        objects = levelContainer.getObjects();
 
-        for (Obstacle obj : objects) {
+        for (Obstacle obj : levelContainer.getObjects()) {
             obj.deactivatePhysics(world);
         }
 
@@ -346,7 +300,6 @@ public class GameplayController implements ContactListener {
         // Populate LevelContainer w/ same level
         levelContainer.populateLevel();
         goalDoor = levelContainer.getGoalDoor();
-
         avatar = levelContainer.getAvatar();
         umbrella = levelContainer.getUmbrella();
 
@@ -361,6 +314,11 @@ public class GameplayController implements ContactListener {
     public boolean showGoal = true;
     public int resetCounter = 0;
 
+    // track updates to player
+    boolean moved = false;
+    boolean umbrellaBoosted = false;
+    boolean windPushed = false;
+
     /**
      * The core gameplay loop of this world.
      * <p>
@@ -372,16 +330,6 @@ public class GameplayController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void update(InputController input, float dt) {
-        // Get objects from level container
-        //TODO: Is this a 1 time thing??
-        this.avatar = levelContainer.getAvatar();
-        this.umbrella = levelContainer.getUmbrella();
-        this.birds = levelContainer.getBirds();
-        this.nests = levelContainer.getNests();
-        this.world = levelContainer.getWorld();
-        this.objects = levelContainer.getObjects();
-        this.movingPlats = levelContainer.getMovingPlats();
-
         // Process actions in object model
 
         // player dies if falling through void
@@ -501,6 +449,7 @@ public class GameplayController implements ContactListener {
                 windStrongFrame --;
             }
             avatar.applyWindForce(cache.x/count, cache.y/count);
+            windPushed = cache.len2() > 0;
 
         } else {
             // Gradually Reset Strong Wind SFX
@@ -510,8 +459,10 @@ public class GameplayController implements ContactListener {
             prevInWind = false;
         }
 
+
         // Process player movement
         float angle = umbrella.getRotation();
+        moved = input.getHorizontal() != 0;
         if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
@@ -563,7 +514,7 @@ public class GameplayController implements ContactListener {
 //        umbrella.applyForce();
 
         //move moving platforms
-        for(MovingPlatformModel mp: movingPlats){
+        for(MovingPlatformModel mp: levelContainer.getMovingPlats()){
             mp.move();
         }
 
@@ -575,7 +526,7 @@ public class GameplayController implements ContactListener {
         Vector2 target = temp;
 
         //loop through birds
-        for (BirdHazard bird : birds) {
+        for (BirdHazard bird : levelContainer.getBirds()) {
             //If sees target, wait before attacking
             if(bird.seesTarget){
                 if(bird.attackWait == 0){
@@ -669,12 +620,35 @@ public class GameplayController implements ContactListener {
                 levelContainer.getBirds().add(b);
             }
         }
+
+        //criterion to disconnect player from moving platform when ANY of the following holds
+        // - player can move (on platform) and tries to move
+        // - player comes into contact with hazards
+        // - player gets force from wind
+        // - player boosts with umbrella
+        destroyWeldJoint = moved || contactHazards.size > 0 || windPushed || umbrella.isBoosting();
+
+        if (destroyWeldJoint && avatarWeldJoint != null) {
+            world.destroyJoint(avatarWeldJoint);
+            avatarWeldJoint = null;
+        }
+
+        // attach player to cloud platform when ALL of the following holds
+        // - player is standing, not pressing move
+        // - touching moving platform.
+        // - not using boost
+        // - no force from wind
+        if (avatar.isGrounded() && touchingMovingCloud && !destroyWeldJoint && avatarWeldJoint == null){
+            avatar.setLinearVelocity(temp.set(0,0));
+            weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
+                    temp.set(avatar.getX(), avatar.getY()-avatar.getHeight()/2)
+            );
+            weldJointDef.collideConnected = true;
+            avatarWeldJoint = (WeldJoint) world.createJoint(weldJointDef);
+        }
+
     }
 
-    private int framesSpent = 0;
-    private Vector2 init = new Vector2();
-    private Vector2 dest = new Vector2();
-    private int frames = 120;
     /**
      * Processes physics
      * <p>
@@ -685,6 +659,7 @@ public class GameplayController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void postUpdate(float dt) {
+        contactWindBod.clear();
         // Add any objects created by actions
         while (!levelContainer.addQueue.isEmpty()) {
             levelContainer.addObject(levelContainer.addQueue.poll());
@@ -699,7 +674,7 @@ public class GameplayController implements ContactListener {
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
         // This is O(n) without copying.
-        Iterator<PooledList<Obstacle>.Entry> iterator = objects.entryIterator();
+        Iterator<PooledList<Obstacle>.Entry> iterator = levelContainer.getObjects().entryIterator();
         while (iterator.hasNext()) {
             PooledList<Obstacle>.Entry entry = iterator.next();
             Obstacle obj = entry.getValue();
@@ -713,7 +688,7 @@ public class GameplayController implements ContactListener {
         }
 
         // clean-up the list of active birds
-        Iterator<PooledList<BirdHazard>.Entry> birdIterator = birds.entryIterator();
+        Iterator<PooledList<BirdHazard>.Entry> birdIterator = levelContainer.getBirds().entryIterator();
         while (iterator.hasNext()) {
             PooledList<BirdHazard>.Entry entry = birdIterator.next();
             BirdHazard bird = entry.getValue();
@@ -733,27 +708,10 @@ public class GameplayController implements ContactListener {
             }
         }
 
-        // attach player to cloud platform
-        if (avatar.isGrounded() && !avatar.isMoving() && touchingMovingCloud && avatarWeldJoint == null){
-            weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
-                    temp.set(avatar.getX(), avatar.getY()-avatar.getHeight()/2)
-            );
-            weldJointDef.collideConnected = true;
-            avatarWeldJoint = (WeldJoint) world.createJoint(weldJointDef);
-        }
-        else {
-            //player moves or touches wind or gets hit, should delete joint
-            if (avatar.isMoving() || contactWindBod.size > 0 || contactHazards.size > 0) {
-                destroyWeldJoint = true;
-            }
-
-            if (destroyWeldJoint && avatarWeldJoint != null) {
-                world.destroyJoint(avatarWeldJoint);
-                destroyWeldJoint = false;
-                avatarWeldJoint = null;
-            }
-        }
-        contactWindBod.clear();
+        umbrellaBoosted = false;
+        moved = false;
+        windPushed = false;
+        destroyWeldJoint = false;
     }
 
     /**
@@ -974,7 +932,6 @@ public class GameplayController implements ContactListener {
         world.dispose();
 
         levelContainer = null;
-        objects = null;
         addQueue = null;
         bounds = null;
         scale = null;
