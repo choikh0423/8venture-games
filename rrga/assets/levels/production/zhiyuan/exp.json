@@ -49,6 +49,12 @@
                  "template":"..\/..\/templates\/cloud_platforms\/large_cloud.json",
                  "x":459.647247461251,
                  "y":750.935328701229
+                }, 
+                {
+                 "id":71,
+                 "template":"..\/..\/templates\/wind.json",
+                 "x":335.022522522523,
+                 "y":427.927927927928
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -57,7 +63,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":70,
+ "nextobjectid":72,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
