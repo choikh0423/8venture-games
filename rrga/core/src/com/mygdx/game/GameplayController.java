@@ -398,12 +398,12 @@ public class GameplayController implements ContactListener {
         }
 
         if (levelContainer.getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
-        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
+        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.0001) levelContainer.getShowGoal().move();
 
         //UMBRELLA
         umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
-        if (!input.didZoom() && !showGoal){
+        if ((!input.didZoom() || (avatar.isMoving() || !avatar.isGrounded() || avatar.getLinearVelocity().len()>0.0001f))&& !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
             if(!input.secondaryControlMode){
                 if (input.didToggle()) {
@@ -512,7 +512,7 @@ public class GameplayController implements ContactListener {
 
         // Process player movement
         float angle = umbrella.getRotation();
-        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
+        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (avatar.isMoving() || avatar.getLinearVelocity().len()>0.0001f))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
