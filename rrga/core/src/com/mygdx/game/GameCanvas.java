@@ -399,7 +399,7 @@ public class GameCanvas {
      */
     public void begin() {
         camera.setViewCenter();
-        camera.getViewport().apply();
+        camera.getViewport().apply(true);
         spriteBatch.setProjectionMatrix(camera.combined());
         spriteBatch.begin();
         active = DrawPass.STANDARD;

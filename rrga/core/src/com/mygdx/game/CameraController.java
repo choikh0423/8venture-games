@@ -13,11 +13,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class CameraController {
 
-    private OrthographicCamera camera;
+    private final OrthographicCamera camera;
 
-    private FitViewport viewport;
+    private final FitViewport viewport;
 
-    private Vector3 pos = new Vector3();
+    private final Vector3 pos = new Vector3();
 
     private final Vector2 temp = new Vector2();
 
@@ -79,7 +79,6 @@ public class CameraController {
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
         camera.zoom = 1.0f;
         camera.update();
-        viewport.apply();
     }
 
 }
