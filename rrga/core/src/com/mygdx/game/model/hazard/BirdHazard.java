@@ -360,15 +360,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         float x = data.getFloat("x");
         float y = data.getFloat("y");
         float[] shape = data.get("points").asFloatArray();
-        PolygonObstacle hit1 = new PolygonObstacle(shape, x, y);
+        PolygonHazard hit1 = new PolygonHazard(x,y, shape, birdDamage, birdKnockBack, temp);
         // flip points and make hit-box #2:
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonObstacle hit2 = new PolygonObstacle(shape, x, y);
+        PolygonHazard hit2 = new PolygonHazard(x,y, shape, birdDamage, birdKnockBack, temp);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
-            // hit1 must be right hitbox
             bodies.add(hit2);   //left facing
             bodies.add(hit1);   //right facing
         }
@@ -472,8 +471,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
                 moveDir.set(targetDir);
                 // targetDir is the direction of target relative to bird's location
                 setFaceRight(targetDir.x > 0);
-                //TODO: Need some way to delete when offscreen, should be handled by gamecontroller
-                //TODO: use AABB to determine off screen
             }
         }
     }

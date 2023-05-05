@@ -7,6 +7,7 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
 /**
  * A polygon hazard is any hazard with the shape of a polygon.
+ * By default, this hazard is static.
  */
 public class PolygonHazard extends PolygonObstacle implements HazardModel {
 

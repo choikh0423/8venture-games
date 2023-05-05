@@ -185,7 +185,6 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
 
     @Override
     public Vector2 getKnockBackForce() {
-        // no knock back
         return temp.set(0,-1);
     }
 
