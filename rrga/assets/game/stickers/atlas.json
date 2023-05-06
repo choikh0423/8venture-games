@@ -230,5 +230,6 @@
         ]
     },
     "hazard_brambles_thick" : ".png",
-    "hazard_brambles_thin" : ".png"
+    "hazard_brambles_thin" : ".png",
+    "grass": ".png"
 }

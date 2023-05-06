@@ -97,6 +97,7 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
+        "game:rock": "game/hazard/hazard_rocks.png",
         "game:newplatform" : {
             "file":  "game/platform.png",
             "wrapU": "repeated",
@@ -133,6 +134,7 @@
         "stickers:pink_bush": "game/stickers/pink_bush.png",
         "stickers:hazard_brambles_thick": "game/stickers/hazard_brambles_thick.png",
         "stickers:hazard_brambles_thin": "game/stickers/hazard_brambles_thin.png",
+        "stickers:grass": "game/stickers/grass.png",
         "tileset:bushes_old": "levels/tilesets/bushes_old.png",
         "tileset:trees_old": "levels/tilesets/trees_old.png",
         "tileset:cliffs_old": "levels/tilesets/cliffs_old.png",

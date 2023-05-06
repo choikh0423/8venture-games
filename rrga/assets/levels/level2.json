@@ -688,7 +688,7 @@
                  "y":2589.19298245614
                 }, 
                 {
-                 "gid":2147483985,
+                 "gid":2147484016,
                  "id":140,
                  "rotation":0,
                  "template":"templates\/birds\/green_bird.json",
@@ -721,11 +721,11 @@
          "source":"tilesets\/trees_old.json"
         }, 
         {
-         "firstgid":263,
+         "firstgid":258,
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":267,
+         "firstgid":298,
          "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,

@@ -510,7 +510,7 @@ public class LevelParser {
         float x = temp.x;
         float y = temp.y;
         JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
-        float angle = convertAngle(obj.getFloat("rotation"));
+        float angle = convertAngle(obj.getFloat("rotation", 0));
         stickers.add(new Sticker(x,y, angle, obj.getInt("__DEPTH__", -1), AABB, texture));
     }
 
@@ -892,9 +892,9 @@ public class LevelParser {
         JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
                 flipX, flipY, assetWidth, assetHeight);
         data.addChild("points", shape);
-        data.addChild("flippedX", new JsonValue(flipX));
-        data.addChild("flippedY", new JsonValue(flipY));
-        data.addChild("angle", new JsonValue(convertAngle(rock.getFloat("rotation"))));
+        data.addChild("flipX", new JsonValue(flipX));
+        data.addChild("flipY", new JsonValue(flipY));
+        data.addChild("angle", new JsonValue(convertAngle(rock.getFloat("rotation",0))));
         return data;
     }
 

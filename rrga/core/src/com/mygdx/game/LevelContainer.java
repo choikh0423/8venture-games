@@ -156,6 +156,11 @@ public class LevelContainer{
      */
     private TextureRegion fillBrambleTexture;
 
+    /**
+     * Texture asset for rocks
+     */
+    private TextureRegion rockTexture;
+
 
     /**
      * Texture asset for nests
@@ -295,6 +300,7 @@ public class LevelContainer{
 
         fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
         fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
+        rockTexture = new TextureRegion(directory.getEntry("game:rock", Texture.class));
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
@@ -424,7 +430,8 @@ public class LevelContainer{
             JsonValue jv = hazardData[ii];
             String type = jv.getString("type");
             if (type.equals("rock")){
-                obj = new StaticHazard(jv, 2*staticDmg, staticKnockBack);
+                obj = new RockHazard(jv, staticDmg, staticKnockBack);
+                obj.setTexture(rockTexture);
             }
             else {
                 obj = new StaticHazard(jv, staticDmg, staticKnockBack);

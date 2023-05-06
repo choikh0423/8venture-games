@@ -6,19 +6,7 @@
          "draworder":"topdown",
          "id":3,
          "name":"stickers",
-         "objects":[
-                {
-                 "gid":131,
-                 "height":146,
-                 "id":83,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":220,
-                 "x":150,
-                 "y":782.142857142857
-                }],
+         "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -99,22 +87,50 @@
                  "y":280.980824270178
                 }, 
                 {
-                 "id":121,
-                 "template":"..\/..\/templates\/static_hazards\/hazard.json",
-                 "x":767.647058823529,
-                 "y":641.176470588235
+                 "gid":1073741951,
+                 "id":124,
+                 "rotation":0,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":320.588235294118,
+                 "y":982.35294117647
                 }, 
                 {
-                 "id":122,
-                 "template":"..\/..\/templates\/static_hazards\/hazard.json",
-                 "x":641.176470588235,
-                 "y":773.529411764706
+                 "gid":2147483775,
+                 "id":125,
+                 "rotation":0,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":654.529411764706,
+                 "y":600.588235294118
                 }, 
                 {
-                 "id":123,
-                 "template":"..\/..\/templates\/lightning\/fill_lightning.json",
-                 "x":970.588235294118,
-                 "y":314.705882352941
+                 "id":126,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":360.411764705882,
+                 "y":588.823529411765
+                }, 
+                {
+                 "gid":2147483775,
+                 "id":127,
+                 "rotation":-90,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":775.117647058824,
+                 "y":794.705882352941
+                }, 
+                {
+                 "gid":127,
+                 "id":128,
+                 "rotation":131.000774017339,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":231,
+                 "y":800.588235294118
+                }, 
+                {
+                 "gid":3221225599,
+                 "id":129,
+                 "rotation":0,
+                 "template":"..\/..\/templates\/static_hazards\/rock.json",
+                 "x":579.399828807836,
+                 "y":989.562984450045
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -156,9 +172,104 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":14,
+         "name":"fore",
+         "objects":[
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":131,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":250.606305578011,
+                 "y":956.037590945837
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":132,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":318.512530315279,
+                 "y":956.037590945837
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":133,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":362.166531932094,
+                 "y":956.037590945837
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":134,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":489.894907033145,
+                 "y":935.018997574778
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":135,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":607.922392886015,
+                 "y":933.402182700081
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":136,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":549.717057396928,
+                 "y":933.402182700081
+                }, 
+                {
+                 "gid":167,
+                 "height":79,
+                 "id":137,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":674.211802748585,
+                 "y":931.785367825384
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":14,
- "nextobjectid":124,
+ "nextlayerid":15,
+ "nextobjectid":138,
  "orientation":"orthogonal",
  "properties":[
         {
