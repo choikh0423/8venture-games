@@ -1,6 +1,5 @@
 { "object":
     {
-     "class":"bird",
      "gid":71,
      "height":217,
      "id":138,
@@ -12,6 +11,7 @@
              "value":15
             }],
      "rotation":0,
+     "type":"bird",
      "visible":true,
      "width":179
     },

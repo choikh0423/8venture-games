@@ -7,7 +7,6 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
 /**
  * A polygon hazard is any hazard with the shape of a polygon.
- * By default, this hazard is static.
  */
 public class PolygonHazard extends PolygonObstacle implements HazardModel {
 
@@ -33,13 +32,14 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
     public float getKnockBackScl() { return knockBackScl; }
 
     @Override
-    public Vector2 getKnockBackForce() { return knockBackForce; }
+    public Vector2 getKnockBackForce() { return temp.set(knockBackForce); }
 
     @Override
     public void setKnockBackForce(Vector2 kbForce) { knockBackForce.set(kbForce.nor()); }
 
     /** the (x,y) position of the top corner of the AABB enclosing this polygon.<br>
-     *  TODO (WARNING): this does not get updated when polygon is resized. Might want to account for that.
+     *  this does not get updated when polygon is resized, so the polygon should not be resized.<br>
+     *  The AABB enclosing a polygon is the smallest box that captures the entire polygon.
      */
     public Vector2 getBoxCoordinate(){ return temp.set(boxCoordinate).add(getX(), getY()); }
 

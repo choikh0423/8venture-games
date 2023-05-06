@@ -92,7 +92,11 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
-        "game:brambles_fill": "game/hazard/hazard_brambles_tiling.png",
+        "game:brambles_fill": {
+          "file":  "game/hazard/hazard_brambles_tiling.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
         "game:newplatform" : {
             "file":  "game/platform.png",
             "wrapU": "repeated",
@@ -151,7 +155,7 @@
         "nest:template": "levels/templates/birds/nest.json",
         "path_point:template": "levels/templates/path_point.json",
         "platform:template": "levels/templates/platform.json",
-        "hazard_zone:template": "levels/templates/static_hazards/hazard_zone.json",
+        "bramble:template": "levels/templates/static_hazards/bramble.json",
         "rock:template": "levels/templates/static_hazards/rock.json",
         "cloud0:template": "levels/templates/cloud_platforms/large_cloud.json",
         "cloud1:template": "levels/templates/cloud_platforms/medium_cloud.json",
@@ -175,7 +179,7 @@
         "data:dirt": "levels/tilesets/dirt.json",
         "data:cliffs_interior": "levels/tilesets/cliffs_interior.json",
         "data:cliffs_exterior": "levels/tilesets/cliffs_exterior.json",
-        "data:trees_foreground": "levels/tilesets/trees_foreground.json",
+        "data:trees_foreground": "levels/tilesets/trees_foreground.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"

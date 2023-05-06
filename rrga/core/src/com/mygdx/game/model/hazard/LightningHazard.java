@@ -29,6 +29,8 @@ public class LightningHazard extends PolygonHazard implements Drawable {
     /** draw depth */
     private final int depth;
 
+    private final Vector2 temp = new Vector2();
+
     public LightningHazard(JsonValue data, int dmg, float knockBack) {
         super(data, dmg, knockBack);
         waitDuration = data.getInt("strike_timer");
@@ -69,6 +71,7 @@ public class LightningHazard extends PolygonHazard implements Drawable {
         }
     }
 
+    // DRAWABLE INTERFACE
     @Override
     public Vector2 getDimensions() {
         return super.getDimension();
@@ -82,5 +85,16 @@ public class LightningHazard extends PolygonHazard implements Drawable {
     @Override
     public Vector2 getBoxCorner() {
         return super.getBoxCoordinate();
+    }
+
+    // HAZARD INTERFACE
+    @Override
+    public Vector2 getKnockBackForce() {
+        return temp.set(0,-1);
+    }
+
+    @Override
+    public void setKnockBackForce(Vector2 in) {
+        // no need to update
     }
 }
