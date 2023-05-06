@@ -68,6 +68,6 @@
   },
   "tilesets": {
     "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
-      "cliffs_interior", "cliffs_exterior", "dirt"]
+      "cliffs_interior", "cliffs_exterior", "trees_background", "dirt" ]
   }
 }
