@@ -241,6 +241,7 @@ public class GDXRoot extends Game implements ScreenListener {
 					setScreen(victory);
 					break;
 				case GameMode.EXIT_FAIL:
+                    defeat.setBackgroundScreen(playing);
 					setScreen(defeat);
 					break;
 				case GameMode.EXIT_PAUSE:

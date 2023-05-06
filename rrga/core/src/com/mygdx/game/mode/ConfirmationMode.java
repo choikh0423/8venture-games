@@ -86,6 +86,8 @@ public class ConfirmationMode extends MenuScreen {
 
     private Music music;
     private float volume;
+    private TextureRegion cursorTexture;
+
     public void setMusic(Music music){this.music=music;}
     public void setVolume(float vol){volume=vol;}
 
@@ -112,8 +114,9 @@ public class ConfirmationMode extends MenuScreen {
     public void gatherAssets(AssetDirectory directory) {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry("game:platform", Texture.class));
-        popup = new TextureRegion(directory.getEntry("menu:popup", Texture.class));
+        cursorTexture = new TextureRegion(directory.getEntry( "menu:cursor_menu", Texture.class ));
 
+        popup = new TextureRegion(directory.getEntry("menu:popup", Texture.class));
         TextureRegion yesTexture = new TextureRegion(directory.getEntry("menu:checkmark", Texture.class));
         TextureRegion noTexture = new TextureRegion(directory.getEntry("menu:toggle_check", Texture.class));
 
@@ -242,6 +245,14 @@ public class ConfirmationMode extends MenuScreen {
 
         yesButton.draw(canvas, yesPressState, BUTTON_SCALE, Color.WHITE);
         noButton.draw(canvas, noPressState, 1.3f, Color.WHITE);
+
+        //draw cursor
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+                    mx, my, 0, .4f, .4f);
+        }
 
         canvas.end();
     }
