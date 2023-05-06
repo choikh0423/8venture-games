@@ -1,6 +1,7 @@
 package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Music;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -11,19 +12,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.mygdx.game.utility.assets.*;
 
 /**
  * A PauseMode is a pause menu screen. User can interact with this screen
  * through keyboard or mouse cursor.
  */
-public class PauseMode extends MenuScreen {
+public class ConfirmationMode extends MenuScreen {
 
     /** Listener that will update the player mode when we are done */
     private ScreenListener listener;
 
     /** The Screen to draw underneath the pause screen*/
-    private GameMode gameScreen;
+    private MenuScreen gameScreen;
 
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
@@ -42,29 +42,20 @@ public class PauseMode extends MenuScreen {
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
 
-    /** exit code to restart game */
-    public static final int EXIT_RESTART = 2;
-    /** exit code to restart game */
-    public static final int EXIT_MENU = 3;
-    public static final int EXIT_CONFIRM = 4;
-
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
 
+    private int prevModeExitCode;
 
-    /** The current state of the level menu button */
-    private int menuPressState;
-    /** The current state of the restart button */
-    private int restartPressState;
-    /** The current state of the back button */
-    private int backPressState;
+    /** The current state of the yes button */
+    private int yesPressState;
+    /** The current state of the no button */
+    private int noPressState;
 
-    /** exit button*/
-    private MenuButton menuButton;
-    /** start button */
-    private MenuButton restartButton;
-    /** back button */
-    private MenuButton backButton;
+    /** yes button*/
+    private MenuButton yesButton;
+    /** no button */
+    private MenuButton noButton;
 
     /** Height of the button */
     private static float BUTTON_SCALE  = 1.0f;
@@ -80,20 +71,35 @@ public class PauseMode extends MenuScreen {
     private static int STANDARD_HEIGHT = 576;
 
     /** Pause text related variables */
-    private TextureRegion pauseTag;
-    private static float PAUSE_TAG_X_RATIO = .5f;
-    private static float PAUSE_TAG_Y_RATIO = .65f;
-    private int pauseTagX;
-    private int pauseTagY;
+    private TextureRegion confirmationTag;
+    private TextureRegion popup;
+    private static float CONFIRMATION_TAG_X_RATIO = .5f;
+    private static float CONFIRMATION_TAG_Y_RATIO = .65f;
+    private int confirmationTagX;
+    private int confirmationTagY;
+    private int popupX;
+    private int popupY;
 
-    public PauseMode(GameCanvas canvas) {
+    public static final int EXIT_LEVEL = 2;
+    public static final int EXIT_SETTINGS = 3;
+    public static final int EXIT_PAUSE = 4;
+
+    private Music music;
+    private float volume;
+    public void setMusic(Music music){this.music=music;}
+    public void setVolume(float vol){volume=vol;}
+
+    public void setPreviousExitCode(int code){
+        prevModeExitCode = code;
+    }
+
+    public ConfirmationMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(0,0,0,0.6f);
         currentExitCode = Integer.MIN_VALUE;
 
-        this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
-        this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
-        this.backButton = new MenuButton(MenuMode.ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
+        this.yesButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.4f, 0);
+        this.noButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.4f, 0);
     }
 
     /**
@@ -105,52 +111,58 @@ public class PauseMode extends MenuScreen {
      */
     public void gatherAssets(AssetDirectory directory) {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
-        foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
+        foregroundTexture = new TextureRegion(directory.getEntry("game:platform", Texture.class));
+        popup = new TextureRegion(directory.getEntry("menu:popup", Texture.class));
 
-        TextureRegion menuTexture = new TextureRegion(directory.getEntry("pause:menu_button", Texture.class));
-        TextureRegion restartTexture = new TextureRegion(directory.getEntry("pause:restart_button", Texture.class));
-        TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
+        TextureRegion yesTexture = new TextureRegion(directory.getEntry("menu:checkmark", Texture.class));
+        TextureRegion noTexture = new TextureRegion(directory.getEntry("menu:toggle_check", Texture.class));
 
-        pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
+        confirmationTag = new TextureRegion(directory.getEntry("menu:confirm_text", Texture.class));
 
-        menuButton.setTexture(menuTexture);
-        restartButton.setTexture(restartTexture);
-        backButton.setTexture(backButtonTexture);
+        yesButton.setTexture(yesTexture);
+        noButton.setTexture(noTexture);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         // Setup
         screenY = canvas.getHeight()-screenY;
-        boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
-        boolean restartPressed = checkClicked2(screenX, screenY, restartButton);
-        boolean backPressed =checkCircleClicked2(screenX, screenY, backButton, BUTTON_SCALE);
+        boolean yesPressed = checkClicked2(screenX, screenY, yesButton);
+        boolean noPressed = checkClicked2(screenX, screenY, noButton);
 
-        if (menuPressed) {
-            menuPressState = 1;
-        } else if (restartPressed) {
-            restartPressState = 1;
-        } else if (backPressed) {
-            backPressState = 1;
+        if (yesPressed) {
+            yesPressState = 1;
+        } else if (noPressed) {
+            noPressState = 1;
         }
 
         return false;
     }
 
+    /** preferences object to store user settings */
+    Preferences settings = Gdx.app.getPreferences("settings");
+    /** preferences object to store which levels the user has unlocked */
+    Preferences unlocked = Gdx.app.getPreferences("unlocked");
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (menuPressState == 1){
-            currentExitCode = EXIT_MENU;
-            menuPressState = 2;
+        if (yesPressState == 1){
+            currentExitCode = prevModeExitCode;
+            yesPressState = 2;
+            if (prevModeExitCode == EXIT_PAUSE || prevModeExitCode == EXIT_SETTINGS){
+                settings.putFloat("musicVolume", 0.5f);
+                settings.putFloat("sfxVolume", 0.5f);
+                settings.putBoolean("toggle", false);
+                settings.flush();
+            } else if (prevModeExitCode == EXIT_LEVEL){
+                for (int i = 2; i <= MenuMode.LEVEL_COUNT; i++){
+                    unlocked.putBoolean(i+"unlocked", false);
+                }
+                unlocked.flush();
+            }
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
-        } else if (restartPressState == 1) {
-            currentExitCode = EXIT_RESTART;
-            restartPressState = 2;
-            listener.exitScreen(this, currentExitCode);
-            currentExitCode = Integer.MIN_VALUE;
-        } else if (backPressState == 1) {
-            currentExitCode = EXIT_RESUME;
-            backPressState = 2;
+        } else if (noPressState == 1) {
+            currentExitCode = prevModeExitCode;
+            noPressState = 2;
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
         }
@@ -210,7 +222,7 @@ public class PauseMode extends MenuScreen {
 //        if (background != null){
 //            background.render(delta);
 //        }
-        gameScreen.draw(delta);
+        gameScreen.draw();
         draw(delta);
     }
 
@@ -223,15 +235,13 @@ public class PauseMode extends MenuScreen {
         canvas.begin();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
 
+        canvas.draw(popup, Color.WHITE, popup.getRegionWidth()/2f, popup.getRegionHeight()/2f,
+                popupX, popupY, 0, scale, scale);
+        canvas.draw(confirmationTag, Color.WHITE, confirmationTag.getRegionWidth()/2f, confirmationTag.getRegionHeight()/2f,
+                confirmationTagX, confirmationTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
-        canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
-                pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
-
-        menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
-        restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
-        backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
-
-
+        yesButton.draw(canvas, yesPressState, BUTTON_SCALE, Color.WHITE);
+        noButton.draw(canvas, noPressState, 1.3f, Color.WHITE);
 
         canvas.end();
     }
@@ -243,12 +253,13 @@ public class PauseMode extends MenuScreen {
         float sy = ((float)height)/STANDARD_HEIGHT;
         scale = (sx < sy ? sx : sy);
 
-        menuButton.setPos(width, height, scale);
-        restartButton.setPos(width, height, scale);
-        backButton.setPos(width, height, scale);
+        yesButton.setPos(width, height, scale);
+        noButton.setPos(width, height, scale);
 
-        pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
-        pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
+        confirmationTagY = (int)(CONFIRMATION_TAG_Y_RATIO * height);
+        confirmationTagX = (int)(CONFIRMATION_TAG_X_RATIO * width);
+        popupY = (int)((CONFIRMATION_TAG_Y_RATIO-0.05f) * height);
+        popupX = (int)(CONFIRMATION_TAG_X_RATIO * width);
     }
 
     public void dispose() {
@@ -279,7 +290,7 @@ public class PauseMode extends MenuScreen {
     }
 
 
-     /**
+    /**
      * Sets the ScreenListener for this mode.
      * The ScreenListener will respond to requests to quit.
      */
@@ -287,18 +298,20 @@ public class PauseMode extends MenuScreen {
         this.listener = listener;
     }
 
-    public void setBackgroundScreen(GameMode gameScreen){
+    public void setBackgroundScreen(MenuScreen gameScreen){
         this.gameScreen = gameScreen;
     }
 
-    public GameMode getBackgroundScreen(){
+    public MenuScreen getBackgroundScreen(){
         return this.gameScreen;
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(0,0,0,0.6f);
         currentExitCode = Integer.MIN_VALUE;
-
+        music.setVolume(volume);
+        music.play();
     }
 }
+
 
