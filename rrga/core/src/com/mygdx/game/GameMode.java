@@ -508,8 +508,18 @@ public class GameMode implements Screen {
 
         if (debug) {
             canvas.beginDebug();
-            for(Obstacle obj : gameplayController.getObjects()) {
-                obj.drawDebug(canvas);
+            for(Drawable drawable : gameplayController.getDrawables()) {
+                cache.set(drawable.getBoxCorner());
+                float bx = cache.x;
+                float by = cache.y;
+                cache.set(drawable.getDimensions());
+                float width = cache.x;
+                float height = cache.y;
+                if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
+                        || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+                    continue;
+                }
+                drawable.drawDebug(canvas);
             }
             canvas.endDebug();
         }

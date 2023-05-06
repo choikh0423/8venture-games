@@ -479,6 +479,7 @@ public class LevelParser {
 
     private void parseSticker(JsonValue obj) {
         long gid = obj.getInt("gid");
+        // see if the sticker is coming from a tileset...
         TextureRegion texture = getTileFromImages(gid);
         if (texture == null){
             if (stickerMaker != null){
@@ -498,7 +499,8 @@ public class LevelParser {
         float x = temp.x;
         float y = temp.y;
         JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
-        stickers.add(new Sticker(x,y, obj.getInt("__DEPTH__", -1), AABB, texture));
+        float angle = convertAngle(obj.getFloat("rotation"));
+        stickers.add(new Sticker(x,y, angle, obj.getInt("__DEPTH__", -1), AABB, texture));
     }
 
     /**
@@ -1149,6 +1151,20 @@ public class LevelParser {
         return new JsonValue(ang);
     }
 
+    /**
+     * convert clock-wise angle from Tiled to counterclock-wise angle. <br>
+     * The reference angle for 0 degree is y-axis/12pm
+     * @param tiledAngle clock-wise angle (degrees)
+     * @return counterclock-wise angle
+     */
+    private float convertAngle(float tiledAngle){
+        //subtract from 360 since tiled gives clockwise rotation but we need counterclockwise
+        //modulo 360 because given angle may be negative.
+        float angle = (360 - tiledAngle) % 360;
+        //convert from deg to rad
+        return angle * (float) (Math.PI/180);
+    }
+
     // ============================= BEGIN TILED PARSING HELPERS =============================
 
     /**
@@ -1255,8 +1271,8 @@ public class LevelParser {
                 tile.setRotation((float) Math.PI * 1.5f);
             }
             else if (flipY && flipX){
-                // 31, 32 => rotate 180
-                tile.setRotation((float) Math.PI);
+                // 31, 32 => rotate 180 (flip both axes)
+                tile.flip(true, true);
             }
             else if (flipD && flipX){
                 // 30, 32 => counter-clock-wise rotate 270 deg
@@ -1306,8 +1322,6 @@ public class LevelParser {
          * @return a texture from the collection set corresponding to the given id
          */
         public TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY) {
-            System.out.println(id - minId);
-            System.out.println(idNameMap.get(id-minId));
             TextureRegion texture = new TextureRegion(collection.get(idNameMap.get(id - minId)));
             texture.flip(flipX, flipY);
             return texture;
