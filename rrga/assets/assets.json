@@ -143,7 +143,8 @@
         "tileset:dirt": "levels/tilesets/dirt.png",
         "tileset:cliffs_interior": "levels/tilesets/cliffs_interior.png",
         "tileset:cliffs_exterior": "levels/tilesets/cliffs_exterior.png",
-        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png"
+        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png",
+        "tileset:trees_background": "levels/tilesets/trees_background.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -181,7 +182,8 @@
         "data:dirt": "levels/tilesets/dirt.json",
         "data:cliffs_interior": "levels/tilesets/cliffs_interior.json",
         "data:cliffs_exterior": "levels/tilesets/cliffs_exterior.json",
-        "data:trees_foreground": "levels/tilesets/trees_foreground.json"
+        "data:trees_foreground": "levels/tilesets/trees_foreground.json",
+        "data:trees_background": "levels/tilesets/trees_background.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"
