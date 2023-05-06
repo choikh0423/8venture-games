@@ -882,6 +882,7 @@ public class LevelParser {
             data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
             data.addChild("direction", computeWindDirection(props, windDirs));
             data.addChild("depth", new JsonValue(w.getInt("__DEPTH__", -1)));
+            data.addChild("particle", new JsonValue(getFromProperties(props, "particle", windDefault).asString()));
             windData[ii] = data;
         }
     }
@@ -1303,13 +1304,13 @@ public class LevelParser {
      * A CollectionTileSetMaker produces texture regions upon request by retrieving texture regions from a list of
      * textures. This is particularly useful for retrieving unrelated textures (stickers).
      */
-    private static class CollectionTileSetMaker extends TileSetMaker{
+    private class CollectionTileSetMaker extends TileSetMaker{
 
         private final HashMap<String, TextureRegion> collection;
         private final IntMap<String> idNameMap;
         CollectionTileSetMaker(HashMap<String, TextureRegion> collection, IntMap<String> idNameMap, int firstGid){
             minId = firstGid;
-            maxId = collection.size() - 1 + minId;
+            maxId = firstGid + maxStickerSetId;
             this.collection = collection;
             this.idNameMap = idNameMap;
         }
