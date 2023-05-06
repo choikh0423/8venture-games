@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
 /**
- * A polygon hazard is any hazard with the shape of a polygon.
+ * A polygon hazard is any single hit-box hazard with the shape of a polygon.
  */
 public class PolygonHazard extends PolygonObstacle implements HazardModel {
 
@@ -82,10 +82,6 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
      */
     public PolygonHazard(float x, float y, float[] points, int dam, float kb, Vector2 kbForce){
         super(points, x, y);
-        setBodyType(BodyDef.BodyType.StaticBody);
-        setDensity(0);
-        setFriction(0);
-        setRestitution(0);
         this.damage = dam;
         this.knockBackScl = kb;
         // ideally, if the constructor was called without knock-back force vector,

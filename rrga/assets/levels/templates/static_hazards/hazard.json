@@ -2,7 +2,7 @@
        "object": {
               "height": 112.134289429902,
               "id": 106,
-              "name": "bramble",
+              "name": "hazard",
               "polygon": [
                      {
                             "x": 0,
@@ -29,7 +29,7 @@
                      }
               ],
               "rotation": 0,
-              "type": "bramble",
+              "type": "static",
               "visible": true,
               "width": 122.178389020873
        },

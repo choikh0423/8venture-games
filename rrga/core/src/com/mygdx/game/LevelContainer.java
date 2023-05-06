@@ -415,7 +415,7 @@ public class LevelContainer{
 
         JsonValue hazardsjv = globalConstants.get("hazards");
 
-        //create bramble/rock hazards
+        //create invisible/bramble/rock hazards
         JsonValue[] hazardData = parser.getStaticHazardData();
         int staticDmg = hazardsjv.getInt("staticHazardDamage");
         float staticKnockBack = hazardsjv.getFloat("staticHazardKnockBack");
@@ -424,10 +424,10 @@ public class LevelContainer{
             JsonValue jv = hazardData[ii];
             String type = jv.getString("type");
             if (type.equals("rock")){
-                obj = new BrambleHazard(jv, 2*staticDmg, staticKnockBack);
+                obj = new StaticHazard(jv, 2*staticDmg, staticKnockBack);
             }
             else {
-                obj = new BrambleHazard(jv, staticDmg, staticKnockBack);
+                obj = new StaticHazard(jv, staticDmg, staticKnockBack);
                 if (type.equals("fill")){
                     obj.setTexture(fillBrambleTexture);
                 }

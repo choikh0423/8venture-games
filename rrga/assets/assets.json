@@ -155,7 +155,7 @@
         "nest:template": "levels/templates/birds/nest.json",
         "path_point:template": "levels/templates/path_point.json",
         "platform:template": "levels/templates/platform.json",
-        "bramble:template": "levels/templates/static_hazards/bramble.json",
+        "static_hazard:template": "levels/templates/static_hazards/hazard.json",
         "rock:template": "levels/templates/static_hazards/rock.json",
         "cloud0:template": "levels/templates/cloud_platforms/large_cloud.json",
         "cloud1:template": "levels/templates/cloud_platforms/medium_cloud.json",

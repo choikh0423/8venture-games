@@ -107,10 +107,10 @@ public class LevelParser {
     private final JsonValue platformDefaultPoly;
 
     /** the default JSON properties of bramble hazard */
-    private final JsonValue brambleHazardDefault;
+    private final JsonValue staticHazardDefault;
 
     /** the default JSON polygon of a bramble hazard */
-    private final JsonValue brambleHazardDefaultPoly;
+    private final JsonValue staticHazardPoly;
 
     /** the default JSON object of a rock hazard*/
     private final JsonValue rockDefaultObj;
@@ -258,7 +258,7 @@ public class LevelParser {
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
 
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
-        JsonValue brambleHazardTemplate = directory.getEntry("bramble:template", JsonValue.class);
+        JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
         JsonValue rockHazardTemplate = directory.getEntry("rock:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
         JsonValue nestTemplate = directory.getEntry("nest:template", JsonValue.class);
@@ -286,8 +286,8 @@ public class LevelParser {
         lightningDefault = fillLightningTemplate.get("object").get("properties");
         lightningDefaultPoly = fillLightningTemplate.get("object").get("polygon");
         platformDefaultPoly = platformTemplate.get("object").get("polygon");
-        brambleHazardDefault = brambleHazardTemplate.get("object").get("properties");
-        brambleHazardDefaultPoly = brambleHazardTemplate.get("object").get("polygon");
+        staticHazardDefault = staticHazardTemplate.get("object").get("properties");
+        staticHazardPoly = staticHazardTemplate.get("object").get("polygon");
         rockDefaultObj = rockHazardTemplate.get("object");
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
@@ -467,8 +467,8 @@ public class LevelParser {
             } else if (template.endsWith("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
                 goalDepth = currentObjectDepth;
-            } else if (template.endsWith("bramble.json") || obj.getString("type", "UNKNOWN").equals("bramble")){
-                obj.addChild("hazard", new JsonValue("bramble"));
+            } else if (template.endsWith("hazard.json") || obj.getString("type", "UNKNOWN").equals("static")){
+                obj.addChild("hazard", new JsonValue("unspecified"));
                 staticHazardRawData.add(obj);
             } else if (template.endsWith("rock.json")){
                 obj.addChild("hazard", new JsonValue("rock"));
@@ -852,8 +852,8 @@ public class LevelParser {
         staticHazardData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < staticHazardData.length; ii++) {
             JsonValue rawHazard = rawData.get(ii);
-            if (rawHazard.getString("hazard").equals("bramble")){
-                staticHazardData[ii] = processBramble(rawHazard);
+            if (rawHazard.getString("hazard").equals("unspecified")){
+                staticHazardData[ii] = processStaticPolyHazard(rawHazard);
             }
             else {
                 staticHazardData[ii] = processRock(rawHazard);
@@ -861,14 +861,14 @@ public class LevelParser {
         }
     }
 
-    private JsonValue processBramble(JsonValue bramble){
+    private JsonValue processStaticPolyHazard(JsonValue polyHazard){
         JsonValue data = new JsonValue(JsonValue.ValueType.object);
-        readPositionAndConvert(bramble, temp);
+        readPositionAndConvert(polyHazard, temp);
         addPosition(data, temp);
-        boolean fill = getFromProperties(bramble.get("properties"), "fill_texture", brambleHazardDefault).asBoolean();
+        boolean fill = getFromProperties(polyHazard.get("properties"), "fill_texture", staticHazardDefault).asBoolean();
         data.addChild("type", new JsonValue(fill ? "fill" : "no_fill"));
-        data.addChild("points", polyPoints(bramble.get("polygon"), brambleHazardDefaultPoly));
-        data.addChild("depth", new JsonValue(bramble.getInt("__DEPTH__", -1)));
+        data.addChild("points", polyPoints(polyHazard.get("polygon"), staticHazardPoly));
+        data.addChild("depth", new JsonValue(polyHazard.getInt("__DEPTH__", -1)));
         return data;
     }
 

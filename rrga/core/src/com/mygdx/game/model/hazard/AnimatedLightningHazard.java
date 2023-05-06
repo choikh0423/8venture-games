@@ -4,11 +4,13 @@ package com.mygdx.game.model.hazard;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.FilmStrip;
 
@@ -85,7 +87,11 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         float y = data.getFloat("y");
         for (JsonValue hitBoxData : data.get("hitboxes")){
             float[] points = hitBoxData.asFloatArray();
-            Obstacle o = new PolygonHazard(x, y, points, dmg, knockBack, temp);
+            Obstacle o = new PolygonObstacle(points, x, y);
+            o.setBodyType(BodyDef.BodyType.StaticBody);
+            o.setDensity(0);
+            o.setFriction(0);
+            o.setRestitution(0);
             bodies.add(o);
         }
         this.damage = dmg;

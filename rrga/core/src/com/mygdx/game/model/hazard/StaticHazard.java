@@ -1,19 +1,24 @@
 package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.util.Drawable;
 
 /**
- * A BrambleHazard is an area covered in brambles that deals damage to the player on contact.<br>
+ * A StaticHazard is an area covered in brambles that deals damage to the player on contact.<br>
  */
-public class BrambleHazard extends PolygonHazard implements Drawable {
+public class StaticHazard extends PolygonHazard implements Drawable {
 
     private final int drawDepth;
 
-    public BrambleHazard(JsonValue data, int dmg, float knockBack) {
+    public StaticHazard(JsonValue data, int dmg, float knockBack) {
         super(data, dmg, knockBack);
+        setBodyType(BodyDef.BodyType.StaticBody);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
         drawDepth = data.getInt("depth");
     }
 

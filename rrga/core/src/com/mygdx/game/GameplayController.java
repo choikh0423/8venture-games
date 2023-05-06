@@ -926,8 +926,8 @@ public class GameplayController implements ContactListener {
                 contact.setEnabled(false);
             }
 
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !(bd1 instanceof BrambleHazard)) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !(bd2 instanceof BrambleHazard))))) {
+            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && !(bd1 instanceof StaticHazard)) ||
+                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && !(bd2 instanceof StaticHazard))))) {
                 contact.setEnabled(false);
             }
         }

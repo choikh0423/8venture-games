@@ -2,6 +2,8 @@ package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.util.Drawable;
@@ -33,17 +35,27 @@ public class LightningHazard extends PolygonHazard implements Drawable {
 
     public LightningHazard(JsonValue data, int dmg, float knockBack) {
         super(data, dmg, knockBack);
+        setBodyType(BodyDef.BodyType.StaticBody);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
         waitDuration = data.getInt("strike_timer");
         waitTimer = waitDuration + data.getInt("initial_timer_offset");
         strikeDuration = data.getInt("strike_duration", DEFAULT_STRIKE_DURATION);
         strikeTimer = -1;
         depth = data.getInt("depth");
+    }
+
+    @Override
+    public boolean activatePhysics(World world) {
+        boolean result = super.activatePhysics(world);
         setActive(false);
+        return result;
     }
 
     public void draw(GameCanvas canvas) {
         if(isActive()) {
-            canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+            super.draw(canvas);
         }
     }
 
