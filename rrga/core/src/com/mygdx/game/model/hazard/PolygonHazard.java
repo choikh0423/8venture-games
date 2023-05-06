@@ -7,6 +7,7 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
 /**
  * A polygon hazard is any hazard with the shape of a polygon.
+ * By default, this hazard is static.
  */
 public class PolygonHazard extends PolygonObstacle implements HazardModel {
 
@@ -85,7 +86,6 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
         setDensity(0);
         setFriction(0);
         setRestitution(0);
-        //fixture.isSensor = true;
         this.damage = dam;
         this.knockBackScl = kb;
         // ideally, if the constructor was called without knock-back force vector,

@@ -1,0 +1,15 @@
+{ "columns":7,
+ "image":"bushes_ground.png",
+ "imageheight":896,
+ "imagewidth":896,
+ "margin":0,
+ "name":"bushes_ground",
+ "objectalignment":"center",
+ "spacing":0,
+ "tilecount":49,
+ "tiledversion":"1.10.0",
+ "tileheight":128,
+ "tilewidth":128,
+ "type":"tileset",
+ "version":"1.10"
+}

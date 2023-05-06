@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "name": "music",
+        "storageType": "string",
+        "type": "enum",
+        "values": [
+            "droplets",
+            "exploring_the_forest",
+            "a_world_of_clouds",
+            "over_the_cliffs",
+            "the_storm"
+        ],
+        "valuesAsFlags": false
+    }
+]

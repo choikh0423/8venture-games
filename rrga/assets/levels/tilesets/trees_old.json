@@ -1,0 +1,15 @@
+{ "columns":12,
+ "image":"trees_old.png",
+ "imageheight":1536,
+ "imagewidth":1536,
+ "margin":0,
+ "name":"trees_old",
+ "objectalignment":"center",
+ "spacing":0,
+ "tilecount":144,
+ "tiledversion":"1.10.0",
+ "tileheight":128,
+ "tilewidth":128,
+ "type":"tileset",
+ "version":"1.10"
+}

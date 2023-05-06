@@ -4,19 +4,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 
+/**
+ * 1-frame lightning bolt
+ */
 public class LightningHazard extends PolygonHazard implements Drawable {
 
-    /** Damage of a lightning hazard */
-    private static final int LIGHTNING_DAMAGE = 1;
-
-    /** Knockback of a lightning hazard */
-    private static final float LIGHTNING_KNOCKBACK = 0;
+    private static final int DEFAULT_STRIKE_DURATION = 100;
 
     /** How long a lightning strike lasts */
-    private static final int STRIKE_DURATION = 100;
+    private final int strikeDuration;
 
     /** The number of ticks between this lightning's strikes */
     private final int waitDuration;
@@ -28,52 +26,46 @@ public class LightningHazard extends PolygonHazard implements Drawable {
      * -1 if not currently striking */
     private int strikeTimer;
 
-    ///** vector cache for computations, getters, etc */
-    //    private final Vector2 temp = new Vector2();
-
     /** draw depth */
     private final int depth;
 
-    public LightningHazard(JsonValue data) {
-        super(data, LIGHTNING_DAMAGE, LIGHTNING_KNOCKBACK);
+    public LightningHazard(JsonValue data, int dmg, float knockBack) {
+        super(data, dmg, knockBack);
         waitDuration = data.getInt("strike_timer");
-        waitTimer = waitDuration + data.getInt("strike_timer_offset");
+        waitTimer = waitDuration + data.getInt("initial_timer_offset");
+        strikeDuration = data.getInt("strike_duration", DEFAULT_STRIKE_DURATION);
         strikeTimer = -1;
-        fixture.isSensor = true;
         depth = data.getInt("depth");
         setActive(false);
     }
 
-    public boolean isStriking(){
-        return strikeTimer != -1;
-    }
-
-    public void strike(){
-        //if not striking, waiting
-        if(!isStriking()){
-            setActive(false);
-            //if not at end of wait, wait longer
-            if(waitTimer!=-1){
-                waitTimer--;
-            }
-            //else at end of wait, start strike
-            else{
-                strikeTimer = STRIKE_DURATION;
-                waitTimer = waitDuration;
-            }
-        }
-        //else striking
-        else{
-            setActive(true);
-            strikeTimer--;
-        }
-
-    }
-
-
     public void draw(GameCanvas canvas) {
         if(isActive()) {
             canvas.draw(region, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(), 1, 1);
+        }
+    }
+
+    @Override
+    public void update(float delta) {
+        if (waitTimer < 0){
+            // no more waiting, strike cycle should be ongoing
+            if (strikeTimer <= 0){
+                // transition to wait mode
+                setActive(false);
+                waitTimer = waitDuration;
+            }
+            else {
+                strikeTimer--;
+            }
+        }
+        else if (waitTimer == 0){
+            // finished waiting, transition to strike cycle
+            setActive(true);
+            strikeTimer = strikeDuration;
+            waitTimer--;
+        }
+        else {
+            waitTimer--;
         }
     }
 

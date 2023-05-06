@@ -167,11 +167,6 @@ public class GameplayController implements ContactListener {
     private PooledList<BirdHazard> birds = new PooledList<>();
 
     /**
-     * The set of all lightning currently in the level
-     */
-    private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
-
-    /**
      * The set of all nests currently in the level
      */
     private ObjectSet<NestHazard> nests = new ObjectSet<>();
@@ -382,7 +377,6 @@ public class GameplayController implements ContactListener {
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
-        this.lightnings = levelContainer.getLightnings();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
@@ -407,6 +401,7 @@ public class GameplayController implements ContactListener {
         if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
 
         //UMBRELLA
+        umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
         if (!input.didZoom() && !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
@@ -419,7 +414,7 @@ public class GameplayController implements ContactListener {
                     } else {
                         umbrella.useClosedTexture();
                         Body body = avatar.getBody();
-                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                        body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentumX(), body.getLinearVelocity().y * umbrella.getClosedMomentumY());
                     }
                 }
             } else {
@@ -431,7 +426,7 @@ public class GameplayController implements ContactListener {
                     umbrella.setOpen(false);
                     umbrella.useClosedTexture();
                     Body body = avatar.getBody();
-                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentum(), body.getLinearVelocity().y * umbrella.getClosedMomentum());
+                    if (wasOpen) body.setLinearVelocity(body.getLinearVelocity().x * umbrella.getClosedMomentumX(), body.getLinearVelocity().y * umbrella.getClosedMomentumY());
                     wasOpen = false;
                 }
             }
@@ -452,21 +447,21 @@ public class GameplayController implements ContactListener {
             //compute new angle
             float mouseAng = (float) Math.acos(mousePos.dot(up));
             if (input.getMousePos().x > center.x) mouseAng *= -1;
-            angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
+            //angInBounds = mouseAng <= (float) Math.PI / 2 && mouseAng >= -(float) Math.PI / 2;
             if (angInBounds) {
                 umbrella.setAngle(mouseAng);
                 lastValidAng = mouseAng;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             } else if (lastValidAng >= 0) {
                 umbrella.setAngle((float) Math.PI / 2);
                 mousePos.x = -1;
                 mousePos.y = 0;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             } else {
                 umbrella.setAngle(-(float) Math.PI / 2);
                 mousePos.x = 1;
                 mousePos.y = 0;
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
+                //Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed);
             }
         }
 
@@ -516,23 +511,21 @@ public class GameplayController implements ContactListener {
         }
 
         // Process player movement
+        float angle = umbrella.getRotation();
         if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
-        } else if (!touching_wind && umbrella.isOpen() && avatar.getVY() < 0) {
+        } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
-            float angle = umbrella.getRotation() % ((float) Math.PI * 2);
-            if (angle < Math.PI) {
-                avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
-            }
+            avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
         } else if (!umbrella.isOpen()) {
             avatar.dampAirHoriz();
         }
-        if (umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
+        if ((umbrella.isOpen() && angle < Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
         }
-        if (!umbrella.isOpen() && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
+        if ((!umbrella.isOpen() || angle > Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownClosed()) {
             avatar.setVY(avatar.getMaxSpeedDownClosed());
         }
 
@@ -555,6 +548,7 @@ public class GameplayController implements ContactListener {
                     avatar.getBody().setLinearVelocity(cache);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
+                    if(h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
                 } else {
                     avatar.setHealth(0);
                     // start iframes even when we die, otherwise player being damaged is not so apparent.
@@ -612,7 +606,6 @@ public class GameplayController implements ContactListener {
             temp.set(px, py);
             temp.sub(bx, by);
             temp.nor();
-            float angle;
 
             //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
             if (temp.x == 0) {
@@ -665,11 +658,6 @@ public class GameplayController implements ContactListener {
                 }
             }
         }
-
-        //update the lightnings
-//        for (LightningHazard light : lightnings) {
-//            light.strike();
-//        }
 
         //update nests
         for(NestHazard n: nests){
@@ -829,31 +817,25 @@ public class GameplayController implements ContactListener {
             // Check for hazard collision
             // Is there any way to add fixture data to all fixtures in a polygon obstacle without changing the
             // implementation? If so, want to change to fd1 == "damage"
-            if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
-                    ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
+            if (((fd2 == "umbrellaSensor" || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
+                    ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 //norm from a to b
+
+                //contact normal being weird, may need for static hazards
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = wm.getNormal();
                 float flip = (bd1 instanceof HazardModel ? 1 : -1);
-                h.setKnockBackForce(norm.scl(flip));
-                // this knockback force is being recomputed many times for each fixture contact,...
-                // i think that's why it's really inconsistent
+                //h.setKnockBackForce(norm.scl(flip));
+
+                //subtract position vectors for now
+                Body hazBod = (bd1 instanceof HazardModel ? body1 : body2);
+                Body playerBod = (bd1 instanceof HazardModel ? body2 : body1);
+                cache.set(playerBod.getPosition().sub(hazBod.getPosition()));
+                h.setKnockBackForce(cache);
+
                 contactHazards.add(h);
             }
-
-            // check for bird sensor collision
-            //depreciated
-            /*
-            if ((avatar == bd1 && fd2 == "birdSensor") ||
-                    (avatar == bd2 && fd1 == "birdSensor")) {
-                BirdHazard bird = (BirdHazard) ("birdSensor" == fd1 ? bd1 : bd2);
-                if (!bird.seesTarget) {
-                    bird.seesTarget = true;
-                    bird.setTargetDir(avatar.getX(), avatar.getY(), avatar.getVX(), avatar.getVY());
-                }
-            }
-            */
 
             // Check for win condition
             if ((bd1 == avatar && bd2 == goalDoor) ||

@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -38,7 +40,7 @@ public class MenuMode extends MenuScreen {
 
 
     /** Types of button by shape */
-    enum ButtonShape {
+    public enum ButtonShape {
         RECTANGLE,
         CIRCLE
     }
@@ -199,6 +201,10 @@ public class MenuMode extends MenuScreen {
     /** current selected level */
     private int currentLevel;
 
+    /** texture for the cursor */
+    private TextureRegion cursorTexture;
+    /** pixmap for the cursor */
+    private Cursor newCursor;
     /** number of levels in the game. NEED TO CHANGE THIS AS WE ADD MORE LEVELS */
     public static final int LEVEL_COUNT = 3;
 
@@ -237,6 +243,12 @@ public class MenuMode extends MenuScreen {
 
         backgroundTexture = new TextureRegion(directory.getEntry( "menu:background", Texture.class ));
         backgroundTexture2 = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
+
+        cursorTexture = new TextureRegion(directory.getEntry( "menu:cursor_menu", Texture.class ));
+        Pixmap pm = new Pixmap(Gdx.files.internal("game/goal.png"));
+        newCursor = Gdx.graphics.newCursor(pm, 0, 0);
+        pm.dispose();
+
 
         // TODO: To reduce global variables, made temporary texture region variables, Let me know if this is too much of a bad practice
         // MENU COMPONENTS
@@ -556,9 +568,9 @@ public class MenuMode extends MenuScreen {
     public void draw() {
         canvas.begin();
         if (screenMode == 1) {
-            canvas.draw(backgroundTexture, 0, 0);
+            canvas.draw(backgroundTexture, Color.WHITE, 0, 0, (float) canvas.getWidth(), (float) canvas.getHeight());
         } else if (screenMode == 2 || screenMode == 3) {
-            canvas.draw(backgroundTexture2, 0, 0);
+            canvas.draw(backgroundTexture2, Color.WHITE, 0, 0, (float) canvas.getWidth(), (float) canvas.getHeight());
         }
 
         if (screenMode == 1) {
@@ -604,6 +616,15 @@ public class MenuMode extends MenuScreen {
             }
             resetButton.draw(canvas, resetSettingsPressState, BUTTON_SCALE, Color.WHITE);
         }
+
+        //draw cursor
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+                    mx, my, 0, .4f, .4f);
+        }
+
         canvas.end();
     }
 
@@ -616,14 +637,15 @@ public class MenuMode extends MenuScreen {
      * @param delta Number of seconds since last animation frame
      */
     public void render(float delta) {
-
+        //DOESN'T WORK. IDK WHY
+        //Gdx.graphics.setCursor(newCursor);
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
-
         draw();
     }
 

@@ -35,7 +35,7 @@
     "drag_y" : 5,
     "lighter_force": 5,
     "lighter_fuel": 150,
-    "lighter_change_rate": 1
+    "lighter_change_rate": 5
   },
   "umbrella" : {
     "shrink": [0.7, 0.95],
@@ -49,7 +49,8 @@
       "height" : 0.05
     },
     "size": [0.97708333, 1.25],
-    "closedmomentum": 0.35
+    "closedmomentumX": 0.5,
+    "closedmomentumY": 0.35
   },
   "world": {
     "width": 16,
@@ -58,7 +59,13 @@
   "hazards": {
     "birdDamage": 1,
     "birdSensorRadius": 7,
-    "birdKnockback": 6,
-    "stillFrames": [ 3, 2, 3, 4]
+    "birdKnockBack": 6,
+    "lightningDamage": 1,
+    "lightningKnockBack": 5,
+    "birdStillFrames": [ 3, 2, 3, 4]
+  },
+  "tilesets": {
+    "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
+      "cliffs_interior", "cliffs_exterior", "dirt"]
   }
 }

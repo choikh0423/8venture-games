@@ -710,15 +710,15 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"tilesets\/bushes.json"
+         "source":"tilesets\/bushes_old.json"
         }, 
         {
          "firstgid":50,
-         "source":"tilesets\/cliffs.json"
+         "source":"tilesets\/cliffs_old.json"
         }, 
         {
          "firstgid":114,
-         "source":"tilesets\/trees.json"
+         "source":"tilesets\/trees_old.json"
         }, 
         {
          "firstgid":263,
