@@ -41,10 +41,10 @@ public class GDXRoot extends Game implements ScreenListener {
      */
     private PauseMode pausing;
 
-    /**
-     * Screen mode for transitioning between levels
-     */
-    private VictoryScreen victory;
+	private ConfirmationMode confirmation;
+
+	/** Screen mode for transitioning between levels */
+	private VictoryScreen victory;
 
     /**
      * Screen mode for transitioning between levels
@@ -87,11 +87,13 @@ public class GDXRoot extends Game implements ScreenListener {
         pausing = new PauseMode(canvas);
         victory = new VictoryScreen(canvas);
         defeat = new LoseScreen(canvas);
+        confirmation = new ConfirmationMode(canvas);
 
         loading.setScreenListener(this);
         pausing.setScreenListener(this);
         victory.setScreenListener(this);
         defeat.setScreenListener(this);
+        confirmation.setScreenListener(this);
         setScreen(loading);
     }
 
@@ -140,23 +142,24 @@ public class GDXRoot extends Game implements ScreenListener {
         super.resize(width, height);
     }
 
-    /**
-     * The given screen has made a request to exit its player mode.
-     * <p>
-     * The value exitCode can be used to implement menu options.
-     *
-     * @param screen   The screen requesting to exit
-     * @param exitCode The state of the screen upon exit
-     */
-    public void exitScreen(Screen screen, int exitCode) {
-        if (screen == loading) {
-            // finish loading assets, let all other controllers gather necessary assets
-            directory = loading.getAssets();
-            playing.gatherAssets(directory);
-            menu.gatherAssets(directory);
-            pausing.gatherAssets(directory);
-            victory.gatherAssets(directory);
-            defeat.gatherAssets(directory);
+	/**
+	 * The given screen has made a request to exit its player mode.
+	 *
+	 * The value exitCode can be used to implement menu options.
+	 *
+	 * @param screen   The screen requesting to exit
+	 * @param exitCode The state of the screen upon exit
+	 */
+	public void exitScreen(Screen screen, int exitCode) {
+		if (screen == loading) {
+			// finish loading assets, let all other controllers gather necessary assets
+			directory = loading.getAssets();
+			playing.gatherAssets(directory);
+			menu.gatherAssets(directory);
+			pausing.gatherAssets(directory);
+			victory.gatherAssets(directory);
+			defeat.gatherAssets(directory);
+			confirmation.gatherAssets(directory);
 
             // transition to gameplay screen.
             menu.setScreenListener(this);
@@ -185,59 +188,83 @@ public class GDXRoot extends Game implements ScreenListener {
                     playing.setCanvas(canvas);
                     // TODO: use exit codes to determine level.
                     //  reserve exit codes 1 to 30 for levels.
-
-                    // Transferring menu mode information to game mode
-                    playing.setLevel(menu.getCurrentLevel());
-                    playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
-                    playing.setSecondaryControlMode(menu.getControlToggle());
-                    playing.reset();
-                    playing.resetShowGoal();
-                    setScreen(playing);
-                    break;
-            }
-            menu.pause();
-        } else if (screen == pausing) {
-            switch (exitCode) {
-                case PauseMode.EXIT_RESUME:
-                    setScreen(pausing.getBackgroundScreen());
-                    break;
-                case PauseMode.EXIT_RESTART:
-                    playing.reset();
-                    setScreen(playing);
-                    break;
-                case PauseMode.EXIT_MENU:
-                    menu.setScreenListener(this);
-                    menu.reset();
-                    playing.pause();
-                    setScreen(menu);
-                    break;
-                default:
-                    Gdx.app.exit();
-            }
-
-        } else if (screen == playing) {
-            canvas.setDynamicCameraZoom(GameMode.standardZoom);
-            switch (exitCode) {
-                case GameMode.EXIT_VICTORY:
-                    victory.setBackgroundScreen(playing);
-                    victory.first = true;
-                    setScreen(victory);
-                    break;
-                case GameMode.EXIT_FAIL:
+                    
+					// Transferring menu mode information to game mode
+					playing.setLevel(menu.getCurrentLevel());
+					playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
+					playing.setSecondaryControlMode(menu.getControlToggle());
+					playing.reset();
+					playing.resetShowGoal();
+					setScreen(playing);
+					menu.pause();
+					break;
+				case MenuMode.EXIT_CONFIRM:
+					confirmation.setPreviousExitCode(menu.getScreenMode());
+					confirmation.setScreenListener(this);
+					confirmation.setBackgroundScreen(menu);
+					confirmation.setMusic(menu.getMusic());
+					confirmation.setVolume(menu.getMusicVolume());
+					confirmation.reset();
+					setScreen(confirmation);
+					break;
+			}
+		} else if (screen == pausing){
+			switch (exitCode){
+				case PauseMode.EXIT_RESUME:
+					setScreen(pausing.getBackgroundScreen());
+					break;
+				case PauseMode.EXIT_RESTART:
+					playing.reset();
+					setScreen(playing);
+					break;
+				case PauseMode.EXIT_MENU:
+					menu.setScreenListener(this);
+					menu.reset();
+					playing.pause();
+					setScreen(menu);
+					break;
+				case PauseMode.EXIT_CONFIRM:
+					confirmation.setPreviousExitCode(ConfirmationMode.EXIT_PAUSE);
+					confirmation.setScreenListener(this);
+					confirmation.setBackgroundScreen(menu);
+					confirmation.reset();
+					setScreen(confirmation);
+					break;
+				default:
+					Gdx.app.exit();
+			}
+		} else if (screen == playing) {
+			canvas.setDynamicCameraZoom(GameMode.standardZoom);
+			switch (exitCode){
+				case GameMode.EXIT_VICTORY:
+					victory.setBackgroundScreen(playing);
+					setScreen(victory);
+					break;
+				case GameMode.EXIT_FAIL:
                     defeat.setBackgroundScreen(playing);
-                    defeat.first = true;
-                    setScreen(defeat);
-                    break;
-                case GameMode.EXIT_PAUSE:
-                    pausing.setBackgroundScreen(playing);
-                    pausing.first = true;
-                    setScreen(pausing);
-                    break;
-                case GameMode.EXIT_QUIT:
-                    Gdx.app.exit();
-                default:
-                    break;
-            }
+					setScreen(defeat);
+					break;
+				case GameMode.EXIT_PAUSE:
+					pausing.setBackgroundScreen(playing);
+					setScreen(pausing);
+					break;
+				case GameMode.EXIT_QUIT:
+					Gdx.app.exit();
+				default:
+					break;
+			}
+		} else if (screen == confirmation){
+			if (exitCode == ConfirmationMode.EXIT_LEVEL || exitCode == ConfirmationMode.EXIT_SETTINGS){
+				menu.setScreenListener(this);
+				menu.reset();
+				menu.setScreenMode(exitCode);
+				setScreen(menu);
+			}
+			else if (exitCode == ConfirmationMode.EXIT_PAUSE){
+				pausing.setBackgroundScreen(playing);
+				setScreen(pausing);
+			}
+		
         } else if (screen == victory) {
             switch (exitCode){
                 case VictoryScreen.EXIT_MENU:
