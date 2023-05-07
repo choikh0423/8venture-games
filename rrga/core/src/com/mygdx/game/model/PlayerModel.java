@@ -70,7 +70,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** The size of the player in physics units (up to scaling by shrink factor) */
 	private float[] size;
 	/** Player Mass */
-	private float FINAL_MASS = 1.8f;
+	private float FINAL_MASS = 1.25f;
 	/** Max player hp */
 	private int MAX_HEALTH;
 	/** Player hp */
@@ -542,7 +542,9 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				width*data.get("shrink").getFloat( 0 ),
 				height*data.get("shrink").getFloat( 1 ));
 
-		float density = FINAL_MASS / (width * height);
+		float density = FINAL_MASS / (width *data.get("shrink").getFloat( 0 )
+				* height * data.get("shrink").getFloat( 1 ));
+
 		setDensity(density);
 		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
@@ -680,7 +682,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				|| Math.signum(temp.x) != Math.signum(temp2.x);
 		boolean applyY = (Math.signum(temp.y) == Math.signum(temp2.y) && Math.abs(temp2.y) > Math.abs(temp.y))
 				|| Math.signum(temp.y) != Math.signum(temp2.y);
-		float dampscl = 75;
+		float dampscl = 85;
 		if (applyX) {
 			forceCache.add((temp.x - temp2.x) * dampscl, 0);
 		}
