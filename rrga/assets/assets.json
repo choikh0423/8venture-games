@@ -76,7 +76,12 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
-        "game:wind_particle" : "game/particle_cloud.png",
+        "game:wind_particle_filmstrip1" : "game/windparticle_filmstrip1.png",
+        "game:wind_particle_filmstrip2" : "game/windparticle_filmstrip2.png",
+        "game:wind_particle_filmstrip3" : "game/windparticle_filmstrip3.png",
+        "game:leaf_particle_filmstrip1" : "game/leafparticle_filmstrip1.png",
+        "game:leaf_particle_filmstrip2" : "game/leafparticle_filmstrip2.png",
+        "game:leaf_particle_filmstrip3" : "game/leafparticle_filmstrip3.png",
         "game:red_bird_flapping" : "game/hazard/red_bird_flapping.png",
         "game:blue_bird_flapping" : "game/hazard/blue_bird_flapping.png",
         "game:green_bird_flapping" : "game/hazard/bird_nest_flapping.png",
