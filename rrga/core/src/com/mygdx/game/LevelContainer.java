@@ -125,13 +125,49 @@ public class LevelContainer{
      */
     private TextureRegion windTexture;
     /**
-     * Texture asset for the wind particles
-     */
-    private TextureRegion windParticleTexture;
-    /**
      * Texture assets for the wind animation
      */
     private TextureRegion[] windAnimation = new TextureRegion[9];
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation1;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation2;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation3;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture[] particleWindAnimationList;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation1;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation2;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation3;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture[] particleLeafAnimationList;
     /**
      * Texture asset for opened umbrella
      */
@@ -290,8 +326,6 @@ public class LevelContainer{
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
         boostTexture = directory.getEntry("game:boost", Texture.class);
 
-        windParticleTexture = new TextureRegion(directory.getEntry("game:wind_particle", Texture.class));
-
         // Hazard Textures
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
         blueBirdAnimationTexture = directory.getEntry("game:blue_bird_flapping", Texture.class);
@@ -311,6 +345,25 @@ public class LevelContainer{
         for(int i = 0; i < 9; i++){
             windAnimation[i] = new TextureRegion(directory.getEntry("game:wind_frame"+i, Texture.class));
         }
+        particleWindAnimation1 = directory.getEntry("game:wind_particle_filmstrip1", Texture.class);
+        particleWindAnimation2 = directory.getEntry("game:wind_particle_filmstrip2", Texture.class);
+        particleWindAnimation3 = directory.getEntry("game:wind_particle_filmstrip3", Texture.class);
+
+        particleWindAnimationList = new Texture[] {
+                particleWindAnimation1,
+                particleWindAnimation2,
+                particleWindAnimation3
+        };
+
+        particleLeafAnimation1 = directory.getEntry("game:leaf_particle_filmstrip1", Texture.class);
+        particleLeafAnimation2 = directory.getEntry("game:leaf_particle_filmstrip2", Texture.class);
+        particleLeafAnimation3 = directory.getEntry("game:leaf_particle_filmstrip3", Texture.class);
+
+        particleLeafAnimationList = new Texture[] {
+                particleLeafAnimation1,
+                particleLeafAnimation2,
+                particleLeafAnimation3
+        };
         avatarIdleAnimationTexture = directory.getEntry("game:player_idle_animation", Texture.class);
         avatarLookAnimationTexture = directory.getEntry("game:player_look_animation", Texture.class);
 
@@ -345,6 +398,7 @@ public class LevelContainer{
         movingPlats.clear();
         nests.clear();
         drawables.clear();
+        winds.clear();
     }
 
     private MovingPlatformModel showGoal;
@@ -414,27 +468,27 @@ public class LevelContainer{
         // Create wind gusts
         String windName = "wind";
         JsonValue[] windjv = parser.getWindData();
-        for (int ii = 1; ii < windjv.length; ii++) {
-            WindModel obj;
-            obj = new WindModel(windjv[ii]);
+        for (int ii = 0; ii < windjv.length; ii++) {
+            NewWindModel obj;
+            obj = new NewWindModel(windjv[ii], scale);
             obj.setDrawScale(scale);
             obj.setTexture(windTexture);
             obj.setAnimation(windAnimation);
+            for (int i = 0; i < obj.getNumParticles(); i++) {
+                int particleNum = (i % 3);
+
+                if (particleNum < 2) {
+                    obj.setParticleAnimation(particleWindAnimationList, i);
+                } else {
+                    obj.setParticleAnimation(particleLeafAnimationList, i);
+                }
+            }
             obj.setName(windName + ii);
             addObject(obj);
             drawables.add(obj);
+            winds.add(obj);
         }
 
-        NewWindModel obj2;
-        obj2 = new NewWindModel(windjv[0], scale);
-        obj2.setDrawScale(scale);
-        obj2.setTexture(windTexture);
-        obj2.setParticleTexture(windParticleTexture);
-        obj2.setAnimation(windAnimation);
-        obj2.setName(windName + 0);
-        addObject(obj2);
-        drawables.add(obj2);
-        winds.add(obj2);
 
 
         JsonValue hazardsjv = globalConstants.get("hazards");
