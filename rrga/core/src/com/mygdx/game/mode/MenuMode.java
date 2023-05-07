@@ -545,9 +545,9 @@ public class MenuMode extends MenuScreen {
     private void draw() {
         canvas.begin();
         if (screenMode == 1) {
-            canvas.draw(backgroundTexture, 0, 0);
+            canvas.draw(backgroundTexture, Color.WHITE, 0, 0, (float) canvas.getWidth(), (float) canvas.getHeight());
         } else if (screenMode == 2 || screenMode == 3) {
-            canvas.draw(backgroundTexture2, 0, 0);
+            canvas.draw(backgroundTexture2, Color.WHITE, 0, 0, (float) canvas.getWidth(), (float) canvas.getHeight());
         }
 
         if (screenMode == 1) {

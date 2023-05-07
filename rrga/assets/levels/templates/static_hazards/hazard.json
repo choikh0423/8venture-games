@@ -1,0 +1,37 @@
+{
+       "object": {
+              "height": 112.134289429902,
+              "id": 106,
+              "name": "hazard",
+              "polygon": [
+                     {
+                            "x": 0,
+                            "y": 0
+                     },
+                     {
+                            "x": 122.178389020873,
+                            "y": 0
+                     },
+                     {
+                            "x": 122.178389020873,
+                            "y": 112.134289429902
+                     },
+                     {
+                            "x": 0,
+                            "y": 112.134289429902
+                     }
+              ],
+              "properties": [
+                     {
+                            "name": "fill_texture",
+                            "type": "bool",
+                            "value": true
+                     }
+              ],
+              "rotation": 0,
+              "type": "static",
+              "visible": true,
+              "width": 122.178389020873
+       },
+       "type": "template"
+}

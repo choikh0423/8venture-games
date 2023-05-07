@@ -150,6 +150,18 @@ public class LevelContainer{
      * Fill Texture asset for lightning
      */
     private TextureRegion fillLightningTexture;
+
+    /**
+     * Fill Texture asset for brambles
+     */
+    private TextureRegion fillBrambleTexture;
+
+    /**
+     * Texture asset for rocks
+     */
+    private TextureRegion rockTexture;
+
+
     /**
      * Texture asset for nests
      */
@@ -287,6 +299,8 @@ public class LevelContainer{
         nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
 
         fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
+        fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
+        rockTexture = new TextureRegion(directory.getEntry("game:rock", Texture.class));
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
@@ -407,19 +421,39 @@ public class LevelContainer{
 
         JsonValue hazardsjv = globalConstants.get("hazards");
 
-        //create hazards
+        //create invisible/bramble/rock hazards
         JsonValue[] hazardData = parser.getStaticHazardData();
+        int staticDmg = hazardsjv.getInt("staticHazardDamage");
+        float staticKnockBack = hazardsjv.getFloat("staticHazardKnockBack");
         for(int ii = 0; ii < hazardData.length; ii++){
-            StaticHazard obj;
+            PolygonObstacle obj;
             JsonValue jv = hazardData[ii];
-            obj = new StaticHazard(jv);
+            String type = jv.getString("type");
+            if (type.equals("rock")){
+                obj = new RockHazard(jv, staticDmg, staticKnockBack);
+                obj.setTexture(rockTexture);
+            }
+            else {
+                obj = new StaticHazard(jv, staticDmg, staticKnockBack);
+                if (type.equals("fill")){
+                    obj.setTexture(fillBrambleTexture);
+                }
+            }
             obj.setDrawScale(scale);
-            //temporary texture - just like with platforms, we will have to get this from parsing
-            // TODO: get texture for static hazards
-            obj.setTexture(fillLightningTexture);
             obj.setName("static_hazard"+ii);
             addObject(obj);
-            //drawables.add(obj); this does not typecheck yet
+            drawables.add((Drawable) obj);
+        }
+
+        // create death zone (using static hazard with 0 knockback)
+        JsonValue[] deathZones = parser.getDeathZoneData();
+        for(int ii = 0; ii < deathZones.length; ii++){
+            JsonValue jv = deathZones[ii];
+            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            obj.setName("death_zone"+ii);
+            obj.setDrawScale(scale);
+            obj.setSensor(true);
+            addObject(obj);
         }
 
         //create birds
@@ -464,7 +498,7 @@ public class LevelContainer{
         String lightningName = "lightning";
         JsonValue[] lightningData = parser.getLightningData();
         int lightningDmg = hazardsjv.getInt("lightningDamage");
-        float lightningKnockBackScl = hazardsjv.getInt("lightningKnockBack");
+        float lightningKnockBackScl = hazardsjv.getFloat("lightningKnockBack");
         for (int ii = 0; ii < lightningData.length; ii++) {
             Obstacle obj;
             JsonValue data = lightningData[ii];

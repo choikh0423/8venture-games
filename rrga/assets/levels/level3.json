@@ -343,7 +343,7 @@
                  "y":2552.4246395806
                 }, 
                 {
-                 "gid":2147483917,
+                 "gid":2147483951,
                  "height":2569.84,
                  "id":157,
                  "rotation":0,
@@ -471,7 +471,7 @@
                  "y":1844.24561403509
                 }, 
                 {
-                 "gid":2147483986,
+                 "gid":2147484020,
                  "height":174.122362869198,
                  "id":115,
                  "properties":[
@@ -545,7 +545,7 @@
                  "y":779.757575757576
                 }, 
                 {
-                 "gid":2147483986,
+                 "gid":2147484020,
                  "height":119.909090909091,
                  "id":138,
                  "properties":[
@@ -870,7 +870,7 @@
          "source":"tilesets\/stickers.json"
         }, 
         {
-         "firstgid":264,
+         "firstgid":298,
          "source":"objects\/json\/objects.json"
         }],
  "tilewidth":128,

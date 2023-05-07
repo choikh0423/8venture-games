@@ -152,6 +152,11 @@ public class GameplayController implements ContactListener {
 
     protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
+    /**
+     * The set of all hazard fixtures that umbrella in contact with
+     */
+    protected ObjectSet<Fixture> contactHazardFixtures = new ObjectSet<>();
+
     /** weld joint definition struct */
     private final WeldJointDef weldJointDef = new WeldJointDef();
 
@@ -346,15 +351,15 @@ public class GameplayController implements ContactListener {
         }
 
         if (levelContainer.getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
-        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.001) levelContainer.getShowGoal().move();
+        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition())>0.0001) levelContainer.getShowGoal().move();
 
         //UMBRELLA
         umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
-        if (!input.didZoom() && !showGoal){
+        if ((!input.didZoom() || (avatar.isMoving() || !avatar.isGrounded() || avatar.getLinearVelocity().len()>0.0001f))&& !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
             if(!input.secondaryControlMode){
-                if (input.didToggle()) {
+                if (input.didToggle() && !umbrella.getBoosting()) {
                     umbrella.setOpen(!umbrella.isOpen());
                     if (umbrella.isOpen()) {
                         umbrella.useOpenedTexture();
@@ -463,7 +468,7 @@ public class GameplayController implements ContactListener {
         // Process player movement
         float angle = umbrella.getRotation();
         moved = input.getHorizontal() != 0;
-        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (input.didZoom() && avatar.isMoving()))) {
+        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (avatar.isMoving() || avatar.getLinearVelocity().len()>0.0001f))) {
             avatar.setMovement(input.getHorizontal() * avatar.getForce());
             avatar.applyWalkingForce();
         } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
@@ -488,15 +493,23 @@ public class GameplayController implements ContactListener {
             avatar.refillLighter();
         }
 
+        contactHazards.clear();
+        for (Fixture f : contactHazardFixtures) {
+            HazardModel bod = (HazardModel) f.getBody().getUserData();
+            if (!contactHazards.contains(bod)) {
+                contactHazards.add(bod);
+            }
+        }
+
         //Process Hazard Collisions
         for(HazardModel h: contactHazards) {
             int dam = h.getDamage();
             // player is only vulnerable to further damage and effects if the level is still ongoing
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
+                cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
+                avatar.getBody().setLinearVelocity(cache);
                 if (avatar.getHealth() - dam > 0) {
-                    cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
-                    avatar.getBody().setLinearVelocity(cache);
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
                     if(h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
@@ -738,8 +751,11 @@ public class GameplayController implements ContactListener {
             Obstacle bd2 = (Obstacle) body2.getUserData();
 
             // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && bd1.getName().contains("platform")) ||
-                    (avatar.getSensorName().equals(fd1) && bd2.getName().contains("platform"))) {
+            boolean isAvatarSensor = avatar.getSensorName().equals(fd2) || avatar.getSensorName().equals(fd1);
+            if ((isAvatarSensor && bd1.getName().contains("platform")) ||
+                    (isAvatarSensor && bd2.getName().contains("platform")) ||
+                    (isAvatarSensor && bd1 instanceof RockHazard) ||
+                    (isAvatarSensor && bd2 instanceof RockHazard)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
 
@@ -792,7 +808,7 @@ public class GameplayController implements ContactListener {
                 cache.set(playerBod.getPosition().sub(hazBod.getPosition()));
                 h.setKnockBackForce(cache);
 
-                contactHazards.add(h);
+                contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
             }
 
             // Check for win condition
@@ -853,8 +869,8 @@ public class GameplayController implements ContactListener {
 
         if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                 ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
-            HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-            contactHazards.remove(h);
+            //HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
+            contactHazardFixtures.remove(bd1 instanceof HazardModel ? fix1 : fix2);
         }
     }
 

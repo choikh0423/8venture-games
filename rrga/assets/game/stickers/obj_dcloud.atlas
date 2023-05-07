@@ -1,0 +1,34 @@
+
+obj_dcloud.png
+size: 714, 905
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+obj_dcloud
+  rotate: false
+  xy: 2, 522
+  size: 710, 381
+  orig: 710, 381
+  offset: 0, 0
+  index: 0
+obj_dcloud
+  rotate: false
+  xy: 2, 183
+  size: 646, 337
+  orig: 646, 337
+  offset: 0, 0
+  index: 1
+obj_dcloud
+  rotate: false
+  xy: 2, 2
+  size: 405, 179
+  orig: 405, 179
+  offset: 0, 0
+  index: 2
+obj_dcloud
+  rotate: false
+  xy: 409, 35
+  size: 220, 146
+  orig: 220, 146
+  offset: 0, 0
+  index: 3

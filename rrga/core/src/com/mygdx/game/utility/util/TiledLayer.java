@@ -75,10 +75,10 @@ public class TiledLayer implements Drawable {
         tilesDrawn = 0;
         int centerTileX = (int) (cx);
         int centerTileY = (int) (cy);
-        int minX = (int) Math.max(0, centerTileX - rx - 1);
-        int maxX = (int) Math.min(width- 1, centerTileX + rx + 1);
-        int minY = (int) Math.max(0, centerTileY - ry - 1);
-        int maxY = (int) Math.min(height - 1, centerTileY + ry + 1);
+        int minX = (int) Math.max(0, Math.floor(centerTileX - rx));
+        int maxX = (int) Math.min(width- 1, Math.ceil(centerTileX + rx));
+        int minY = (int) Math.max(0, Math.floor(centerTileY - ry));
+        int maxY = (int) Math.min(height - 1, Math.ceil(centerTileY + ry));
         // draw a grid of tiles around the camera's tile
         // O(dw * dh)
         for (int j = minY; j <= maxY; j++) {
@@ -101,4 +101,8 @@ public class TiledLayer implements Drawable {
         return tilesDrawn;
     }
 
+    @Override
+    public void drawDebug(GameCanvas canvas) {
+        // nothing happens, too inefficient to draw box for every tile.
+    }
 }

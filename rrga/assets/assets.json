@@ -92,7 +92,12 @@
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
-        "game:brambles_fill": "game/hazard/hazard_brambles_tiling.png",
+        "game:brambles_fill": {
+          "file":  "game/hazard/hazard_brambles_tiling.png",
+          "wrapU": "repeated",
+          "wrapV": "repeated"
+        },
+        "game:rock": "game/hazard/hazard_rocks.png",
         "game:newplatform" : {
             "file":  "game/platform.png",
             "wrapU": "repeated",
@@ -117,16 +122,19 @@
         "platform:cloud1": "game/clouds/obj_cloud_1.png",
         "platform:cloud2": "game/clouds/obj_cloud_2.png",
         "platform:cloud3": "game/clouds/obj_cloud_3.png",
-        "stickers:dcloud0": "game/dclouds/obj_dcloud_0.png",
-        "stickers:dcloud1": "game/dclouds/obj_dcloud_1.png",
-        "stickers:dcloud2": "game/dclouds/obj_dcloud_2.png",
-        "stickers:dcloud3": "game/dclouds/obj_dcloud_3.png",
         "game:lightning0": "game/lightning/obj_lightning_filmstrip_0.png",
         "game:lightning1": "game/lightning/obj_lightning_filmstrip_1.png",
         "game:lightning2": "game/lightning/obj_lightning_filmstrip_2.png",
         "game:lightning3": "game/lightning/obj_lightning_filmstrip_3.png",
         "game:lightning4": "game/lightning/obj_lightning_filmstrip_4.png",
         "game:cursor_ingame": "game/cursor_ingame.png",
+        "stickers:obj_dcloud": "game/stickers/obj_dcloud.png",
+        "stickers:green_bush": "game/stickers/green_bush.png",
+        "stickers:ground_bush": "game/stickers/ground_bush.png",
+        "stickers:pink_bush": "game/stickers/pink_bush.png",
+        "stickers:hazard_brambles_thick": "game/stickers/hazard_brambles_thick.png",
+        "stickers:hazard_brambles_thin": "game/stickers/hazard_brambles_thin.png",
+        "stickers:grass": "game/stickers/grass.png",
         "tileset:bushes_old": "levels/tilesets/bushes_old.png",
         "tileset:trees_old": "levels/tilesets/trees_old.png",
         "tileset:cliffs_old": "levels/tilesets/cliffs_old.png",
@@ -135,7 +143,8 @@
         "tileset:dirt": "levels/tilesets/dirt.png",
         "tileset:cliffs_interior": "levels/tilesets/cliffs_interior.png",
         "tileset:cliffs_exterior": "levels/tilesets/cliffs_exterior.png",
-        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png"
+        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png",
+        "tileset:trees_background": "levels/tilesets/trees_background.png"
     },
     "jsons"  : {
         "global:constants" :"globalconstants.json",
@@ -149,7 +158,7 @@
         "nest:template": "levels/templates/birds/nest.json",
         "path_point:template": "levels/templates/path_point.json",
         "platform:template": "levels/templates/platform.json",
-        "hazard_zone:template": "levels/templates/static_hazards/hazard_zone.json",
+        "static_hazard:template": "levels/templates/static_hazards/hazard.json",
         "rock:template": "levels/templates/static_hazards/rock.json",
         "cloud0:template": "levels/templates/cloud_platforms/large_cloud.json",
         "cloud1:template": "levels/templates/cloud_platforms/medium_cloud.json",
@@ -162,6 +171,8 @@
         "lightning3:template": "levels/templates/lightning/one_lightning.json",
         "lightning4:template": "levels/templates/lightning/left_lightning.json",
         "wind:template": "levels/templates/wind.json",
+        "data:stickers": "levels/tilesets/stickers.json",
+        "data:stickers_atlas": "game/stickers/atlas.json",
         "data:objects": "levels/objects/json/objects.json",
         "data:bushes_old": "levels/tilesets/bushes_old.json",
         "data:trees_old": "levels/tilesets/trees_old.json",
@@ -171,7 +182,8 @@
         "data:dirt": "levels/tilesets/dirt.json",
         "data:cliffs_interior": "levels/tilesets/cliffs_interior.json",
         "data:cliffs_exterior": "levels/tilesets/cliffs_exterior.json",
-        "data:trees_foreground": "levels/tilesets/trees_foreground.json"
+        "data:trees_foreground": "levels/tilesets/trees_foreground.json",
+        "data:trees_background": "levels/tilesets/trees_background.json"
     },
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav"

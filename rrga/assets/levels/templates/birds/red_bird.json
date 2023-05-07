@@ -1,6 +1,5 @@
 { "object":
     {
-     "class":"bird",
      "gid":75,
      "height":100,
      "id":99,
@@ -14,9 +13,10 @@
             {
              "name":"path",
              "type":"object",
-             "value":71
+             "value":0
             }],
      "rotation":0,
+     "type":"bird",
      "visible":true,
      "width":107
     },

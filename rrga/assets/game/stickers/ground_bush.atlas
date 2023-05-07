@@ -1,0 +1,83 @@
+
+ground_bush.png
+size: 873, 668
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+bush_00_ground
+  rotate: false
+  xy: 2, 220
+  size: 351, 446
+  orig: 351, 446
+  offset: 0, 0
+  index: -1
+bush_01_ground
+  rotate: false
+  xy: 355, 406
+  size: 226, 260
+  orig: 226, 260
+  offset: 0, 0
+  index: -1
+bush_02_ground
+  rotate: false
+  xy: 583, 419
+  size: 232, 247
+  orig: 232, 247
+  offset: 0, 0
+  index: -1
+bush_03_ground
+  rotate: false
+  xy: 355, 177
+  size: 233, 227
+  orig: 233, 227
+  offset: 0, 0
+  index: -1
+bush_04_ground
+  rotate: false
+  xy: 315, 4
+  size: 248, 171
+  orig: 248, 171
+  offset: 0, 0
+  index: -1
+bush_05_ground
+  rotate: false
+  xy: 2, 2
+  size: 311, 216
+  orig: 311, 216
+  offset: 0, 0
+  index: -1
+bush_06_ground
+  rotate: false
+  xy: 590, 225
+  size: 281, 192
+  orig: 281, 192
+  offset: 0, 0
+  index: -1
+bush_07_ground
+  rotate: false
+  xy: 565, 8
+  size: 135, 94
+  orig: 135, 94
+  offset: 0, 0
+  index: -1
+bush_08_ground
+  rotate: false
+  xy: 702, 15
+  size: 124, 87
+  orig: 124, 87
+  offset: 0, 0
+  index: -1
+bush_09_ground
+  rotate: false
+  xy: 590, 104
+  size: 139, 119
+  orig: 139, 119
+  offset: 0, 0
+  index: -1
+bush_10_ground
+  rotate: false
+  xy: 731, 104
+  size: 125, 119
+  orig: 125, 119
+  offset: 0, 0
+  index: -1
