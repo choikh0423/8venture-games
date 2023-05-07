@@ -320,8 +320,14 @@ public class GameplayController implements ContactListener {
     public int resetCounter = 0;
 
     // track updates to player
-    boolean moved = false;
+
+    /** whether there is input to move player */
+    boolean moveInputted = false;
+
+    /** whether umbrella is in boost */
     boolean umbrellaBoosted = false;
+
+    /** whether Gale's affected by wind */
     boolean windPushed = false;
 
     /**
@@ -359,7 +365,7 @@ public class GameplayController implements ContactListener {
         if ((!input.didZoom() || (avatar.isMoving() || !avatar.isGrounded() || avatar.getLinearVelocity().len()>0.0001f))&& !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
             if(!input.secondaryControlMode){
-                if (input.didToggle() && !umbrella.getBoosting()) {
+                if (input.didToggle() && !umbrella.isBoosting()) {
                     umbrella.setOpen(!umbrella.isOpen());
                     if (umbrella.isOpen()) {
                         umbrella.useOpenedTexture();
@@ -467,10 +473,14 @@ public class GameplayController implements ContactListener {
 
         // Process player movement
         float angle = umbrella.getRotation();
-        moved = input.getHorizontal() != 0;
+        moveInputted = input.getHorizontal() != 0;
         if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (avatar.isMoving() || avatar.getLinearVelocity().len()>0.0001f))) {
-            avatar.setMovement(input.getHorizontal() * avatar.getForce());
-            avatar.applyWalkingForce();
+            // frame N: Gale on ground, press boost
+            // frame N+1: Gale still on ground, do not apply dampening.
+            if (!umbrella.isBoosting()){
+                avatar.setMovement(input.getHorizontal() * avatar.getForce());
+                avatar.applyWalkingForce();
+            }
         } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
@@ -639,7 +649,7 @@ public class GameplayController implements ContactListener {
         // - player comes into contact with hazards
         // - player gets force from wind
         // - player boosts with umbrella
-        destroyWeldJoint = moved || contactHazards.size > 0 || windPushed || umbrella.isBoosting();
+        destroyWeldJoint = moveInputted || contactHazards.size > 0 || windPushed || umbrella.isBoosting();
 
         if (destroyWeldJoint && avatarWeldJoint != null) {
             world.destroyJoint(avatarWeldJoint);
@@ -651,6 +661,7 @@ public class GameplayController implements ContactListener {
         // - touching moving platform.
         // - not using boost
         // - no force from wind
+        // - no hit from hazard
         if (avatar.isGrounded() && touchingMovingCloud && !destroyWeldJoint && avatarWeldJoint == null){
             avatar.setLinearVelocity(temp.set(0,0));
             weldJointDef.initialize(avatar.getBody(), contactedCloudBody,
@@ -722,7 +733,7 @@ public class GameplayController implements ContactListener {
         }
 
         umbrellaBoosted = false;
-        moved = false;
+        moveInputted = false;
         windPushed = false;
         destroyWeldJoint = false;
     }

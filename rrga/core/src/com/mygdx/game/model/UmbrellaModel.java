@@ -167,10 +167,6 @@ public class UmbrellaModel extends BoxObstacle {
         return true;
     }
 
-    public boolean getBoosting(){
-        return isBoosting;
-    }
-
     /**
      * Returns the angle away from the x-axis of the umbrella in radians.
      * THIS IS THE VALUE YOU SHOULD USE FOR WIND INTERACTIONS, ETC.

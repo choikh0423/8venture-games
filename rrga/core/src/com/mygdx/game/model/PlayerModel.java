@@ -632,7 +632,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 		// Don't want to be moving. Damp out player motion
 		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
+			forceCache.set(-getDamping()*getVX(),-getDamping()*getVY());
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
