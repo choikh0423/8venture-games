@@ -146,7 +146,7 @@ public class LevelParser {
     private final JsonValue gameObjectTiles;
 
     /** the list of texture region cutters, one for each tileset */
-    private ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
+    private final ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
 
     /** the texture producer for stickers */
     private CollectionTileSetMaker stickerMaker;
@@ -173,6 +173,7 @@ public class LevelParser {
 
     /** drawing depth of scarf */
     private int goalDepth;
+    private JsonValue[] deathZoneData;
 
     /**
      * @return tile texture layers
@@ -233,6 +234,9 @@ public class LevelParser {
     public JsonValue[] getWindData(){
         return windData;
     }
+
+    public JsonValue[] getDeathZoneData() { return deathZoneData; }
+
     public Vector2 getGoalPos() {
         return goalPos;
     }
@@ -247,6 +251,19 @@ public class LevelParser {
     public int getPlayerDrawDepth(){ return playerDepth; }
 
     public int getGoalDrawDepth(){ return goalDepth; }
+
+    // containers for unprocessed JSON data
+    HashMap<Integer, JsonValue> trajectory = new HashMap<>();
+    ArrayList<JsonValue> birdRawData = new ArrayList<>();
+    ArrayList<JsonValue> platformRawData = new ArrayList<>();
+    ArrayList<JsonValue> lightningRawData = new ArrayList<>();
+    ArrayList<JsonValue> windRawData = new ArrayList<>();
+    HashMap<Integer, JsonValue> windDirs = new HashMap<>();
+    ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
+    ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
+    ArrayList<JsonValue> nestRawData = new ArrayList<>();
+
+    ArrayList<JsonValue> deathZoneRawData = new ArrayList<>();
 
     public LevelParser(AssetDirectory directory){
         JsonValue globalConstants = directory.getEntry("global:constants", JsonValue.class);
@@ -373,7 +390,7 @@ public class LevelParser {
 
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
-        tileSetMakers = new ArrayList<>();
+        tileSetMakers.clear();
         stickerMaker = null;
         JsonValue tileSets = levelData.get("tilesets");
         for (JsonValue ts : tileSets){
@@ -394,16 +411,17 @@ public class LevelParser {
         stickers.clear();
         layers.clear();
 
-        // containers for unprocessed JSON data
-        HashMap<Integer, JsonValue> trajectory = new HashMap<>();
-        ArrayList<JsonValue> birdRawData = new ArrayList<>();
-        ArrayList<JsonValue> platformRawData = new ArrayList<>();
-        ArrayList<JsonValue> lightningRawData = new ArrayList<>();
-        ArrayList<JsonValue> windRawData = new ArrayList<>();
-        HashMap<Integer, JsonValue> windDirs = new HashMap<>();
-        ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
-        ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
-        ArrayList<JsonValue> nestRawData = new ArrayList<>();
+        // clear raw data containers
+        trajectory.clear();
+        birdRawData.clear();
+        lightningRawData.clear();
+        platformRawData.clear();
+        windRawData.clear();
+        windDirs.clear();
+        movingPlatRawData.clear();
+        staticHazardRawData.clear();
+        nestRawData.clear();
+        deathZoneRawData.clear();
 
         JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together WITH depth considered)
@@ -413,11 +431,9 @@ public class LevelParser {
         for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData,
-                        windDirs, movingPlatRawData, staticHazardRawData, nestRawData);
+                parseObjectLayer(layer);
             }
             else if (layerName.equals("tilelayer")){
-                layer.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
                 parseTileLayer(layer);
             }
             else {
@@ -434,21 +450,13 @@ public class LevelParser {
         processWind(windRawData, windDirs);
         processMovingPlats(movingPlatRawData, trajectory);
         processNests(nestRawData, trajectory);
+        processDeathZone(deathZoneRawData);
     }
 
     /**
      * parse all relevant object data in the given object layer by categorizing/grouping raw data.
      */
-    private void parseObjectLayer(JsonValue layer, HashMap<Integer, JsonValue> trajectory,
-                                  ArrayList<JsonValue> birdRawData,
-                                  ArrayList<JsonValue> lightningRawData,
-                                  ArrayList<JsonValue> platformRawData,
-                                  ArrayList<JsonValue> windRawData,
-                                  HashMap<Integer, JsonValue> windDirs,
-                                  ArrayList<JsonValue> movingPlatRawData,
-                                  ArrayList<JsonValue> staticHazardRawData,
-                                  ArrayList<JsonValue> nestRawData)
-    {
+    private void parseObjectLayer(JsonValue layer) {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
             obj.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
@@ -479,8 +487,11 @@ public class LevelParser {
                 windDirs.put(obj.getInt("id"), obj);
             } else if (template.endsWith("cloud.json")){
                 movingPlatRawData.add(obj);
-            } else if (template.endsWith("nest.json")){
+            } else if (template.endsWith("nest.json")) {
                 nestRawData.add(obj);
+            } else if (obj.getString("type").equals("death") || obj.getString("name").equals("death") && obj.has("polygon")){
+                System.out.println("yo");
+                deathZoneRawData.add(obj);
             } else if (obj.has("gid")){
                 // treat as possibly a sticker, process it
                 parseSticker(obj);
@@ -898,6 +909,20 @@ public class LevelParser {
         return data;
     }
 
+    private void processDeathZone(ArrayList<JsonValue> deathZoneRawData) {
+        deathZoneData = new JsonValue[deathZoneRawData.size()];
+        for (int ii = 0; ii < deathZoneData.length; ii++) {
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            JsonValue rawData = deathZoneRawData.get(ii);
+            readPositionAndConvert(rawData, temp);
+            addPosition(data, temp);
+            data.addChild("points", polyPoints(rawData.get("polygon")));
+            data.addChild("depth", new JsonValue(rawData.getInt("__DEPTH__", -1)));
+            deathZoneData[ii] =  data;
+        }
+
+    }
+
     private void processWind(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> windDirs){
         windData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < rawData.size(); ii++){
@@ -1242,7 +1267,7 @@ public class LevelParser {
             int idx = row * worldWidth + col;
             tiles[idx] = getTileFromImages(rawId);
         }
-        layers.add(new TiledLayer(tiles, layer.getInt("__DEPTH__"), worldWidth, worldHeight));
+        layers.add(new TiledLayer(tiles, currentObjectDepth, worldWidth, worldHeight));
     }
 
     /**

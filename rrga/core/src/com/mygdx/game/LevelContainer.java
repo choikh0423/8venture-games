@@ -445,6 +445,17 @@ public class LevelContainer{
             drawables.add((Drawable) obj);
         }
 
+        // create death zone (using static hazard with 0 knockback)
+        JsonValue[] deathZones = parser.getDeathZoneData();
+        for(int ii = 0; ii < deathZones.length; ii++){
+            JsonValue jv = deathZones[ii];
+            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            obj.setName("death_zone"+ii);
+            obj.setDrawScale(scale);
+            obj.setSensor(true);
+            addObject(obj);
+        }
+
         //create birds
         JsonValue[] birdData = parser.getBirdData();
         int birdDamage = hazardsjv.getInt("birdDamage");

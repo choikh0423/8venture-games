@@ -14,7 +14,7 @@
     "height": 1.2
   },
   "player": {
-    "shrink": [0.7, 0.95],
+    "shrink": [0.5, 0.95],
     "force": 40.0,
     "damping": 30.0,
     "density": 1.0,
@@ -62,9 +62,9 @@
     "birdKnockBack": 6,
     "birdStillFrames": [ 3, 2, 3, 4],
     "lightningDamage": 1,
-    "lightningKnockBack": 5,
+    "lightningKnockBack": 10,
     "staticHazardDamage": 1,
-    "staticHazardKnockBack": 3
+    "staticHazardKnockBack": 4
   },
   "tilesets": {
     "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
