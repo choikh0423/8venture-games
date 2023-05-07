@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "name": "music",
+        "storageType": "string",
+        "type": "enum",
+        "values": [
+            "droplets",
+            "exploring_the_forest",
+            "a_world_of_clouds",
+            "over_the_cliffs",
+            "the_storm"
+        ],
+        "valuesAsFlags": false
+    },
+    {
+        "id": 2,
+        "name": "parallax",
+        "storageType": "string",
+        "type": "enum",
+        "values": [
+            "sky",
+            "forest"
+        ],
+        "valuesAsFlags": false
+    },
+    {
+        "id": 3,
+        "name": "particle",
+        "storageType": "string",
+        "type": "enum",
+        "values": [
+            "gust",
+            "leaf"
+        ],
+        "valuesAsFlags": false
+    }
+]

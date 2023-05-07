@@ -1,0 +1,83 @@
+
+green_bush.png
+size: 873, 668
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+green_bush
+  rotate: false
+  xy: 2, 220
+  size: 351, 446
+  orig: 351, 446
+  offset: 0, 0
+  index: 0
+green_bush
+  rotate: false
+  xy: 2, 2
+  size: 311, 216
+  orig: 311, 216
+  offset: 0, 0
+  index: 5
+green_bush
+  rotate: false
+  xy: 355, 406
+  size: 226, 260
+  orig: 226, 260
+  offset: 0, 0
+  index: 1
+green_bush
+  rotate: false
+  xy: 583, 419
+  size: 232, 247
+  orig: 232, 247
+  offset: 0, 0
+  index: 2
+green_bush
+  rotate: false
+  xy: 355, 177
+  size: 233, 227
+  orig: 233, 227
+  offset: 0, 0
+  index: 3
+green_bush
+  rotate: false
+  xy: 590, 225
+  size: 281, 192
+  orig: 281, 192
+  offset: 0, 0
+  index: 6
+green_bush
+  rotate: false
+  xy: 315, 4
+  size: 248, 171
+  orig: 248, 171
+  offset: 0, 0
+  index: 4
+green_bush
+  rotate: false
+  xy: 590, 104
+  size: 139, 119
+  orig: 139, 119
+  offset: 0, 0
+  index: 9
+green_bush
+  rotate: false
+  xy: 731, 104
+  size: 125, 119
+  orig: 125, 119
+  offset: 0, 0
+  index: 10
+green_bush
+  rotate: false
+  xy: 565, 8
+  size: 135, 94
+  orig: 135, 94
+  offset: 0, 0
+  index: 7
+green_bush
+  rotate: false
+  xy: 702, 15
+  size: 124, 87
+  orig: 124, 87
+  offset: 0, 0
+  index: 8

@@ -19,6 +19,7 @@ import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
 import com.mygdx.game.utility.util.Sticker;
+import com.mygdx.game.utility.util.TiledLayer;
 
 import java.util.*;
 
@@ -61,7 +62,7 @@ public class LevelContainer{
     /**
      * The set of all birds currently in the level
      */
-    private ObjectSet<BirdHazard> birds;
+    private PooledList<BirdHazard> birds;
 
     /**
      * The set of all winds currently in the level
@@ -77,11 +78,6 @@ public class LevelContainer{
      * The set of all moving platforms currently in the level
      */
     private final ObjectSet<MovingPlatformModel> movingPlats;
-
-    /**
-     * The set of all lightning currently in the level
-     */
-    private ObjectSet<LightningHazard> lightnings;
 
     /**
      * The set of all nests currently in the level
@@ -201,9 +197,25 @@ public class LevelContainer{
      */
     private Texture boostTexture;
     /**
-     * Texture asset for lightning
+     * Fill Texture asset for lightning
      */
-    private TextureRegion lightningTexture;
+    private TextureRegion fillLightningTexture;
+
+    /**
+     * Fill Texture asset for brambles
+     */
+    private TextureRegion fillBrambleTexture;
+
+    /**
+     * Texture asset for rocks
+     */
+    private TextureRegion rockTexture;
+
+
+    /**
+     * Texture asset for nests
+     */
+    private TextureRegion nestTexture;
 
     // Start of animation texture
     /**
@@ -218,6 +230,10 @@ public class LevelContainer{
      * Texture asset for umbrella open animation
      */
     private Texture umbrellaOpenAnimationTexture;
+    /**
+     * Texture asset for umbrella open animation when depleted
+     */
+    private Texture umbrellaOpenEmptyAnimationTexture;
 
     /**
      * Texture asset for umbrella boost animation
@@ -333,13 +349,17 @@ public class LevelContainer{
         brownBirdAnimationTexture = directory.getEntry("game:brown_bird_flapping", Texture.class);
         
         warningTexture = directory.getEntry("game:bird_warning", Texture.class);
+        nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
 
-        lightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
+        fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
+        fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
+        rockTexture = new TextureRegion(directory.getEntry("game:rock", Texture.class));
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
         avatarFallingAnimationTexture = directory.getEntry("game:player_falling_animation", Texture.class);
         umbrellaOpenAnimationTexture = directory.getEntry("game:umbrella_open_animation", Texture.class);
+        umbrellaOpenEmptyAnimationTexture = directory.getEntry("game:umbrella_open_empty_animation", Texture.class);
         umbrellaBoostAnimationTexture =  directory.getEntry("game:umbrella_dodge_animation", Texture.class);
         goalAnimationTexture = directory.getEntry("game:goal_animation", Texture.class);
         for(int i = 0; i < 9; i++){
@@ -394,7 +414,6 @@ public class LevelContainer{
         objects.clear();
         addQueue.clear();
         birds.clear();
-        lightnings.clear();
         movingPlats.clear();
         nests.clear();
         drawables.clear();
@@ -417,10 +436,6 @@ public class LevelContainer{
         goalDoor = new GoalDoor(goalconst, goalPos.x, goalPos.y,dwidth, dheight, parser.getGoalDrawDepth());
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTexture);
-        // doing so fits the texture onto the specified size of the object
-//        goalDoor.setTextureScale(
-//                dwidth * scale.x/goalTexture.getRegionWidth(),
-//                dheight * scale.y/goalTexture.getRegionHeight());
         goalDoor.setAnimation(goalAnimationTexture);
         addObject(goalDoor);
         drawables.add(goalDoor);
@@ -429,7 +444,6 @@ public class LevelContainer{
         JsonValue defaults = globalConstants.get("defaults");
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
-        String pname = "platform";
         JsonValue[] plats = parser.getPlatformData();
         JsonValue cur;
         for (int ii = 0; ii < plats.length; ii++) {
@@ -442,11 +456,10 @@ public class LevelContainer{
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
             obj.setTexture(platformTile);
-            obj.setName(pname + ii);
+            obj.setName("platform" + ii);
             addObject(obj);
         }
 
-        String mpname = "moving_platform";
         JsonValue[] mPlats = parser.getMovingPlatformData();
         for (int ii = 0; ii < mPlats.length; ii++) {
             cur = mPlats[ii];
@@ -459,7 +472,7 @@ public class LevelContainer{
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
             obj.setTexture(cloudPlatformTextures[cur.getInt("tileIndex")]);
-            obj.setName(mpname + ii);
+            obj.setName("moving_platform" + ii);
             addObject(obj);
             drawables.add(obj);
             movingPlats.add(obj);
@@ -493,37 +506,56 @@ public class LevelContainer{
 
         JsonValue hazardsjv = globalConstants.get("hazards");
 
-        //create hazards
+        //create invisible/bramble/rock hazards
         JsonValue[] hazardData = parser.getStaticHazardData();
+        int staticDmg = hazardsjv.getInt("staticHazardDamage");
+        float staticKnockBack = hazardsjv.getFloat("staticHazardKnockBack");
         for(int ii = 0; ii < hazardData.length; ii++){
-            StaticHazard obj;
+            PolygonObstacle obj;
             JsonValue jv = hazardData[ii];
-            obj = new StaticHazard(jv);
+            String type = jv.getString("type");
+            if (type.equals("rock")){
+                obj = new RockHazard(jv, staticDmg, staticKnockBack);
+                obj.setTexture(rockTexture);
+            }
+            else {
+                obj = new StaticHazard(jv, staticDmg, staticKnockBack);
+                if (type.equals("fill")){
+                    obj.setTexture(fillBrambleTexture);
+                }
+            }
             obj.setDrawScale(scale);
-            //temporary texture - just like with platforms, we will have to get this from parsing
-            // TODO: get texture for static hazards
-            obj.setTexture(lightningTexture);
             obj.setName("static_hazard"+ii);
             addObject(obj);
-            //drawables.add(obj); this does not typecheck yet
+            drawables.add((Drawable) obj);
+        }
+
+        // create death zone (using static hazard with 0 knockback)
+        JsonValue[] deathZones = parser.getDeathZoneData();
+        for(int ii = 0; ii < deathZones.length; ii++){
+            JsonValue jv = deathZones[ii];
+            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            obj.setName("death_zone"+ii);
+            obj.setDrawScale(scale);
+            obj.setSensor(true);
+            addObject(obj);
         }
 
         //create birds
-        String birdName = "bird";
         JsonValue[] birdData = parser.getBirdData();
         int birdDamage = hazardsjv.getInt("birdDamage");
         int birdSensorRadius = hazardsjv.getInt("birdSensorRadius");
-        float birdKnockback = hazardsjv.getInt("birdKnockback");
+        float birdKnockBack = hazardsjv.getInt("birdKnockBack");
         // indices for each bird type indicating the preferred still frame.
-        int[] indices = hazardsjv.get("stillFrames").asIntArray();
+        int[] indices = hazardsjv.get("birdStillFrames").asIntArray();
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockback, warningTexture);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
-            obj.setName(birdName + ii);
+            obj.setName("bird" + ii);
             addObject(obj);
             birds.add(obj);
             drawables.add(obj);
@@ -531,21 +563,43 @@ public class LevelContainer{
 
         //TODO
         //create nests
+        String nestName = "nest";
+        JsonValue[] nestData = parser.getNestData();
+        for(int ii = 0; ii<nestData.length; ii++){
+            NestHazard obj;
+            JsonValue jv = nestData[ii];
+            JsonValue blueData = parser.getBlueBirdData();
+            obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
+                    jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
+                    birdDamage, birdKnockBack, scale, getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), blueData);
+            obj.setDrawScale(scale);
+            obj.setTexture(nestTexture);
+            obj.setName("nest" + ii);
+            addObject(obj);
+            nests.add(obj);
+        }
 
-
-        //create lightning
+        //create lightning (animated lightning bolts and still-frame lightning bolts)
         String lightningName = "lightning";
         JsonValue[] lightningData = parser.getLightningData();
+        int lightningDmg = hazardsjv.getInt("lightningDamage");
+        float lightningKnockBackScl = hazardsjv.getFloat("lightningKnockBack");
         for (int ii = 0; ii < lightningData.length; ii++) {
-            AnimatedLightningHazard obj;
+            Obstacle obj;
             JsonValue data = lightningData[ii];
-            obj = new AnimatedLightningHazard(data, animatedLightningTextures[data.getInt("tileIndex")]);
+            if (data.getBoolean("fill_texture")){
+                LightningHazard lightning = new LightningHazard(data, lightningDmg, lightningKnockBackScl);
+                lightning.setTexture(fillLightningTexture);
+                obj = lightning;
+            }
+            else {
+                obj = new AnimatedLightningHazard(data, animatedLightningTextures[data.getInt("tileIndex")],
+                        lightningDmg, lightningKnockBackScl);
+            }
             obj.setDrawScale(scale);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
             obj.setName(lightningName + ii);
             addObject(obj);
-            //lightnings.add(obj);
-            drawables.add(obj);
+            drawables.add((Drawable) obj);
         }
 
         // Create invisible |_| shaped world boundaries so player is within bounds.
@@ -636,23 +690,28 @@ public class LevelContainer{
         umbrella.setOpenTexture(umbrellaOpenTexture);
         umbrella.setClosedTexture(umbrellaClosedTexture);
         umbrella.useClosedTexture();
-        umbrella.setOpenAnimation(umbrellaOpenAnimationTexture);
+        umbrella.setOpenAnimation(umbrellaOpenAnimationTexture, umbrellaOpenEmptyAnimationTexture);
         umbrella.setBoostAnimation(umbrellaBoostAnimationTexture);
-        umbrella.setClosedMomentum(globalConstants.get("umbrella").getFloat("closedmomentum"));
+        umbrella.setClosedMomentumX(globalConstants.get("umbrella").getFloat("closedmomentumX"));
+        umbrella.setClosedMomentumY(globalConstants.get("umbrella").getFloat("closedmomentumY"));
         addObject(umbrella);
         // drawables.add(umbrella); unnecessary because player+umbrella always drawn together.
 
-        // Include Stickers and Sort all drawables
+        // Include Stickers + Tiled Layers and Sort all drawables
         for (Sticker s : parser.getStickers()){
             s.setDrawScale(scale);
             drawables.add(s);
         }
-        Collections.sort(drawables, Collections.<Drawable>reverseOrder(new Comparator<Drawable>(){
+        for (TiledLayer t : parser.getLayers()){
+            t.setDrawScale(scale);
+            drawables.add(t);
+        }
+        Collections.sort(drawables, Collections.reverseOrder(new Comparator<Drawable>(){
             @Override
-            public int compare(Drawable o1, Drawable o2) {
-                return o1.getDepth() - o2.getDepth();
+            public int compare(Drawable o1, Drawable o2) { return o1.getDepth() - o2.getDepth();
             }
         }));
+
     }
 
     /**
@@ -702,9 +761,7 @@ public class LevelContainer{
         objects.clear();
         addQueue.clear();
         birds.clear();
-        lightnings.clear();
         nests.clear();
-
 
         objects = null;
         addQueue = null;
@@ -712,7 +769,6 @@ public class LevelContainer{
         scale = null;
         world = null;
         birds = null;
-        lightnings = null;
         nests = null;
     }
     /**
@@ -754,7 +810,7 @@ public class LevelContainer{
      * Get birds
      * @return birds
      */
-    public ObjectSet<BirdHazard> getBirds() {
+    public PooledList<BirdHazard> getBirds() {
         return birds;
     }
     /**
@@ -825,14 +881,8 @@ public class LevelContainer{
     /**
      * Set birds
      */
-    public void setBirds(ObjectSet<BirdHazard> birdsObj) {
+    public void setBirds(PooledList<BirdHazard> birdsObj) {
         birds = birdsObj;
-    }
-    /**
-     * Set lightnings
-     */
-    public void setLightnings(ObjectSet<LightningHazard> lightningsObj) {
-        lightnings = lightningsObj;
     }
 
 }

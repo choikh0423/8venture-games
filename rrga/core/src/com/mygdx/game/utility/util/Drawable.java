@@ -11,12 +11,12 @@ import com.mygdx.game.GameCanvas;
  */
 public interface Drawable{
 
-    /** width and height (standardized units) <br>
+    /** width and height of AABB (game standardized units) <br>
      * NOTE: vector should not be used as an allocator because the same vector is returned each time.
      */
     Vector2 getDimensions();
 
-    /** position of top left bounding box corner. <br>
+    /** game position of top left bounding box corner. <br>
      * NOTE: vector should not be used as an allocator because the same vector is returned each time.
      * */
     Vector2 getBoxCorner();
@@ -30,5 +30,16 @@ public interface Drawable{
      */
     void setDrawScale(Vector2 scale);
 
+    /**
+     * Draws the drawable to the provided drawing context.
+     * @param canvas Drawing context
+     */
     void draw(GameCanvas canvas);
+
+    /**
+     * Draws the outline of the bounding box.<br>
+     * If the bounding box is not visible, the drawable should not be drawn.
+     * @param canvas Drawing context
+     */
+    void drawDebug(GameCanvas canvas);
 }

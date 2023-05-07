@@ -6,6 +6,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.util.Sticker;
+import com.mygdx.game.utility.util.Tile;
+import com.mygdx.game.utility.util.TiledLayer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,9 +18,6 @@ public class LevelParser {
      * This saves parsing time when a level is played immediately again.
      */
     private JsonValue prevParsed;
-
-    /** reference to game global default values */
-    private final JsonValue globalConstants;
 
     /** list of bird json data.
      * Invariant: JSON is in the format used by level-container
@@ -49,10 +49,15 @@ public class LevelParser {
      */
     private JsonValue[] movingPlatformData;
 
+    /** list of nest json data
+     * Invariant: JSON is in the format used by level-container
+     */
+    private JsonValue[] nestData;
+
     /** the texture data of the tile layers
      * Invariant: front layers are stored last in list
      */
-    private ArrayList<TextureRegion[]> layers = new ArrayList<>();
+    private final ArrayList<TiledLayer> layers = new ArrayList<>();
 
     /** the list of Sticker objects */
     private final ArrayList<Sticker> stickers = new ArrayList<>();
@@ -86,6 +91,9 @@ public class LevelParser {
     /** template object with defaults for brown birds*/
     private final JsonValue brownBirdDefaultObj;
 
+    /** blue bird template data that is parsed */
+    private JsonValue blueBirdData;
+
     /** the default JSON properties of path point. */
     private final JsonValue pointDefault;
 
@@ -98,8 +106,14 @@ public class LevelParser {
     /** the default JSON polygon of a platform */
     private final JsonValue platformDefaultPoly;
 
-    /** the default JSON polygon of a static hazard */
-    private final JsonValue staticHazardDefaultPoly;
+    /** the default JSON properties of bramble hazard */
+    private final JsonValue staticHazardDefault;
+
+    /** the default JSON polygon of a bramble hazard */
+    private final JsonValue staticHazardPoly;
+
+    /** the default JSON object of a rock hazard*/
+    private final JsonValue rockDefaultObj;
 
     /** the default JSON properties of a wind object */
     private final JsonValue windDefault;
@@ -110,29 +124,41 @@ public class LevelParser {
     /** the default JSONs of movable cloud objects */
     private final JsonValue[] cloudDefaultObjects;
 
+    /** the default JSON properties of a nest object */
+    private final JsonValue nestDefault;
+
+    /** the default JSON polygon of a nest object */
+    private final JsonValue nestDefaultPoly;
+
     /** the default JSONs of animated lightning objects */
     private final JsonValue[] lightningDefaultObjects;
 
     /** the default direction of a wind object */
     private static final float windDirDefault = 0;
 
-    /** maps from tileset name (bushes, cliffs, etc) to its undivided texture */
-    private final HashMap<String, Texture> textureMap;
+    /** maps from tileset name (bushes, cliffs, .etc) to its undivided texture */
+    private final HashMap<String, Texture> tileSetTextureMap;
 
-    /** maps from tileset name (bushes, cliffs, etc) to its JSON data */
+    /** maps from tileset name (bushes, cliffs, .etc) to its JSON data */
     private final HashMap<String, JsonValue> tileSetJsonMap;
 
     /** all objects in game that needs asset information can be found in an objects.json */
     private final JsonValue gameObjectTiles;
 
     /** the list of texture region cutters, one for each tileset */
-    private ArrayList<TileSetMaker> tileSetMakers;
+    private final ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
 
     /** the texture producer for stickers */
-    private TileSetMaker stickerMaker;
+    private CollectionTileSetMaker stickerMaker;
 
-    /** list of all sticker textures in THE ORDER as given by sticker.json in levels/tilesets/ */
-    private final Texture[] stickerTextures;
+    /** The max id in a sticker set is not necessarily size() - 1 due to deletions.*/
+    private int maxStickerSetId;
+
+    /** (name -> texture) map of all stickers as specified by sticker.json in levels/tilesets/ */
+    private final HashMap<String, TextureRegion> stickerTextureMap;
+
+    /** (id -> name) map of all stickers as specified by sticker.json in levels/tilesets/ */
+    private final IntMap<String> stickerNameMap;
 
     private static final int LOWER28BITMASK = 0xFFFFFFF;
 
@@ -147,11 +173,12 @@ public class LevelParser {
 
     /** drawing depth of scarf */
     private int goalDepth;
+    private JsonValue[] deathZoneData;
 
     /**
      * @return tile texture layers
      */
-    public ArrayList<TextureRegion[]> getLayers() {
+    public ArrayList<TiledLayer> getLayers() {
         return layers;
     }
 
@@ -160,6 +187,17 @@ public class LevelParser {
      */
     public JsonValue[] getBirdData() {
         return birdData;
+    }
+
+    public JsonValue getBlueBirdData(){
+        return blueBirdData;
+    }
+
+    /**
+     * @return processed nest data that is ready for consumption
+     */
+    public JsonValue[] getNestData(){
+        return nestData;
     }
 
     /**
@@ -196,6 +234,9 @@ public class LevelParser {
     public JsonValue[] getWindData(){
         return windData;
     }
+
+    public JsonValue[] getDeathZoneData() { return deathZoneData; }
+
     public Vector2 getGoalPos() {
         return goalPos;
     }
@@ -211,24 +252,42 @@ public class LevelParser {
 
     public int getGoalDrawDepth(){ return goalDepth; }
 
+    // containers for unprocessed JSON data
+    HashMap<Integer, JsonValue> trajectory = new HashMap<>();
+    ArrayList<JsonValue> birdRawData = new ArrayList<>();
+    ArrayList<JsonValue> platformRawData = new ArrayList<>();
+    ArrayList<JsonValue> lightningRawData = new ArrayList<>();
+    ArrayList<JsonValue> windRawData = new ArrayList<>();
+    HashMap<Integer, JsonValue> windDirs = new HashMap<>();
+    ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
+    ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
+    ArrayList<JsonValue> nestRawData = new ArrayList<>();
+
+    ArrayList<JsonValue> deathZoneRawData = new ArrayList<>();
+
     public LevelParser(AssetDirectory directory){
-        globalConstants = directory.getEntry("global:constants", JsonValue.class);
+        JsonValue globalConstants = directory.getEntry("global:constants", JsonValue.class);
 
         JsonValue redBirdTemplate = directory.getEntry("red_bird:template", JsonValue.class);
         JsonValue blueBirdTemplate = directory.getEntry("blue_bird:template", JsonValue.class);
         JsonValue greenBirdTemplate = directory.getEntry("green_bird:template", JsonValue.class);
         JsonValue brownBirdTemplate = directory.getEntry("brown_bird:template", JsonValue.class);
         JsonValue pathPointTemplate = directory.getEntry("path_point:template", JsonValue.class);
-        JsonValue lightningTemplate = directory.getEntry("lightning:template", JsonValue.class);
+
         JsonValue platformTemplate = directory.getEntry("platform:template", JsonValue.class);
         JsonValue staticHazardTemplate = directory.getEntry("static_hazard:template", JsonValue.class);
+        JsonValue rockHazardTemplate = directory.getEntry("rock:template", JsonValue.class);
         JsonValue windTemplate = directory.getEntry("wind:template", JsonValue.class);
+        JsonValue nestTemplate = directory.getEntry("nest:template", JsonValue.class);
+
         // cloud templates
         JsonValue cloud0Template = directory.getEntry("cloud0:template", JsonValue.class);
         JsonValue cloud1Template = directory.getEntry("cloud1:template", JsonValue.class);
         JsonValue cloud2Template = directory.getEntry("cloud2:template", JsonValue.class);
         JsonValue cloud3Template = directory.getEntry("cloud3:template", JsonValue.class);
+
         // growing lightning templates
+        JsonValue fillLightningTemplate = directory.getEntry("fill_lightning:template", JsonValue.class);
         JsonValue lightning0Template = directory.getEntry("lightning0:template", JsonValue.class);
         JsonValue lightning1Template = directory.getEntry("lightning1:template", JsonValue.class);
         JsonValue lightning2Template = directory.getEntry("lightning2:template", JsonValue.class);
@@ -239,13 +298,20 @@ public class LevelParser {
         blueBirdDefaultObj = blueBirdTemplate.get("object");
         greenBirdDefaultObj = greenBirdTemplate.get("object");
         brownBirdDefaultObj = brownBirdTemplate.get("object");
+
         pointDefault = pathPointTemplate.get("object").get("properties");
-        lightningDefault = lightningTemplate.get("object").get("properties");
-        lightningDefaultPoly = lightningTemplate.get("object").get("polygon");
+        lightningDefault = fillLightningTemplate.get("object").get("properties");
+        lightningDefaultPoly = fillLightningTemplate.get("object").get("polygon");
         platformDefaultPoly = platformTemplate.get("object").get("polygon");
-        staticHazardDefaultPoly = staticHazardTemplate.get("object").get("polygon");
+        staticHazardDefault = staticHazardTemplate.get("object").get("properties");
+        staticHazardPoly = staticHazardTemplate.get("object").get("polygon");
+        rockDefaultObj = rockHazardTemplate.get("object");
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
+
+        nestDefault = nestTemplate.get("object").get("properties");
+        nestDefaultPoly = nestTemplate.get("object").get("polygon");
+
         cloudDefaultObjects = new JsonValue[]{
                 cloud0Template.get("object"),
                 cloud1Template.get("object"),
@@ -260,31 +326,46 @@ public class LevelParser {
                 lightning4Template.get("object")
         };
 
-        // save tileset textures and their corresponding JSON tileset data
-        textureMap = new HashMap<>();
-        textureMap.put("bushes", directory.getEntry( "tileset:bushes", Texture.class ));
-        textureMap.put("bushes_flipped", directory.getEntry("tileset:bushes_flipped", Texture.class));
-        textureMap.put("trees", directory.getEntry( "tileset:trees", Texture.class ));
-        textureMap.put("trees_flipped", directory.getEntry("tileset:trees_flipped", Texture.class));
-        textureMap.put("cliffs", directory.getEntry( "tileset:cliffs", Texture.class ));
-        textureMap.put("cliffs_flipped", directory.getEntry("tileset:cliffs_flipped", Texture.class));
-
-        // add tile layer tile-sets (artwork)
+        // save tileset textures and tileset JSON data
+        tileSetTextureMap = new HashMap<>();
         tileSetJsonMap = new HashMap<>();
-        tileSetJsonMap.put("bushes", directory.getEntry("data:bushes", JsonValue.class));
-        tileSetJsonMap.put("trees", directory.getEntry("data:trees", JsonValue.class));
-        tileSetJsonMap.put("cliffs", directory.getEntry("data:cliffs", JsonValue.class));
+        String[] tileSetFileNames = globalConstants.get("tilesets").get("filenames").asStringArray();
+        for (String tileSetName : tileSetFileNames){
+            tileSetTextureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
+            tileSetJsonMap.put(tileSetName + ".json", directory.getEntry("data:"+tileSetName, JsonValue.class));
+        }
 
         // add object json
         gameObjectTiles = directory.getEntry("data:objects", JsonValue.class).get("tiles");
 
-        // load all stickers
-        stickerTextures = new Texture[]{
-                directory.getEntry("stickers:dcloud0", Texture.class),
-                directory.getEntry("stickers:dcloud1", Texture.class),
-                directory.getEntry("stickers:dcloud2", Texture.class),
-                directory.getEntry("stickers:dcloud3", Texture.class)
-        };
+        // load all sticker textures (according to atlas file)
+        stickerTextureMap = new HashMap<>();
+        JsonValue atlas = directory.getEntry("data:stickers_atlas", JsonValue.class);
+        for (JsonValue imageAtlas : atlas){
+            String textureName = imageAtlas.name;
+            Texture texture = directory.getEntry("stickers:"+textureName, Texture.class);
+            if (imageAtlas.isString()){
+                // treat as entire asset because this is an extension tag.
+                stickerTextureMap.put(textureName + imageAtlas.asString(), new TextureRegion(texture));
+                continue;
+            }
+            // asset should be broken up
+            for (JsonValue region : imageAtlas){
+                String regionName = region.name;
+                int[] arr = region.asIntArray();
+                stickerTextureMap.put(textureName + "_" + regionName, new TextureRegion(texture, arr[0], arr[1], arr[2], arr[3]));
+            }
+        }
+        stickerNameMap = new IntMap<>();
+        JsonValue stickerJson = directory.getEntry("data:stickers", JsonValue.class);
+        maxStickerSetId = 0;
+        for (JsonValue stickerTile : stickerJson.get("tiles")){
+            int id = stickerTile.getInt("id");
+            maxStickerSetId = Math.max(maxStickerSetId, id);
+            String[] sourcePath = stickerTile.getString("image").split("/");
+            String sourceImageName = sourcePath[sourcePath.length - 1];
+            stickerNameMap.put(id, sourceImageName);
+        }
     }
 
     /**
@@ -304,19 +385,22 @@ public class LevelParser {
         worldSize.y = levelData.getInt("height", 18);
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
+        //get blue bird data for nests
+        blueBirdData = processBird(getBirdDefaultObj("blue"), null);
 
         // prepare texture/tileset parsing, get all tilesets used by current level
         // properly formatted raw data should have tilesets ordered by IDs so this guarantees sorted order.
-        tileSetMakers = new ArrayList<>();
+        tileSetMakers.clear();
         stickerMaker = null;
         JsonValue tileSets = levelData.get("tilesets");
         for (JsonValue ts : tileSets){
             String source = ts.getString("source");
-            if (source.endsWith("stickers.json")){
-                stickerMaker = new CollectionTileSetMaker(stickerTextures, ts.getInt("firstgid"));
+            String[] pathNames = source.split("/");
+            if (pathNames[pathNames.length - 1].equals("stickers.json")){
+                stickerMaker = new CollectionTileSetMaker(stickerTextureMap, stickerNameMap, ts.getInt("firstgid"));
                 continue;
             }
-            JsonValue j = getTileLayerTileSetJson(source);
+            JsonValue j = tileSetJsonMap.get(pathNames[pathNames.length - 1]);
             if (j == null){
                 continue;
             }
@@ -327,15 +411,17 @@ public class LevelParser {
         stickers.clear();
         layers.clear();
 
-        // containers for unprocessed JSON data
-        HashMap<Integer, JsonValue> trajectory = new HashMap<>();
-        ArrayList<JsonValue> birdRawData = new ArrayList<>();
-        ArrayList<JsonValue> platformRawData = new ArrayList<>();
-        ArrayList<JsonValue> lightningRawData = new ArrayList<>();
-        ArrayList<JsonValue> windRawData = new ArrayList<>();
-        HashMap<Integer, JsonValue> windDirs = new HashMap<>();
-        ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
-        ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
+        // clear raw data containers
+        trajectory.clear();
+        birdRawData.clear();
+        lightningRawData.clear();
+        platformRawData.clear();
+        windRawData.clear();
+        windDirs.clear();
+        movingPlatRawData.clear();
+        staticHazardRawData.clear();
+        nestRawData.clear();
+        deathZoneRawData.clear();
 
         JsonValue rawLayers = levelData.get("layers");
         // flatten all layers (all object layers are put together WITH depth considered)
@@ -345,8 +431,7 @@ public class LevelParser {
         for (JsonValue layer : rawLayers) {
             String layerName = layer.getString("type", "");
             if (layerName.equals("objectgroup")){
-                parseObjectLayer(layer, trajectory, birdRawData, lightningRawData, platformRawData, windRawData,
-                        windDirs, movingPlatRawData, staticHazardRawData);
+                parseObjectLayer(layer);
             }
             else if (layerName.equals("tilelayer")){
                 parseTileLayer(layer);
@@ -359,51 +444,54 @@ public class LevelParser {
 
         // begin object processing
         processBirds(birdRawData, trajectory);
-        processNewLightning(lightningRawData);
+        processLightning(lightningRawData);
         processPlatforms(platformRawData);
         processStaticHazards(staticHazardRawData);
         processWind(windRawData, windDirs);
         processMovingPlats(movingPlatRawData, trajectory);
+        processNests(nestRawData, trajectory);
+        processDeathZone(deathZoneRawData);
     }
 
     /**
      * parse all relevant object data in the given object layer by categorizing/grouping raw data.
      */
-    private void parseObjectLayer(JsonValue layer, HashMap<Integer, JsonValue> trajectory,
-                                  ArrayList<JsonValue> birdRawData,
-                                  ArrayList<JsonValue> lightningRawData,
-                                  ArrayList<JsonValue> platformRawData,
-                                  ArrayList<JsonValue> windRawData,
-                                  HashMap<Integer, JsonValue> windDirs,
-                                  ArrayList<JsonValue> movingPlatRawData,
-                                  ArrayList<JsonValue> staticHazardRawData)
-    {
+    private void parseObjectLayer(JsonValue layer) {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
             obj.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
             String template = obj.getString("template", "IGNORE");
-            if (template.contains("bird.json")) {
+            if (template.endsWith("bird.json")) {
                 birdRawData.add(obj);
-            } else if (template.contains("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
+            } else if (template.endsWith("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
                 platformRawData.add(obj);
-            } else if (template.contains("lightning.json")) {
+            } else if (template.endsWith("lightning.json")) {
                 lightningRawData.add(obj);
-            } else if (template.contains("path_point.json")) {
+            } else if (template.endsWith("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
-            } else if (template.contains("spawn.json")) {
+            } else if (template.endsWith("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
                 playerDepth = currentObjectDepth;
-            } else if (template.contains("goal.json")) {
+            } else if (template.endsWith("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
                 goalDepth = currentObjectDepth;
-            } else if (template.contains("static_hazard.json")){
+            } else if (template.endsWith("hazard.json") || obj.getString("type", "UNKNOWN").equals("static")){
+                obj.addChild("hazard", new JsonValue("unspecified"));
                 staticHazardRawData.add(obj);
-            } else if (template.contains("wind.json")){
+            } else if (template.endsWith("rock.json")){
+                obj.addChild("hazard", new JsonValue("rock"));
+                staticHazardRawData.add(obj);
+            } else if (template.endsWith("wind.json")){
                 windRawData.add(obj);
-            } else if (template.contains("wind_dir.json")){
+            } else if (template.endsWith("wind_dir.json")){
                 windDirs.put(obj.getInt("id"), obj);
-            } else if (template.contains("cloud.json")){
+            } else if (template.endsWith("cloud.json")){
                 movingPlatRawData.add(obj);
+            } else if (template.endsWith("nest.json")) {
+                nestRawData.add(obj);
+            } else if (obj.getString("type").equals("death") || obj.getString("name").equals("death") && obj.has("polygon")){
+                System.out.println("yo");
+                deathZoneRawData.add(obj);
             } else if (obj.has("gid")){
                 // treat as possibly a sticker, process it
                 parseSticker(obj);
@@ -412,14 +500,18 @@ public class LevelParser {
     }
 
     private void parseSticker(JsonValue obj) {
-        int gid = obj.getInt("gid");
+        long gid = obj.getInt("gid");
+        // see if the sticker is coming from a tileset...
         TextureRegion texture = getTileFromImages(gid);
         if (texture == null){
             if (stickerMaker != null){
                 int id = (int) (gid & LOWER28BITMASK);
+                if (!stickerMaker.contains(id)){
+                    return;
+                }
                 boolean flipX = (gid & (1L << 31)) != 0;
                 boolean flipY = (gid & (1L << 30)) != 0;
-                texture = stickerMaker.getRegionFromId(id, false, flipX, flipY);
+                texture = stickerMaker.getRegionFromId(id, flipX, flipY);
             }
             else {
                 return;
@@ -429,7 +521,8 @@ public class LevelParser {
         float x = temp.x;
         float y = temp.y;
         JsonValue AABB = processTileObjectAABB(obj, null, texture.getRegionWidth(), texture.getRegionHeight());
-        stickers.add(new Sticker(x,y, obj.getInt("__DEPTH__", -1), AABB, texture));
+        float angle = convertAngle(obj.getFloat("rotation", 0));
+        stickers.add(new Sticker(x,y, angle, obj.getInt("__DEPTH__", -1), AABB, texture));
     }
 
     /**
@@ -448,6 +541,9 @@ public class LevelParser {
         int idx = 1;
         seen.clear();
         seen.put(id, 0);
+        if (trajectory == null){
+            return -1;
+        }
         while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
             seen.put(next, idx);
             idx++;
@@ -465,7 +561,7 @@ public class LevelParser {
     }
 
     /**
-     * This computes the AABB of a tile object (an object that has an associated tile).
+     * This computes the AABB of an NON-ROTATED tile object (an object that has an associated tile).
      * The scalars cache is updated with the coefficients that can be used to convert an asset size to its Box2D size
      * under the scaling of the processed object.
      * @param rawData the entity's unprocessed json object data (this should be from level files)
@@ -486,7 +582,7 @@ public class LevelParser {
         // compute the scale factors of both dimensions to yield correct AABB starting location and dimensions
         scalars.set(tileWidth/assetWidth/tileScale.x, tileHeight/assetHeight/tileScale.y);
 
-        // the AABB is specified entirely in game coordinates relative to the bird's position
+        // the AABB is specified entirely in game coordinates relative to the object's position
         // AABB[0 ... 3] = {corner x, corner y, AABB physics width, AABB physics height}
         JsonValue AABB = new JsonValue(JsonValue.ValueType.array);
         AABB.addChild(new JsonValue(temp.x * scalars.x));
@@ -497,26 +593,27 @@ public class LevelParser {
     }
 
     /**
-     * processes the hit-box information given.<br>
+     * processes the hit-box information given (without rotation).<br>
      * NOTE: the polygon origin is specified in asset coordinates. This is not Tiled world coordinates
      * nor is this origin specified in Box2D world coordinates. This origin is a coordinate within the
      * collider tool.
      * @param vertices the collection of points [{x,y}] that describes the shape of hitbox
      * @param origin a vector cache containing the origin of the polygon in asset-space.
      * @param scalars a vector cache with the proper scaling factors (ideally loaded from computing AABB)
-     * @param horizontalFlipped whether the hitbox should be flipped horizontally about the texture origin.
+     * @param flipX whether the hit-box should be flipped horizontally about the texture origin.
+     * @param flipY whether the hit-box should be flipped vertically about the texture origin.
      * @param assetWidth the width of the source asset
      * @param assetHeight the height of the source asset
-     * @return a JSON array consisting of the points of the hitbox polygon relative to the center of the entity.
+     * @return a JSON array consisting of the points of the hit-box polygon relative to the center of the entity.
      * The center is defined to be the location where the texture (default) origin is drawn.
      */
     private JsonValue processAssetHitBox(JsonValue vertices, Vector2 origin, Vector2 scalars,
-                                         boolean horizontalFlipped, int assetWidth, int assetHeight){
+                                         boolean flipX, boolean flipY, int assetWidth, int assetHeight){
         JsonValue shape = new JsonValue(JsonValue.ValueType.array);
         float ox = origin.x;
         float oy = origin.y;
-        float sx = scalars.x * (horizontalFlipped ? -1 : 1);
-        float sy = scalars.y;
+        float sx = scalars.x * (flipX? -1 : 1);
+        float sy = scalars.y * (flipY? -1 : 1);
         for (int idx = 0; idx < vertices.size; idx++){
             JsonValue jv = vertices.get(idx);
             readPosition(jv, temp);
@@ -529,20 +626,6 @@ public class LevelParser {
             shape.addChild(new JsonValue(temp.y));
         }
         return shape;
-    }
-
-    /**
-     * load into vector cache the dimensions of the tile asset.
-     * @param tileJson the JSON for the tile
-     * @param tileSetJson the JSON for the entire tileset in which the given tile belongs to.
-     */
-    private void loadAssetTileDimensions(JsonValue tileJson, JsonValue tileSetJson){
-        // implementation detai: tilesets with consistent tile sizes (same throughout) will only have
-        // "tilewidth" and "tileheight" property in the tileset json. For tilesets with varying tile sizes,
-        // each individual tile will have their "imagewidth" and "imageheight" properties. These tilesets are
-        // collections of images instead of coming from a single image.
-        temp.set(tileJson.getInt("imagewidth", tileSetJson.getInt("tilewidth")),
-                tileJson.getInt("imageheight", tileSetJson.getInt("tileheight")));
     }
 
     /**
@@ -562,8 +645,7 @@ public class LevelParser {
      * This method is specifically used to convert a given point p whose current origin point is the point (cx,cy)
      * where (cx,cy) is already expressed in the new coordinate system. The original coordinate system where
      * (0,0) -> (cx,cy) is a standard graphics coordinate system and the new coordinate system is standard cartesian
-     * coordinate system.
-     *
+     * coordinate system.<br>
      * Note: p is modified directly.
      * @param p (x,y) expressed in relation to (cx,cy) being the origin
      * @param cx the x-offset of the old origin from the new
@@ -578,6 +660,10 @@ public class LevelParser {
         return (object.getLong("gid", 0) & 1L << 31) != 0;
     }
 
+    private boolean isObjectVerticallyFlipped(JsonValue object){
+        return (object.getLong("gid", 0) & 1L << 30) != 0;
+    }
+
     /**
      * @param object game object (templates/tile objects contain gid(s))
      * @return the indexing portion of a tile Gid (excludes flip bits).
@@ -587,97 +673,113 @@ public class LevelParser {
     }
 
     /**
-     * Convert raw bird JSON into game-expected JSON format.
-     * @param rawData the unprocessed bird object data
+     * Convert all raw bird JSON into game-expected JSON format.
+     * @param rawData the unprocessed list of bird object data
      * @param trajectory map of path node Ids to raw JSON
      */
-    private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+    private void processBirds(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory) {
         birdData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < birdData.length; ii++) {
-            // b = raw bird data
-            JsonValue b = rawData.get(ii);
-            // data = the bird JSON that game will read
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            String color = computeColor(b.getString("template", "blue_bird.json"));
-            JsonValue properties = b.get("properties");
-            JsonValue defaultObj = getBirdDefaultObj(color);
-            JsonValue defaults = defaultObj.get("properties");
-            // set deterministic trivial properties
-            data.addChild("depth", new JsonValue(b.getInt("__DEPTH__", -1)));
-            data.addChild("color", new JsonValue(color));
-            data.addChild("attack", new JsonValue(doesBirdAttack(color)));
-            // add whether facing right
-            boolean facingRight = isBirdInitiallyFacingRight(color);
-            boolean horizontalFlipped = isObjectHorizontallyFlipped(b);
-            // XOR(flip, facingRight) => if flip then !facingRight else facingRight
-            facingRight = horizontalFlipped ^ facingRight;
-            data.addChild("facing_right", new JsonValue(facingRight));
-
-            // The following is procedure to: set position, hit-box, AABB data
-            readPositionAndConvert(b, temp);
-            addPosition(data, temp);
-            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
-            // implicitly, the bird's location is the FIRST point on their path.
-            pathJson.addChild(new JsonValue(temp.x));
-            pathJson.addChild(new JsonValue(temp.y));
-
-            // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
-            // using the first tile in the set is sufficient for birds, unless we want multi-hitbox.
-            JsonValue tileJson = gameObjectTiles.get(getProcessedGid(defaultObj) - 1);
-            int assetWidth = tileJson.getInt("imagewidth");
-            int assetHeight = tileJson.getInt("imageheight");
-            data.addChild("filmStripWidth", new JsonValue(assetWidth));
-            data.addChild("filmStripHeight", new JsonValue(assetHeight));
-
-            // add AABB
-            data.addChild("AABB", processTileObjectAABB(b, defaultObj, assetWidth, assetHeight));
-
-            // the hitbox information for birds is stored in one tile (the one animated), in its objectgroup, which we then
-            // look at the first of its objects list.
-            // Now, load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
-            JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
-            float ox = hitBoxPoints.getFloat("x");
-            float oy = hitBoxPoints.getFloat("y");
-            JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
-                    horizontalFlipped, assetWidth, assetHeight);
-            data.addChild("points", shape);
-
-            // Remaining: set bird properties and complete their path
-            // the resulting path should be stored as a list of floats which is Json array of Json floats.
-            float moveSpeed = 0;
-            float atkSpeed = 0;
-            // path birds are red and brown
-            if (color.equals("red") || color.equals("brown")){
-                // update properties
-                moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
-                // using custom properties to find rest of path
-                // this takes either the bird's next point along its path or take from default (which should be 0)
-                int next = getFromProperties(properties, "path", defaults).asInt();
-                int loopTo = processPath(pathJson, trajectory, next, b.getInt("id"));
-                data.addChild("loopTo", new JsonValue(loopTo));
-            }
-            if (doesBirdAttack(color)){
-                atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
-            }
-            data.addChild("path", pathJson);
-            data.addChild("movespeed", new JsonValue(moveSpeed));
-            data.addChild("atkspeed", new JsonValue(atkSpeed));
+            JsonValue data = processBird(rawData.get(ii), trajectory);
             birdData[ii] = data;
         }
     }
 
-    private void processNewLightning(ArrayList<JsonValue> rawData){
+    /**
+     * Convert a single raw bird JSON into game-expected JSON object
+     * @param b the unprocessed bird object data
+     * @param trajectory map of path node Ids to raw JSON
+     * @return game-formatted bird JSON
+     */
+    private JsonValue processBird(JsonValue b, HashMap<Integer, JsonValue> trajectory){
+        // data = the bird JSON that game will read
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        String color = computeColor(b.getString("template", "blue_bird.json"));
+        JsonValue properties = b.get("properties");
+        JsonValue defaultObj = getBirdDefaultObj(color);
+        JsonValue defaults = defaultObj.get("properties");
+        // set deterministic trivial properties
+        data.addChild("depth", new JsonValue(b.getInt("__DEPTH__", -1)));
+        data.addChild("color", new JsonValue(color));
+        data.addChild("attack", new JsonValue(doesBirdAttack(color)));
+        // add whether facing right
+        boolean horizontalFlipped = isObjectHorizontallyFlipped(b);
+        // XOR(flip, ?facingRight) => if flip then !(?facingRight) else (?facingRight)
+        boolean facingRight = horizontalFlipped ^ isBirdInitiallyFacingRight(color);
+        data.addChild("facing_right", new JsonValue(facingRight));
+
+        // The following is procedure to: set position, hit-box, AABB data
+        readPositionAndConvert(b, temp);
+        addPosition(data, temp);
+        JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+        // implicitly, the bird's location is the FIRST point on their path.
+        pathJson.addChild(new JsonValue(temp.x));
+        pathJson.addChild(new JsonValue(temp.y));
+
+        // get dimension of a single filmstrip of the original animated asset (pixel coordinates)
+        // using the first tile in the set is sufficient for birds, unless we want multi-hitbox.
+        JsonValue tileJson = gameObjectTiles.get(getProcessedGid(defaultObj) - 1);
+        int assetWidth = tileJson.getInt("imagewidth");
+        int assetHeight = tileJson.getInt("imageheight");
+        data.addChild("filmStripWidth", new JsonValue(assetWidth));
+        data.addChild("filmStripHeight", new JsonValue(assetHeight));
+
+        // add AABB
+        data.addChild("AABB", processTileObjectAABB(b, defaultObj, assetWidth, assetHeight));
+
+        // the hitbox information for birds is stored in one tile (the one animated), in its objectgroup, which we then
+        // look at the first of its objects list.
+        // Now, load hit-box, convert to asset coordinates then to cartesian coordinates relative to bird's pos
+        JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+        float ox = hitBoxPoints.getFloat("x");
+        float oy = hitBoxPoints.getFloat("y");
+        JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                horizontalFlipped, false, assetWidth, assetHeight);
+        data.addChild("points", shape);
+
+        // Remaining: set bird properties and complete their path
+        // the resulting path should be stored as a list of floats which is Json array of Json floats.
+        float moveSpeed = 0;
+        float atkSpeed = 0;
+        // path birds are red and brown
+        if (color.equals("red") || color.equals("brown")){
+            // update properties
+            moveSpeed = getFromProperties(properties, "move_speed", defaults).asFloat();
+            // using custom properties to find rest of path
+            // this takes either the bird's next point along its path or take from default (which should be 0)
+            int next = getFromProperties(properties, "path", defaults).asInt();
+            int loopTo = processPath(pathJson, trajectory, next, b.getInt("id"));
+            data.addChild("loopTo", new JsonValue(loopTo));
+        }
+        if (doesBirdAttack(color)){
+            atkSpeed = getFromProperties(properties, "atk_speed", defaults).asFloat();
+        }
+        data.addChild("path", pathJson);
+        data.addChild("movespeed", new JsonValue(moveSpeed));
+        data.addChild("atkspeed", new JsonValue(atkSpeed));
+        return data;
+    }
+
+    private void processLightning(ArrayList<JsonValue> rawData){
         lightningData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < lightningData.length; ii++) {
-            lightningData[ii] = processNewLightning(rawData.get(ii));
+            JsonValue rawLightning = rawData.get(ii);
+            String lightningTemplateName = rawLightning.getString("template", "lightning.json");
+            if (lightningTemplateName.endsWith("fill_lightning.json")){
+                lightningData[ii] = processStillLightning(rawLightning);
+            }
+            else{
+                // one of the growing lightning
+                lightningData[ii] = processAnimatedLightning(rawLightning);
+            }
         }
     }
 
     /**
      * processes a single animated lightning object into JSON data
-     * @param rawData unproecessed
+     * @param rawData unprocessed lightning
      */
-    private JsonValue processNewLightning(JsonValue rawData){
+    private JsonValue processAnimatedLightning(JsonValue rawData){
         JsonValue data = new JsonValue(JsonValue.ValueType.object);
         readPositionAndConvert(rawData, temp);
         addPosition(data, temp);
@@ -688,7 +790,9 @@ public class LevelParser {
         JsonValue lightningDefaultObj = lightningDefaultObjects[tileIndex];
         JsonValue lightningProps = lightningDefaultObj.get("properties");
         data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
-        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_timer", lightningProps).asInt()));
+        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_duration", lightningProps).asInt()));
+        data.addChild("initial_timer_offset",
+                new JsonValue(getFromProperties(props, "initial_timer_offset", lightningProps).asInt()));
         // get unscaled-size data from lightning.json file (collection of all ligntning bolts)
         // get the AABB for the given lightning
         int gid = getProcessedGid(lightningDefaultObj);
@@ -701,7 +805,7 @@ public class LevelParser {
 
         // add all the hit-boxes (loop over number of frames)
         // INVARIANT: the selected tile is the last tile of the animation, so iterate ids: gid-length through gid-1
-        int frameCount = getFrameCount(tileJson,"lightning");
+        int frameCount = getFrameCount(tileJson);
         boolean horizontalFlipped = isObjectHorizontallyFlipped(rawData);
         data.addChild("flipped", new JsonValue(horizontalFlipped));
         JsonValue hitboxes = new JsonValue(JsonValue.ValueType.array);
@@ -710,34 +814,33 @@ public class LevelParser {
             float ox = hitBoxPoints.getFloat("x");
             float oy = hitBoxPoints.getFloat("y");
             JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
-                    horizontalFlipped, assetWidth, assetHeight);
+                    horizontalFlipped, false, assetWidth, assetHeight);
             hitboxes.addChild(shape);
         }
         data.addChild("hitboxes", hitboxes);
+        data.addChild("fill_texture", new JsonValue(false));
         return data;
     }
 
     /**
-     * deprecated
-     * @param rawData deprecated
+     * processes a single still lightning object into JSON data
+     * @param l unprocessed lightning data
      */
-    private void processLightningOld(ArrayList<JsonValue> rawData){
-        lightningData = new JsonValue[rawData.size()];
-        for (int ii = 0; ii < lightningData.length; ii++) {
-            //data we pass in to lightning constructor
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            //lightning raw data
-            JsonValue l = rawData.get(ii);
-            // set position data
-            readPositionAndConvert(l, temp);
-            addPosition(data, temp);
-            JsonValue props = l.get("properties");
-            data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
-            data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
-            data.addChild("strike_timer_offset", new JsonValue(getFromProperties(props, "strike_timer_offset", lightningDefault).asInt()));
-            data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
-            lightningData[ii] = data;
-        }
+    private JsonValue processStillLightning(JsonValue l){
+        // processed data
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        // set position
+        readPositionAndConvert(l, temp);
+        addPosition(data, temp);
+        JsonValue props = l.get("properties");
+        data.addChild("points", polyPoints(l.get("polygon"), lightningDefaultPoly));
+        data.addChild("strike_timer", new JsonValue(getFromProperties(props, "strike_timer", lightningDefault).asInt()));
+        data.addChild("strike_duration", new JsonValue(getFromProperties(props, "strike_duration", lightningDefault).asInt()));
+        data.addChild("initial_timer_offset",
+                new JsonValue(getFromProperties(props, "initial_timer_offset", lightningDefault).asInt()));
+        data.addChild("depth", new JsonValue(l.getInt("__DEPTH__", -1)));
+        data.addChild("fill_texture", new JsonValue(true));
+        return data;
     }
 
     private void processPlatforms(ArrayList<JsonValue> rawData){
@@ -759,17 +862,65 @@ public class LevelParser {
     private void processStaticHazards(ArrayList<JsonValue> rawData){
         staticHazardData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < staticHazardData.length; ii++) {
-            //data we pass in to static hazard constructor
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
-            //static hazard raw data
-            JsonValue sh = rawData.get(ii);
-            // set position data
-            readPositionAndConvert(sh, temp);
-            addPosition(data, temp);
-            data.addChild("points", polyPoints(sh.get("polygon"), staticHazardDefaultPoly));
-            data.addChild("depth", new JsonValue(sh.getInt("__DEPTH__", -1)));
-            staticHazardData[ii] = data;
+            JsonValue rawHazard = rawData.get(ii);
+            if (rawHazard.getString("hazard").equals("unspecified")){
+                staticHazardData[ii] = processStaticPolyHazard(rawHazard);
+            }
+            else {
+                staticHazardData[ii] = processRock(rawHazard);
+            }
         }
+    }
+
+    private JsonValue processStaticPolyHazard(JsonValue polyHazard){
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        readPositionAndConvert(polyHazard, temp);
+        addPosition(data, temp);
+        boolean fill = getFromProperties(polyHazard.get("properties"), "fill_texture", staticHazardDefault).asBoolean();
+        data.addChild("type", new JsonValue(fill ? "fill" : "no_fill"));
+        data.addChild("points", polyPoints(polyHazard.get("polygon"), staticHazardPoly));
+        data.addChild("depth", new JsonValue(polyHazard.getInt("__DEPTH__", -1)));
+        return data;
+    }
+
+    private JsonValue processRock(JsonValue rock){
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        readPositionAndConvert(rock, temp);
+        addPosition(data, temp);
+        data.addChild("type", new JsonValue("rock"));
+        data.addChild("depth", new JsonValue(rock.getInt("__DEPTH__", -1)));
+        // find this rock's corresponding tile
+        JsonValue tileJson = gameObjectTiles.get(getProcessedGid(rockDefaultObj) - 1);
+        int assetWidth = tileJson.getInt("imagewidth");
+        int assetHeight = tileJson.getInt("imageheight");
+        data.addChild("AABB", processTileObjectAABB(rock, rockDefaultObj, assetWidth, assetHeight));
+        // add hit-box
+        JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+        float ox = hitBoxPoints.getFloat("x");
+        float oy = hitBoxPoints.getFloat("y");
+        boolean flipX = isObjectHorizontallyFlipped(rock);
+        boolean flipY = isObjectVerticallyFlipped(rock);
+        JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                flipX, flipY, assetWidth, assetHeight);
+        data.addChild("points", shape);
+        data.addChild("flipX", new JsonValue(flipX));
+        data.addChild("flipY", new JsonValue(flipY));
+        data.addChild("angle", new JsonValue(convertAngle(rock.getFloat("rotation",0))));
+        return data;
+    }
+
+    private void processDeathZone(ArrayList<JsonValue> deathZoneRawData) {
+        deathZoneData = new JsonValue[deathZoneRawData.size()];
+        for (int ii = 0; ii < deathZoneData.length; ii++) {
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            JsonValue rawData = deathZoneRawData.get(ii);
+            readPositionAndConvert(rawData, temp);
+            addPosition(data, temp);
+            data.addChild("points", polyPoints(rawData.get("polygon")));
+            data.addChild("depth", new JsonValue(rawData.getInt("__DEPTH__", -1)));
+            deathZoneData[ii] =  data;
+        }
+
     }
 
     private void processWind(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> windDirs){
@@ -785,20 +936,22 @@ public class LevelParser {
             pos.addChild(new JsonValue(temp.x));
             pos.addChild(new JsonValue(temp.y));
             data.addChild("pos", pos);
-            //points
             data.addChild("dimensions", polyPoints(w.get("polygon"), windDefaultPoly));
             //magnitude and direction
             JsonValue props = w.get("properties");
             data.addChild("magnitude", new JsonValue(getFromProperties(props, "magnitude", windDefault).asFloat()));
             data.addChild("direction", computeWindDirection(props, windDirs));
             data.addChild("depth", new JsonValue(w.getInt("__DEPTH__", -1)));
+            data.addChild("particle", new JsonValue(getFromProperties(props, "particle", windDefault).asString()));
             windData[ii] = data;
         }
     }
 
     private void processMovingPlats(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         movingPlatformData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < movingPlatformData.length; ii++) {
+            seen.clear();
             //data we pass in to platform constructor
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //moving platform raw data
@@ -837,12 +990,60 @@ public class LevelParser {
             float oy = hitBoxPoints.getFloat("y");
             boolean horizontalFlipped = isObjectHorizontallyFlipped(mp);
             JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
-                    horizontalFlipped, assetWidth, assetHeight);
+                    horizontalFlipped, false, assetWidth, assetHeight);
             data.addChild("points", shape);
             data.addChild("flipped", new JsonValue(horizontalFlipped));
             movingPlatformData[ii] = data;
         }
     }
+
+    private void processNests(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
+        nestData = new JsonValue[rawData.size()];
+        IntIntMap seen = new IntIntMap(16);
+        for (int ii = 0; ii < nestData.length; ii++) {
+            seen.clear();
+            //data we pass in to nest constructor
+            JsonValue data = new JsonValue(JsonValue.ValueType.object);
+            //nest raw data
+            JsonValue n = rawData.get(ii);
+            JsonValue props = n.get("properties");
+
+            // set position data
+            readPositionAndConvert(n, temp);
+            addPosition(data, temp);
+
+            // the resulting path should be stored as a list of floats which is Json array of Json floats.
+            JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
+            // implicitly, the platform's location is the FIRST point on its path.
+            pathJson.addChild(new JsonValue(temp.x));
+            pathJson.addChild(new JsonValue(temp.y));
+
+            // this takes either the platform's next point along its path or take from default (which should be 0)
+            JsonValue jsonId = getFromProperties(props, "path", null);
+            int next = jsonId.asInt();
+            int idx = 1;
+            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
+                seen.put(next, idx);
+                idx++;
+                JsonValue nodeData = trajectory.get(next);
+                // put path point (x,y) into vector cache and perform conversion
+                readPositionAndConvert(nodeData, temp);
+                // add this node to bird's path
+                pathJson.addChild(new JsonValue(temp.x));
+                pathJson.addChild(new JsonValue(temp.y));
+                // get next
+                nodeData = nodeData.get("properties");
+                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
+                next = jsonId.asInt();
+            }
+            data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
+            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
+            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            data.addChild("path", pathJson);
+            nestData[ii] = data;
+        }
+    }
+
 
     /**
      * loads into p an (x,y) pair that are direct properties of the given JsonValue into vector cache
@@ -880,7 +1081,7 @@ public class LevelParser {
      */
     private void convertPos(Vector2 pos){
         pos.x /= tileScale.x;
-        pos.y /= tileScale.y;;
+        pos.y /= tileScale.y;
         pos.y = worldSize.y - pos.y;
     }
 
@@ -1011,13 +1212,28 @@ public class LevelParser {
         return new JsonValue(ang);
     }
 
+    /**
+     * convert clock-wise angle from Tiled to counterclock-wise angle. <br>
+     * The reference angle for 0 degree is y-axis/12pm
+     * @param tiledAngle clock-wise angle (degrees)
+     * @return counterclock-wise angle
+     */
+    private float convertAngle(float tiledAngle){
+        //subtract from 360 since tiled gives clockwise rotation, but we need counterclockwise
+        //positive modulo 360 because given angle may be negative.
+        tiledAngle = ((tiledAngle % 360) + 360) % 360;
+        float angle = 360 - tiledAngle;
+        //convert from deg to rad
+        return angle * (float) (Math.PI/180);
+    }
+
     // ============================= BEGIN TILED PARSING HELPERS =============================
 
     /**
      * @param gid raw grid tile id (possibly with flipping bits enabled)
-     * @return texture (possibly null) for the corresponding gid
+     * @return tile (possibly null) for the corresponding gid
      */
-    private TextureRegion getTileFromImages(long gid){
+    private Tile getTileFromImages(long gid){
         // the Tiled ID is a 32-bit UNSIGNED integer
         // actual ID is the lower 28 bits of the Tiled ID
         int id = (int) (gid & LOWER28BITMASK);
@@ -1028,8 +1244,8 @@ public class LevelParser {
         boolean flipY = (gid & (1L << 30)) != 0;
         boolean flipD = (gid & (1L << 29)) != 0;
         // this loop should be fast with small number of tilesets
-        for (TileSetMaker tsm : tileSetMakers) {
-            if (tsm.contains(id)) return tsm.getRegionFromId(id, flipD, flipX, flipY);
+        for (ImageTileSetMaker imageSet : tileSetMakers) {
+            if (imageSet.contains(id)) return imageSet.getTileFromId(id, flipD, flipX, flipY);
         }
         return null;
     }
@@ -1037,43 +1253,26 @@ public class LevelParser {
     private void parseTileLayer(JsonValue layer){
         // loop over array data and make texture regions
         JsonValue data = layer.get("data");
-        TextureRegion[] textures = new TextureRegion[data.size];
-        for (int i = 0; i < textures.length; i++){
+        Tile[] tiles = new Tile[data.size];
+        int worldWidth = (int) worldSize.x;
+        int worldHeight = (int) worldSize.y;
+        for (int i = 0; i < tiles.length; i++){
             // the Tiled ID is a 32-bit UNSIGNED integer
             long rawId = data.get(i).asLong();
             if (rawId == 0){
                 continue;
             }
-            int col = i % (int) worldSize.x;
-            int row = (int) worldSize.y - 1 -  i / (int) worldSize.x;
-            int idx = row * (int) worldSize.x + col;
-            textures[idx] = getTileFromImages(rawId);
+            int col = i % worldWidth;
+            int row = worldHeight - 1 -  i / worldWidth;
+            int idx = row * worldWidth + col;
+            tiles[idx] = getTileFromImages(rawId);
         }
-        layers.add(textures);
-    }
-
-    /**
-     * Given the relative path of a tileset (that can be used for tile layers), find the Json Data that corresponds to
-     * the tileset used. Example: level data contains "source":"tilesets\/bushes.json" so bushes JSON is returned.
-     * @param name the source path of a tileset
-     * @return the tileset JSON (possibly null)
-     */
-    private JsonValue getTileLayerTileSetJson(String name){
-        if (name.endsWith("bushes.json")){
-            return tileSetJsonMap.get("bushes");
-        }
-        else if (name.endsWith("trees.json")){
-            return tileSetJsonMap.get("trees");
-        }
-        else if (name.endsWith("cliffs.json")){
-            return tileSetJsonMap.get("cliffs");
-        }
-        return null;
+        layers.add(new TiledLayer(tiles, currentObjectDepth, worldWidth, worldHeight));
     }
 
     /**
      * A TileSetMaker produces texture regions upon request.
-     * This class is useful when converting Tile IDs into textures.
+     * This class is useful when associating Tile IDs with textures.
      */
     private abstract static class TileSetMaker {
 
@@ -1089,17 +1288,6 @@ public class LevelParser {
         public boolean contains(int gid){
             return gid <= maxId && gid >= minId;
         }
-
-        /**
-         * for single image tilesets: returns a subregion of the texture<br>
-         * for collection-based tilesets: returns a complete texture from set
-         * @param id the associated id of the desired Tile, where contains(id) is true.
-         * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
-         * @param flipX whether to flip the resulting region horizontally
-         * @param flipY whether to flip the resulting region vertically
-         * @return a texture from the tile set corresponding to the given id
-         */
-        public abstract TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY);
     }
 
     /**
@@ -1108,9 +1296,6 @@ public class LevelParser {
     private class ImageTileSetMaker extends TileSetMaker {
         private final int columns;
         private final Texture texture;
-
-        /** flipped variant */
-        private final Texture textureVariant;
         private final  int width;
         private final int height;
 
@@ -1118,28 +1303,60 @@ public class LevelParser {
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
-            texture = textureMap.get(name);
-            textureVariant = textureMap.get(name + "_flipped");
+            texture = tileSetTextureMap.get(name);
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            textureVariant.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             width = tileSetJson.getInt("tilewidth");
             height = tileSetJson.getInt("tileheight");
             columns = tileSetJson.getInt("columns");
         }
 
-        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY){
+        /**
+         * returns a subregion of the tileset texture <br>
+         * @param id the associated id of the desired Tile, where contains(id) is true.
+         * @param flipD whether to flip the resulting region anti-diagonally (not necessarily supported)
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
+         * @return a tile from the tile set corresponding to the given id
+         */
+        public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
             int row = index / columns;
             int col = index % columns;
-            TextureRegion tile;
-            if (flipD){
-                tile = new TextureRegion(textureVariant, col * width, row * height, width, height);
+            Tile tile = new Tile(texture);
+            tile.setRegion(col * width, row * height, width, height);
+
+            // enumerate all 8 possible cases
+            if (flipD && flipY && flipX){
+                // 30, 31, 32 => flip x THEN counter-clock-wise rotate 270 deg
+                tile.flip(true, false);
+                tile.setRotation((float) Math.PI * 1.5f);
             }
-            else {
-                tile = new TextureRegion(texture, col * width, row * height, width, height);
+            else if (flipY && flipX){
+                // 31, 32 => rotate 180 (flip both axes)
+                tile.flip(true, true);
             }
-            tile.flip(flipX, flipY);
+            else if (flipD && flipX){
+                // 30, 32 => counter-clock-wise rotate 270 deg
+                tile.setRotation((float) Math.PI * 1.5f);
+            }
+            else if (flipD && flipY){
+                // 30, 31 => counter-clock-wise rotate 90 deg
+                tile.setRotation((float) Math.PI / 2f);
+            }
+            else if (flipX){
+                // 32 => flip x
+                tile.flip(true, false);
+            }
+            else if (flipY){
+                // 31 => flip y
+                tile.flip(false, true);
+            }
+            else if (flipD){
+                // 30 => flip x THEN counter-clock-wise rotate 90 deg
+                tile.flip(true, false);
+                tile.setRotation((float) Math.PI /2f);
+            }
             return tile;
         }
     }
@@ -1148,40 +1365,44 @@ public class LevelParser {
      * A CollectionTileSetMaker produces texture regions upon request by retrieving texture regions from a list of
      * textures. This is particularly useful for retrieving unrelated textures (stickers).
      */
-    private static class CollectionTileSetMaker extends TileSetMaker {
+    private class CollectionTileSetMaker extends TileSetMaker{
 
-        private final Texture[] collection;
-        CollectionTileSetMaker(Texture[] collection, int firstGid){
+        private final HashMap<String, TextureRegion> collection;
+        private final IntMap<String> idNameMap;
+        CollectionTileSetMaker(HashMap<String, TextureRegion> collection, IntMap<String> idNameMap, int firstGid){
             minId = firstGid;
-            maxId = collection.length - 1 + minId;
+            maxId = firstGid + maxStickerSetId;
             this.collection = collection;
+            this.idNameMap = idNameMap;
         }
 
-        public TextureRegion getRegionFromId(int id, boolean flipD, boolean flipX, boolean flipY) {
-            TextureRegion tile = new TextureRegion(collection[id - minId]);
-            tile.flip(flipX, flipY);
-            return tile;
+        /**
+         * returns one of the textures as a texture region <br>
+         * @param id the associated id of the desired Tile, where contains(id) is true.
+         * @param flipX whether to flip the resulting region horizontally
+         * @param flipY whether to flip the resulting region vertically
+         * @return a texture from the collection set corresponding to the given id
+         */
+        public TextureRegion getRegionFromId(int id, boolean flipX, boolean flipY) {
+            TextureRegion texture = new TextureRegion(collection.get(idNameMap.get(id - minId)));
+            texture.flip(flipX, flipY);
+            return texture;
         }
     }
 
     // ========================== END of FUNCTIONS for TILE PARSING =================================
 
     /**
-     *
      * @param tile the tile of the game object
-     * @param type the type of game object (bird, lightning, etc)
      * @return the number of frames this object has for animations
      */
-    private int getFrameCount(JsonValue tile, String type) {
+    private int getFrameCount(JsonValue tile) {
         JsonValue animation = tile.get("animation");
         if (animation == null){
             return 0;
         }
-        if (type.equals("lightning")){
-            // an additional frame is included to allow easy tracing of still frame
-            return animation.size - 1;
-        }
-        return animation.size;
+        // an additional frame is included to allow easy tracing of still frame
+        return animation.size - 1;
     }
 
 
@@ -1228,7 +1449,6 @@ public class LevelParser {
      * @return the asset index in the list of loaded animated lightning assets
      */
     public static int getLightningTileIndex(String templateName){
-        System.out.println(templateName);
         if (templateName.endsWith("out_lightning.json")){
             return 0;
         }

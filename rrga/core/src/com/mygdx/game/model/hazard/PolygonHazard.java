@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 
 /**
- * A polygon hazard is any hazard with the shape of a polygon.
+ * A polygon hazard is any single hit-box hazard with the shape of a polygon.
  */
 public class PolygonHazard extends PolygonObstacle implements HazardModel {
 
@@ -32,13 +32,14 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
     public float getKnockBackScl() { return knockBackScl; }
 
     @Override
-    public Vector2 getKnockBackForce() { return knockBackForce; }
+    public Vector2 getKnockBackForce() { return temp.set(knockBackForce); }
 
     @Override
     public void setKnockBackForce(Vector2 kbForce) { knockBackForce.set(kbForce.nor()); }
 
     /** the (x,y) position of the top corner of the AABB enclosing this polygon.<br>
-     *  TODO (WARNING): this does not get updated when polygon is resized. Might want to account for that.
+     *  this does not get updated when polygon is resized, so the polygon should not be resized.<br>
+     *  The AABB enclosing a polygon is the smallest box that captures the entire polygon.
      */
     public Vector2 getBoxCoordinate(){ return temp.set(boxCoordinate).add(getX(), getY()); }
 
@@ -81,11 +82,6 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
      */
     public PolygonHazard(float x, float y, float[] points, int dam, float kb, Vector2 kbForce){
         super(points, x, y);
-        setBodyType(BodyDef.BodyType.StaticBody);
-        setDensity(0);
-        setFriction(0);
-        setRestitution(0);
-        //fixture.isSensor = true;
         this.damage = dam;
         this.knockBackScl = kb;
         // ideally, if the constructor was called without knock-back force vector,

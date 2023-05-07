@@ -1,6 +1,7 @@
 package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Cursor;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -84,11 +85,16 @@ public class PauseMode extends MenuScreen {
     private static float PAUSE_TAG_Y_RATIO = .65f;
     private int pauseTagX;
     private int pauseTagY;
+    /** Texture for the cursor */
+    private TextureRegion cursorTexture;
+    /** true until the first call to render*/
+    public boolean first;
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
+        first = true;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
@@ -106,11 +112,13 @@ public class PauseMode extends MenuScreen {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
-        TextureRegion menuTexture = new TextureRegion(directory.getEntry("pause:menu_button", Texture.class));
-        TextureRegion restartTexture = new TextureRegion(directory.getEntry("pause:restart_button", Texture.class));
+        TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
+        TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
+
+        cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
 
         menuButton.setTexture(menuTexture);
         restartButton.setTexture(restartTexture);
@@ -209,7 +217,20 @@ public class PauseMode extends MenuScreen {
 //        if (background != null){
 //            background.render(delta);
 //        }
-        gameScreen.draw(delta);
+
+        //Gdx.input.setCursorCatched(false);
+        int x=0, y=0;
+        if(first) {
+            x = Gdx.input.getX();
+            y = Gdx.input.getY();
+        }
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        if(first){
+            Gdx.input.setCursorPosition(x, y);
+            first = false;
+        }
+
+        gameScreen.draw(delta, false);
         draw(delta);
     }
 
@@ -226,11 +247,17 @@ public class PauseMode extends MenuScreen {
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
                 pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
-        menuButton.draw(canvas, menuPressState, BUTTON_SCALE);
-        restartButton.draw(canvas, restartPressState, BUTTON_SCALE);
-        backButton.draw(canvas, backPressState, BUTTON_SCALE);
+        menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
+        restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
+        backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
 
-
+        //draw mouse
+        int mx = Gdx.input.getX();
+        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+                    mx, my, 0, .4f, .4f);
+        }
 
         canvas.end();
     }
@@ -297,7 +324,6 @@ public class PauseMode extends MenuScreen {
     public void reset() {
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
-
     }
 }
 

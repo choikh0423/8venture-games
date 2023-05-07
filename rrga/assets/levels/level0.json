@@ -615,7 +615,7 @@
                          "type":"int",
                          "value":100
                         }],
-                 "template":"templates\/lightning.json",
+                 "template":"templates\/lightning\/fill_lightning.json",
                  "x":-19.2081929380636,
                  "y":1100.81180026021
                 }, 
@@ -851,7 +851,7 @@
                          "type":"int",
                          "value":0
                         }],
-                 "template":"templates\/lightning.json",
+                 "template":"templates\/lightning\/fill_lightning.json",
                  "x":1174.82373831168,
                  "y":1366.14435085658
                 }, 
@@ -955,6 +955,7 @@
                 }, 
                 {
                  "id":148,
+                 "rotation":0,
                  "template":"templates\/birds\/green_bird.json",
                  "x":3766.66666666667,
                  "y":2939.39393939394
@@ -1020,26 +1021,26 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":153,
+ "nextobjectid":154,
  "orientation":"orthogonal",
  "renderorder":"right-up",
- "tiledversion":"1.9.2",
+ "tiledversion":"1.10.0",
  "tileheight":128,
  "tilesets":[
         {
          "firstgid":1,
-         "source":"tilesets\/cliffs.json"
+         "source":"tilesets\/cliffs_old.json"
         }, 
         {
          "firstgid":65,
-         "source":"tilesets\/bushes.json"
+         "source":"tilesets\/bushes_old.json"
         }, 
         {
          "firstgid":114,
-         "source":"tilesets\/trees.json"
+         "source":"tilesets\/trees_old.json"
         }],
  "tilewidth":128,
  "type":"map",
- "version":"1.9",
+ "version":"1.10",
  "width":32
 }

@@ -28,11 +28,12 @@ import com.mygdx.game.utility.util.Drawable;
 
 /**
  * Player avatar for the plaform game.
- *
+ * <p>
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
 public class PlayerModel extends CapsuleObstacle implements Drawable {
+
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -69,7 +70,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** The size of the player in physics units (up to scaling by shrink factor) */
 	private float[] size;
 	/** Player Mass */
-	private float FINAL_MASS = 1.8f;
+	private float FINAL_MASS = 1.25f;
 	/** Max player hp */
 	private int MAX_HEALTH;
 	/** Player hp */
@@ -81,6 +82,9 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 	/** Cache for getters */
 	private final Vector2 temp = new Vector2();
+
+	/** Another vector cache */
+	private final Vector2 temp2 = new Vector2();
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -166,7 +170,6 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 			faceRight = true;
 		}
 	}
-
 
 	/**
 	 * Returns true if the player is actively jumping.
@@ -358,13 +361,17 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		iFrames = f;
 	}
 
+	public boolean canBoost(){
+		return lighterFuel == maxLighterFuel;
+	}
+
 
 	/**
 	 * sets the player's HP texture.
 	 * @param texture the HP texture
 	 */
 	public void setHpTexture(Texture texture){
-		TextureRegion[][] tempTexture = TextureRegion.split(texture, 250, 250);
+		TextureRegion[][] tempTexture = TextureRegion.split(texture, 304, 200);
 		hpTexture = new TextureRegion[4];
 
 		// Ordering Texture Tile
@@ -535,7 +542,9 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				width*data.get("shrink").getFloat( 0 ),
 				height*data.get("shrink").getFloat( 1 ));
 
-		float density = FINAL_MASS / (width * height);
+		float density = FINAL_MASS / (width *data.get("shrink").getFloat( 0 )
+				* height * data.get("shrink").getFloat( 1 ));
+
 		setDensity(density);
 		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
@@ -645,21 +654,42 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if (!isActive()) {
 			return;
 		}
+		float x = 0;
+		float y = 0;
+		//determine x of wind force
 		//if force in same direction as currently moving and at max horiz speed, clamp
 		if (Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-			setVX(Math.signum(getVX())*getMaxSpeedXAirWind());
-		}
-		else {
-			forceCache.set(fx,0);
-			body.applyForce(forceCache,getPosition(),true);
-		}
-
-		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-			setVY(Math.signum(getVY())*getMaxSpeedUp());
+			setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
 		} else {
-			forceCache.set(0,fy);
-			body.applyForce(forceCache, getPosition(), true);
+			x = fx;
 		}
+		//determine y of wind force
+		if (Math.abs(getVY()) >= getMaxSpeedUp()) {
+			setVY(Math.signum(getVY()) * getMaxSpeedUp());
+		} else {
+			y = fy;
+		}
+		forceCache.set(x, y);
+
+		//Damp out velcoity not in direction of wind velocity
+		//wind dir
+		temp.set(x, y);
+		temp.nor();
+		//vel
+		temp2.set(getVX(), getY());
+		temp2.nor();
+		boolean applyX = (Math.signum(temp.x) == Math.signum(temp2.x) && Math.abs(temp2.x) > Math.abs(temp.x))
+				|| Math.signum(temp.x) != Math.signum(temp2.x);
+		boolean applyY = (Math.signum(temp.y) == Math.signum(temp2.y) && Math.abs(temp2.y) > Math.abs(temp.y))
+				|| Math.signum(temp.y) != Math.signum(temp2.y);
+		float dampscl = 85;
+		if (applyX) {
+			forceCache.add((temp.x - temp2.x) * dampscl, 0);
+		}
+		if (applyY){
+			//forceCache.add(0, (temp.y - temp2.y) * dampscl);
+		}
+		body.applyForce(forceCache,getPosition(),true);
 	}
 
 	/**
@@ -672,60 +702,46 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		if ((Math.signum(fx) == Math.signum(getVX()) && Math.abs(getVX()) < getMaxSpeedXAirDrag())
 				|| Math.signum(fx) == -Math.signum(getVX()) || getVX() == 0){
 			forceCache.set(fx, 0);
-			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX())/2 + 1 : .6f;
+			float scl = Math.signum(fx) == -Math.signum(getVX()) ? Math.abs(getVX()) + 1 : .6f;
 			forceCache.scl(scl);
 			body.applyForce(forceCache, getPosition(), true);
 		}
 	}
+  
+  /**
+     * Applies lighter force to the body of this player.
+     */
+    public boolean applyLighterForce(float umbAng) {
+        if (lighterFuel == maxLighterFuel) {
+            lighterFuel = 0;
+            float umbrellaX = (float) Math.cos(umbAng);
+            float umbrellaY = (float) Math.sin(umbAng);
+            float yscl = 1.05f;
 
-	/**
-	 * Applies lighter force to the body of this player.
-	 */
-	public boolean applyLighterForce(float umbAng) {
-		if(lighterFuel == maxLighterFuel) {
-			lighterFuel = 0;
-			float umbrellaX = (float) Math.cos(umbAng);
-			float umbrellaY = (float) Math.sin(umbAng);
+            //determine X
+            if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
+                forceCache.x = getMaxSpeedXAirWind();
+            } else {
+                if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) > Math.abs(umbrellaX * lighterForce)) {
+                    forceCache.x = getVX();
+                } else forceCache.x = umbrellaX * lighterForce;
+            }
 
-			//switch between lighter boost as a force or setting velocity directly
-			boolean force = false;
-
-			if(force) {
-				//determine X
-				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-					setVX(Math.signum(getVX()) * getMaxSpeedXAirWind());
-					forceCache.x = 0;
-				} else {
-					forceCache.x = umbrellaX * lighterForce;
-				}
-				//determine Y
-				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-					setVY(Math.signum(getVY()) * getMaxSpeedUp());
-					forceCache.y = 0;
-				} else {
-					forceCache.y = umbrellaY * lighterForce;
-				}
-				body.applyLinearImpulse(forceCache, getPosition(), true);
-			}
-			else{
-				//determine X
-				if (Math.signum(umbrellaX) == Math.signum(getVX()) && Math.abs(getVX()) >= getMaxSpeedXAirWind()) {
-					forceCache.x = getMaxSpeedXAirWind();
-				} else {
-					forceCache.x = umbrellaX * lighterForce;
-				}
-				//determine Y
-				if (Math.abs(getVY()) >= getMaxSpeedUp()) {
-					forceCache.y = getMaxSpeedUp();
-				} else {
-					forceCache.y = umbrellaY * lighterForce;
-				}
-				body.setLinearVelocity(forceCache);
-			}
-			return true;
-		}
-		return false;
-	}
+            //determine Y
+            if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() >= getMaxSpeedUp()) {
+				forceCache.y = getMaxSpeedUp();
+			}else if (Math.signum(umbrellaY) == Math.signum(getVY()) && getVY() <= getMaxSpeedDownOpen()){
+				forceCache.y = getMaxSpeedDownOpen();
+			} else {
+                if (Math.signum(umbrellaY) == Math.signum(getVY()) && Math.abs(getVY()) > Math.abs(umbrellaY * lighterForce)) {
+                    forceCache.y = getVY();
+                } else forceCache.y = umbrellaY * lighterForce * yscl;
+            }
+            body.setLinearVelocity(forceCache);
+            return true;
+        }
+        return false;
+    }
 
 	public void dampAirHoriz(){
 		if(Math.abs(getVX()) > getMaxSpeedXAirDrag()/1.5f){
@@ -801,82 +817,81 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				getX() * drawScale.x, getY() * drawScale.y, getAngle(),
 				effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
 	}
+      
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        if (iFrames > 0) {
+            if (iFrameCountdown == 0) {
+                iFrameCountdown = 7;
+                drawIFrameTexture = !drawIFrameTexture;
+            }
+            if (drawIFrameTexture) {
+                drawAux(canvas, Color.BLACK);
+                iFrameCountdown--;
+            } else {
+                drawAux(canvas, Color.WHITE);
+                iFrameCountdown--;
+            }
+        } else {
+            drawAux(canvas, Color.WHITE);
+        }
+    }
 
-	/**
-	 * Draws the physics object.
-	 *
-	 * @param canvas Drawing context
-	 */
-	public void draw(GameCanvas canvas) {
-		if(iFrames>0){
-			if (iFrameCountdown == 0){
-				iFrameCountdown = 7;
-				drawIFrameTexture = !drawIFrameTexture;
-			}
-			if(drawIFrameTexture){
-				drawAux(canvas, Color.BLACK);
-				iFrameCountdown--;
-			}
-			else{
-				drawAux(canvas, Color.WHITE);
-				iFrameCountdown--;
-			}
-		}
-		else{
-			drawAux(canvas, Color.WHITE);
-		}
-	}
+    /**
+     * Draws player HP information on screen and
+     * TODO: possibly other status information
+     *
+     * @param canvas the game canvas
+     */
 
-	/**
-	 * Draws player HP information on screen and
-	 * TODO: possibly other status information
-	 * @param canvas the game canvas
-	 */
+    public void drawInfo(GameCanvas canvas) {
+        // draw health info
+        if (hpTexture == null) {
+            return;
+        }
+        float height = hpTexture[health].getRegionHeight();
+        float width = hpTexture[health].getRegionWidth();
 
-	public void drawInfo(GameCanvas canvas){
-		// draw health info
-		if (hpTexture == null){
-			return;
-		}
-		float height = hpTexture[health].getRegionHeight();
-		float width = hpTexture[health].getRegionWidth();
+        // TODO: HP Texture is manually scaled at the moment
+        canvas.draw(hpTexture[health], Color.WHITE, width / 2f, height / 2f, drawScale.x,
+                canvas.getHeight() - drawScale.y, 0, 0.3f, 0.3f);
 
-		// TODO: HP Texture is manually scaled at the moment
-		canvas.draw(hpTexture[health],Color.WHITE,width/2f,height/2f, drawScale.x,
-				canvas.getHeight() - drawScale.y,0,0.3f,0.3f);
+        // TODO: Boost Texture is manually scaled at the moment
+        int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
+        canvas.draw(boostTexture[boost_capac], Color.WHITE, boostTexture[health].getRegionWidth() / 2f,
+                boostTexture[health].getRegionHeight() / 2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
+                0, 0.3f, 0.3f);
 
-		// TODO: Boost Texture is manually scaled at the moment
-		int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
-		canvas.draw(boostTexture[boost_capac],Color.WHITE,boostTexture[health].getRegionWidth()/2f,
-				boostTexture[health].getRegionHeight()/2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
-				0,0.3f,0.3f);
+    }
 
-	}
+    /**
+     * Draws the outline of the physics body.
+     * <p>
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    public void drawDebug(GameCanvas canvas) {
+        super.drawDebug(canvas);
+        canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+    }
 
-	/**
-	 * Draws the outline of the physics body.
-	 *
-	 * This method can be helpful for understanding issues with collisions.
-	 *
-	 * @param canvas Drawing context
-	 */
-	public void drawDebug(GameCanvas canvas) {
-		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
-	}
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(size[0], size[1]);
+    }
 
-	@Override
-	public Vector2 getDimensions() {
-		return temp.set(size[0], size[1]);
-	}
+    @Override
+    public int getDepth() {
+        return this.depth;
+    }
 
-	@Override
-	public int getDepth() {
-		return this.depth;
-	}
-
-	@Override
-	public Vector2 getBoxCorner() {
-		return temp.set(getX() - size[0]/2f, getY() + size[1]/2f);
-	}
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(getX() - size[0] / 2f, getY() + size[1] / 2f);
+    }
 }

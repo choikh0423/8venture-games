@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.ComplexObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 
 /**
@@ -46,7 +47,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         LOOP,
         FORWARD,
         REVERSE,
-        STATIONARY
+        STATIONARY,
     }
 
     private static final int ATTACK_WAIT_TIME = 80;
@@ -112,6 +113,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     private final float knockBackScl;
 
     private final Vector2 knockBackVec = new Vector2();
+    /** Whether this bird's kockback vector should be set. Upon initial collision, set to false.
+     * Once the collision is resolved, set to true */
+    private boolean setKB;
 
     /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
@@ -139,7 +143,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     float flapElapsedTime;
 
     /** Bird warning animation filmstrip texture */
-    private Texture warningTex;
+    private final Texture warningTex;
 
 
     /** Bird warning animation frames */
@@ -214,7 +218,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     }
     @Override
     public void setKnockBackForce(Vector2 in) {
-        knockBackVec.set(in.nor());
+        if(setKB) {
+            knockBackVec.set(in.nor());
+            setKB = false;
+        }
+    }
+
+    public void setSetKB(boolean b){
+        setKB = b;
     }
 
     public BirdColor getColor() {
@@ -341,35 +352,35 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         seesTarget = false;
         damage = birdDamage;
         knockBackScl = birdKnockBack;
+        setKB = true;
         warning = false;
         this.warningTex = warningTex;
 
         // make hit-box objects
-        // small optimization: passing `temp` into the hazard constructor avoids wasting extra un-used space.
-        PolygonHazard hit1 = new PolygonHazard(data, damage, knockBackScl, temp);
-        // flip points and make hit-box #2:
         float x = data.getFloat("x");
         float y = data.getFloat("y");
         float[] shape = data.get("points").asFloatArray();
+        PolygonObstacle hit1 = new PolygonObstacle( shape, x, y);
+        // flip points and make hit-box #2:
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonHazard hit2 = new PolygonHazard(x,y, shape, damage, knockBackScl, temp);
+        PolygonObstacle hit2 = new PolygonObstacle(shape, x, y);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
-            // hit1 must be right hitbox
-            bodies.add(hit2);
-            bodies.add(hit1);
+            bodies.add(hit2);   //left facing
+            bodies.add(hit1);   //right facing
         }
         else {
-            bodies.add(hit1);
-            bodies.add(hit2);
+            bodies.add(hit1);   //left facing
+            bodies.add(hit2);   //right facing
         }
-
-        // TODO: if we need birds to be sensors...
-//        for (Obstacle o : bodies){
-//            o.setSensor(true);
-//        }
+        for (Obstacle o : bodies){
+            o.setBodyType(BodyDef.BodyType.StaticBody);
+            o.setDensity(0);
+            o.setFriction(0);
+            o.setRestitution(0);
+        }
     }
 
     @Override
@@ -466,8 +477,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
                 moveDir.set(targetDir);
                 // targetDir is the direction of target relative to bird's location
                 setFaceRight(targetDir.x > 0);
-                //TODO: Need some way to delete when offscreen, should be handled by gamecontroller
-                //TODO: use AABB to determine off screen
             }
         }
     }
