@@ -410,7 +410,7 @@ public class GameplayController implements ContactListener {
         if (!input.didZoom() && !showGoal){
             // Check for whether the player toggled the umbrella being open/closed
             if(!input.secondaryControlMode){
-                if (input.didToggle()) {
+                if (input.didToggle() && !umbrella.getBoosting()) {
                     umbrella.setOpen(!umbrella.isOpen());
                     if (umbrella.isOpen()) {
                         umbrella.useOpenedTexture();
