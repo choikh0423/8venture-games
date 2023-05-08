@@ -180,21 +180,21 @@ public class MenuMode extends MenuScreen {
     private int settingTagY;
 
     private TextureRegion toggleTag;
-    private static float TOGGLE_TAG_X_RATIO = .35f;
-    private static float TOGGLE_TAG_Y_RATIO = .15f;
+    private static float TOGGLE_TAG_X_RATIO = .3f;
+    private static float TOGGLE_TAG_Y_RATIO = .2f;
     private int toggleTagX;
     private int toggleTagY;
 
 
     /** toggle button texture */
-    private TextureRegion toggleButton;
-    private static float TOGGLE_BUTTON_X_RATIO = .75f;
-    private static float TOGGLE_BUTTON_Y_RATIO = .15f;
+    private TextureRegion toggleToggle;
+    private static float TOGGLE_BUTTON_X_RATIO = .65f;
+    private static float TOGGLE_BUTTON_Y_RATIO = .19f;
     private int toggleButtonX;
     private int toggleButtonY;
 
     /** toggle check texture */
-    private TextureRegion toggleCheck;
+    private TextureRegion toggleHold;
 
     private boolean toggleOn;
 
@@ -280,8 +280,8 @@ public class MenuMode extends MenuScreen {
         sfxTag = new TextureRegion(directory.getEntry("menu:sfx_tag", Texture.class));
         settingTag = new TextureRegion(directory.getEntry("menu:setting_tag", Texture.class));
         toggleTag = new TextureRegion(directory.getEntry("menu:toggle_tag", Texture.class));
-        toggleButton = new TextureRegion(directory.getEntry("menu:toggle_button", Texture.class));
-        toggleCheck = new TextureRegion(directory.getEntry("menu:toggle_check", Texture.class));
+        toggleToggle = new TextureRegion(directory.getEntry("menu:toggle_toggle", Texture.class));
+        toggleHold = new TextureRegion(directory.getEntry("menu:toggle_hold", Texture.class));
 
         // TODO: Scale slider bars
         musicSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
@@ -357,7 +357,7 @@ public class MenuMode extends MenuScreen {
             boolean exitPressed = checkCircleClicked2(screenX, screenY, exitButton, BUTTON_SCALE);
             boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.getKnobX(), musicSlider.getKnobY(), musicSliderKnob, musicSlider.sx);
             boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.getKnobX(), sfxSlider.getKnobY(), sfxSliderKnob, sfxSlider.sx);
-            boolean togglePressed = checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleButton, BUTTON_SCALE);
+            boolean togglePressed = checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleToggle, 0) || checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleHold, 0);
             boolean resetPressed = checkClicked2(screenX, screenY, resetButton);
 
             if (exitPressed) {
@@ -608,10 +608,12 @@ public class MenuMode extends MenuScreen {
             canvas.draw(toggleTag, Color.WHITE, toggleTag.getRegionWidth()/2f, toggleTag.getRegionHeight()/2f,
                     toggleTagX, toggleTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
-            canvas.draw(toggleButton, Color.WHITE, toggleButton.getRegionWidth()/2f, toggleButton.getRegionHeight()/2f,
-                    toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
+
             if (toggleOn) {
-                canvas.draw(toggleCheck, Color.WHITE, toggleCheck.getRegionWidth()/2f, toggleCheck.getRegionHeight()/2f,
+                canvas.draw(toggleHold, Color.WHITE, toggleHold.getRegionWidth()/2f, toggleHold.getRegionHeight()/2f,
+                        toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
+            } else {
+                canvas.draw(toggleToggle, Color.WHITE, toggleToggle.getRegionWidth()/2f, toggleToggle.getRegionHeight()/2f,
                         toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
             }
             resetButton.draw(canvas, resetSettingsPressState, BUTTON_SCALE, Color.WHITE);
