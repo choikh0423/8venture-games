@@ -96,6 +96,8 @@ public class LevelContainer{
      */
     private Texture[] animatedLightningTextures;
 
+    private HashMap<String, TextureRegion> logTextures;
+
     /**
      * Texture asset for character front avatar
      */
@@ -386,10 +388,10 @@ public class LevelContainer{
 
         // Movable Platforms (clouds)
         cloudPlatformTextures = new TextureRegion[]{
-                new TextureRegion(directory.getEntry("platform:cloud0", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud1", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud2", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud3", Texture.class))
+                new TextureRegion(directory.getEntry("game:cloud0", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud1", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud2", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud3", Texture.class))
         };
 
         // animated lightning
@@ -400,6 +402,13 @@ public class LevelContainer{
                 directory.getEntry("game:lightning3", Texture.class),
                 directory.getEntry("game:lightning4", Texture.class)
         };
+
+        // load all branch/log textures by name (this is better approach than hard coding all textures)
+        logTextures = new HashMap<>();
+        for (String fileName : globalConstants.get("textures").get("tree_logs").asStringArray()){
+            logTextures.put(fileName, new TextureRegion(directory.getEntry("game:" + fileName, Texture.class)));
+        }
+
     }
     /**
      * Resets the level container (emptying the container)
@@ -439,24 +448,31 @@ public class LevelContainer{
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
         JsonValue[] plats = parser.getPlatformData();
-        JsonValue cur;
         for (int ii = 0; ii < plats.length; ii++) {
-            cur = plats[ii];
-            PolygonObstacle obj = new PolygonObstacle(cur.get("points").asFloatArray(),
-                    cur.getFloat("x"), cur.getFloat("y"));
+            JsonValue cur = plats[ii];
+            PlatformModel obj;
+            if (cur.getBoolean("textured")){
+                // this platform has an asset (branch, log, etc)
+                obj = new PlatformModel(cur, logTextures.get(cur.getString("texture")), cur.getInt("depth"));
+            }
+            else {
+                // this platform is an invisible object
+                obj = new PlatformModel(cur.getFloat("x"), cur.getFloat("y"), cur.get("points").asFloatArray(),
+                        cur.getInt("depth"));
+            }
             obj.setBodyType(BodyDef.BodyType.StaticBody);
             obj.setDensity(defaults.getFloat("density", 0.0f));
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
             obj.setName("platform" + ii);
             addObject(obj);
+            drawables.add(obj);
         }
 
         JsonValue[] mPlats = parser.getMovingPlatformData();
         for (int ii = 0; ii < mPlats.length; ii++) {
-            cur = mPlats[ii];
+            JsonValue cur = mPlats[ii];
             MovingPlatformModel obj = new MovingPlatformModel( cur, cur.get("points").asFloatArray(),
                     cur.getFloat("x"), cur.getFloat("y")
             );
