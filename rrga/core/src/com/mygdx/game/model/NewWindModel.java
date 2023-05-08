@@ -14,9 +14,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
-
-import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.Random;
 
 import static com.badlogic.gdx.math.Intersector.isPointInPolygon;
@@ -34,30 +31,28 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
      */
     private final JsonValue data;
     /** The local centroid coordinate (x,y) of the wind */
-    private Vector2 centroid = new Vector2();
+    private final Vector2 centroid = new Vector2();
     /** The global center coordinate (x,y) of the wind */
-    private Vector2 center = new Vector2();
+    private final Vector2 center = new Vector2();
     /**
      * The magnitude of this wind's force. Invariant: magnitude > 0.
      */
-    private float magnitude;
+    private final float magnitude;
     /**
      * The direction of this wind's force in radians. Value within [0, 2pi).
      */
-    private float direction;
+    private final float direction;
     /** Particle Width */
-    private float partWidth = 50f;
+    private static final float partWidth = 50f;
     /** Particle Height */
-    private float partHeight = 50f;
+    private static final float partHeight = 50f;
 
-    /** Wind Animation Texture (Used for previous implementation */
-    private Animation<TextureRegion> animation;
-    /** Particle Animation Texture */
-    private Animation<TextureRegion> ParticleAnimation;
+    /** Wind Animation polygon draw regions */
+    private Animation<PolygonRegion> animation;
+
     /** Wind Animation Elapsed Time */
     private float elapsedTime;
 
-    private PolygonRegion drawRegion;
     private float xOffset;
     private float yOffset;
 
@@ -77,24 +72,24 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     private final Vector2 temp = new Vector2();
 
     /** (x,y) offset of the AABB top corner from polygon origin */
-    private Vector2 boxCoordinate;
+    private final Vector2 boxCoordinate;
     /** Vector array of wind polygon points for checking if particle is inside polygon*/
-    private Array<Vector2> polygonPoints;
+    private final Array<Vector2> polygonPoints;
 
 
     /** Particle System Queue */
-    private ParticleModel[] queue;
+    private final ParticleModel[] queue;
     /** density: # of particles per area */
-    private float PARTICLE_DENSITY = 1f;
+    private static final float PARTICLE_DENSITY = 1f;
     /** Inward force applied to keep particles inside the wind */
-    private float INWARD_VELOCITY = 0.000025f;
+    private static final float INWARD_VELOCITY = 0.000025f;
     /** Start offset to particles */
-    private int PARTICLE_OFFSET = 10;
+    private static final int PARTICLE_OFFSET = 10;
     /** Actual Number of particles per wind*/
-    private int numParticles;
+    private final int numParticles;
 
     /** Randomizing animation texture used for particles*/
-    private Random rand;
+    private final Random rand;
 
 
     public NewWindModel(JsonValue data, Vector2 scale) {
@@ -118,7 +113,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         this.data = data;
         this.depth = data.getInt("depth");
 
-        // compute tight AABB top right corner
+        // compute tight AABB top left corner
         boxCoordinate = new Vector2();
         float[] points = data.get("dimensions").asFloatArray();
         float minx = points[0];
@@ -150,7 +145,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         boxCoordinate.set(minx, maxy);
 
         partRadius = 0;
-        centroid.set(centerX / (points.length/2), centerY / (points.length/2));
+        centroid.set(centerX / (points.length/2f), centerY / (points.length/2f));
         center.set(originX + centroid.x, originY + centroid.y);
 
 
@@ -211,7 +206,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
      * NOTE: particles will be sampled in the "start area" of wind and will not be spawned in locations that are
      * not visible.
      *
-     * @return Vector2 (x,y) sampled point
+     * @return Vector2 (x,y) sampled point (this is not an allocator, same vector returned every time)
      */
     private Vector2 particleRandomSample() {
         float sampleY = (float)Math.random() * (relMaxY-relMinY) + relMinY;
@@ -219,9 +214,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
 
         float sampleGlobX = (float)Math.cos(direction) * sampleX - (float)Math.sin(direction) * sampleY + center.x;
         float sampleGlobY = (float)Math.sin(direction) * sampleX + (float)Math.cos(direction) * sampleY + center.y;
-        Vector2 pointVec = new Vector2(sampleGlobX, sampleGlobY);
-
-        return pointVec;
+        return temp.set(sampleGlobX, sampleGlobY);
     }
 
     public boolean activatePhysics(World world) {
@@ -230,6 +223,29 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Returns a value which gives the magnitude of the force on the umbrella from the wind. value is >=0.
+     */
+    public float getWindForce(float umbrellaAngle){
+        //may need to change the umbrella angle based up the value returned by umbrella.getRotation.
+        //for now assuming value is within[0, 2pi).
+        float windx = (float) Math.cos(direction);
+        float windy = (float) Math.sin(direction);
+        float umbrellax = (float) Math.cos(umbrellaAngle);
+        float umbrellay = (float) Math.sin(umbrellaAngle);
+        float dot = Vector2.dot(windx, windy, umbrellax, umbrellay);
+        if (dot<0) return 0;
+        else return dot*magnitude;
+    }
+
+    /** Sets wind animation */
+    public void setAnimation(TextureRegion[] frames){
+
+        xOffset = 0;
+        yOffset = 0;
         float angle = -direction+((float) Math.PI/2);
         float[] verts = new float[region.getVertices().length];
         for(int i = 0; i<region.getVertices().length; i+=2){
@@ -257,30 +273,13 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             }
         }
 
-        //TODO: What does this draw region do? - Kyu
-        drawRegion = new PolygonRegion(texture, verts, region.getTriangles());
+        PolygonRegion[] drawRegions = new PolygonRegion[frames.length];
+        for (int ii = 0; ii < frames.length; ii++){
+            PolygonRegion p = new PolygonRegion(frames[ii], verts,region.getTriangles());
+            drawRegions[ii] = p;
+        }
 
-        return true;
-    }
-
-    /**
-     * Returns a value which gives the magnitude of the force on the umbrella from the wind. value is >=0.
-     */
-    public float getWindForce(float umbrellaAngle){
-        //may need to change the umbrella angle based up the value returned by umbrella.getRotation.
-        //for now assuming value is within[0, 2pi).
-        float windx = (float) Math.cos(direction);
-        float windy = (float) Math.sin(direction);
-        float umbrellax = (float) Math.cos(umbrellaAngle);
-        float umbrellay = (float) Math.sin(umbrellaAngle);
-        float dot = Vector2.dot(windx, windy, umbrellax, umbrellay);
-        if (dot<0) return 0;
-        else return dot*magnitude;
-    }
-
-    /** Sets wind animation */
-    public void setAnimation(TextureRegion[] frames){
-        this.animation = new Animation<>(1f/8f, frames);
+        this.animation = new Animation<>(1f/8f, drawRegions);
     }
 
     /** Sets particle texture(still image) with alternating leaf and cloud texture
@@ -368,43 +367,15 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        //TODO fix wrapping issue
+        //TODO fix wrapping issue (zhi: ????)
+
+        // draw background fill-texture animation
         elapsedTime += Gdx.graphics.getDeltaTime();
-
-        float angle = -direction+((float) Math.PI/2);
-        float[] verts = new float[region.getVertices().length];
-        for(int i = 0; i<region.getVertices().length; i+=2){
-            float rotatedX = (float) Math.cos(angle) * region.getVertices()[i]
-                    - (float) Math.sin(angle) * region.getVertices()[i+1];
-            float rotatedY = (float) Math.sin(angle) * region.getVertices()[i]
-                    + (float) Math.cos(angle) * region.getVertices()[i+1];
-            verts[i] = rotatedX;
-            verts[i+1] = rotatedY;
-        }
-        for(int i = 0; i<verts.length; i++){
-            if(i%2==0 && verts[i]<xOffset){
-                xOffset = verts[i];
-            }
-            if(i%2==1 && verts[i]<yOffset){
-                yOffset = verts[i];
-            }
-        }
-        for(int i = 0; i<verts.length; i++){
-            if(i%2==0){
-                verts[i] -= xOffset;
-            }
-            if(i%2==1){
-                verts[i] -= yOffset;
-            }
-        }
-        TextureRegion t = animation.getKeyFrame(elapsedTime, true);
-
-        PolygonRegion p = new PolygonRegion(t, verts,region.getTriangles());
+        PolygonRegion p = animation.getKeyFrame(elapsedTime, true);
 
         Color tint = new Color(1,1,1,0.5f);
         canvas.draw(p, tint, -xOffset, -yOffset,getX()*drawScale.x + xOffset,getY()*drawScale.y + yOffset,
                     direction-((float) Math.PI/2),1,1);
-
 
         // Draw Particles
         for (int i = 0; i < numParticles; i++) {
@@ -412,15 +383,18 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             // Updating Particles - if left wind area, particle fades out
             if (!isPointInPolygon(polygonPoints, queue[i].getPos())) {
                 queue[i].setDead();
-            } else if (queue[i].getIsAlive() == false) {
+            } else if (!queue[i].getIsAlive()) {
                 queue[i].setAlive();
             }
 
             // Draw particles
-            queue[i].setOffset(xOffset, yOffset);
             queue[i].setDrawScale(drawScale);
             queue[i].draw(canvas);
         }
+    }
+
+    public int getNumParticles() {
+        return this.numParticles;
     }
 
     @Override
@@ -430,7 +404,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
 
     @Override
     public Vector2 getBoxCorner() {
-        return temp.set(boxCoordinate).add(getX(), getY());
+        return temp.set(getPosition()).add(boxCoordinate);
     }
 
     @Override
@@ -438,7 +412,4 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         return this.depth;
     }
 
-    public int getNumParticles() {
-        return this.numParticles;
-    }
 }

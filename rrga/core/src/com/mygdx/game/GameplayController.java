@@ -166,11 +166,6 @@ public class GameplayController implements ContactListener {
     private PooledList<BirdHazard> birds = new PooledList<>();
 
     /**
-     * The set of all winds currently in the level
-     */
-    private ObjectSet<NewWindModel> winds = new ObjectSet<>();
-
-    /**
      * The set of all lightning currently in the level
      */
     private ObjectSet<LightningHazard> lightnings = new ObjectSet<>();
@@ -391,7 +386,6 @@ public class GameplayController implements ContactListener {
         this.avatar = levelContainer.getAvatar();
         this.umbrella = levelContainer.getUmbrella();
         this.birds = levelContainer.getBirds();
-        this.winds = levelContainer.getWinds();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();
@@ -510,7 +504,6 @@ public class GameplayController implements ContactListener {
                 count++;
                 cache.add(umbrellaX * f, umbrellaY * f);
                 contactNewWindBod.add(bod);
-                System.out.println(count);
             }
         }
 
@@ -528,7 +521,6 @@ public class GameplayController implements ContactListener {
             } else {
                 windStrongFrame --;
             }
-            System.out.println("applied");
             avatar.applyWindForce(cache.x/count, cache.y/count);
 
         } else {
@@ -705,11 +697,6 @@ public class GameplayController implements ContactListener {
                 b.activatePhysics(world);
                 levelContainer.getBirds().add(b);
             }
-        }
-
-        //updates wind
-        for(NewWindModel w: winds) {
-            w.update(dt);
         }
 
     }

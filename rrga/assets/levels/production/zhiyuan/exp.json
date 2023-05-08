@@ -256,7 +256,32 @@
          "draworder":"topdown",
          "id":14,
          "name":"fore",
-         "objects":[],
+         "objects":[
+                {
+                 "height":1156.17801355732,
+                 "id":157,
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":1149.01503094607,
+                         "y":0
+                        }, 
+                        {
+                         "x":1149.01503094607,
+                         "y":1156.17801355732
+                        }, 
+                        {
+                         "x":0,
+                         "y":1156.17801355732
+                        }],
+                 "template":"..\/..\/templates\/wind.json",
+                 "width":1149.01503094607,
+                 "x":2.94724432655471,
+                 "y":2.94724432655471
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -264,7 +289,7 @@
          "y":0
         }],
  "nextlayerid":15,
- "nextobjectid":157,
+ "nextobjectid":158,
  "orientation":"orthogonal",
  "properties":[
         {

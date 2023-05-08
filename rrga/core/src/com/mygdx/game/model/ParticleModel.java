@@ -4,84 +4,67 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.utility.obstacle.BoxObstacle;
-import com.mygdx.game.utility.obstacle.PolygonObstacle;
-import com.mygdx.game.utility.util.Drawable;
-
-import java.util.Random;
-
 import static java.lang.Math.*;
 
 
 /**
- * A model for wind objects.
- * Currently extends PolygonObstacle to allow for different shaped wind gusts, but may want to change later
- * to make drawing manageable/easier
+ * A model for particle effect
  */
-public class ParticleModel implements Drawable {
+public class ParticleModel {
     /**
      * The velocity of this wind particle. Value: [vx, vy];
      */
-    private Vector2 pos = new Vector2();
+    private final Vector2 pos = new Vector2();
     /**
      * The velocity of this wind particle. Value: [vx, vy];
      */
-    private Vector2 velocity = new Vector2();
+    private final Vector2 velocity = new Vector2();
 
     /**
      * The velocity of this wind particle. Value: [vx, vy];
      */
-    private Vector2 tempdelt = new Vector2();
+    private final Vector2 tempdelt = new Vector2();
     /**
      * The velocity of this wind particle. Value: [vx, vy];
      */
-    private Vector2 originalVel;
+    private final Vector2 originalVel;
 
     /**
      * The magnitude of this wind's force. Invariant: magnitude > 0.
      */
-    private float magnitude;
+    private final float magnitude;
     /**
      * The direction of this wind's force in radians. Value within [0, 2pi).
      */
-    private float direction;
+    private final float direction;
 
-    private Animation<TextureRegion>[] animation = new Animation[3];
+    private final Array<Animation<TextureRegion>> animation;
 
     private float elapsedTime;
 
-    private PolygonRegion drawRegion;
-    private float xOffset;
-    private float yOffset;
-
-    /** draw depth */
-    private final int depth;
+//    /** draw depth */
+//    private final int depth;
 
     private int life;
 
     private boolean isalive;
 
-    private final Vector2 temp = new Vector2();
-    private Vector2 drawScale = new Vector2();
-    private Vector2 offset = new Vector2();
-    private Vector2 partSize = new Vector2();
+//    private final Vector2 temp = new Vector2();
+    private final Vector2 drawScale = new Vector2();
+    private final Vector2 partSize = new Vector2();
     /** Decides when particles get start drawn - gives different start time */
     private int startOffset;
-    private int MAX_LIFE = 10;
-    private int OFFSET_CONST = 10;
-    private float VELOCITY_SCALE = 1/15f;
+    private static final int MAX_LIFE = 10;
+    private static final int OFFSET_CONST = 10;
+    private static final float VELOCITY_SCALE = 1/15f;
 
     private TextureRegion texture;
 
     private int textureIndex;
-
-
 
 
     public ParticleModel(float posX, float posY, float direction, float magnitude, int depth, int offset) {
@@ -98,9 +81,17 @@ public class ParticleModel implements Drawable {
         this.startOffset = offset * OFFSET_CONST;
 
 
-        originalVel = new Vector2(magnitude * (float) Math.cos(direction) * VELOCITY_SCALE, magnitude * (float) Math.sin(direction) * VELOCITY_SCALE);
+        originalVel = new Vector2(
+                magnitude * (float) Math.cos(direction) * VELOCITY_SCALE,
+                magnitude * (float) Math.sin(direction) * VELOCITY_SCALE
+        );
 
-        this.depth = depth;
+        // initialize array of animations, pad the animation with null animations until animations are set
+        this.animation = new Array<>(3); //array of 3 animations
+        animation.add(null);
+        animation.add(null);
+        animation.add(null);
+        // this.depth = depth;
 
     }
 
@@ -112,15 +103,15 @@ public class ParticleModel implements Drawable {
 
             // Placing animation frames in order
             int index = 0;
-            for (int j = 0; j < tempFrames.length; j++) {
+            for (TextureRegion[] tempFrame : tempFrames) {
                 for (int k = 0; k < tempFrames[0].length; k++) {
-                    frames[index] = tempFrames[j][k];
+                    frames[index] = tempFrame[k];
                     index++;
                 }
             }
 
             // Adjust animation frame here
-            animation[i] = new Animation<>(1f / 8f, frames);
+            animation.set(i, new Animation<>(1f / 8f, frames));
         }
     }
 
@@ -136,17 +127,13 @@ public class ParticleModel implements Drawable {
 
         elapsedTime += Gdx.graphics.getDeltaTime();
 
-        TextureRegion t = animation[textureIndex].getKeyFrame(elapsedTime, true);
+        TextureRegion t = animation.get(textureIndex).getKeyFrame(elapsedTime, true);
 
         float ox = t.getRegionWidth()/2.0f;
         float oy = t.getRegionHeight()/2.0f;
 
         canvas.draw(t, particleColor, ox, oy, this.pos.x * drawScale.x, this.pos.y * drawScale.y, 0, partSize.x / t.getRegionWidth(),
                 partSize.y / t.getRegionHeight());
-    }
-
-    @Override
-    public void drawDebug(GameCanvas canvas) {
     }
 
     /** Updates particle: velocity, position, and life */
@@ -163,7 +150,7 @@ public class ParticleModel implements Drawable {
         if (this.startOffset > 0) {
             this.life = 0;
             this.startOffset -= 1;
-            System.out.println(startOffset);
+            //System.out.println(startOffset);
         } else {
             // Updates particle life
             if (!isalive) {
@@ -187,34 +174,37 @@ public class ParticleModel implements Drawable {
     }
 
     // TODO: Drawable override methods may not be correctly implemented
-    @Override
-    public int getDepth() {
-        return this.depth;
-    }
+    //  UPDATE: particles do not have to implement drawable (they are owned by wind not by world) --zhi
 
-    @Override
-    public Vector2 getDimensions() {
-        return this.pos;
-    }
+    //    @Override
+//    public void drawDebug(GameCanvas canvas) {
+//    }
 
-    @Override
-    public Vector2 getBoxCorner() {
-        return this.pos;
-    }
+//    @Override
+//    public int getDepth() {
+//        return this.depth;
+//    }
 
-    @Override
+//    @Override
+//    public Vector2 getDimensions() {
+//        return this.pos;
+//    }
+
+//    @Override
+//    public Vector2 getBoxCorner() {
+//        return this.pos;
+//    }
+
     public void setDrawScale(Vector2 scale) {
         drawScale.set(scale);
     }
 
     public void setTexture(TextureRegion texture) { this.texture = texture; }
 
-    public void setOffset(float xOffset, float yOffset) { this.offset.set(xOffset, yOffset); }
-
     public void setParticleSize(float partWidth, float partHeight) { this.partSize.set(partWidth, partHeight); }
 
     public Vector2 getPos() { return this.pos; }
-    public Vector2 setPos(Vector2 pos) { return this.pos = pos; }
+    public void setPos(Vector2 pos) { this.pos.set(pos); }
 
     public void setDead() { this.isalive = false; }
 
