@@ -145,6 +145,10 @@ public class ParticleModel implements Drawable {
                 partSize.y / t.getRegionHeight());
     }
 
+    @Override
+    public void drawDebug(GameCanvas canvas) {
+    }
+
     /** Updates particle: velocity, position, and life */
     public void update(float dt, float velScale, float velDirection) {
 

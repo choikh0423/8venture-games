@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
+import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
@@ -162,7 +163,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all birds currently in the level
      */
-    private ObjectSet<BirdHazard> birds = new ObjectSet<>();
+    private PooledList<BirdHazard> birds = new PooledList<>();
 
     /**
      * The set of all winds currently in the level
@@ -397,7 +398,6 @@ public class GameplayController implements ContactListener {
         this.birds = levelContainer.getBirds();
         this.winds = levelContainer.getWinds();
         this.windParticles = levelContainer.getWindParticles();
-        this.lightnings = levelContainer.getLightnings();
         this.nests = levelContainer.getNests();
         this.world = levelContainer.getWorld();
         this.objects = levelContainer.getObjects();

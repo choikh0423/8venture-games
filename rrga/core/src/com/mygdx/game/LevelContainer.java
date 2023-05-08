@@ -289,10 +289,9 @@ public class LevelContainer{
         this.scale = scale;
 
         sensorFixtures = new ObjectSet<Fixture>();
-        birds = new ObjectSet<>();
+        birds = new PooledList<>();
         winds = new ObjectSet<>();
         particles = new ObjectSet<>();
-        lightnings = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
         nests = new ObjectSet<>();
 
@@ -827,13 +826,7 @@ public class LevelContainer{
     public ObjectSet<ParticleModel> getWindParticles() {
         return particles;
     }
-    /**
-     * Get lightnings
-     * @return lightnings
-     */
-    public ObjectSet<LightningHazard> getLightnings() {
-        return lightnings;
-    }
+
     /**
      * Get nests
      * @return nests
