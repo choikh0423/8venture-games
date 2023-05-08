@@ -133,7 +133,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 */
 	private final int FlIP_ANIMATION_FRAMECOUNT = 20;
 	private final int TAKEOFF_ANIMATION_FRAMECOUNT = 12;
-	private final int LAND_ANIMATION_FRAMECOUNT = 12;
+	private final int LAND_ANIMATION_FRAMECOUNT = 18;
 
 	// <=============================== Animation objects start here ===============================>
 	/** Player walk animation*/
@@ -899,6 +899,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 			idleElapsedTime = 0;
 			lookElapsedTime = 0;
 			walkElapsedTime = 0;
+			takeoffElapsedTime = 0;
+			landElapsedTime = 0;
 
 			flipElapsedTime += Gdx.graphics.getDeltaTime();
 			t = flipAnimation.getKeyFrame(flipElapsedTime, false);
@@ -912,8 +914,14 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 					flipEffect * size[0] / t.getRegionWidth() * drawScale.x, size[1] / t.getRegionHeight() * drawScale.y);
 		}
 		else {
+			flipElapsedTime = 0;
 			if(landing && !isMoving()){
 				takeoffElapsedTime = 0;
+				fallElapsedTime = 0;
+				walkElapsedTime = 0;
+				lookElapsedTime = 0;
+				idleElapsedTime = 0;
+
 				landElapsedTime += Gdx.graphics.getDeltaTime();
 				t = landAnimation.getKeyFrame(landElapsedTime, false);
 				if (currentFrameCount == 0) {
@@ -926,7 +934,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				fallElapsedTime = 0;
 				idleElapsedTime = 0;
 				lookElapsedTime = 0;
-				flipElapsedTime = 0;
+				takeoffElapsedTime = 0;
+				landElapsedTime = 0;
 
 				// Walk animation
 				walkElapsedTime += Gdx.graphics.getDeltaTime();
@@ -935,7 +944,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				// Reset other animation elapsed time
 				walkElapsedTime = 0f;
 				fallElapsedTime = 0;
-				flipElapsedTime = 0;
+				takeoffElapsedTime = 0;
+				landElapsedTime = 0;
 
 				if (isZooming() && getLinearVelocity().epsilonEquals(0, 0)) {
 					idleElapsedTime = 0;
@@ -953,9 +963,11 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				walkElapsedTime = 0f;
 				idleElapsedTime = 0;
 				lookElapsedTime = 0;
-				flipElapsedTime = 0;
+				landElapsedTime = 0;
+
 				if(takeoff){
-					landElapsedTime = 0;
+					fallElapsedTime = 0;
+
 					takeoffElapsedTime += Gdx.graphics.getDeltaTime();
 					t = takeoffAnimation.getKeyFrame(takeoffElapsedTime, false);
 					if (currentFrameCount == 0) {
@@ -964,7 +976,6 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				}
 				else {
 					// Reset other animation elapsed time
-					landElapsedTime = 0;
 					takeoffElapsedTime = 0;
 
 					//falling animation
