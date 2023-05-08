@@ -239,141 +239,202 @@
          "name":"Mid",
          "objects":[
                 {
-                 "id":98,
-                 "polygon":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":5064,
-                         "y":-40
-                        }, 
-                        {
-                         "x":5064,
-                         "y":82.6202419592801
-                        }, 
-                        {
-                         "x":0,
-                         "y":82.6202419592801
-                        }],
+                 "id":118,
                  "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
-                 "x":16,
-                 "y":3748
+                 "x":24,
+                 "y":1552
                 }, 
                 {
-                 "id":99,
+                 "id":119,
+                 "polygon":[
+                        {
+                         "x":436,
+                         "y":-156
+                        }, 
+                        {
+                         "x":616,
+                         "y":-156
+                        }, 
+                        {
+                         "x":604,
+                         "y":2018.62024195928
+                        }, 
+                        {
+                         "x":432,
+                         "y":2014.62024195928
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "x":592,
+                 "y":1816
+                }, 
+                {
+                 "id":120,
+                 "polygon":[
+                        {
+                         "x":-248,
+                         "y":-468
+                        }, 
+                        {
+                         "x":-156,
+                         "y":-468
+                        }, 
+                        {
+                         "x":-168,
+                         "y":2102.62024195928
+                        }, 
+                        {
+                         "x":-464.870734643856,
+                         "y":2095.3945202706
+                        }, 
+                        {
+                         "x":-468,
+                         "y":1962.62024195928
+                        }, 
+                        {
+                         "x":-248,
+                         "y":1960
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "x":2628,
+                 "y":1744
+                }, 
+                {
+                 "id":121,
                  "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/spawn.json",
-                 "x":376,
-                 "y":3672
+                 "x":1124,
+                 "y":1408
                 }, 
                 {
-                 "id":100,
+                 "id":122,
                  "polygon":[
                         {
-                         "x":-4,
-                         "y":-580
+                         "x":-292,
+                         "y":-1196
                         }, 
                         {
-                         "x":655.837648355914,
-                         "y":-569.649844105491
+                         "x":496,
+                         "y":-1188
                         }, 
                         {
-                         "x":892.191210485736,
-                         "y":-638.883577486507
+                         "x":527.705368831609,
+                         "y":900.015275563846
                         }, 
                         {
-                         "x":1148,
-                         "y":-548
+                         "x":364,
+                         "y":1080
                         }, 
                         {
-                         "x":1312.40279171992,
-                         "y":-401.083820535118
-                        }, 
-                        {
-                         "x":1528.96611875627,
-                         "y":-267.957538989615
-                        }, 
-                        {
-                         "x":1715.83881679023,
-                         "y":-121.920769692683
-                        }, 
-                        {
-                         "x":1813.56983763294,
-                         "y":75.433559528024
-                        }, 
-                        {
-                         "x":1280,
-                         "y":82.6202419592801
-                        }, 
-                        {
-                         "x":0,
-                         "y":82.6202419592801
+                         "x":-308,
+                         "y":1076
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
-                 "x":1084,
-                 "y":3648
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":127
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":8
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "x":1680,
+                 "y":2752
                 }, 
                 {
-                 "id":101,
+                 "id":123,
+                 "polygon":[
+                        {
+                         "x":-872,
+                         "y":-388
+                        }, 
+                        {
+                         "x":515.977214285092,
+                         "y":-377.085642558904
+                        }, 
+                        {
+                         "x":520.018950706793,
+                         "y":-526.552807679234
+                        }, 
+                        {
+                         "x":1039.32941423277,
+                         "y":-525.535129334368
+                        }, 
+                        {
+                         "x":1044,
+                         "y":-384
+                        }, 
+                        {
+                         "x":1048,
+                         "y":12
+                        }, 
+                        {
+                         "x":-872,
+                         "y":16
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":129
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":8
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "x":2156,
+                 "y":4392
+                }, 
+                {
+                 "id":124,
+                 "polygon":[
+                        {
+                         "x":-804,
+                         "y":-936
+                        }, 
+                        {
+                         "x":-640,
+                         "y":-928
+                        }, 
+                        {
+                         "x":-632,
+                         "y":1610.62024195928
+                        }, 
+                        {
+                         "x":-768,
+                         "y":1618.62024195928
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "x":4092,
+                 "y":2224
+                }, 
+                {
+                 "id":125,
                  "polygon":[
                         {
                          "x":-120,
-                         "y":-324
+                         "y":-2148
                         }, 
                         {
-                         "x":5.38378378378377,
-                         "y":-409.902702702703
+                         "x":376,
+                         "y":-2144
                         }, 
                         {
-                         "x":243.654054054054,
-                         "y":-459.524324324324
+                         "x":376,
+                         "y":376
                         }, 
                         {
-                         "x":329.220090971966,
-                         "y":-435.785572110742
-                        }, 
-                        {
-                         "x":350.105724776808,
-                         "y":-288.271508438694
-                        }, 
-                        {
-                         "x":260.607229957445,
-                         "y":-283.925238883432
-                        }, 
-                        {
-                         "x":256,
-                         "y":0
-                        }, 
-                        {
-                         "x":256,
-                         "y":384
-                        }, 
-                        {
-                         "x":-108,
-                         "y":388
-                        }, 
-                        {
-                         "x":-132.983090298978,
-                         "y":195.738411655729
-                        }, 
-                        {
-                         "x":-128.335915846902,
-                         "y":50.9852559917363
-                        }, 
-                        {
-                         "x":-98.4026622296173,
-                         "y":-88.332778702163
-                        }, 
-                        {
-                         "x":-138.085005377555,
-                         "y":-219.808923085934
+                         "x":-56,
+                         "y":372
                         }],
                  "properties":[
                         {
                          "name":"dir",
                          "type":"object",
-                         "value":102
+                         "value":128
                         }, 
                         {
                          "name":"magnitude",
@@ -381,116 +442,243 @@
                          "value":12
                         }],
                  "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
-                 "x":820,
-                 "y":3348
+                 "x":2744,
+                 "y":3436
                 }, 
                 {
-                 "id":102,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
-                 "x":924,
-                 "y":3112
-                }, 
-                {
-                 "id":103,
+                 "id":126,
                  "polygon":[
                         {
-                         "x":0,
-                         "y":0
+                         "x":-468,
+                         "y":-184
                         }, 
                         {
-                         "x":230.398415673516,
-                         "y":-163.268097747286
+                         "x":-352,
+                         "y":-688
                         }, 
                         {
-                         "x":608,
-                         "y":-300
+                         "x":432,
+                         "y":-689.37975804072
                         }, 
                         {
-                         "x":723.122495807718,
-                         "y":-314.817600135762
+                         "x":542.74079582266,
+                         "y":-187.403443625134
                         }, 
                         {
-                         "x":819.321929996886,
-                         "y":-184.744121963508
+                         "x":187.425433614797,
+                         "y":434.284288006726
                         }, 
                         {
-                         "x":878.695227493868,
-                         "y":88.3004338897604
-                        }, 
-                        {
-                         "x":875.664805086866,
-                         "y":368.300906876679
-                        }, 
-                        {
-                         "x":753.351394334914,
-                         "y":370.738654747868
-                        }, 
-                        {
-                         "x":256,
-                         "y":384
-                        }, 
-                        {
-                         "x":0,
-                         "y":384
-                        }, 
-                        {
-                         "x":-148,
-                         "y":368
-                        }, 
-                        {
-                         "x":-104.103325536459,
-                         "y":175.175836469033
-                        }],
-                 "properties":[
-                        {
-                         "name":"dir",
-                         "type":"object",
-                         "value":106
-                        }, 
-                        {
-                         "name":"magnitude",
-                         "type":"float",
-                         "value":12
-                        }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
-                 "x":3268,
-                 "y":3336
-                }, 
-                {
-                 "id":104,
-                 "polygon":[
-                        {
-                         "x":496,
-                         "y":-428
-                        }, 
-                        {
-                         "x":880,
-                         "y":-424
-                        }, 
-                        {
-                         "x":884,
-                         "y":330.62024195928
-                        }, 
-                        {
-                         "x":496,
-                         "y":342.62024195928
+                         "x":-68,
+                         "y":410.62024195928
                         }],
                  "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
-                 "x":3988,
-                 "y":3372
+                 "x":2376,
+                 "y":824
                 }, 
                 {
-                 "id":105,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/goal.json",
-                 "x":4724,
-                 "y":2796
-                }, 
-                {
-                 "id":106,
-                 "rotation":35.2263676548636,
+                 "id":127,
                  "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
-                 "x":3910,
-                 "y":2976
+                 "x":1796,
+                 "y":1992
+                }, 
+                {
+                 "id":128,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "x":2868,
+                 "y":2216
+                }, 
+                {
+                 "id":129,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "x":2248,
+                 "y":3932
+                }, 
+                {
+                 "id":130,
+                 "polygon":[
+                        {
+                         "x":-184,
+                         "y":-228
+                        }, 
+                        {
+                         "x":188,
+                         "y":-240
+                        }, 
+                        {
+                         "x":177.142121652481,
+                         "y":916.079053352709
+                        }, 
+                        {
+                         "x":467.958771083325,
+                         "y":918.715228746635
+                        }, 
+                        {
+                         "x":467.985349726621,
+                         "y":-241.87788935171
+                        }, 
+                        {
+                         "x":832,
+                         "y":-240
+                        }, 
+                        {
+                         "x":819.845498670336,
+                         "y":1175.48807022111
+                        }, 
+                        {
+                         "x":-208,
+                         "y":1180
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":134
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":12
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "x":3788,
+                 "y":1708
+                }, 
+                {
+                 "id":131,
+                 "polygon":[
+                        {
+                         "x":-56,
+                         "y":-376
+                        }, 
+                        {
+                         "x":124,
+                         "y":-376
+                        }, 
+                        {
+                         "x":144,
+                         "y":1398.62024195928
+                        }, 
+                        {
+                         "x":-32,
+                         "y":1398.62024195928
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "x":4068,
+                 "y":984
+                }, 
+                {
+                 "id":132,
+                 "polygon":[
+                        {
+                         "x":16,
+                         "y":320
+                        }, 
+                        {
+                         "x":396,
+                         "y":320
+                        }, 
+                        {
+                         "x":408,
+                         "y":450.62024195928
+                        }, 
+                        {
+                         "x":8,
+                         "y":458.62024195928
+                        }],
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "x":4656,
+                 "y":948
+                }, 
+                {
+                 "id":133,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/goal.json",
+                 "x":4924,
+                 "y":1124
+                }, 
+                {
+                 "id":134,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "x":4112,
+                 "y":1608
+                }, 
+                {
+                 "id":135,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":1232,
+                 "y":1928
+                }, 
+                {
+                 "id":136,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":1232,
+                 "y":2756
+                }, 
+                {
+                 "id":137,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2220,
+                 "y":2292
+                }, 
+                {
+                 "id":138,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2232,
+                 "y":3072
+                }, 
+                {
+                 "id":139,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":1224,
+                 "y":3460
+                }, 
+                {
+                 "id":140,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2492,
+                 "y":1668
+                }, 
+                {
+                 "id":141,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2496,
+                 "y":2224
+                }, 
+                {
+                 "id":142,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":3148,
+                 "y":2228
+                }, 
+                {
+                 "id":143,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":3144,
+                 "y":1656
+                }, 
+                {
+                 "id":144,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2916,
+                 "y":696
+                }, 
+                {
+                 "id":145,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":3148,
+                 "y":3220
+                }, 
+                {
+                 "id":146,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":2492,
+                 "y":3220
+                }, 
+                {
+                 "id":147,
+                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/static_hazard.json",
+                 "x":4056,
+                 "y":2416
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -510,7 +698,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":107,
+ "nextobjectid":148,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

@@ -701,11 +701,12 @@ public class GameMode implements Screen {
      * Sets current level of the game
      */
     public void setNextLevel(){
-        if (currentLevel < 3) {
+        if (currentLevel < 16) {
             currentLevel += 1;
         } else {
             currentLevel = 1;
         }
+        System.out.println(currentLevel);
         resetShowGoal();
         resetCounter--;
         gameplayController.resetCounter--;
