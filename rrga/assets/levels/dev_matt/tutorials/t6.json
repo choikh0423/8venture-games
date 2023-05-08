@@ -83,7 +83,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3221225613, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -240,13 +240,13 @@
          "objects":[
                 {
                  "id":99,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/spawn.json",
+                 "template":"..\/..\/templates\/spawn.json",
                  "x":817.333333333333,
                  "y":2544.24242424242
                 }, 
                 {
                  "id":105,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/goal.json",
+                 "template":"..\/..\/templates\/goal.json",
                  "x":3689.57575757576,
                  "y":1595.63636363636
                 }, 
@@ -328,14 +328,14 @@
                          "type":"float",
                          "value":16
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "template":"..\/..\/templates\/wind.json",
                  "x":1897.33333333333,
                  "y":2933.45454545455
                 }, 
                 {
                  "id":111,
                  "rotation":1.87239049633064,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "template":"..\/..\/templates\/wind_dir.json",
                  "x":2363.39393939394,
                  "y":1650.06060606061
                 }, 
@@ -358,7 +358,7 @@
                          "x":374.788,
                          "y":-609.986
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "x":3052.48484848485,
                  "y":2899.29593962642
                 }, 
@@ -385,7 +385,7 @@
                          "x":374.788,
                          "y":-609.986
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "x":-353,
                  "y":3774.68987902036
                 }],
@@ -412,19 +412,7 @@
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
  "tileheight":128,
- "tilesets":[
-        {
-         "firstgid":1,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/bushes.json"
-        }, 
-        {
-         "firstgid":50,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/cliffs.json"
-        }, 
-        {
-         "firstgid":114,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/trees.json"
-        }],
+ "tilesets":[],
  "tilewidth":128,
  "type":"map",
  "version":"1.10",

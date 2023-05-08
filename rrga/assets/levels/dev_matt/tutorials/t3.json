@@ -83,7 +83,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3221225613, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -277,13 +277,13 @@
                          "x":0,
                          "y":82.6202419592801
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "x":17,
                  "y":3764
                 }, 
                 {
                  "id":99,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/spawn.json",
+                 "template":"..\/..\/templates\/spawn.json",
                  "x":348,
                  "y":3688
                 }, 
@@ -365,14 +365,14 @@
                          "type":"float",
                          "value":6
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "template":"..\/..\/templates\/wind.json",
                  "x":1556,
                  "y":3340
                 }, 
                 {
                  "id":102,
                  "rotation":323.914926957148,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "template":"..\/..\/templates\/wind_dir.json",
                  "x":1636,
                  "y":3296
                 }, 
@@ -395,13 +395,13 @@
                          "x":496,
                          "y":350.62024195928
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "x":532,
                  "y":3372
                 }, 
                 {
                  "id":105,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/goal.json",
+                 "template":"..\/..\/templates\/goal.json",
                  "x":2912,
                  "y":2984
                 }, 
@@ -447,13 +447,13 @@
                          "type":"float",
                          "value":12
                         }],
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind.json",
+                 "template":"..\/..\/templates\/wind.json",
                  "x":744,
                  "y":3348
                 }, 
                 {
                  "id":109,
-                 "template":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/templates\/wind_dir.json",
+                 "template":"..\/..\/templates\/wind_dir.json",
                  "x":852,
                  "y":2800
                 }],
@@ -480,19 +480,7 @@
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
  "tileheight":128,
- "tilesets":[
-        {
-         "firstgid":1,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/bushes.json"
-        }, 
-        {
-         "firstgid":50,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/cliffs.json"
-        }, 
-        {
-         "firstgid":114,
-         "source":"..\/..\/8venture-games-main (10)\/8venture-games-main\/rrga\/assets\/levels\/tilesets\/trees.json"
-        }],
+ "tilesets":[],
  "tilewidth":128,
  "type":"map",
  "version":"1.10",
