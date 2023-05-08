@@ -10,11 +10,9 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
-import com.mygdx.game.model.MovingPlatformModel;
+import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.*;
-import com.mygdx.game.model.PlayerModel;
-import com.mygdx.game.model.UmbrellaModel;
-import com.mygdx.game.model.WindModel;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -140,10 +138,12 @@ public class GameplayController implements ContactListener {
      */
     protected ObjectSet<Fixture> contactWindFix = new ObjectSet<>();
 
+    protected ObjectSet<Fixture> contactNewWindFix = new ObjectSet<>();
     /**
      * The set of all wind bodies that umbrella in contact with
      */
     protected ObjectSet<WindModel> contactWindBod = new ObjectSet<>();
+    protected ObjectSet<NewWindModel> contactNewWindBod = new ObjectSet<>();
 
     /**
      * The set of all nests currently in the level
@@ -223,7 +223,7 @@ public class GameplayController implements ContactListener {
     // ====================== (BEGIN) SOUND-related fields =============================
 
     /** The background music volume */
-    private float musicVolume = 0.5f;
+    private float musicVolume = 0.0f;
     /** The sound effects volume */
     private float SFXVolume = 0.0f;
 
@@ -431,7 +431,7 @@ public class GameplayController implements ContactListener {
         avatar.setZooming(input.didZoom());
 
         //average the force of touched winds
-        boolean touching_wind = contactWindFix.size > 0;
+        boolean touching_wind = contactWindFix.size > 0 || contactNewWindFix.size > 0;
         float ang = umbrella.getRotation();
         float umbrellaX = (float) Math.cos(ang);
         float umbrellaY = (float) Math.sin(ang);
@@ -446,6 +446,18 @@ public class GameplayController implements ContactListener {
                 contactWindBod.add(bod);
             }
         }
+
+        for (Fixture w : contactNewWindFix) {
+            NewWindModel bod = (NewWindModel) w.getBody().getUserData();
+            float f = bod.getWindForce(ang);
+            if (!contactNewWindBod.contains(bod) && umbrella.isOpen()) {
+                count++;
+                cache.add(umbrellaX * f, umbrellaY * f);
+                contactNewWindBod.add(bod);
+            }
+        }
+
+
         if(count!=0){
             // TODO: We might want to make a separate update loop for sounds
             // Play Strong Wind SFX
@@ -670,7 +682,6 @@ public class GameplayController implements ContactListener {
             weldJointDef.collideConnected = true;
             avatarWeldJoint = (WeldJoint) world.createJoint(weldJointDef);
         }
-
     }
 
     /**
@@ -683,7 +694,13 @@ public class GameplayController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void postUpdate(float dt) {
-        contactWindBod.clear();
+        contactWindBod.clear(); //todo: remove old wind
+        contactNewWindBod.clear();
+        umbrellaBoosted = false;
+        moveInputted = false;
+        windPushed = false;
+        destroyWeldJoint = false;
+
         // Add any objects created by actions
         while (!levelContainer.addQueue.isEmpty()) {
             levelContainer.addObject(levelContainer.addQueue.poll());
@@ -731,11 +748,6 @@ public class GameplayController implements ContactListener {
                 entry.remove();
             }
         }
-
-        umbrellaBoosted = false;
-        moveInputted = false;
-        windPushed = false;
-        destroyWeldJoint = false;
     }
 
     /**
@@ -797,6 +809,12 @@ public class GameplayController implements ContactListener {
                     (fd1 == "umbrellaSensor" && (bd2.getClass() == WindModel.class))) {
                 Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
                 contactWindFix.add(windFix);
+            }
+
+            if ((fd2 == "umbrellaSensor" && (bd1.getClass() == NewWindModel.class)) ||
+                    (fd1 == "umbrellaSensor" && (bd2.getClass() == NewWindModel.class))) {
+                Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
+                contactNewWindFix.add(windFix);
             }
 
             // Check for hazard collision
@@ -876,6 +894,12 @@ public class GameplayController implements ContactListener {
                 (umbrella == bd1 && bd2 instanceof WindModel)) {
             Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
             contactWindFix.remove(windFix);
+        }
+
+        if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
+                (umbrella == bd1 && bd2.getName().contains("wind"))) {
+            Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
+            contactNewWindFix.remove(windFix);
         }
 
         if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
