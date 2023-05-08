@@ -377,7 +377,7 @@ public class GameplayController implements ContactListener {
                     }
                 }
             } else {
-                if (input.isToggleHeld()) {
+                if (input.isToggleHeld() || umbrella.isBoosting()) {
                     umbrella.setOpen(true);
                     umbrella.useOpenedTexture();
                     wasOpen = true;

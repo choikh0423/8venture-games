@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
+import com.mygdx.game.GameCanvas;
 
 /**
  * A MenuScreen is any non-game screen where the user can click on
@@ -84,4 +85,6 @@ public abstract class MenuScreen implements Screen, InputProcessor, ControllerLi
     public boolean buttonUp(Controller controller, int buttonCode) {return false;}
 
     public boolean axisMoved(Controller controller, int axisCode, float value) {return false;}
+
+    public void draw(){}
 }

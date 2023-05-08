@@ -1,0 +1,18 @@
+{ "object":
+    {
+     "gid":85,
+     "height":511,
+     "id":165,
+     "name":"",
+     "rotation":0,
+     "type":"",
+     "visible":true,
+     "width":251
+    },
+ "tileset":
+    {
+     "firstgid":1,
+     "source":"..\/..\/objects\/json\/objects.json"
+    },
+ "type":"template"
+}
