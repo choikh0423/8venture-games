@@ -328,9 +328,6 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
                 queue[i].setLife(0);
                 queue[i].setPos(newSample);
                 queue[i].setTextureIndex(rand.nextInt(3));
-
-                // Random offset for particle start
-                queue[i].setStartOffset(rand.nextInt(100));
             }
         }
     }
