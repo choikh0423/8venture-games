@@ -572,6 +572,7 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
             canvas.drawText("Grounded:" + avatar.isGrounded(),
                     debugFont, 0.1f*canvas.getWidth(), 0.25f*canvas.getHeight());
+            canvas.drawText("Level: " + currentLevel, debugFont, 0.1f*canvas.getWidth(), 0.2f*canvas.getHeight());
         }
         canvas.end();
     }
@@ -706,7 +707,6 @@ public class GameMode implements Screen {
         } else {
             currentLevel = 1;
         }
-        System.out.println(currentLevel);
         resetShowGoal();
         resetCounter--;
         gameplayController.resetCounter--;
