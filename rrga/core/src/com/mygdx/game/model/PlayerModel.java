@@ -632,7 +632,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 		// Don't want to be moving. Damp out player motion
 		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
+			forceCache.set(-getDamping()*getVX(),-getDamping()*getVY());
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
@@ -709,7 +709,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	}
   
   /**
-     * Applies lighter force to the body of this player.
+     * Attempts to apply lighter force to the body of this player.
+   	 * @return whether force was actually applied
      */
     public boolean applyLighterForce(float umbAng) {
         if (lighterFuel == maxLighterFuel) {
