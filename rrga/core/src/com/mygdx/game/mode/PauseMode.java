@@ -256,7 +256,7 @@ public class PauseMode extends MenuScreen {
         int mx = Gdx.input.getX();
         int my = Gdx.graphics.getHeight() - Gdx.input.getY();
         if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
-            canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
+            canvas.draw(cursorTexture,  Color.WHITE, 0, cursorTexture.getRegionHeight(),
                     mx, my, 0, .4f, .4f);
         }
 
