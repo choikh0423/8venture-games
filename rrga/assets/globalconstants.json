@@ -66,8 +66,10 @@
     "staticHazardDamage": 1,
     "staticHazardKnockBack": 4
   },
-  "tilesets": {
-    "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
-      "cliffs_interior", "cliffs_exterior", "trees_background", "dirt" ]
+  "textures": {
+    "tilesets": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
+      "cliffs_interior", "cliffs_exterior", "trees_background", "dirt" ],
+    "tree_logs": ["branch_00", "branch_01", "branch_02", "branch_03", "branch_04", "branch_05", "branch_block_00",
+      "branch_block_01", "log_00", "log_01", "log_02", "stump_00", "stump_01"]
   }
 }

@@ -133,6 +133,9 @@ public class LevelParser {
     /** the default JSONs of animated lightning objects */
     private final JsonValue[] lightningDefaultObjects;
 
+    /** the default JSONs of branches/logs platforms*/
+    private final HashMap<String, JsonValue> logDefaultObjects;
+
     /** the default direction of a wind object */
     private static final float windDirDefault = 0;
 
@@ -326,10 +329,17 @@ public class LevelParser {
                 lightning4Template.get("object")
         };
 
+        // map from branch_log#.json -> json data
+        logDefaultObjects = new HashMap<>();
+        for (String fileName : globalConstants.get("textures").get("tree_logs").asStringArray()){
+            logDefaultObjects.put(fileName + ".json",
+                    directory.getEntry("template:" + fileName, JsonValue.class).get("object"));
+        }
+
         // save tileset textures and tileset JSON data
         tileSetTextureMap = new HashMap<>();
         tileSetJsonMap = new HashMap<>();
-        String[] tileSetFileNames = globalConstants.get("tilesets").get("filenames").asStringArray();
+        String[] tileSetFileNames = globalConstants.get("textures").get("tilesets").asStringArray();
         for (String tileSetName : tileSetFileNames){
             tileSetTextureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
             tileSetJsonMap.put(tileSetName + ".json", directory.getEntry("data:"+tileSetName, JsonValue.class));
@@ -353,10 +363,11 @@ public class LevelParser {
             for (JsonValue region : imageAtlas){
                 String regionName = region.name;
                 int[] arr = region.asIntArray();
-                stickerTextureMap.put(textureName + "_" + regionName, new TextureRegion(texture, arr[0], arr[1], arr[2], arr[3]));
+                stickerTextureMap.put(textureName + "_" + regionName,
+                        new TextureRegion(texture, arr[0], arr[1], arr[2], arr[3]));
             }
         }
-        stickerNameMap = new IntMap<>();
+        stickerNameMap = new IntMap<String>();
         JsonValue stickerJson = directory.getEntry("data:stickers", JsonValue.class);
         maxStickerSetId = 0;
         for (JsonValue stickerTile : stickerJson.get("tiles")){
@@ -460,37 +471,43 @@ public class LevelParser {
         JsonValue objs = layer.get("objects");
         for (JsonValue obj : objs) {
             obj.addChild("__DEPTH__", new JsonValue(currentObjectDepth));
-            String template = obj.getString("template", "IGNORE");
+            String template = obj.getString("template", "UNKNOWN");
+            String[] pathNames = template.split("/");
+            template = pathNames[pathNames.length - 1];
+            obj.remove("template");
+            obj.addChild("template", new JsonValue(template));
             if (template.endsWith("bird.json")) {
                 birdRawData.add(obj);
-            } else if (template.endsWith("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
+            } else if (template.equals("platform.json") || (obj.has("type") && obj.getString("type").equals("platform"))) {
                 platformRawData.add(obj);
             } else if (template.endsWith("lightning.json")) {
                 lightningRawData.add(obj);
-            } else if (template.endsWith("path_point.json")) {
+            } else if (template.equals("path_point.json")) {
                 trajectory.put(obj.getInt("id"), obj);
-            } else if (template.endsWith("spawn.json")) {
+            } else if (template.equals("spawn.json")) {
                 readPositionAndConvert(obj, playerPos);
                 playerDepth = currentObjectDepth;
-            } else if (template.endsWith("goal.json")) {
+            } else if (template.equals("goal.json")) {
                 readPositionAndConvert(obj, goalPos);
                 goalDepth = currentObjectDepth;
-            } else if (template.endsWith("hazard.json") || obj.getString("type", "UNKNOWN").equals("static")){
+            } else if (template.equals("hazard.json") || obj.getString("type", "UNKNOWN").equals("static")){
                 obj.addChild("hazard", new JsonValue("unspecified"));
                 staticHazardRawData.add(obj);
-            } else if (template.endsWith("rock.json")){
+            } else if (template.equals("rock.json")){
                 obj.addChild("hazard", new JsonValue("rock"));
                 staticHazardRawData.add(obj);
-            } else if (template.endsWith("wind.json")){
+            } else if (template.equals("wind.json")){
                 windRawData.add(obj);
-            } else if (template.endsWith("wind_dir.json")){
+            } else if (template.equals("wind_dir.json")){
                 windDirs.put(obj.getInt("id"), obj);
             } else if (template.endsWith("cloud.json")){
                 movingPlatRawData.add(obj);
-            } else if (template.endsWith("nest.json")) {
+            } else if (template.equals("nest.json")) {
                 nestRawData.add(obj);
-            } else if (obj.getString("type").equals("death") || obj.getString("name").equals("death") && obj.has("polygon")){
-                System.out.println("yo");
+            } else if (logDefaultObjects.containsKey(template)){
+                platformRawData.add(obj);
+            } else if (obj.getString("type", "UNKNOWN").equals("death") ||
+                    obj.getString("name", "UNKNOWN").equals("death") && obj.has("polygon")) {
                 deathZoneRawData.add(obj);
             } else if (obj.has("gid")){
                 // treat as possibly a sticker, process it
@@ -846,17 +863,54 @@ public class LevelParser {
     private void processPlatforms(ArrayList<JsonValue> rawData){
         platformData = new JsonValue[rawData.size()];
         for (int ii = 0; ii < platformData.length; ii++) {
-            //data we pass in to platform constructor
-            JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //platform raw data
             JsonValue p = rawData.get(ii);
-            // set position data
-            readPositionAndConvert(p, temp);
-            addPosition(data, temp);
-            data.addChild("points", polyPoints(p.get("polygon"), platformDefaultPoly));
-            data.addChild("depth", new JsonValue(p.getInt("__DEPTH__", -1)));
+            String templateName = p.getString("template");
+            JsonValue data;
+            if (logDefaultObjects.containsKey(templateName)){
+                data = processLog(p, logDefaultObjects.get(templateName));
+                data.addChild("textured", new JsonValue(true));
+            }
+            else {
+                //data we pass in to platform constructor
+                data = new JsonValue(JsonValue.ValueType.object);
+                // set position data
+                readPositionAndConvert(p, temp);
+                addPosition(data, temp);
+                data.addChild("points", polyPoints(p.get("polygon"), platformDefaultPoly));
+                data.addChild("depth", new JsonValue(p.getInt("__DEPTH__", -1)));
+                data.addChild("textured", new JsonValue(false));
+            }
             platformData[ii] = data;
         }
+    }
+
+    private JsonValue processLog(JsonValue log, JsonValue logDefaultObj){
+        JsonValue data = new JsonValue(JsonValue.ValueType.object);
+        readPositionAndConvert(log, temp);
+        addPosition(data, temp);
+        data.addChild("depth", new JsonValue(log.getInt("__DEPTH__", -1)));
+        JsonValue tileJson = gameObjectTiles.get(getProcessedGid(logDefaultObj) - 1);
+        int assetWidth = tileJson.getInt("imagewidth");
+        int assetHeight = tileJson.getInt("imageheight");
+        data.addChild("AABB", processTileObjectAABB(log, logDefaultObj, assetWidth, assetHeight));
+        // add hit-box
+        JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+        float ox = hitBoxPoints.getFloat("x");
+        float oy = hitBoxPoints.getFloat("y");
+        boolean flipX = isObjectHorizontallyFlipped(log);
+        boolean flipY = isObjectVerticallyFlipped(log);
+        JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                flipX, flipY, assetWidth, assetHeight);
+        data.addChild("points", shape);
+        data.addChild("flipX", new JsonValue(flipX));
+        data.addChild("flipY", new JsonValue(flipY));
+        data.addChild("angle", new JsonValue(convertAngle(log.getFloat("rotation",0))));
+        // save asset name to allow quick retrieval of textures (ie: log.png -> texture(log))
+        String[] sourcePath = tileJson.getString("image").split("/");
+        String sourceImageName = sourcePath[sourcePath.length - 1];
+        data.addChild("texture", new JsonValue(sourceImageName.split("\\.")[0]));
+        return data;
     }
 
     private void processStaticHazards(ArrayList<JsonValue> rawData){
