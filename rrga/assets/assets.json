@@ -30,6 +30,7 @@
         "menu:next_button": "menu/b_next.png",
         "menu:lose_text": "menu/splash_lose.png",
         "menu:win_text": "menu/splash_win.png",
+        "menu:level_buttons": "menu/b_level_all.png",
         "game:background" : "game/background.png",
         "game:skylayerA" : "game/parallax/skylayerA.png",
         "game:skylayerB" : "game/parallax/skylayerB.png",
