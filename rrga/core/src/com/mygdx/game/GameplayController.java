@@ -529,12 +529,14 @@ public class GameplayController implements ContactListener {
             // player is only vulnerable to further damage and effects if the level is still ongoing
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
-                cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
-                avatar.getBody().setLinearVelocity(cache);
+                if(h.getKnockBackScl() != 0) {
+                    cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
+                    avatar.getBody().setLinearVelocity(cache);
+                }
+                if(h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
                 if (avatar.getHealth() - dam > 0) {
                     avatar.setHealth(avatar.getHealth() - dam);
                     avatar.setiFrames(NUM_I_FRAMES);
-                    if(h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
                 } else {
                     avatar.setHealth(0);
                     // start iframes even when we die, otherwise player being damaged is not so apparent.
@@ -835,7 +837,7 @@ public class GameplayController implements ContactListener {
                 Body hazBod = (bd1 instanceof HazardModel ? body1 : body2);
                 Body playerBod = (bd1 instanceof HazardModel ? body2 : body1);
                 cache.set(playerBod.getPosition().sub(hazBod.getPosition()));
-                h.setKnockBackForce(cache);
+                h.setKnockBackForce(cache.nor());
 
                 contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
             }
