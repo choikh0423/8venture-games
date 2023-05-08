@@ -167,6 +167,7 @@ public class GDXRoot extends Game implements ScreenListener {
             loading.dispose();
             loading = null;
         } else if (screen == menu) {
+            menu.cameForPauseSettings = false;
             switch (exitCode) {
                 case MenuMode.EXIT_QUIT:
                     Gdx.app.exit();
@@ -207,6 +208,10 @@ public class GDXRoot extends Game implements ScreenListener {
 					confirmation.reset();
 					setScreen(confirmation);
 					break;
+                case MenuMode.EXIT_PAUSE:
+                    pausing.setBackgroundScreen(playing);
+                    setScreen(pausing);
+                    break;
 			}
 		} else if (screen == pausing){
 			switch (exitCode){
@@ -223,12 +228,13 @@ public class GDXRoot extends Game implements ScreenListener {
 					playing.pause();
 					setScreen(menu);
 					break;
-				case PauseMode.EXIT_CONFIRM:
-					confirmation.setPreviousExitCode(ConfirmationMode.EXIT_PAUSE);
-					confirmation.setScreenListener(this);
-					confirmation.setBackgroundScreen(menu);
-					confirmation.reset();
-					setScreen(confirmation);
+				case PauseMode.EXIT_SETTINGS:
+                    menu.setScreenListener(this);
+                    menu.reset();
+                    menu.setScreenMode(3);
+                    menu.cameForPauseSettings = true;
+                    playing.pause();
+                    setScreen(menu);
 					break;
 				default:
 					Gdx.app.exit();

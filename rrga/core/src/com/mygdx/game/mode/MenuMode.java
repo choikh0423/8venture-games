@@ -96,8 +96,8 @@ public class MenuMode extends MenuScreen {
     public static final int EXIT_QUIT = 0;
     /** exit code to play game */
     public static final int EXIT_PLAY = 1;
-    /** exit code to game settings */
-    public static final int EXIT_SETTINGS = 2;
+    /** exit code to pause menu */
+    public static final int EXIT_PAUSE = 2;
     public static final int EXIT_CONFIRM = 3;
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
@@ -217,6 +217,8 @@ public class MenuMode extends MenuScreen {
      * 0th element is whether to unlock all levels at start of game
      * (true for developers and final submission, false for publicly distributed version)*/
     private boolean[] levelUnlocked = new boolean[LEVEL_COUNT+1];
+
+    public boolean cameForPauseSettings = false;
 
     public MenuMode(GameCanvas canvas) {
         //TODO: CHANGE TO FALSE FOR PUBLIC RELEASE (or to test unlocking of levels)
@@ -514,14 +516,15 @@ public class MenuMode extends MenuScreen {
             }
         } else if (screenMode == 3) {
             if (exitPressState == 1) {
-                // Level Selector: Back to main screen
-                screenMode = 1;
+                // Settings: Back to main screen
                 exitPressState = 2;
+                if (cameForPauseSettings) {
+                    listener.exitScreen(this, EXIT_PAUSE);
+                } else screenMode = 1;
             } else if (togglePressState == 1) {
                 toggleOn = !toggleOn;
                 togglePressState = 2;
             } else if (resetSettingsPressState == 1) {
-                //TODO: popup
                 resetSettingsPressState = 2;
                 currentExitCode = EXIT_CONFIRM;
                 listener.exitScreen(this, currentExitCode);
