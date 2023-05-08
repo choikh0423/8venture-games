@@ -65,8 +65,6 @@ public class ParticleModel implements Drawable {
 
     private int life;
 
-    private int MAX_LIFE = 10;
-
     private boolean isalive;
 
     private final Vector2 temp = new Vector2();
@@ -75,7 +73,9 @@ public class ParticleModel implements Drawable {
     private Vector2 partSize = new Vector2();
     /** Decides when particles get start drawn - gives different start time */
     private int startOffset;
+    private int MAX_LIFE = 10;
     private int OFFSET_CONST = 10;
+    private float VELOCITY_SCALE = 1/15f;
 
     private TextureRegion texture;
 
@@ -92,13 +92,13 @@ public class ParticleModel implements Drawable {
         this.direction = direction;
         this.magnitude = magnitude;
 
-        velocity.x =  magnitude * (float) Math.cos(direction) / 10;
-        velocity.y =  magnitude * (float) Math.sin(direction) / 10;
+        velocity.x =  magnitude * (float) Math.cos(direction) * VELOCITY_SCALE;
+        velocity.y =  magnitude * (float) Math.sin(direction) * VELOCITY_SCALE;
 
         this.startOffset = offset * OFFSET_CONST;
 
 
-        originalVel = new Vector2(magnitude * (float) Math.cos(direction) / 10, magnitude * (float) Math.sin(direction) / 10);
+        originalVel = new Vector2(magnitude * (float) Math.cos(direction) * VELOCITY_SCALE, magnitude * (float) Math.sin(direction) * VELOCITY_SCALE);
 
         this.depth = depth;
 

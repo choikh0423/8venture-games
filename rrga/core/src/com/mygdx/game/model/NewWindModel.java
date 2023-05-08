@@ -303,10 +303,9 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         queue[i].setAnimation(t);
     }
 
-    /** Update particles */
-    public void updateParticles(float dt) {
+    /** Update loop for wind: currently updates particles */
+    public void update(float dt) {
         for (int i = 0; i < numParticles; i++) {
-
 
             Vector2 partPos = queue[i].getPos();
 

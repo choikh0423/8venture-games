@@ -68,10 +68,6 @@ public class LevelContainer{
      * The set of all winds currently in the level
      */
     private ObjectSet<NewWindModel> winds;
-    /**
-     * The set of all particles currently in the level
-     */
-    private ObjectSet<ParticleModel> particles;
 
 
     /**
@@ -291,7 +287,6 @@ public class LevelContainer{
         sensorFixtures = new ObjectSet<Fixture>();
         birds = new PooledList<>();
         winds = new ObjectSet<>();
-        particles = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
         nests = new ObjectSet<>();
 
@@ -487,8 +482,8 @@ public class LevelContainer{
             obj.setTexture(windTexture);
             obj.setAnimation(windAnimation);
             for (int i = 0; i < obj.getNumParticles(); i++) {
+                // Populates particle with 2/3 winds, 1/3 leaf
                 int particleNum = (i % 3);
-
                 if (particleNum < 2) {
                     obj.setParticleAnimation(particleWindAnimationList, i);
                 } else {
@@ -818,13 +813,6 @@ public class LevelContainer{
      */
     public ObjectSet<NewWindModel> getWinds() {
         return winds;
-    }
-    /**
-     * Get wind particles
-     * @return winds
-     */
-    public ObjectSet<ParticleModel> getWindParticles() {
-        return particles;
     }
 
     /**
