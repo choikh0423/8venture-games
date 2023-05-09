@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.mode.MenuButton;
@@ -43,7 +45,7 @@ public class LoseScreen extends MenuScreen{
     private static final float LOSE_TAG_Y_RATIO = .65f;
     private int loseTagX;
     private int loseTagY;
-    private final float TAG_SCL = .8f;
+    private final float TAG_SCL = 1f;
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
     /** Height of the button */
@@ -79,6 +81,18 @@ public class LoseScreen extends MenuScreen{
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.tryAgainButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
+
+        int width = (int) canvas.getCamera().getViewWidth();
+        int height = (int) canvas.getCamera().getViewHeight();
+        this.menuButton.setPos(width, height, 1);
+        this.tryAgainButton.setPos(width, height, 1);
+
+        loseTagY = (int) (LOSE_TAG_Y_RATIO * height);
+        loseTagX = (int) (LOSE_TAG_X_RATIO * width);
+
+        float sx = ((float)width)/STANDARD_WIDTH;
+        float sy = ((float)height)/STANDARD_HEIGHT;
+        scale = (sx < sy ? sx : sy);
     }
 
     /**
@@ -89,15 +103,15 @@ public class LoseScreen extends MenuScreen{
     public void render(float delta) {
         //Gdx.input.setCursorCatched(false);
         int x=0, y=0;
-        if(first) {
-            x = Gdx.input.getX();
-            y = Gdx.input.getY();
-        }
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        if(first){
-            Gdx.input.setCursorPosition(x, y);
-            first = false;
-        }
+//        if(first) {
+//            x = Gdx.input.getX();
+//            y = Gdx.input.getY();
+//        }
+//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+//        if(first){
+//            Gdx.input.setCursorPosition(x, y);
+//            first = false;
+//        }
 
         //comment this out if opaque foreground
         gameScreen.draw(delta, false);
@@ -106,10 +120,11 @@ public class LoseScreen extends MenuScreen{
 
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
         //above line for opaque foreground, below line for transparent foreground
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
+        CameraController camera = canvas.getCamera();
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(loseTag, Color.WHITE, loseTag.getRegionWidth()/2f, loseTag.getRegionHeight()/2f,
-                loseTagX, loseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
+                loseTagX, loseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale );
 
         menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
         tryAgainButton.draw(canvas, tryAgainPressState, BUTTON_SCALE, Color.WHITE);
@@ -143,15 +158,12 @@ public class LoseScreen extends MenuScreen{
     @Override
     public void resize(int width, int height) {
         // Scaling code from Professor White's code
-        float sx = ((float)width)/STANDARD_WIDTH;
-        float sy = ((float)height)/STANDARD_HEIGHT;
-        scale = (sx < sy ? sx : sy);
-
-        menuButton.setPos(width, height, scale);
-        tryAgainButton.setPos(width, height, scale);
-
-        loseTagY = (int)(LOSE_TAG_Y_RATIO * height);
-        loseTagX = (int)(LOSE_TAG_X_RATIO * width);
+//
+//        menuButton.setPos(width, height, scale);
+//        tryAgainButton.setPos(width, height, scale);
+//
+//        loseTagY = (int)(LOSE_TAG_Y_RATIO * height);
+//        loseTagX = (int)(LOSE_TAG_X_RATIO * width);
     }
 
     /**
@@ -188,7 +200,7 @@ public class LoseScreen extends MenuScreen{
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        screenY = canvas.getHeight()-screenY;
+
         boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
         boolean tryAgainPressed = checkClicked2(screenX, screenY, tryAgainButton);
 
@@ -222,6 +234,12 @@ public class LoseScreen extends MenuScreen{
      * @return boolean for whether button is pressed
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
+        // convert mouse screen coordinate to viewport world coordinate
+        CameraController camera = canvas.getCamera();
+        Vector2 temp = camera.unproject(screenX, screenY);
+        screenX = (int) temp.x;
+        screenY = (int) temp.y;
+
         // TODO: TEMPORARY touch range to make it smaller than button
         // Gets positional data of button
         float buttonX = button.getX();

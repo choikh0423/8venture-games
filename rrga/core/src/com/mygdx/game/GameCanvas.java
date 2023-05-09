@@ -105,8 +105,8 @@ public class GameCanvas {
      *
      */
     private Vector2 wrapPosition(Vector2 pos, float px, float py, float worldHeight, float zoomScl) {
-        float w = getWidth();
-        float h = getHeight();
+        float w = camera.getViewWidth();
+        float h = camera.getViewHeight();
         float leftBound = px - w/2;
         float bottomBound = py - h/2;
 
@@ -596,12 +596,14 @@ public class GameCanvas {
         positionCache.set(x,y);
         wrapPosition(positionCache, px, py, worldHeight,zoomScl);
 
-        int w = getWidth();
+        float w = camera.getViewWidth();
 
         // Have to draw the background twice for continuous scrolling.
         spriteBatch.draw(image, positionCache.x,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
         spriteBatch.draw(image, positionCache.x - w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
         spriteBatch.draw(image, positionCache.x + w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
+        spriteBatch.draw(image, positionCache.x - 2*w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
+        spriteBatch.draw(image, positionCache.x + 2*w,   positionCache.y, image.getRegionWidth()/2, image.getRegionHeight()/2, image.getRegionWidth(), image.getRegionHeight(), 1, 1, 0);
     }
 
     /**

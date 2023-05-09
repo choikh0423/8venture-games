@@ -84,6 +84,7 @@ public class CameraController {
      * sets camera position to be center of viewport
      */
     public void setViewCenter(){
+        camera.zoom = 1.0f;
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
         camera.update();
     }
