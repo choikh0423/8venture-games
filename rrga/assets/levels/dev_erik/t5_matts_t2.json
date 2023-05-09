@@ -1287,9 +1287,49 @@
         {
          "draworder":"topdown",
          "id":16,
-         "locked":true,
          "name":"Enemies",
-         "objects":[],
+         "objects":[
+                {
+                 "id":376,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":378
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6272,
+                 "y":768
+                }, 
+                {
+                 "id":377,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":379
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":4992,
+                 "y":512
+                }, 
+                {
+                 "id":378,
+                 "template":"..\/templates\/path_point.json",
+                 "x":4992,
+                 "y":768
+                }, 
+                {
+                 "id":379,
+                 "template":"..\/templates\/path_point.json",
+                 "x":6272,
+                 "y":512
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -1320,7 +1360,7 @@
          "y":0
         }],
  "nextlayerid":20,
- "nextobjectid":376,
+ "nextobjectid":380,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
