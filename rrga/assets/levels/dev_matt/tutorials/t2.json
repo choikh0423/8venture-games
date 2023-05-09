@@ -533,11 +533,11 @@
  "nextobjectid":108,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.10.0",
+ "tiledversion":"1.9.2",
  "tileheight":128,
  "tilesets":[],
  "tilewidth":128,
  "type":"map",
- "version":"1.10",
+ "version":"1.9",
  "width":40
 }
