@@ -463,12 +463,13 @@ public class GameMode implements Screen {
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
-        //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-        if (currentLevel == 2) {
+        // TODO: Temporarily not drawing parallax in level 4 and 6.
+        if (currentLevel != 4 && currentLevel != 6) {
             canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
         }
+
         PlayerModel avatar = gameplayController.getPlayer();
 
         // draw all game objects + stickers + tile layers, these objects are "dynamic"
