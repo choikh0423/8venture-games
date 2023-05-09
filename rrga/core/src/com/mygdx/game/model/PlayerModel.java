@@ -928,7 +928,6 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				if (currentFrameCount == 0) {
 					landing = false;
 				}
-				System.out.println("land");
 			}
 			else if (isGrounded() && isMoving()) {
 				// Reset other animation elapsed time
