@@ -8,11 +8,13 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -22,6 +24,7 @@ import com.mygdx.game.utility.util.ScreenListener;
 import org.w3c.dom.Text;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class MenuMode extends MenuScreen {
     /** Listener that will update the player mode when we are done */
@@ -52,17 +55,10 @@ public class MenuMode extends MenuScreen {
     private MenuButton settingsButton;
     /** level select button */
     private MenuButton levelSelectButton;
-    /** level 1 button */
-    private MenuButton levelButton1;
-    /** level 2 button */
-    private MenuButton levelButton2;
-    /** level 3 button */
-    private MenuButton levelButton3;
     /** back button */
     private MenuButton backButton;
     /** reset button */
     private MenuButton resetButton;
-
 
     /** The current state of the level select button */
     private int selectPressState;
@@ -72,12 +68,8 @@ public class MenuMode extends MenuScreen {
     private int exitPressState;
     /** The current state of the exit button */
     private int startPressState;
-    /** The current state of the exit button */
-    private int levelPressState1;
-    /** The current state of the exit button */
-    private int levelPressState2;
-    /** The current state of the exit button */
-    private int levelPressState3;
+    /** The current states of the level buttons. 0 = not clicked, 1 = clicked */
+    private int[] levelPressStates;
     /** The current state of the umbrella toggle button */
     private int togglePressState;
     private int resetLevelPressState;
@@ -107,6 +99,15 @@ public class MenuMode extends MenuScreen {
      *  3: settings
      * */
     private int screenMode;
+
+    /////////// LEVEL BUTTONS /////////////
+    private ArrayList<MenuButton> levelButtons;
+    /** number of levels in the game. NEED TO CHANGE THIS AS WE ADD MORE LEVELS */
+    public static final int LEVEL_COUNT = 30;
+    private boolean[] levelUnlocked = new boolean[LEVEL_COUNT+1];
+
+    //////////////////
+
     public int getScreenMode(){return screenMode;}
     public void setScreenMode(int mode){screenMode = mode;}
 
@@ -124,7 +125,6 @@ public class MenuMode extends MenuScreen {
     private int buttonWidth;
     /** Ratio of the button width to the screen */
     private static float BUTTON_WIDTH_RATIO  = 0.66f;
-
 
     /** Music volume slider bar texture */
     private TextureRegion musicSliderBar;
@@ -205,8 +205,6 @@ public class MenuMode extends MenuScreen {
     private TextureRegion cursorTexture;
     /** pixmap for the cursor */
     private Cursor newCursor;
-    /** number of levels in the game. NEED TO CHANGE THIS AS WE ADD MORE LEVELS */
-    public static final int LEVEL_COUNT = 3;
 
     /** preferences object to store user settings */
     Preferences settings = Gdx.app.getPreferences("settings");
@@ -216,7 +214,6 @@ public class MenuMode extends MenuScreen {
      * size is 30 to allow for room for more levels.
      * 0th element is whether to unlock all levels at start of game
      * (true for developers and final submission, false for publicly distributed version)*/
-    private boolean[] levelUnlocked = new boolean[LEVEL_COUNT+1];
 
     public MenuMode(GameCanvas canvas) {
         //TODO: CHANGE TO FALSE FOR PUBLIC RELEASE (or to test unlocking of levels)
@@ -234,9 +231,14 @@ public class MenuMode extends MenuScreen {
         this.backButton = new MenuButton(ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
         resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
-        this.levelButton1 = new MenuButton(ButtonShape.CIRCLE, 0.25f, 0.5f, 0);
-        this.levelButton2 = new MenuButton(ButtonShape.CIRCLE, 0.5f, 0.5f, 0);
-        this.levelButton3 = new MenuButton(ButtonShape.CIRCLE, 0.75f, 0.5f, 0);
+        levelButtons = new ArrayList<>();
+        float num_row = 5;
+        float num_col = 6;
+        for(int i=1; i<LEVEL_COUNT+1; i++){
+            levelButtons.add(new MenuButton(ButtonShape.RECTANGLE, .15f+.7f*(((i-1)%num_col)/(num_col-1)),
+                    .875f-.6f*(((i-1)/(int)num_col)/(num_row-1)), 0, i));
+        }
+        levelPressStates = new int[LEVEL_COUNT];
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -266,14 +268,22 @@ public class MenuMode extends MenuScreen {
         resetButton.setTexture(new TextureRegion(directory.getEntry("menu:reset_button", Texture.class)));
 
         // LEVEL SELECT COMPONENTS
-        TextureRegion levelButtonTexture1 = new TextureRegion(directory.getEntry("menu:level1_button", Texture.class));
-        TextureRegion levelButtonTexture2 = new TextureRegion(directory.getEntry("menu:level2_button", Texture.class));
-        // TODO: Change this to level 3 button
-        TextureRegion levelButtonTexture3 = new TextureRegion(directory.getEntry("menu:level3_button", Texture.class));
+        Texture tex = directory.getEntry("menu:level_buttons", Texture.class);
+        TextureRegion[][] tempLevels = TextureRegion.split(tex, tex.getWidth()/6, tex.getHeight()/5);
+        TextureRegion[] levels = new TextureRegion[30];
 
-        levelButton1.setTexture(levelButtonTexture1);
-        levelButton2.setTexture(levelButtonTexture2);
-        levelButton3.setTexture(levelButtonTexture3);
+        // Placing level buttons in order
+        int index = 0;
+        for (int i=0; i<tempLevels.length; i++) {
+            for (int j=0; j<tempLevels[0].length; j++) {
+                levels[index] = tempLevels[i][j];
+                index++;
+            }
+        }
+
+        for(int i=0; i<LEVEL_COUNT; i++){
+            levelButtons.get(i).setTexture(levels[i]);
+        }
 
         // SETTINGS COMPONENT
         musicTag = new TextureRegion(directory.getEntry("menu:music_tag", Texture.class));
@@ -336,18 +346,13 @@ public class MenuMode extends MenuScreen {
         } else if (screenMode == 2) {
             // Checks which button was clicked in Level Selector Screen
             boolean exitPressed = checkCircleClicked2(screenX, screenY, exitButton, BUTTON_SCALE);
-            boolean levelPressed1 = checkCircleClicked2(screenX, screenY, levelButton1, BUTTON_SCALE);
-            boolean levelPressed2 = checkCircleClicked2(screenX, screenY, levelButton2, BUTTON_SCALE);
-            boolean levelPressed3 = checkCircleClicked2(screenX, screenY, levelButton3, BUTTON_SCALE);
             boolean resetPressed = checkClicked2(screenX, screenY, resetButton);
 
-            if (levelPressed1) {
-                levelPressState1 = 1;
-            } else if (levelPressed2) {
-                levelPressState2 = 1;
-            } else if (levelPressed3) {
-                levelPressState3 = 1;
-            } else if (exitPressed) {
+            for(int i=0; i<LEVEL_COUNT; i++){
+                levelPressStates[i] = checkClicked2(screenX, screenY, levelButtons.get(i)) ? 1 : 0;
+            }
+
+            if (exitPressed) {
                 exitPressState = 1;
             } else if (resetPressed){
                 resetLevelPressState = 1;
@@ -488,29 +493,17 @@ public class MenuMode extends MenuScreen {
                 currentExitCode = EXIT_CONFIRM;
                 listener.exitScreen(this, currentExitCode);
                 currentExitCode = Integer.MIN_VALUE;
-            } else if (levelPressState1 == 1) {
-                // TODO: TEMPORARY NEED CHANGE - Level Selector needs to be a list of levels
-                currentLevel = 1;
-                levelPressState1 = 2;
-                currentExitCode = EXIT_PLAY;
-                listener.exitScreen(this, currentExitCode);
-                currentExitCode = Integer.MIN_VALUE;
-            } else if (levelPressState2 == 1) {
-                if (levelUnlocked[2]){
-                    currentLevel = 2;
-                    currentExitCode = EXIT_PLAY;
-                    listener.exitScreen(this, currentExitCode);
-                    currentExitCode = Integer.MIN_VALUE;
+            }
+            else {
+                for (int i = 0; i < LEVEL_COUNT; i++) {
+                    if (levelPressStates[i] == 1) {
+                        currentLevel = levelButtons.get(i).getID();
+                        levelPressStates[i] = 0;
+                        currentExitCode = EXIT_PLAY;
+                        listener.exitScreen(this, currentExitCode);
+                        currentExitCode = Integer.MIN_VALUE;
+                    }
                 }
-                levelPressState2 = 2;
-            } else if (levelPressState3 == 1) {
-                if (levelUnlocked[3]) {
-                    currentLevel = 3;
-                    currentExitCode = EXIT_PLAY;
-                    listener.exitScreen(this, currentExitCode);
-                    currentExitCode = Integer.MIN_VALUE;
-                }
-                levelPressState3 = 2;
             }
         } else if (screenMode == 3) {
             if (exitPressState == 1) {
@@ -585,12 +578,12 @@ public class MenuMode extends MenuScreen {
         } else if (screenMode == 2){
             // Draw Back Button
             backButton.draw(canvas, exitPressState, BUTTON_SCALE, Color.WHITE);
-            // Temporary Implementation - Will change to iterables once we get proper textures
-            levelButton1.draw(canvas, levelPressState1, BUTTON_SCALE, Color.WHITE);
-            levelButton2.draw(canvas, levelPressState2, BUTTON_SCALE, levelUnlocked[2] ? Color.WHITE : Color.LIGHT_GRAY);
-            levelButton3.draw(canvas, levelPressState3, BUTTON_SCALE, levelUnlocked[3] ? Color.WHITE : Color.LIGHT_GRAY);
             resetButton.draw(canvas, resetLevelPressState, BUTTON_SCALE, Color.WHITE);
+            // Temporary Implementation - Will change to iterables once we get proper textures
 
+            for(int i=0; i<LEVEL_COUNT; i++){
+                levelButtons.get(i).draw(canvas, levelPressStates[i], BUTTON_SCALE, levelUnlocked[i] ? Color.WHITE : Color.LIGHT_GRAY);
+            }
         } else if (screenMode == 3) {
             // Draw Back Button
             backButton.draw(canvas, exitPressState, BUTTON_SCALE, Color.WHITE);
@@ -663,9 +656,9 @@ public class MenuMode extends MenuScreen {
         backButton.setPos(width, height, scale);
         resetButton.setPos(width, height, scale);
 
-        levelButton1.setPos(width, height, scale);
-        levelButton2.setPos(width, height, scale);
-        levelButton3.setPos(width, height, scale);
+        for(MenuButton b: levelButtons){
+            b.setPos(width, height, scale);
+        }
 
         this.buttonWidth = (int)(BUTTON_WIDTH_RATIO*width);
         heightY = height;

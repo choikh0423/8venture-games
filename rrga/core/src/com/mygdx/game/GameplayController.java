@@ -781,7 +781,11 @@ public class GameplayController implements ContactListener {
                     (isAvatarSensor && bd2.getName().contains("platform")) ||
                     (isAvatarSensor && bd1 instanceof RockHazard) ||
                     (isAvatarSensor && bd2 instanceof RockHazard)) {
+                boolean prev = avatar.isGrounded();
                 avatar.setGrounded(true);
+                if(avatar.isGrounded()!=prev){
+                    avatar.startLand();
+                }
                 sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
 
                 // TODO : cloud platforms are named "moving_platform" hence they have the "platform" part in their name.
@@ -880,7 +884,11 @@ public class GameplayController implements ContactListener {
                 (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
             sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
             if (sensorFixtures.size == 0) {
+                boolean prev = avatar.isGrounded();
                 avatar.setGrounded(false);
+                if(avatar.isGrounded()!=prev){
+                    avatar.startTakeoff();
+                }
             }
             boolean isCloud1 = bd1 instanceof MovingPlatformModel;
             boolean isCloud2 = bd2 instanceof MovingPlatformModel;
