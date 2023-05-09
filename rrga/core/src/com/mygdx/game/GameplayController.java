@@ -264,7 +264,7 @@ public class GameplayController implements ContactListener {
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
-        backgroundMusic = directory.getEntry("music:level0", Music.class);
+        backgroundMusic = directory.getEntry("music:cloud", Music.class);
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);

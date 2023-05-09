@@ -464,7 +464,7 @@ public class GameMode implements Screen {
 
         // Parallax Drawing
         // TODO: Temporarily not drawing parallax in level 4 and 6.
-        if (currentLevel != 4 && currentLevel != 6) {
+        if (currentLevel != 4) {
             canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
