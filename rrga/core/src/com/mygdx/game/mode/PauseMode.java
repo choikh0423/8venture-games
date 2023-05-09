@@ -37,9 +37,10 @@ public class PauseMode extends MenuScreen {
     /** The background tinting color cache */
     private Color overlayTint;
 
-//    /** A reference to a text font (changes to any of its properties will be global) */
-//    private BitmapFont bigFont;
-//    private BitmapFont smallFont;
+    /** A reference to a text font (changes to any of its properties will be global) */
+    private BitmapFont bigFont;
+
+    private BitmapFont smallFont;
 
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
@@ -48,9 +49,11 @@ public class PauseMode extends MenuScreen {
     public static final int EXIT_RESTART = 2;
     /** exit code to restart game */
     public static final int EXIT_MENU = 3;
+    public static final int EXIT_CONFIRM = 4;
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
+
 
     /** The current state of the level menu button */
     private int menuPressState;
@@ -60,29 +63,33 @@ public class PauseMode extends MenuScreen {
     private int backPressState;
 
     /** exit button*/
-    private final MenuButton menuButton;
+    private MenuButton menuButton;
     /** start button */
-    private final MenuButton restartButton;
+    private MenuButton restartButton;
     /** back button */
-    private final MenuButton backButton;
+    private MenuButton backButton;
 
     /** Height of the button */
-    private static final float BUTTON_SCALE  = 1.0f;
+    private static float BUTTON_SCALE  = 1.0f;
     /** Touch range constant */
-    private static final float TOUCH_AREA_RATIO = 0.95f;
-    private static final float TAG_SCL = 1;
+    private static float TOUCH_AREA_RATIO = 0.95f;
+    private float TAG_SCL = 1;
+    /** Scaling factor for when the player changes the resolution. */
+    private float scale;
 
+    /** Standard window size (for scaling) */
+    private static int STANDARD_WIDTH  = 1024;
+    /** Standard window height (for scaling) */
+    private static int STANDARD_HEIGHT = 576;
 
-    // Pause text related variables
-
+    /** Pause text related variables */
     private TextureRegion pauseTag;
-    private static final float PAUSE_TAG_X_RATIO = .5f;
-    private static final float PAUSE_TAG_Y_RATIO = .65f;
-    private final int pauseTagX;
-    private final int pauseTagY;
+    private static float PAUSE_TAG_X_RATIO = .5f;
+    private static float PAUSE_TAG_Y_RATIO = .65f;
+    private int pauseTagX;
+    private int pauseTagY;
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
-
     /** true until the first call to render*/
     public boolean first;
 
@@ -96,13 +103,19 @@ public class PauseMode extends MenuScreen {
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
         this.backButton = new MenuButton(MenuMode.ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
 
+
         int width = (int) canvas.getCamera().getViewWidth();
         int height = (int) canvas.getCamera().getViewHeight();
-        this.menuButton.setPos(width, height, 1);
-        this.restartButton.setPos(width, height, 1);
-        this.backButton.setPos(width, height, 1);
-        pauseTagY = (int) (PAUSE_TAG_Y_RATIO * height);
-        pauseTagX = (int) (PAUSE_TAG_X_RATIO * width);
+        float sx = ((float)width)/STANDARD_WIDTH;
+        float sy = ((float)height)/STANDARD_HEIGHT;
+        scale = Math.min(sx, sy);
+
+        menuButton.setPos(width, height, scale);
+        restartButton.setPos(width, height, scale);
+        backButton.setPos(width, height, scale);
+
+        pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
+        pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
     }
 
     /**
@@ -113,6 +126,7 @@ public class PauseMode extends MenuScreen {
      * @param directory    Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
+        //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
         TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
@@ -132,7 +146,7 @@ public class PauseMode extends MenuScreen {
 
         boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
         boolean restartPressed = checkClicked2(screenX, screenY, restartButton);
-        boolean backPressed = checkCircleClicked2(screenX, screenY, backButton);
+        boolean backPressed =checkCircleClicked2(screenX, screenY, backButton, BUTTON_SCALE);
 
         if (menuPressed) {
             menuPressState = 1;
@@ -142,7 +156,7 @@ public class PauseMode extends MenuScreen {
             backPressState = 1;
         }
 
-        return true;
+        return false;
     }
 
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -168,16 +182,11 @@ public class PauseMode extends MenuScreen {
     /**
      * Checks if click was in bound for rectangular buttons
      *
-     * @param screenX x coordinate of cursor (graphics coordinate, x-right)
-     * @param screenY y coordinate of cursor (graphics coordinate, y-downwards)
-     * @param button button to check for click
      * @return boolean for whether button is pressed
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
 
-        // convert mouse screen coordinate to viewport world coordinate
-        CameraController camera = canvas.getCamera();
-        Vector2 temp = camera.unproject(screenX, screenY);
+        Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;
 
@@ -194,32 +203,28 @@ public class PauseMode extends MenuScreen {
         float screenTY = -screenX * (float)Math.sin(angle) + screenY * (float)Math.cos(angle);
 
         // Checks if appropriate area was clicked
-        boolean buttonPressedX = buttonTX - TOUCH_AREA_RATIO*BUTTON_SCALE*button.getRegionWidth()/2 <= screenTX &&
-                screenTX <= buttonTX + TOUCH_AREA_RATIO*BUTTON_SCALE*button.getRegionWidth()/2;
-        boolean buttonPressedY = buttonTY - BUTTON_SCALE*button.getRegionHeight()/2 <= screenTY &&
-                screenTY <= buttonTY + BUTTON_SCALE*button.getRegionHeight()/2;
+        boolean buttonPressedX = buttonTX - TOUCH_AREA_RATIO*BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenTX &&
+                screenTX <= buttonTX + TOUCH_AREA_RATIO*BUTTON_SCALE*scale*button.getRegionWidth()/2;
+        boolean buttonPressedY = buttonTY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenTY &&
+                screenTY <= buttonTY + BUTTON_SCALE*scale*button.getRegionHeight()/2;
 
         return buttonPressedX && buttonPressedY;
     }
 
     /**
      * Checks if click was in bound for circular buttons
-     * @param screenX x coordinate of cursor (graphics coordinate, x-right)
-     * @param screenY y coordinate of cursor (graphics coordinate, y-downwards)
-     * @param button button to check for click
+     *
      * @return boolean for whether button is pressed
      */
-    private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button) {
+    private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button, float scl) {
 
-        // convert mouse screen coordinate to viewport world coordinate
-        CameraController camera = canvas.getCamera();
-        Vector2 temp = camera.unproject(screenX, screenY);
+        Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;
 
         float buttonX = button.getX();
         float buttonY = button.getY();
-        float radius = button.getRegionWidth()/2.0f;
+        float radius = scl*scale*button.getRegionWidth()/2.0f;
         float dist = (screenX-buttonX)*(screenX-buttonX)+(screenY-buttonY)*(screenY-buttonY);
 
         // Checks if space inside the circle has been clicked
@@ -232,19 +237,23 @@ public class PauseMode extends MenuScreen {
      * @param delta The time in seconds since the last render.
      */
     public void render(float delta) {
+//        if (background != null){
+//            background.render(delta);
+//        }
 
-        Gdx.input.setCursorCatched(false);
+        //Gdx.input.setCursorCatched(false);
 //        int x=0, y=0;
 //        if(first) {
 //            x = Gdx.input.getX();
 //            y = Gdx.input.getY();
 //        }
+//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
 //        if(first){
-//            //Gdx.input.setCursorPosition(x, y);
+//            Gdx.input.setCursorPosition(x, y);
 //            first = false;
 //        }
 
-        gameScreen.draw(delta, false);
+        //gameScreen.draw(delta);
         draw(delta);
     }
 
@@ -254,41 +263,36 @@ public class PauseMode extends MenuScreen {
      */
     private void draw(float delta){
         canvas.begin();
-        CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
 
 
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
-                pauseTagX, pauseTagY, 0 , TAG_SCL, TAG_SCL);
+                pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
         menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
         restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
 
-        // hide cursor if cursor is outside viewport, otherwise draw
-
-//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        CameraController camera = canvas.getCamera();
+        //draw mouse texture
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
-        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, Gdx.graphics.getHeight() - my, 0, .4f, .4f);
+                    pos.x, pos.y, 0, .4f, .4f);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         canvas.end();
     }
 
     public void resize(int width, int height) {
-            // Scaling code from Professor White's code
-//            float sx = ((float) width) / STANDARD_WIDTH;
-//            float sy = ((float) height) / STANDARD_HEIGHT;
-//            scale = (sx < sy ? sx : sy);
-//            scale = 1;
-//            menuButton.setPos(width, height, scale);
-//            restartButton.setPos(width, height, scale);
-//            backButton.setPos(width, height, scale);
-//            pauseTagY = (int) (PAUSE_TAG_Y_RATIO * height);
-//            pauseTagX = (int) (PAUSE_TAG_X_RATIO * width);
+        // resizing done through viewport
     }
 
     public void dispose() {
@@ -297,8 +301,8 @@ public class PauseMode extends MenuScreen {
         canvas = null;
         foregroundTexture = null;
         overlayTint = null;
-//        bigFont = null;
-//        smallFont = null;
+        bigFont = null;
+        smallFont = null;
     }
 
     @Override
@@ -319,7 +323,7 @@ public class PauseMode extends MenuScreen {
     }
 
 
-     /**
+    /**
      * Sets the ScreenListener for this mode.
      * The ScreenListener will respond to requests to quit.
      */
@@ -340,4 +344,3 @@ public class PauseMode extends MenuScreen {
         currentExitCode = Integer.MIN_VALUE;
     }
 }
-

@@ -114,7 +114,7 @@ public class VictoryScreen extends MenuScreen{
 //        }
 
         //comment this out if opaque foreground
-        gameScreen.draw(delta, false);
+        //gameScreen.draw(delta);
 
         canvas.begin();
 
@@ -129,12 +129,18 @@ public class VictoryScreen extends MenuScreen{
         menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
         nextButton.draw(canvas, nextPressState, BUTTON_SCALE, Color.WHITE);
 
-        //draw mouse
+        //draw mouse texture
         int mx = Gdx.input.getX();
-        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, my, 0, .4f, .4f);
+                    pos.x, pos.y, 0, .4f, .4f);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         canvas.end();

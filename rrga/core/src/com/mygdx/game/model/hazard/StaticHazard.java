@@ -1,18 +1,47 @@
 package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.GameCanvas;
+import com.mygdx.game.utility.util.Drawable;
 
-public class StaticHazard extends PolygonHazard{
+/**
+ * A StaticHazard is an area covered in brambles that deals damage to the player on contact.<br>
+ */
+public class StaticHazard extends PolygonHazard implements Drawable {
 
-    /** Damage of a static hazard */
-    private static final int STATIC_DAMAGE = 1;
+    private final int drawDepth;
 
-    /** Knock-back of a static hazard */
-    private static final float STATIC_KNOCKBACK = 3;
-
-    public StaticHazard(JsonValue data) {
-        super(data, STATIC_DAMAGE, STATIC_KNOCKBACK);
+    public StaticHazard(JsonValue data, int dmg, float knockBack) {
+        super(data, dmg, knockBack);
+        setBodyType(BodyDef.BodyType.StaticBody);
+        setDensity(0);
+        setFriction(0);
+        setRestitution(0);
+        drawDepth = data.getInt("depth");
     }
 
+    // DRAWABLE INTERFACE
+
+    @Override
+    public Vector2 getDimensions() {
+        return super.getDimension();
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return super.getBoxCoordinate();
+    }
+
+    @Override
+    public int getDepth() {
+        return drawDepth;
+    }
+
+    public void draw(GameCanvas canvas) {
+        // method unnecessary
+        // polygon obstacle already does not draw without a texture to be used as a fill texture.
+        super.draw(canvas);
+    }
 }

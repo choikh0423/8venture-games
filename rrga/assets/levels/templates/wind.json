@@ -1,40 +1,48 @@
-{ "object":
-    {
-     "height":384,
-     "id":41,
-     "name":"wind",
-     "polygon":[
-            {
-             "x":0,
-             "y":0
-            }, 
-            {
-             "x":256,
-             "y":0
-            }, 
-            {
-             "x":256,
-             "y":384
-            }, 
-            {
-             "x":0,
-             "y":384
-            }],
-     "properties":[
-            {
-             "name":"dir",
-             "type":"object",
-             "value":0
-            }, 
-            {
-             "name":"magnitude",
-             "type":"float",
-             "value":20
-            }],
-     "rotation":0,
-     "type":"wind",
-     "visible":true,
-     "width":256
-    },
- "type":"template"
+{
+       "object": {
+              "height": 384,
+              "id": 41,
+              "name": "wind",
+              "polygon": [
+                     {
+                            "x": 0,
+                            "y": 0
+                     },
+                     {
+                            "x": 256,
+                            "y": 0
+                     },
+                     {
+                            "x": 256,
+                            "y": 384
+                     },
+                     {
+                            "x": 0,
+                            "y": 384
+                     }
+              ],
+              "properties": [
+                     {
+                            "name": "dir",
+                            "type": "object",
+                            "value": 0
+                     },
+                     {
+                            "name": "magnitude",
+                            "type": "float",
+                            "value": 20
+                     },
+                     {
+                            "name": "particle",
+                            "propertytype": "particle",
+                            "type": "string",
+                            "value": "gust"
+                     }
+              ],
+              "rotation": 0,
+              "type": "wind",
+              "visible": true,
+              "width": 256
+       },
+       "type": "template"
 }

@@ -437,4 +437,8 @@ public class UmbrellaModel extends BoxObstacle {
         currentFrameCount = BOOST_ANIMATION_FRAMECOUNT;
         isBoosting = true;
     }
+
+    public boolean isBoosting(){
+        return isBoosting;
+    }
 }

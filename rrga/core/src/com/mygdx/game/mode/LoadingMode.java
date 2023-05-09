@@ -290,7 +290,7 @@ public class LoadingMode extends MenuScreen {
 	 * of using the single render() method that LibGDX does.  We will talk about why we
 	 * prefer this in lecture.
 	 */
-	private void draw() {
+	public void draw() {
 		CameraController camera = canvas.getCamera();
 		canvas.begin();
 		canvas.draw(background, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
@@ -306,7 +306,7 @@ public class LoadingMode extends MenuScreen {
 		int my = Gdx.input.getY();
 		// retrieve the viewport coordinate to draw cursor
 		Vector2 pos = camera.unproject(mx, my);
-		if(pos.x < camera.getViewWidth() && pos.x>0 && my< camera.getViewHeight() && my>0) {
+		if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
 			canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
 					pos.x, pos.y, 0, .4f, .4f);
 			Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);

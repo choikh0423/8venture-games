@@ -360,12 +360,12 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         float x = data.getFloat("x");
         float y = data.getFloat("y");
         float[] shape = data.get("points").asFloatArray();
-        PolygonHazard hit1 = new PolygonHazard(x,y, shape, birdDamage, birdKnockBack, temp);
+        PolygonObstacle hit1 = new PolygonObstacle( shape, x, y);
         // flip points and make hit-box #2:
         for (int idx = 0; idx < shape.length; idx+=2){
             shape[idx] = -shape[idx];
         }
-        PolygonHazard hit2 = new PolygonHazard(x,y, shape, birdDamage, birdKnockBack, temp);
+        PolygonObstacle hit2 = new PolygonObstacle(shape, x, y);
         // now figure out which of the above is left/right hitbox
         if (faceRight){
             bodies.add(hit2);   //left facing
@@ -374,6 +374,12 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         else {
             bodies.add(hit1);   //left facing
             bodies.add(hit2);   //right facing
+        }
+        for (Obstacle o : bodies){
+            o.setBodyType(BodyDef.BodyType.StaticBody);
+            o.setDensity(0);
+            o.setFriction(0);
+            o.setRestitution(0);
         }
     }
 

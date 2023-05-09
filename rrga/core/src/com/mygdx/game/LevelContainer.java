@@ -65,6 +65,12 @@ public class LevelContainer{
     private PooledList<BirdHazard> birds;
 
     /**
+     * The set of all winds currently in the level
+     */
+    private ObjectSet<NewWindModel> winds;
+
+
+    /**
      * The set of all moving platforms currently in the level
      */
     private final ObjectSet<MovingPlatformModel> movingPlats;
@@ -90,6 +96,8 @@ public class LevelContainer{
      */
     private Texture[] animatedLightningTextures;
 
+    private HashMap<String, TextureRegion> logTextures;
+
     /**
      * Texture asset for character front avatar
      */
@@ -107,6 +115,18 @@ public class LevelContainer{
      */
     private Texture avatarLookAnimationTexture;
     /**
+     * Texture asset for character takeoff animation
+     */
+    private Texture avatarTakeoffAnimationTexture;
+    /**
+     * Texture asset for character land animation
+     */
+    private Texture avatarLandAnimationTexture;
+    /**
+     * Texture asset for character flip animation
+     */
+    private Texture avatarFlipAnimationTexture;
+    /**
      * Texture asset for the wind gust
      */
     private TextureRegion windTexture;
@@ -114,6 +134,46 @@ public class LevelContainer{
      * Texture assets for the wind animation
      */
     private TextureRegion[] windAnimation = new TextureRegion[9];
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation1;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation2;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleWindAnimation3;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture[] particleWindAnimationList;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation1;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation2;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture particleLeafAnimation3;
+
+    /**
+     * Texture assets for the wind animation
+     */
+    private Texture[] particleLeafAnimationList;
     /**
      * Texture asset for opened umbrella
      */
@@ -150,6 +210,18 @@ public class LevelContainer{
      * Fill Texture asset for lightning
      */
     private TextureRegion fillLightningTexture;
+
+    /**
+     * Fill Texture asset for brambles
+     */
+    private TextureRegion fillBrambleTexture;
+
+    /**
+     * Texture asset for rocks
+     */
+    private TextureRegion rockTexture;
+
+
     /**
      * Texture asset for nests
      */
@@ -228,6 +300,7 @@ public class LevelContainer{
 
         sensorFixtures = new ObjectSet<Fixture>();
         birds = new PooledList<>();
+        winds = new ObjectSet<>();
         movingPlats = new ObjectSet<>();
         nests = new ObjectSet<>();
 
@@ -287,6 +360,8 @@ public class LevelContainer{
         nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
 
         fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
+        fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
+        rockTexture = new TextureRegion(directory.getEntry("game:rock", Texture.class));
 
         // Animation Textures
         avatarWalkAnimationTexture = directory.getEntry("game:player_walk_animation", Texture.class);
@@ -298,18 +373,40 @@ public class LevelContainer{
         for(int i = 0; i < 9; i++){
             windAnimation[i] = new TextureRegion(directory.getEntry("game:wind_frame"+i, Texture.class));
         }
+        particleWindAnimation1 = directory.getEntry("game:wind_particle_filmstrip1", Texture.class);
+        particleWindAnimation2 = directory.getEntry("game:wind_particle_filmstrip2", Texture.class);
+        particleWindAnimation3 = directory.getEntry("game:wind_particle_filmstrip3", Texture.class);
+
+        particleWindAnimationList = new Texture[] {
+                particleWindAnimation1,
+                particleWindAnimation2,
+                particleWindAnimation3
+        };
+
+        particleLeafAnimation1 = directory.getEntry("game:leaf_particle_filmstrip1", Texture.class);
+        particleLeafAnimation2 = directory.getEntry("game:leaf_particle_filmstrip2", Texture.class);
+        particleLeafAnimation3 = directory.getEntry("game:leaf_particle_filmstrip3", Texture.class);
+
+        particleLeafAnimationList = new Texture[] {
+                particleLeafAnimation1,
+                particleLeafAnimation2,
+                particleLeafAnimation3
+        };
         avatarIdleAnimationTexture = directory.getEntry("game:player_idle_animation", Texture.class);
         avatarLookAnimationTexture = directory.getEntry("game:player_look_animation", Texture.class);
+        avatarTakeoffAnimationTexture = directory.getEntry("game:player_takeoff_animation", Texture.class);
+        avatarLandAnimationTexture = directory.getEntry("game:player_land_animation", Texture.class);
+        avatarFlipAnimationTexture = directory.getEntry("game:player_flip_animation", Texture.class);
 
         // Fonts
         avatarHealthFont = directory.getEntry("shared:retro", BitmapFont.class);
 
         // Movable Platforms (clouds)
         cloudPlatformTextures = new TextureRegion[]{
-                new TextureRegion(directory.getEntry("platform:cloud0", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud1", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud2", Texture.class)),
-                new TextureRegion(directory.getEntry("platform:cloud3", Texture.class))
+                new TextureRegion(directory.getEntry("game:cloud0", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud1", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud2", Texture.class)),
+                new TextureRegion(directory.getEntry("game:cloud3", Texture.class))
         };
 
         // animated lightning
@@ -320,6 +417,13 @@ public class LevelContainer{
                 directory.getEntry("game:lightning3", Texture.class),
                 directory.getEntry("game:lightning4", Texture.class)
         };
+
+        // load all branch/log textures by name (this is better approach than hard coding all textures)
+        logTextures = new HashMap<>();
+        for (String fileName : globalConstants.get("textures").get("tree_logs").asStringArray()){
+            logTextures.put(fileName, new TextureRegion(directory.getEntry("game:" + fileName, Texture.class)));
+        }
+
     }
     /**
      * Resets the level container (emptying the container)
@@ -331,6 +435,7 @@ public class LevelContainer{
         movingPlats.clear();
         nests.clear();
         drawables.clear();
+        winds.clear();
     }
 
     private MovingPlatformModel showGoal;
@@ -358,24 +463,31 @@ public class LevelContainer{
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", DEFAULT_GRAVITY)));
 
         JsonValue[] plats = parser.getPlatformData();
-        JsonValue cur;
         for (int ii = 0; ii < plats.length; ii++) {
-            cur = plats[ii];
-            PolygonObstacle obj = new PolygonObstacle(cur.get("points").asFloatArray(),
-                    cur.getFloat("x"), cur.getFloat("y"));
+            JsonValue cur = plats[ii];
+            PlatformModel obj;
+            if (cur.getBoolean("textured")){
+                // this platform has an asset (branch, log, etc)
+                obj = new PlatformModel(cur, logTextures.get(cur.getString("texture")), cur.getInt("depth"));
+            }
+            else {
+                // this platform is an invisible object
+                obj = new PlatformModel(cur.getFloat("x"), cur.getFloat("y"), cur.get("points").asFloatArray(),
+                        cur.getInt("depth"));
+            }
             obj.setBodyType(BodyDef.BodyType.StaticBody);
             obj.setDensity(defaults.getFloat("density", 0.0f));
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
-            obj.setTexture(platformTile);
             obj.setName("platform" + ii);
             addObject(obj);
+            drawables.add(obj);
         }
 
         JsonValue[] mPlats = parser.getMovingPlatformData();
         for (int ii = 0; ii < mPlats.length; ii++) {
-            cur = mPlats[ii];
+            JsonValue cur = mPlats[ii];
             MovingPlatformModel obj = new MovingPlatformModel( cur, cur.get("points").asFloatArray(),
                     cur.getFloat("x"), cur.getFloat("y")
             );
@@ -395,31 +507,63 @@ public class LevelContainer{
         String windName = "wind";
         JsonValue[] windjv = parser.getWindData();
         for (int ii = 0; ii < windjv.length; ii++) {
-            WindModel obj;
-            obj = new WindModel(windjv[ii]);
+            NewWindModel obj;
+            obj = new NewWindModel(windjv[ii], scale);
             obj.setDrawScale(scale);
             obj.setTexture(windTexture);
             obj.setAnimation(windAnimation);
+            for (int i = 0; i < obj.getNumParticles(); i++) {
+                // Populates particle with 2/3 winds, 1/3 leaf
+                int particleNum = (i % 3);
+                if (particleNum < 2) {
+                    obj.setParticleAnimation(particleWindAnimationList, i);
+                } else {
+                    obj.setParticleAnimation(particleLeafAnimationList, i);
+                }
+            }
             obj.setName(windName + ii);
             addObject(obj);
             drawables.add(obj);
+            winds.add(obj);
         }
+
+
 
         JsonValue hazardsjv = globalConstants.get("hazards");
 
-        //create hazards
+        //create invisible/bramble/rock hazards
         JsonValue[] hazardData = parser.getStaticHazardData();
+        int staticDmg = hazardsjv.getInt("staticHazardDamage");
+        float staticKnockBack = hazardsjv.getFloat("staticHazardKnockBack");
         for(int ii = 0; ii < hazardData.length; ii++){
-            StaticHazard obj;
+            PolygonObstacle obj;
             JsonValue jv = hazardData[ii];
-            obj = new StaticHazard(jv);
+            String type = jv.getString("type");
+            if (type.equals("rock")){
+                obj = new RockHazard(jv, staticDmg, staticKnockBack);
+                obj.setTexture(rockTexture);
+            }
+            else {
+                obj = new StaticHazard(jv, staticDmg, staticKnockBack);
+                if (type.equals("fill")){
+                    obj.setTexture(fillBrambleTexture);
+                }
+            }
             obj.setDrawScale(scale);
-            //temporary texture - just like with platforms, we will have to get this from parsing
-            // TODO: get texture for static hazards
-            obj.setTexture(fillLightningTexture);
             obj.setName("static_hazard"+ii);
             addObject(obj);
-            //drawables.add(obj); this does not typecheck yet
+            drawables.add((Drawable) obj);
+        }
+
+        // create death zone (using static hazard with 0 knockback)
+        JsonValue[] deathZones = parser.getDeathZoneData();
+        for(int ii = 0; ii < deathZones.length; ii++){
+            JsonValue jv = deathZones[ii];
+            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            obj.setName("death_zone"+ii);
+            obj.setDrawScale(scale);
+            obj.setSensor(true);
+            addObject(obj);
         }
 
         //create birds
@@ -464,7 +608,7 @@ public class LevelContainer{
         String lightningName = "lightning";
         JsonValue[] lightningData = parser.getLightningData();
         int lightningDmg = hazardsjv.getInt("lightningDamage");
-        float lightningKnockBackScl = hazardsjv.getInt("lightningKnockBack");
+        float lightningKnockBackScl = hazardsjv.getFloat("lightningKnockBack");
         for (int ii = 0; ii < lightningData.length; ii++) {
             Obstacle obj;
             JsonValue data = lightningData[ii];
@@ -533,6 +677,9 @@ public class LevelContainer{
         avatar.setFallingAnimation(avatarFallingAnimationTexture);
         avatar.setIdleAnimation(avatarIdleAnimationTexture);
         avatar.setLookAnimation(avatarLookAnimationTexture);
+        avatar.setTakeoffAnimation(avatarTakeoffAnimationTexture);
+        avatar.setLandAnimation(avatarLandAnimationTexture);
+        avatar.setFlipAnimation(avatarFlipAnimationTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
@@ -693,6 +840,13 @@ public class LevelContainer{
      */
     public PooledList<BirdHazard> getBirds() {
         return birds;
+    }
+    /**
+     * Get winds
+     * @return winds
+     */
+    public ObjectSet<NewWindModel> getWinds() {
+        return winds;
     }
 
     /**

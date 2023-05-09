@@ -3,6 +3,7 @@ package com.mygdx.game.utility.util;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.GameCanvas;
 
 public class MySlider {
@@ -72,6 +73,7 @@ public class MySlider {
     }
 
     public void updateKnob(float x, float y){
+
         if(x <= barX-barTexture.getRegionWidth()/2f){
             knobX = barX-barTexture.getRegionWidth()/2f;
             curNotch = 0;

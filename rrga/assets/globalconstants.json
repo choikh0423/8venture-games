@@ -14,8 +14,8 @@
     "height": 1.2
   },
   "player": {
-    "shrink": [0.7, 0.95],
-    "force": 40.0,
+    "shrink": [0.5, 0.95],
+    "force": 35.0,
     "damping": 30.0,
     "density": 1.0,
     "friction": 0.3,
@@ -60,12 +60,16 @@
     "birdDamage": 1,
     "birdSensorRadius": 7,
     "birdKnockBack": 6,
+    "birdStillFrames": [ 3, 2, 3, 4],
     "lightningDamage": 1,
-    "lightningKnockBack": 5,
-    "birdStillFrames": [ 3, 2, 3, 4]
+    "lightningKnockBack": 10,
+    "staticHazardDamage": 1,
+    "staticHazardKnockBack": 4
   },
-  "tilesets": {
-    "filenames": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
-      "cliffs_interior", "cliffs_exterior", "dirt"]
+  "textures": {
+    "tilesets": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
+      "cliffs_interior", "cliffs_exterior", "trees_background", "dirt" ],
+    "tree_logs": ["branch_00", "branch_01", "branch_02", "branch_03", "branch_04", "branch_05", "branch_block_00",
+      "branch_block_01", "log_00", "log_01", "log_02", "stump_00", "stump_01"]
   }
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -223,7 +224,7 @@ public class GameMode implements Screen {
 
         // Create the controllers.
         inputController = new InputController();
-        gameplayController = new GameplayController(bounds, gravity, 0);
+        gameplayController = new GameplayController(bounds, gravity);
         cache = new Vector2(1,1);
     }
 
@@ -429,7 +430,7 @@ public class GameMode implements Screen {
      *
      * @param dt    Number of seconds since last animation frame
      */
-    public void draw(float dt, boolean cursor) {
+    public void draw(float dt) {
         canvas.clear();
 
         CameraController camera = canvas.getCamera();
@@ -461,12 +462,13 @@ public class GameMode implements Screen {
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
-        //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-        if (currentLevel == 2) {
+        // TODO: Temporarily not drawing parallax in level 4 and 6.
+        if (currentLevel != 4) {
             canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
             canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
         }
+
         PlayerModel avatar = gameplayController.getPlayer();
 
         // draw all game objects + stickers + tile layers, these objects are "dynamic"
@@ -505,8 +507,22 @@ public class GameMode implements Screen {
 
         if (debug) {
             canvas.beginDebug();
-            for(Obstacle obj : gameplayController.getObjects()) {
-                obj.drawDebug(canvas);
+            // Drawables do not include platforms
+//            for(Drawable drawable : gameplayController.getDrawables()) {
+//                cache.set(drawable.getBoxCorner());
+//                float bx = cache.x;
+//                float by = cache.y;
+//                cache.set(drawable.getDimensions());
+//                float width = cache.x;
+//                float height = cache.y;
+//                if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
+//                        || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+//                    continue;
+//                }
+//                drawable.drawDebug(canvas);
+//            }
+            for (Obstacle o : gameplayController.getObjects()){
+                o.drawDebug(canvas);
             }
             canvas.endDebug();
         }
@@ -516,13 +532,20 @@ public class GameMode implements Screen {
         camera.setZoom(1.0f);
         avatar.drawInfo(canvas);
 
-        //draw cursor
-//        if(cursor) {
-//            int mx = Gdx.input.getX();
-//            int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-//            canvas.draw(cursorTexture, Color.WHITE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
-//                    mx, my, 0, cursorScl, cursorScl);
-//        }
+        // draw cursor
+        //draw mouse texture
+        int mx = Gdx.input.getX();
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
+            canvas.draw(cursorTexture, Color.WHITE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
+                    pos.x, pos.y, 0, cursorScl, cursorScl);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        }
 
         // debug information on screen to track FPS, etc
         if (debug){
@@ -555,6 +578,9 @@ public class GameMode implements Screen {
                     debugFont, 0.1f*camera.getViewWidth(), 0.30f*camera.getViewHeight());
             canvas.drawText("Grounded:" + avatar.isGrounded(),
                     debugFont, 0.1f*camera.getViewWidth(), 0.25f*camera.getViewHeight());
+            canvas.drawText("Level: " + currentLevel, debugFont,
+                    0.1f*camera.getViewWidth(), 0.2f*camera.getViewHeight());
+
         }
         canvas.end();
     }
@@ -628,7 +654,7 @@ public class GameMode implements Screen {
             if (preUpdate(delta)) {
                 update(delta); // This is the one that must be defined.
             }
-            draw(delta, true);
+            draw(delta);
     }
 
     /**
@@ -684,7 +710,7 @@ public class GameMode implements Screen {
      * Sets current level of the game
      */
     public void setNextLevel(){
-        if (currentLevel < 3) {
+        if (currentLevel < 16) {
             currentLevel += 1;
         } else {
             currentLevel = 1;
