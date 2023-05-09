@@ -643,7 +643,6 @@ public class MenuMode extends MenuScreen {
             // Temporary Implementation - Will change to iterables once we get proper textures
 
             for(int i=0; i<LEVEL_COUNT; i++){
-                System.out.println(levelButtons.get(i).getX() + " " + levelButtons.get(i).getY());
                 levelButtons.get(i).draw(canvas, levelPressStates[i], BUTTON_SCALE, levelUnlocked[i] ? Color.WHITE : Color.LIGHT_GRAY);
             }
         } else if (screenMode == 3) {

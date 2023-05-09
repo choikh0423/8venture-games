@@ -462,12 +462,12 @@ public class GameMode implements Screen {
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
-        // TODO: Temporarily not drawing parallax in level 4 and 6.
-        if (currentLevel != 4) {
-            canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
-            canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
-            canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
-        }
+        canvas.drawWrapped(skyLayerTextureA, -camPos.x * horizontalA, -camPos.y * verticalA, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+        canvas.drawWrapped(skyLayerTextureB, -camPos.x * horizontalB, -camPos.y * verticalB, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+        canvas.drawWrapped(skyLayerTextureC, -camPos.x * horizontalC, -camPos.y * verticalC, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
 
         PlayerModel avatar = gameplayController.getPlayer();
 
