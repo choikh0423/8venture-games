@@ -271,47 +271,6 @@
                  "template":"..\/templates\/wind_dir.json",
                  "x":6724,
                  "y":1970.30303030303
-                }, 
-                {
-                 "id":372,
-                 "properties":[
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":375
-                        }],
-                 "template":"..\/templates\/birds\/red_bird.json",
-                 "x":4228,
-                 "y":768
-                }, 
-                {
-                 "id":373,
-                 "properties":[
-                        {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":3
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":374
-                        }],
-                 "template":"..\/templates\/birds\/red_bird.json",
-                 "x":5832,
-                 "y":408
-                }, 
-                {
-                 "id":374,
-                 "template":"..\/templates\/path_point.json",
-                 "x":4788,
-                 "y":400
-                }, 
-                {
-                 "id":375,
-                 "template":"..\/templates\/path_point.json",
-                 "x":6292,
-                 "y":760
                 }],
          "opacity":1,
          "type":"objectgroup",
