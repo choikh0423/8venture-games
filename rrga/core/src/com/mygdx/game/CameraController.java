@@ -70,15 +70,45 @@ public class CameraController {
 //        camera.update();
 //    }
 
-    public void setToTargetPoint(float tx, float ty){
+    /**
+     * sets camera position to given point (tx, ty)
+     * @param tx x-coordinate
+     * @param ty y-coordinate
+     */
+    public void setPosition(float tx, float ty){
         camera.translate(tx - camera.position.x, ty - camera.position.y);
         camera.update();
     }
 
+    /**
+     * sets camera position to be center of viewport
+     */
     public void setViewCenter(){
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
-        camera.zoom = 1.0f;
         camera.update();
+    }
+
+    /**
+     * converts a screen coordinate (x,y) to (x', y') coordinate within the camera's viewport.<br>
+     * The coordinate system in which (x,y) belongs to is where (0,0) is top left corner of window screen.
+     * @param screenX application screen x coordinate
+     * @param screenY applcation screen y coordinate
+     * @return (non-allocator) vector cache containing (x',y')
+     */
+    public Vector2 unproject(float screenX, float screenY){
+        temp.set(screenX, screenY);
+        return viewport.unproject(temp);
+    }
+
+    /**
+     * converts a viewport coordinate (x',y') to (x, y) screen coordinate.<br>
+     * @param viewX viewport world coordinate x
+     * @param viewY viewport world coordinate y
+     * @return (non-allocator) vector cache containing (x,y)
+     */
+    public Vector2 project(float viewX, float viewY){
+        temp.set(viewX, viewY);
+        return viewport.project(temp);
     }
 
 }

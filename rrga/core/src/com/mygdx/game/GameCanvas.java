@@ -354,10 +354,11 @@ public class GameCanvas {
         //Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
         Gdx.gl.glClearColor(0,0,0,1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        camera.getViewport().apply();
+        //camera.getViewport().apply();
     }
 
     /**
+     * UNSUPPORTED<br>
      * Start a standard drawing sequence.
      *
      * Nothing is flushed to the graphics card until the method end() is called.
@@ -375,6 +376,7 @@ public class GameCanvas {
     }
 
     /**
+     * UNSUPPORTED<br>
      * Start a standard drawing sequence.
      *
      * Nothing is flushed to the graphics card until the method end() is called.
@@ -393,8 +395,8 @@ public class GameCanvas {
     }
 
     /**
-     * Start a standard drawing sequence.
-     *
+     * Start a standard drawing sequence.<br>
+     * The camera is centered within the viewport<br>
      * Nothing is flushed to the graphics card until the method end() is called.
      */
     public void begin() {
@@ -405,8 +407,14 @@ public class GameCanvas {
         active = DrawPass.STANDARD;
     }
 
+    /**
+     * Starts a standard drawing sequence with camera position at (tx,ty)<br>
+     * Nothing is flushed to the graphics card until the method end() is called.
+     * @param tx translate to x-coordinate
+     * @param ty translate to y-coordinate
+     */
     public void beginTranslated(float tx, float ty){
-        camera.setToTargetPoint(tx, ty);
+        camera.setPosition(tx, ty);
         camera.getViewport().apply();
         spriteBatch.setProjectionMatrix(camera.combined());
         spriteBatch.begin();

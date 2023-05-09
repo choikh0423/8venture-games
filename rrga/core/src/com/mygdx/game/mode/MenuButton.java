@@ -75,8 +75,8 @@ public class MenuButton {
 
     /** Directly sets XY Coordinate of the center of the button */
     public void setXY(int x, int y) {
-        buttonY = x;
-        buttonX = y;
+        buttonY = y;
+        buttonX = x;
     }
 
     /** Set texture of the button */
@@ -91,15 +91,12 @@ public class MenuButton {
         this.ratioX = x_ratio;
         this.ratioY = y_ratio;
         this.angle = angle;
-
-        this.texture = texture;
-
     }
 
     public void draw(GameCanvas canvas, int pressState, float button_scl, com.badlogic.gdx.graphics.Color tint) {
         // Draw Exit Button
         com.badlogic.gdx.graphics.Color exitTint = (pressState == 1 ? com.badlogic.gdx.graphics.Color.GRAY : tint);
-        canvas.draw(texture, exitTint, texture.getRegionWidth() / 2, texture.getRegionHeight() / 2,
+        canvas.draw(texture, exitTint, texture.getRegionWidth() / 2f, texture.getRegionHeight() / 2f,
                 buttonX, buttonY, angle, button_scl * scale, button_scl * scale);
     }
 
