@@ -58,8 +58,9 @@ public class ParticleModel {
     private final Vector2 partSize = new Vector2();
     /** Decides when particles get start drawn - gives different start time */
     private int startOffset;
+    private int countOffset;
     private static final int MAX_LIFE = 10;
-    private static final int OFFSET_CONST = 10;
+    private static final int OFFSET_CONST = 50;
     private static final float VELOCITY_SCALE = 1/15f;
 
     private TextureRegion texture;
@@ -79,6 +80,7 @@ public class ParticleModel {
         velocity.y =  magnitude * (float) Math.sin(direction) * VELOCITY_SCALE;
 
         this.startOffset = offset * OFFSET_CONST;
+        this.countOffset = offset * OFFSET_CONST;
 
 
         originalVel = new Vector2(
@@ -147,10 +149,9 @@ public class ParticleModel {
         velocity.set(originalVel.x + tempdelt.x, originalVel.y + tempdelt.y);
 
         // Deducts start offset
-        if (this.startOffset > 0) {
+        if (this.countOffset > 0) {
             this.life = 0;
-            this.startOffset -= 1;
-            //System.out.println(startOffset);
+            this.countOffset -= 1;
         } else {
             // Updates particle life
             if (!isalive) {
@@ -212,7 +213,7 @@ public class ParticleModel {
 
     public void setLife(int life) { this.life = life; }
 
-    public void setStartOffset(int offset) { this.startOffset = offset; }
+    public void setStartOffset() { this.countOffset = this.startOffset; }
 
     public Boolean getIsAlive() { return isalive; }
 
