@@ -1375,7 +1375,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":8
+                         "value":10
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":3016,
