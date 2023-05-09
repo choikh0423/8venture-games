@@ -1777,8 +1777,8 @@
                 {
                  "id":564,
                  "template":"..\/templates\/wind_dir.json",
-                 "x":7144,
-                 "y":960
+                 "x":8120,
+                 "y":1856
                 }, 
                 {
                  "id":565,
@@ -1944,7 +1944,147 @@
          "id":16,
          "locked":true,
          "name":"Enemies",
-         "objects":[],
+         "objects":[
+                {
+                 "id":571,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":575
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6272,
+                 "y":1408
+                }, 
+                {
+                 "id":572,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":576
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6144,
+                 "y":1280
+                }, 
+                {
+                 "id":573,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":577
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6272,
+                 "y":1152
+                }, 
+                {
+                 "id":574,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":3
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":578
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6400,
+                 "y":1024
+                }, 
+                {
+                 "id":575,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":582
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5120,
+                 "y":1408
+                }, 
+                {
+                 "id":576,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":579
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5120,
+                 "y":1280
+                }, 
+                {
+                 "id":577,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":580
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5120,
+                 "y":1152
+                }, 
+                {
+                 "id":578,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":581
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5120,
+                 "y":1024
+                }, 
+                {
+                 "id":579,
+                 "template":"..\/templates\/path_point.json",
+                 "x":7424,
+                 "y":1280
+                }, 
+                {
+                 "id":580,
+                 "template":"..\/templates\/path_point.json",
+                 "x":7296,
+                 "y":1152
+                }, 
+                {
+                 "id":581,
+                 "template":"..\/templates\/path_point.json",
+                 "x":7168,
+                 "y":1024
+                }, 
+                {
+                 "id":582,
+                 "template":"..\/templates\/path_point.json",
+                 "x":7296,
+                 "y":1408
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -1954,14 +2094,13 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"Player",
          "objects":[
                 {
                  "id":99,
                  "template":"..\/templates\/spawn.json",
-                 "x":5468.9696969697,
-                 "y":2779
+                 "x":5290.18181818182,
+                 "y":2775.9696969697
                 }, 
                 {
                  "id":174,
@@ -1976,7 +2115,7 @@
          "y":0
         }],
  "nextlayerid":20,
- "nextobjectid":571,
+ "nextobjectid":583,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
