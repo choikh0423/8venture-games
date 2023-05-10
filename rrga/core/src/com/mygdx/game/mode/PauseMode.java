@@ -116,6 +116,7 @@ public class PauseMode extends MenuScreen {
         menuButton.setPos(width, height, scale);
         restartButton.setPos(width, height, scale);
         backButton.setPos(width, height, scale);
+        settingsButton.setPos(width, height, scale);
 
         pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
         pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
@@ -198,7 +199,6 @@ public class PauseMode extends MenuScreen {
      * @return boolean for whether button is pressed
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
-
         Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;
@@ -230,7 +230,6 @@ public class PauseMode extends MenuScreen {
      * @return boolean for whether button is pressed
      */
     private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button, float scl) {
-
         Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;

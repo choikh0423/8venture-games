@@ -94,6 +94,8 @@ public class MenuMode extends MenuScreen {
      *  3: settings
      * */
     private int screenMode;
+    /** inGame is true when transitioned from pause mode */
+    private boolean inGame = false;
 
     /////////// LEVEL BUTTONS /////////////
     private ArrayList<MenuButton> levelButtons;
@@ -708,9 +710,11 @@ public class MenuMode extends MenuScreen {
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
-        backgroundMusic.play();
-        backgroundMusic.setVolume(musicVolume);
-        backgroundMusic.setLooping(true);
+        if (!inGame) {
+            backgroundMusic.play();
+            backgroundMusic.setVolume(musicVolume);
+            backgroundMusic.setLooping(true);
+        }
         draw();
     }
 
@@ -753,9 +757,8 @@ public class MenuMode extends MenuScreen {
         }
     }
 
-    public void setMusic(Music music){
-        backgroundMusic.stop();
-        backgroundMusic=music;
+    public void setInGame(boolean inGame){
+        this.inGame = inGame;
     }
 
     /** Reset is for transitioning from other mode to current mode*/
@@ -767,9 +770,11 @@ public class MenuMode extends MenuScreen {
         sfxSlider.ratio = sfxVolume;
         if (!cameForPauseSettings)
             backgroundMusic = menuMusic;
-        backgroundMusic.play();
-        backgroundMusic.setVolume(musicVolume);
-        backgroundMusic.setLooping(true);
+        if (!inGame) {
+            backgroundMusic.play();
+            backgroundMusic.setVolume(musicVolume);
+            backgroundMusic.setLooping(true);
+        }
 
         this.screenMode = 1;
 
