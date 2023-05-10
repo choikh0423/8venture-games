@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
@@ -178,6 +179,8 @@ public class GameMode implements Screen {
         this.scale.y = canvas.getCamera().getViewHeight()/displayHeight;
         gameplayController.setScale(this.scale);
     }
+
+    public Music getMusic(){return gameplayController.getMusic();}
 
     /**
      * Creates a new game world with the default values.
