@@ -862,7 +862,19 @@
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
  "tileheight":128,
- "tilesets":[],
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"..\/tilesets\/bushes_old.json"
+        }, 
+        {
+         "firstgid":50,
+         "source":"..\/tilesets\/cliffs_old.json"
+        }, 
+        {
+         "firstgid":114,
+         "source":"..\/tilesets\/trees_old.json"
+        }],
  "tilewidth":128,
  "type":"map",
  "version":"1.10",

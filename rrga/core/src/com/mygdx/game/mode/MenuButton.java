@@ -44,8 +44,6 @@ public class MenuButton {
     private float angle;
     /** The button XY Scale */
     private float scale;
-    /** ID of this button. 0 for non level buttons */
-    private final int ID;
 
 
     /** Returns the x-coordinate of the center of the button */
@@ -77,16 +75,13 @@ public class MenuButton {
 
     /** Directly sets XY Coordinate of the center of the button */
     public void setXY(int x, int y) {
-        buttonY = y;
-        buttonX = x;
+        buttonY = x;
+        buttonX = y;
     }
 
     /** Set texture of the button */
     public void setTexture(TextureRegion texture) { this.texture = texture; }
 
-    public int getID(){
-        return ID;
-    }
 
     /**
      * Creates a new menu mode button
@@ -96,21 +91,15 @@ public class MenuButton {
         this.ratioX = x_ratio;
         this.ratioY = y_ratio;
         this.angle = angle;
-        this.ID = 0;
-    }
 
-    public MenuButton(ButtonShape type, float x_ratio, float y_ratio, float angle, int id) {
-        this.type = type;
-        this.ratioX = x_ratio;
-        this.ratioY = y_ratio;
-        this.angle = angle;
-        this.ID = id;
+        this.texture = texture;
+
     }
 
     public void draw(GameCanvas canvas, int pressState, float button_scl, com.badlogic.gdx.graphics.Color tint) {
         // Draw Exit Button
         com.badlogic.gdx.graphics.Color exitTint = (pressState == 1 ? com.badlogic.gdx.graphics.Color.GRAY : tint);
-        canvas.draw(texture, exitTint, texture.getRegionWidth() / 2f, texture.getRegionHeight() / 2f,
+        canvas.draw(texture, exitTint, texture.getRegionWidth() / 2, texture.getRegionHeight() / 2,
                 buttonX, buttonY, angle, button_scl * scale, button_scl * scale);
     }
 

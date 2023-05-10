@@ -138,7 +138,6 @@ public class GDXRoot extends Game implements ScreenListener {
      * @param height The new height in pixels
      */
     public void resize(int width, int height) {
-        Gdx.gl.glViewport(0, 0,width, height);
         canvas.resize();
         super.resize(width, height);
     }
@@ -188,6 +187,8 @@ public class GDXRoot extends Game implements ScreenListener {
                     playing.setSampleLevel(sampleLevel);
                     playing.setScreenListener(this);
                     playing.setCanvas(canvas);
+                    // TODO: use exit codes to determine level.
+                    //  reserve exit codes 1 to 30 for levels.
                     
 					// Transferring menu mode information to game mode
 					playing.setLevel(menu.getCurrentLevel());
@@ -208,7 +209,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					setScreen(confirmation);
 					break;
                 case MenuMode.EXIT_PAUSE:
-                    menu.setInGame(false);
                     pausing.setBackgroundScreen(playing);
                     playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
                     setScreen(pausing);
@@ -236,7 +236,7 @@ public class GDXRoot extends Game implements ScreenListener {
 				case PauseMode.EXIT_SETTINGS:
                     menu.setScreenListener(this);
                     menu.cameForPauseSettings = true;
-                    menu.setInGame(true);
+                    menu.setMusic(playing.getMusic());
                     menu.reset();
                     menu.setScreenMode(3);
                     setScreen(menu);
@@ -245,20 +245,18 @@ public class GDXRoot extends Game implements ScreenListener {
 					Gdx.app.exit();
 			}
 		} else if (screen == playing) {
+			canvas.setDynamicCameraZoom(GameMode.standardZoom);
 			switch (exitCode){
 				case GameMode.EXIT_VICTORY:
 					victory.setBackgroundScreen(playing);
-                    victory.first = true;
 					setScreen(victory);
 					break;
 				case GameMode.EXIT_FAIL:
                     defeat.setBackgroundScreen(playing);
-                    defeat.first = true;
 					setScreen(defeat);
 					break;
 				case GameMode.EXIT_PAUSE:
 					pausing.setBackgroundScreen(playing);
-                    pausing.first = true;
 					setScreen(pausing);
 					break;
 				case GameMode.EXIT_QUIT:

@@ -27,7 +27,7 @@ public class RockHazard extends StaticHazard{
     public RockHazard(JsonValue data, int dmg, float knockBack){
         super(data, dmg, knockBack);
         this.angle = data.getFloat("angle");
-        float[] aabb = data.get("AABB").asFloatArray();
+        float[] aabb = data.get("aabb").asFloatArray();
         size.set(aabb[2], aabb[3]);
         temp.set(size);
         if (this.angle != 0){

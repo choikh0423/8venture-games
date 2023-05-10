@@ -1,4 +1,4 @@
-Controls for Gale - Beta Release
+Controls for Gale - Alpha Release
 
 1. A/D Key: Horizontal Movement On Platform
 

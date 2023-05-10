@@ -234,6 +234,7 @@ public class ConfirmationMode extends MenuScreen {
      * @param delta The time in seconds since the last render
      */
     private void draw(float delta){
+        canvas.setCameraHUD();
         canvas.begin();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
 
