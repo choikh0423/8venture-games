@@ -755,8 +755,10 @@ public class MenuMode extends MenuScreen {
     }
 
     public void setMusic(Music music){
-        backgroundMusic.stop();
-        backgroundMusic=music;
+        if (!music.equals(backgroundMusic)){
+            backgroundMusic.stop();
+            backgroundMusic=music;
+        }
     }
 
     /** Reset is for transitioning from other mode to current mode*/

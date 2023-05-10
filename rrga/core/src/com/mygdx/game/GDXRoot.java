@@ -168,12 +168,12 @@ public class GDXRoot extends Game implements ScreenListener {
             loading.dispose();
             loading = null;
         } else if (screen == menu) {
-            menu.cameForPauseSettings = false;
             switch (exitCode) {
                 case MenuMode.EXIT_QUIT:
                     Gdx.app.exit();
                     break;
                 case MenuMode.EXIT_PLAY:
+                    menu.cameForPauseSettings = false;
                     if (filePath.length() > 0) {
                         String filePath = Gdx.files.local(this.filePath).file().getAbsolutePath();
 
@@ -208,6 +208,7 @@ public class GDXRoot extends Game implements ScreenListener {
 					setScreen(confirmation);
 					break;
                 case MenuMode.EXIT_PAUSE:
+                    menu.cameForPauseSettings = false;
                     pausing.setBackgroundScreen(playing);
                     playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
                     setScreen(pausing);
