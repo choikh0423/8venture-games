@@ -2,6 +2,8 @@ package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
@@ -104,6 +106,19 @@ public class PauseMode extends MenuScreen {
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
         this.backButton = new MenuButton(MenuMode.ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
         this.settingsButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.95f, 0.07f, 0);
+
+        int width = (int) canvas.getCamera().getViewWidth();
+        int height = (int) canvas.getCamera().getViewHeight();
+        float sx = ((float)width)/STANDARD_WIDTH;
+        float sy = ((float)height)/STANDARD_HEIGHT;
+        scale = Math.min(sx, sy);
+
+        menuButton.setPos(width, height, scale);
+        restartButton.setPos(width, height, scale);
+        backButton.setPos(width, height, scale);
+
+        pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
+        pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
     }
 
     /**
@@ -134,8 +149,6 @@ public class PauseMode extends MenuScreen {
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-        // Setup
-        screenY = canvas.getHeight()-screenY;
         boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
         boolean restartPressed = checkClicked2(screenX, screenY, restartButton);
         boolean backPressed =checkCircleClicked2(screenX, screenY, backButton, BUTTON_SCALE);
@@ -186,6 +199,10 @@ public class PauseMode extends MenuScreen {
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
 
+        Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
+        screenX = (int) temp.x;
+        screenY = (int) temp.y;
+
         // TODO: TEMPORARY touch range to make it smaller than button
         // Gets positional data of button
         float buttonX = button.getX();
@@ -214,6 +231,10 @@ public class PauseMode extends MenuScreen {
      */
     private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button, float scl) {
 
+        Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
+        screenX = (int) temp.x;
+        screenY = (int) temp.y;
+
         float buttonX = button.getX();
         float buttonY = button.getY();
         float radius = scl*scale*button.getRegionWidth()/2.0f;
@@ -234,18 +255,18 @@ public class PauseMode extends MenuScreen {
 //        }
 
         //Gdx.input.setCursorCatched(false);
-        int x=0, y=0;
-        if(first) {
-            x = Gdx.input.getX();
-            y = Gdx.input.getY();
-        }
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        if(first){
-            Gdx.input.setCursorPosition(x, y);
-            first = false;
-        }
+//        int x=0, y=0;
+//        if(first) {
+//            x = Gdx.input.getX();
+//            y = Gdx.input.getY();
+//        }
+//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+//        if(first){
+//            Gdx.input.setCursorPosition(x, y);
+//            first = false;
+//        }
 
-        gameScreen.draw(delta, false);
+        //gameScreen.draw(delta);
         draw(delta);
     }
 
@@ -254,7 +275,6 @@ public class PauseMode extends MenuScreen {
      * @param delta The time in seconds since the last render
      */
     private void draw(float delta){
-        canvas.setCameraHUD();
         canvas.begin();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -267,31 +287,26 @@ public class PauseMode extends MenuScreen {
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
         settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
 
-        //draw mouse
+        CameraController camera = canvas.getCamera();
+        //draw mouse texture
         int mx = Gdx.input.getX();
-        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, my, 0, .4f, .4f);
+                    pos.x, pos.y, 0, .4f, .4f);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         canvas.end();
     }
 
     public void resize(int width, int height) {
-
-        // Scaling code from Professor White's code
-        float sx = ((float)width)/STANDARD_WIDTH;
-        float sy = ((float)height)/STANDARD_HEIGHT;
-        scale = (sx < sy ? sx : sy);
-
-        menuButton.setPos(width, height, scale);
-        restartButton.setPos(width, height, scale);
-        backButton.setPos(width, height, scale);
-        settingsButton.setPos(width, height, scale);
-
-        pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
-        pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
+        // resizing done through viewport
     }
 
     public void dispose() {
@@ -322,7 +337,7 @@ public class PauseMode extends MenuScreen {
     }
 
 
-     /**
+    /**
      * Sets the ScreenListener for this mode.
      * The ScreenListener will respond to requests to quit.
      */
@@ -343,4 +358,3 @@ public class PauseMode extends MenuScreen {
         currentExitCode = Integer.MIN_VALUE;
     }
 }
-

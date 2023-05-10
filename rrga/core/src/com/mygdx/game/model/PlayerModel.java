@@ -117,6 +117,23 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	private final float maxLighterFuel;
 	private float lighterFuel;
 	private float lighterChangeRate;
+	private boolean flipping;
+	private boolean takeoff;
+	private boolean landing;
+	private float flipEffect = 1;
+
+	/**
+	 * Current remaining frame count for animation
+	 */
+	private int currentFrameCount;
+
+	/**
+	 * Default Flip Animation Frame Count
+	 * NOTE: This needs to change if animation frame duration changes
+	 */
+	private final int FlIP_ANIMATION_FRAMECOUNT = 20;
+	private final int TAKEOFF_ANIMATION_FRAMECOUNT = 12;
+	private final int LAND_ANIMATION_FRAMECOUNT = 18;
 
 	// <=============================== Animation objects start here ===============================>
 	/** Player walk animation*/
@@ -143,6 +160,22 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** Player look animation elapsed time */
 	private float lookElapsedTime;
 
+	/** Player takeoff animation texture */
+	private Animation<TextureRegion> takeoffAnimation;
+
+	/** Player takeoff animation elapsed time */
+	private float takeoffElapsedTime;
+	/** Player land animation texture */
+	private Animation<TextureRegion> landAnimation;
+
+	/** Player land animation elapsed time */
+	private float landElapsedTime;
+	/** Player flip animation texture from left to right */
+	private Animation<TextureRegion> flipAnimation;
+
+	/** Player flip animation elapsed time */
+	private float flipElapsedTime;
+
 	/**
 	 * Returns left/right movement of this character.
 	 *
@@ -162,12 +195,19 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 * @param value left/right movement of this character.
 	 */
 	public void setMovement(float value) {
+		boolean prev = faceRight;
 		movement = value;
 		// Change facing if appropriate
 		if (movement < 0) {
 			faceRight = false;
 		} else if (movement > 0) {
 			faceRight = true;
+		}
+		if(faceRight!=prev){
+			flipping = true;
+			currentFrameCount = FlIP_ANIMATION_FRAMECOUNT;
+			flipEffect = faceRight ? 1.0f : -1.0f;
+			flipElapsedTime = 0;
 		}
 	}
 
@@ -205,6 +245,17 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	 */
 	public void setGrounded(boolean value) {
 		isGrounded = value;
+	}
+
+	public void startTakeoff() {
+		takeoff = true;
+		currentFrameCount = TAKEOFF_ANIMATION_FRAMECOUNT;
+	}
+
+	public void startLand(){
+		landing = true;
+		currentFrameCount = LAND_ANIMATION_FRAMECOUNT;
+		faceRight = getVX() > 0 || faceRight;
 	}
 
 	/**
@@ -503,6 +554,69 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	}
 
 	/**
+	 * Sets player takeoff animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setTakeoffAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, texture.getWidth()/2, texture.getHeight());
+		TextureRegion[] frames = new TextureRegion[2];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		takeoffAnimation = new Animation<>(1f/12f, frames);
+	}
+
+	/**
+	 * Sets player land animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setLandAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, texture.getWidth()/3, texture.getHeight());
+		TextureRegion[] frames = new TextureRegion[3];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		landAnimation = new Animation<>(1f/12f, frames);
+	}
+
+	/**
+	 * Sets player flip animation
+	 * NOTE: iterator is specific to current filmstrip - need to change value if tile dimension changes on filmstrip
+	 * */
+	public void setFlipAnimation(Texture texture){
+		TextureRegion[][] tempFrames = TextureRegion.split(texture, texture.getWidth()/4, texture.getHeight()/2);
+		TextureRegion[] frames = new TextureRegion[8];
+
+		// Placing animation frames in order
+		int index = 0;
+		for (int i=0; i<tempFrames.length; i++) {
+			for (int j=0; j<tempFrames[0].length; j++) {
+				frames[index] = tempFrames[i][j];
+				index++;
+			}
+		}
+
+		// Adjust idle animation speed here
+		flipAnimation = new Animation<>(1f/20f, frames);
+	}
+
+	/**
 	 * sets the texture to be frontal view for drawing purposes.
 	 *
 	 * No update occurs if the current texture is already the front view texture.
@@ -632,7 +746,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
 		// Don't want to be moving. Damp out player motion
 		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
+			forceCache.set(-getDamping()*getVX(),-getDamping()*getVY());
 			body.applyForce(forceCache,getPosition(),true);
 		}
 
@@ -709,7 +823,8 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	}
   
   /**
-     * Applies lighter force to the body of this player.
+     * Attempts to apply lighter force to the body of this player.
+   	 * @return whether force was actually applied
      */
     public boolean applyLighterForce(float umbAng) {
         if (lighterFuel == maxLighterFuel) {
@@ -767,6 +882,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	public void update(float dt) {
 		// Apply cooldowns
 		if(iFrames!=0) iFrames--;
+		if (currentFrameCount != 0) currentFrameCount--;
 
 		super.update(dt);
 	}
@@ -778,44 +894,99 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 		// mirror left or right (if player is facing left, this should be -1)
 		float effect = faceRight ? -1.0f : 1.0f;
 		TextureRegion t;
-		if (isGrounded() && isMoving()) {
+		if(flipping){
 			// Reset other animation elapsed time
 			fallElapsedTime = 0;
 			idleElapsedTime = 0;
 			lookElapsedTime = 0;
+			walkElapsedTime = 0;
+			takeoffElapsedTime = 0;
+			landElapsedTime = 0;
 
-			// Walk animation
-			walkElapsedTime += Gdx.graphics.getDeltaTime();
-			t = walkAnimation.getKeyFrame(walkElapsedTime, true);
-		} else if (isGrounded() && !isMoving()) {
-			// Reset other animation elapsed time
-			walkElapsedTime = 0f;
-			fallElapsedTime = 0;
+			flipElapsedTime += Gdx.graphics.getDeltaTime();
+			t = flipAnimation.getKeyFrame(flipElapsedTime, false);
 
-			if (isZooming() && getLinearVelocity().epsilonEquals(0, 0)) {
-				idleElapsedTime = 0;
-				//look animation
-				lookElapsedTime += Gdx.graphics.getDeltaTime();
-				t = lookAnimation.getKeyFrame(lookElapsedTime, true);
-			} else {
-				lookElapsedTime = 0;
-				//idle animation
-				idleElapsedTime += Gdx.graphics.getDeltaTime();
-				t = idleAnimation.getKeyFrame(idleElapsedTime, true);
+			if (currentFrameCount == 0) {
+				flipping = false;
 			}
-		} else {
-			// Reset other animation elapsed time
-			walkElapsedTime = 0f;
-			idleElapsedTime = 0;
-			lookElapsedTime = 0;
 
-			//falling animation
-			fallElapsedTime += Gdx.graphics.getDeltaTime();
-			t = fallAnimation.getKeyFrame(fallElapsedTime, true);
+			canvas.draw(t, tint, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+					flipEffect * size[0] / t.getRegionWidth() * drawScale.x, size[1] / t.getRegionHeight() * drawScale.y);
 		}
-		canvas.draw(t, tint, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-				getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-				effect * size[0]/ t.getRegionWidth() * drawScale.x, size[1]/t.getRegionHeight() * drawScale.y);
+		else {
+			flipElapsedTime = 0;
+			if(landing && !isMoving()){
+				takeoffElapsedTime = 0;
+				fallElapsedTime = 0;
+				walkElapsedTime = 0;
+				lookElapsedTime = 0;
+				idleElapsedTime = 0;
+
+				landElapsedTime += Gdx.graphics.getDeltaTime();
+				t = landAnimation.getKeyFrame(landElapsedTime, false);
+				if (currentFrameCount == 0) {
+					landing = false;
+				}
+			}
+			else if (isGrounded() && isMoving()) {
+				// Reset other animation elapsed time
+				fallElapsedTime = 0;
+				idleElapsedTime = 0;
+				lookElapsedTime = 0;
+				takeoffElapsedTime = 0;
+				landElapsedTime = 0;
+
+				// Walk animation
+				walkElapsedTime += Gdx.graphics.getDeltaTime();
+				t = walkAnimation.getKeyFrame(walkElapsedTime, true);
+			} else if (isGrounded() && !isMoving()) {
+				// Reset other animation elapsed time
+				walkElapsedTime = 0f;
+				fallElapsedTime = 0;
+				takeoffElapsedTime = 0;
+				landElapsedTime = 0;
+
+				if (isZooming() && getLinearVelocity().epsilonEquals(0, 0)) {
+					idleElapsedTime = 0;
+					//look animation
+					lookElapsedTime += Gdx.graphics.getDeltaTime();
+					t = lookAnimation.getKeyFrame(lookElapsedTime, true);
+				} else {
+					lookElapsedTime = 0;
+					//idle animation
+					idleElapsedTime += Gdx.graphics.getDeltaTime();
+					t = idleAnimation.getKeyFrame(idleElapsedTime, true);
+				}
+			} else {
+				// Reset other animation elapsed time
+				walkElapsedTime = 0f;
+				idleElapsedTime = 0;
+				lookElapsedTime = 0;
+				landElapsedTime = 0;
+
+				if(takeoff){
+					fallElapsedTime = 0;
+
+					takeoffElapsedTime += Gdx.graphics.getDeltaTime();
+					t = takeoffAnimation.getKeyFrame(takeoffElapsedTime, false);
+					if (currentFrameCount == 0) {
+						takeoff = false;
+					}
+				}
+				else {
+					// Reset other animation elapsed time
+					takeoffElapsedTime = 0;
+
+					//falling animation
+					fallElapsedTime += Gdx.graphics.getDeltaTime();
+					t = fallAnimation.getKeyFrame(fallElapsedTime, true);
+				}
+			}
+			canvas.draw(t, tint, t.getRegionWidth() / 2f, t.getRegionHeight() / 2f,
+					getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+					effect * size[0] / t.getRegionWidth() * drawScale.x, size[1] / t.getRegionHeight() * drawScale.y);
+		}
 	}
       
     /**
@@ -858,12 +1029,13 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 
         // TODO: HP Texture is manually scaled at the moment
         canvas.draw(hpTexture[health], Color.WHITE, width / 2f, height / 2f, drawScale.x,
-                canvas.getHeight() - drawScale.y, 0, 0.3f, 0.3f);
+                canvas.getCamera().getViewHeight() - drawScale.y, 0, 0.3f, 0.3f);
 
         // TODO: Boost Texture is manually scaled at the moment
         int boost_capac = (int) (lighterFuel / maxLighterFuel * 9);
         canvas.draw(boostTexture[boost_capac], Color.WHITE, boostTexture[health].getRegionWidth() / 2f,
-                boostTexture[health].getRegionHeight() / 2f, drawScale.x, canvas.getHeight() - drawScale.y * 2,
+                boostTexture[health].getRegionHeight() / 2f, drawScale.x,
+				canvas.getCamera().getViewHeight() - drawScale.y * 2,
                 0, 0.3f, 0.3f);
 
     }
