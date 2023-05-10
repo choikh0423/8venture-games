@@ -217,6 +217,7 @@ public class MenuMode extends MenuScreen {
     private final int viewHeight;
 
     public boolean cameForPauseSettings = false;
+    private static Music menuMusic;
 
     public MenuMode(GameCanvas canvas) {
         //TODO: CHANGE TO FALSE FOR PUBLIC RELEASE (or to test unlocking of levels)
@@ -345,6 +346,7 @@ public class MenuMode extends MenuScreen {
         sfxSlider.setX(SFX_X_RATIO * viewWidth);
 
         backgroundMusic = directory.getEntry("music:menu", Music.class);
+        menuMusic = directory.getEntry("music:menu", Music.class);
 
         //load in user settings
         musicVolume = settings.getFloat("musicVolume", 0.5f);
@@ -752,6 +754,11 @@ public class MenuMode extends MenuScreen {
         }
     }
 
+    public void setMusic(Music music){
+        backgroundMusic.stop();
+        backgroundMusic=music;
+    }
+
     /** Reset is for transitioning from other mode to current mode*/
     public void reset() {
         musicVolume = settings.getFloat("musicVolume", 0.5f);
@@ -759,6 +766,8 @@ public class MenuMode extends MenuScreen {
         toggleOn = settings.getBoolean("toggle", false);
         musicSlider.ratio = musicVolume;
         sfxSlider.ratio = sfxVolume;
+        if (!cameForPauseSettings)
+            backgroundMusic = menuMusic;
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
