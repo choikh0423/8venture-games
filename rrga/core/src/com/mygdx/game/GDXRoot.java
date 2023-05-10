@@ -168,7 +168,6 @@ public class GDXRoot extends Game implements ScreenListener {
             loading.dispose();
             loading = null;
         } else if (screen == menu) {
-            menu.cameForPauseSettings = false;
             switch (exitCode) {
                 case MenuMode.EXIT_QUIT:
                     Gdx.app.exit();
@@ -207,39 +206,28 @@ public class GDXRoot extends Game implements ScreenListener {
 					confirmation.reset();
 					setScreen(confirmation);
 					break;
-                case MenuMode.EXIT_PAUSE:
-                    menu.setInGame(false);
-                    pausing.setBackgroundScreen(playing);
-                    playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
-                    setScreen(pausing);
-                    break;
 			}
 		} else if (screen == pausing){
 			switch (exitCode){
 				case PauseMode.EXIT_RESUME:
 					setScreen(pausing.getBackgroundScreen());
-                    playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
 				case PauseMode.EXIT_RESTART:
 					playing.reset();
 					setScreen(playing);
-                    playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
 				case PauseMode.EXIT_MENU:
 					menu.setScreenListener(this);
-                    menu.cameForPauseSettings = false;
 					menu.reset();
-					playing.getMusic().stop();
+					playing.pause();
 					setScreen(menu);
-                    playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
-				case PauseMode.EXIT_SETTINGS:
-                    menu.setScreenListener(this);
-                    menu.cameForPauseSettings = true;
-                    menu.setInGame(true);
-                    menu.reset();
-                    menu.setScreenMode(3);
-                    setScreen(menu);
+				case PauseMode.EXIT_CONFIRM:
+					confirmation.setPreviousExitCode(ConfirmationMode.EXIT_PAUSE);
+					confirmation.setScreenListener(this);
+					confirmation.setBackgroundScreen(menu);
+					confirmation.reset();
+					setScreen(confirmation);
 					break;
 				default:
 					Gdx.app.exit();

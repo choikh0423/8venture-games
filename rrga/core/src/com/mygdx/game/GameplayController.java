@@ -308,6 +308,7 @@ public class GameplayController implements ContactListener {
         avatar = levelContainer.getAvatar();
         umbrella = levelContainer.getUmbrella();
 
+        backgroundMusic.stop();
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
@@ -1052,8 +1053,6 @@ public class GameplayController implements ContactListener {
     public PlayerModel getPlayer() {
         return avatar;
     }
-
-    public Music getMusic(){return backgroundMusic;}
 
     /**
      * set world bounds to be the given rectangle dimensions.

@@ -49,7 +49,7 @@ public class PauseMode extends MenuScreen {
     public static final int EXIT_RESTART = 2;
     /** exit code to restart game */
     public static final int EXIT_MENU = 3;
-    public static final int EXIT_SETTINGS = 4;
+    public static final int EXIT_CONFIRM = 4;
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
@@ -61,7 +61,6 @@ public class PauseMode extends MenuScreen {
     private int restartPressState;
     /** The current state of the back button */
     private int backPressState;
-    private int settingsPressState;
 
     /** exit button*/
     private MenuButton menuButton;
@@ -69,8 +68,6 @@ public class PauseMode extends MenuScreen {
     private MenuButton restartButton;
     /** back button */
     private MenuButton backButton;
-    /** settings button */
-    private MenuButton settingsButton;
 
     /** Height of the button */
     private static float BUTTON_SCALE  = 1.0f;
@@ -105,7 +102,7 @@ public class PauseMode extends MenuScreen {
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
         this.backButton = new MenuButton(MenuMode.ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
-        this.settingsButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.95f, 0.07f, 0);
+
 
         int width = (int) canvas.getCamera().getViewWidth();
         int height = (int) canvas.getCamera().getViewHeight();
@@ -116,7 +113,6 @@ public class PauseMode extends MenuScreen {
         menuButton.setPos(width, height, scale);
         restartButton.setPos(width, height, scale);
         backButton.setPos(width, height, scale);
-        settingsButton.setPos(width, height, scale);
 
         pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
         pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
@@ -136,7 +132,6 @@ public class PauseMode extends MenuScreen {
         TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
         TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
-        TextureRegion settingsTexture = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
 
@@ -145,7 +140,6 @@ public class PauseMode extends MenuScreen {
         menuButton.setTexture(menuTexture);
         restartButton.setTexture(restartTexture);
         backButton.setTexture(backButtonTexture);
-        settingsButton.setTexture(settingsTexture);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -153,7 +147,6 @@ public class PauseMode extends MenuScreen {
         boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
         boolean restartPressed = checkClicked2(screenX, screenY, restartButton);
         boolean backPressed =checkCircleClicked2(screenX, screenY, backButton, BUTTON_SCALE);
-        boolean settingsPressed = checkCircleClicked2(screenX, screenY, settingsButton, BUTTON_SCALE);
 
         if (menuPressed) {
             menuPressState = 1;
@@ -161,8 +154,6 @@ public class PauseMode extends MenuScreen {
             restartPressState = 1;
         } else if (backPressed) {
             backPressState = 1;
-        } else if (settingsPressed){
-            settingsPressState = 1;
         }
 
         return false;
@@ -184,11 +175,6 @@ public class PauseMode extends MenuScreen {
             backPressState = 2;
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
-        } else if (settingsPressState == 1){
-            currentExitCode = EXIT_SETTINGS;
-            settingsPressState = 2;
-            listener.exitScreen(this, currentExitCode);
-            currentExitCode = Integer.MIN_VALUE;
         }
         return true;
     }
@@ -199,6 +185,7 @@ public class PauseMode extends MenuScreen {
      * @return boolean for whether button is pressed
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
+
         Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;
@@ -230,6 +217,7 @@ public class PauseMode extends MenuScreen {
      * @return boolean for whether button is pressed
      */
     private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button, float scl) {
+
         Vector2 temp = canvas.getCamera().unproject(screenX, screenY);
         screenX = (int) temp.x;
         screenY = (int) temp.y;
@@ -284,7 +272,6 @@ public class PauseMode extends MenuScreen {
         menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
         restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
-        settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
 
         CameraController camera = canvas.getCamera();
         //draw mouse texture

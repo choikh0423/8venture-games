@@ -77,14 +77,14 @@ public class MenuMode extends MenuScreen {
     private float musicVolume;
     /** SFX volume */
     private float sfxVolume;
-ㄷ
+
 
     /** exit code to terminate game */
     public static final int EXIT_QUIT = 0;
     /** exit code to play game */
     public static final int EXIT_PLAY = 1;
-    /** exit code to pause menu */
-    public static final int EXIT_PAUSE = 2;
+    /** exit code to game settings */
+    public static final int EXIT_SETTINGS = 2;
     public static final int EXIT_CONFIRM = 3;
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
@@ -94,8 +94,6 @@ public class MenuMode extends MenuScreen {
      *  3: settings
      * */
     private int screenMode;
-    /** inGame is true when transitioned from pause mode */
-    private boolean inGame = false;
 
     /////////// LEVEL BUTTONS /////////////
     private ArrayList<MenuButton> levelButtons;
@@ -177,21 +175,21 @@ public class MenuMode extends MenuScreen {
     private int settingTagY;
 
     private TextureRegion toggleTag;
-    private static float TOGGLE_TAG_X_RATIO = .3f;
-    private static float TOGGLE_TAG_Y_RATIO = .2f;
+    private static float TOGGLE_TAG_X_RATIO = .35f;
+    private static float TOGGLE_TAG_Y_RATIO = .15f;
     private int toggleTagX;
     private int toggleTagY;
 
 
     /** toggle button texture */
-    private TextureRegion toggleToggle;
-    private static float TOGGLE_BUTTON_X_RATIO = .65f;
-    private static float TOGGLE_BUTTON_Y_RATIO = .19f;
+    private TextureRegion toggleButton;
+    private static float TOGGLE_BUTTON_X_RATIO = .75f;
+    private static float TOGGLE_BUTTON_Y_RATIO = .15f;
     private int toggleButtonX;
     private int toggleButtonY;
 
     /** toggle check texture */
-    private TextureRegion toggleHold;
+    private TextureRegion toggleCheck;
 
     private boolean toggleOn;
 
@@ -218,9 +216,6 @@ public class MenuMode extends MenuScreen {
     /** viewport height used for computing the UI scale*/
     private final int viewHeight;
 
-    public boolean cameForPauseSettings = false;
-    private static Music menuMusic;
-
     public MenuMode(GameCanvas canvas) {
         //TODO: CHANGE TO FALSE FOR PUBLIC RELEASE (or to test unlocking of levels)
         levelUnlocked[0] = true;
@@ -235,7 +230,6 @@ public class MenuMode extends MenuScreen {
         this.settingsButton = new MenuButton(ButtonShape.RECTANGLE, 0.95f, 0.07f, 0);
         this.levelSelectButton = new MenuButton(ButtonShape.RECTANGLE, 0.63f, 0.2f, -0.05f * 3.14f);
         this.backButton = new MenuButton(ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
-        this.resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
 
         CameraController camera = canvas.getCamera();
@@ -253,7 +247,6 @@ public class MenuMode extends MenuScreen {
         settingsButton.setPos(width, height, scale);
         levelSelectButton.setPos(width, height, scale);
         backButton.setPos(width, height, scale);
-        resetButton.setPos(width, height, scale);
 
         this.buttonWidth = (int)(BUTTON_WIDTH_RATIO*width);
         heightY = height;
@@ -268,6 +261,8 @@ public class MenuMode extends MenuScreen {
         toggleTagX = (int)(TOGGLE_TAG_X_RATIO * width);
         toggleButtonY = (int)(TOGGLE_BUTTON_Y_RATIO * height);
         toggleButtonX = (int)(TOGGLE_BUTTON_X_RATIO * width);
+
+        resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
         levelButtons = new ArrayList<>();
         float num_row = 5;
@@ -331,8 +326,8 @@ public class MenuMode extends MenuScreen {
         sfxTag = new TextureRegion(directory.getEntry("menu:sfx_tag", Texture.class));
         settingTag = new TextureRegion(directory.getEntry("menu:setting_tag", Texture.class));
         toggleTag = new TextureRegion(directory.getEntry("menu:toggle_tag", Texture.class));
-        toggleToggle = new TextureRegion(directory.getEntry("menu:toggle_toggle", Texture.class));
-        toggleHold = new TextureRegion(directory.getEntry("menu:toggle_hold", Texture.class));
+        toggleButton = new TextureRegion(directory.getEntry("menu:toggle_button", Texture.class));
+        toggleCheck = new TextureRegion(directory.getEntry("menu:toggle_check", Texture.class));
 
         // TODO: Scale slider bars (??)
         musicSliderBar = new TextureRegion(directory.getEntry("menu:sliderBar", Texture.class));
@@ -349,7 +344,6 @@ public class MenuMode extends MenuScreen {
         sfxSlider.setX(SFX_X_RATIO * viewWidth);
 
         backgroundMusic = directory.getEntry("music:menu", Music.class);
-        menuMusic = directory.getEntry("music:menu", Music.class);
 
         //load in user settings
         musicVolume = settings.getFloat("musicVolume", 0.5f);
@@ -406,7 +400,7 @@ public class MenuMode extends MenuScreen {
             boolean exitPressed = checkCircleClicked2(screenX, screenY, exitButton, BUTTON_SCALE);
             boolean musicKnobPressed = checkCircleClicked(screenX, screenY, musicSlider.getKnobX(), musicSlider.getKnobY(), musicSliderKnob, musicSlider.sx);
             boolean sfxKnobPressed = checkCircleClicked(screenX, screenY, sfxSlider.getKnobX(), sfxSlider.getKnobY(), sfxSliderKnob, sfxSlider.sx);
-            boolean togglePressed = checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleToggle, 0) || checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleHold, 0);
+            boolean togglePressed = checkClicked(screenX, screenY, toggleButtonX, toggleButtonY, toggleButton, BUTTON_SCALE);
             boolean resetPressed = checkClicked2(screenX, screenY, resetButton);
 
             if (exitPressed) {
@@ -569,15 +563,14 @@ public class MenuMode extends MenuScreen {
             }
         } else if (screenMode == 3) {
             if (exitPressState == 1) {
-                // Settings: Back to main screen
+                // Level Selector: Back to main screen
+                screenMode = 1;
                 exitPressState = 2;
-                if (cameForPauseSettings) {
-                    listener.exitScreen(this, EXIT_PAUSE);
-                } else screenMode = 1;
             } else if (togglePressState == 1) {
                 toggleOn = !toggleOn;
                 togglePressState = 2;
             } else if (resetSettingsPressState == 1) {
+                //TODO: popup
                 resetSettingsPressState = 2;
                 currentExitCode = EXIT_CONFIRM;
                 listener.exitScreen(this, currentExitCode);
@@ -669,12 +662,10 @@ public class MenuMode extends MenuScreen {
             canvas.draw(toggleTag, Color.WHITE, toggleTag.getRegionWidth()/2f, toggleTag.getRegionHeight()/2f,
                     toggleTagX, toggleTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
 
-
+            canvas.draw(toggleButton, Color.WHITE, toggleButton.getRegionWidth()/2f, toggleButton.getRegionHeight()/2f,
+                    toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
             if (toggleOn) {
-                canvas.draw(toggleHold, Color.WHITE, toggleHold.getRegionWidth()/2f, toggleHold.getRegionHeight()/2f,
-                        toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
-            } else {
-                canvas.draw(toggleToggle, Color.WHITE, toggleToggle.getRegionWidth()/2f, toggleToggle.getRegionHeight()/2f,
+                canvas.draw(toggleCheck, Color.WHITE, toggleCheck.getRegionWidth()/2f, toggleCheck.getRegionHeight()/2f,
                         toggleButtonX, toggleButtonY, 0 , TAG_SCL * scale, TAG_SCL * scale);
             }
             resetButton.draw(canvas, resetSettingsPressState, BUTTON_SCALE, Color.WHITE);
@@ -710,11 +701,9 @@ public class MenuMode extends MenuScreen {
         // TODO: Move this if necessary
         musicVolume = musicSlider.ratio;
         sfxVolume = sfxSlider.ratio;
-        if (!inGame) {
-            backgroundMusic.play();
-            backgroundMusic.setVolume(musicVolume);
-            backgroundMusic.setLooping(true);
-        }
+        backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
+        backgroundMusic.setLooping(true);
         draw();
     }
 
@@ -757,10 +746,6 @@ public class MenuMode extends MenuScreen {
         }
     }
 
-    public void setInGame(boolean inGame){
-        this.inGame = inGame;
-    }
-
     /** Reset is for transitioning from other mode to current mode*/
     public void reset() {
         musicVolume = settings.getFloat("musicVolume", 0.5f);
@@ -768,13 +753,9 @@ public class MenuMode extends MenuScreen {
         toggleOn = settings.getBoolean("toggle", false);
         musicSlider.ratio = musicVolume;
         sfxSlider.ratio = sfxVolume;
-        if (!cameForPauseSettings)
-            backgroundMusic = menuMusic;
-        if (!inGame) {
-            backgroundMusic.play();
-            backgroundMusic.setVolume(musicVolume);
-            backgroundMusic.setLooping(true);
-        }
+        backgroundMusic.play();
+        backgroundMusic.setVolume(musicVolume);
+        backgroundMusic.setLooping(true);
 
         this.screenMode = 1;
 

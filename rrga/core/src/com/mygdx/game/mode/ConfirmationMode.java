@@ -118,7 +118,7 @@ public class ConfirmationMode extends MenuScreen {
 
         popup = new TextureRegion(directory.getEntry("menu:popup", Texture.class));
         TextureRegion yesTexture = new TextureRegion(directory.getEntry("menu:checkmark", Texture.class));
-        TextureRegion noTexture = new TextureRegion(directory.getEntry("menu:x", Texture.class));
+        TextureRegion noTexture = new TextureRegion(directory.getEntry("menu:toggle_check", Texture.class));
 
         confirmationTag = new TextureRegion(directory.getEntry("menu:confirm_text", Texture.class));
 
