@@ -230,7 +230,7 @@ public class MenuMode extends MenuScreen {
         this.settingsButton = new MenuButton(ButtonShape.RECTANGLE, 0.95f, 0.07f, 0);
         this.levelSelectButton = new MenuButton(ButtonShape.RECTANGLE, 0.63f, 0.2f, -0.05f * 3.14f);
         this.backButton = new MenuButton(ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
-
+        resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
         CameraController camera = canvas.getCamera();
         viewWidth = (int) camera.getViewWidth();
@@ -247,6 +247,7 @@ public class MenuMode extends MenuScreen {
         settingsButton.setPos(width, height, scale);
         levelSelectButton.setPos(width, height, scale);
         backButton.setPos(width, height, scale);
+        resetButton.setPos(width, height, scale);
 
         this.buttonWidth = (int)(BUTTON_WIDTH_RATIO*width);
         heightY = height;
@@ -261,8 +262,6 @@ public class MenuMode extends MenuScreen {
         toggleTagX = (int)(TOGGLE_TAG_X_RATIO * width);
         toggleButtonY = (int)(TOGGLE_BUTTON_Y_RATIO * height);
         toggleButtonX = (int)(TOGGLE_BUTTON_X_RATIO * width);
-
-        resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
         levelButtons = new ArrayList<>();
         float num_row = 5;
@@ -553,11 +552,13 @@ public class MenuMode extends MenuScreen {
             else {
                 for (int i = 0; i < LEVEL_COUNT; i++) {
                     if (levelPressStates[i] == 1) {
-                        currentLevel = levelButtons.get(i).getID();
                         levelPressStates[i] = 0;
-                        currentExitCode = EXIT_PLAY;
-                        listener.exitScreen(this, currentExitCode);
-                        currentExitCode = Integer.MIN_VALUE;
+                        if(levelUnlocked[i+1]){
+                            currentLevel = levelButtons.get(i).getID();
+                            currentExitCode = EXIT_PLAY;
+                            listener.exitScreen(this, currentExitCode);
+                            currentExitCode = Integer.MIN_VALUE;
+                        }
                     }
                 }
             }
@@ -643,7 +644,7 @@ public class MenuMode extends MenuScreen {
             // Temporary Implementation - Will change to iterables once we get proper textures
 
             for(int i=0; i<LEVEL_COUNT; i++){
-                levelButtons.get(i).draw(canvas, levelPressStates[i], BUTTON_SCALE, levelUnlocked[i] ? Color.WHITE : Color.LIGHT_GRAY);
+                levelButtons.get(i).draw(canvas, levelPressStates[i], BUTTON_SCALE, levelUnlocked[i+1] ? Color.WHITE : Color.LIGHT_GRAY);
             }
         } else if (screenMode == 3) {
             // Draw Back Button
