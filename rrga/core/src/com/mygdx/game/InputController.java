@@ -269,7 +269,6 @@ public class InputController {
         // Give priority to gamepad results
         resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
         debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.B));
-        exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
         nextLevelPressed = (secondary && nextLevelPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 
         // A/D for moving character
@@ -301,14 +300,14 @@ public class InputController {
             else toggleHeld = false;
         }
 
-        // P for pausing game
+        // Escape for pausing game
 
-        pauseToggled = Gdx.input.isKeyJustPressed(Input.Keys.P);
+        pauseToggled = Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE);
 
-        // Z for zooming
-        zoomPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
+        // Space for zooming
+        zoomPressed = Gdx.input.isKeyPressed(Input.Keys.SPACE);
 
-        // W for using the lighter
+        // W for using the dash
         lighter = Gdx.input.isKeyJustPressed(Input.Keys.W);
     }
 
