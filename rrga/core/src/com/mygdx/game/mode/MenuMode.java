@@ -211,10 +211,10 @@ public class MenuMode extends MenuScreen {
      * (true for developers and final submission, false for publicly distributed version)*/
 
     /** viewport width used for computing the UI scale*/
-    private final int viewWidth;
+    private int viewWidth;
 
     /** viewport height used for computing the UI scale*/
-    private final int viewHeight;
+    private int viewHeight;
 
     public boolean cameForPauseSettings = false;
     private static Music menuMusic;
@@ -717,7 +717,13 @@ public class MenuMode extends MenuScreen {
 
     @Override
     public void resize(int width, int height) {
-        // do nothing, camera takes care of resizing.
+        //update sliders. for some reason, they don't work properly unless we do this
+        viewWidth = (int) canvas.getCamera().getViewWidth();
+        viewHeight = (int) canvas.getCamera().getViewHeight();
+        musicSlider.setY(MUSIC_Y_RATIO * viewHeight);
+        musicSlider.setX(MUSIC_X_RATIO * viewWidth);
+        sfxSlider.setY(SFX_Y_RATIO * viewHeight);
+        sfxSlider.setX(SFX_X_RATIO * viewWidth);
     }
 
     /** Returns current level selected */
@@ -768,6 +774,7 @@ public class MenuMode extends MenuScreen {
         toggleOn = settings.getBoolean("toggle", false);
         musicSlider.ratio = musicVolume;
         sfxSlider.ratio = sfxVolume;
+
         if (!cameForPauseSettings)
             backgroundMusic = menuMusic;
         backgroundMusic.play();
