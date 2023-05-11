@@ -1,0 +1,14 @@
+{ "columns":4,
+ "image":"tutorial_helpers.png",
+ "imageheight":256,
+ "imagewidth":512,
+ "margin":0,
+ "name":"tutorial_helpers",
+ "spacing":0,
+ "tilecount":8,
+ "tiledversion":"1.9.2",
+ "tileheight":128,
+ "tilewidth":128,
+ "type":"tileset",
+ "version":"1.9"
+}

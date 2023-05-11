@@ -29,11 +29,15 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.ControllerMapping;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
+import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.utility.assets.*;
 import com.mygdx.game.utility.util.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
@@ -43,26 +47,16 @@ import com.mygdx.game.utility.util.XBoxController;
 
 /**
  * Class that provides a loading screen for the state of the game.
- *
- * You still DO NOT need to understand this class for this lab.  We will talk about this
- * class much later in the course.  This class provides a basic template for a loading
- * screen to be used at the start of the game or between levels.  Feel free to adopt
- * this to your needs.
- *
- * You will note that this mode has some textures that are not loaded by the AssetManager.
- * You are never required to load through the AssetManager.  But doing this will block
- * the application.  That is why we try to have as few resources as possible for this
- * loading screen.
  */
-public class LoadingMode implements Screen, InputProcessor, ControllerListener {
+public class LoadingMode extends MenuScreen {
 	// There are TWO asset managers.  One to load the loading screen.  The other to load the assets
 	/** Internal assets for this loading screen */
-	private AssetDirectory internal;
+	private final AssetDirectory internal;
 	/** The actual assets to be loaded */
-	private AssetDirectory assets;
+	private final AssetDirectory assets;
 	
 	/** Background texture for start-up */
-	private Texture background;
+	private final Texture background;
 	/** Play button to display when done */
 	private TextureRegion playButton;
 	/** Texture atlas to support a progress bar */
@@ -70,55 +64,55 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	
 	// statusBar is a "texture atlas." Break it up into parts.
 	/** Left cap to the status background (grey region) */
-	private TextureRegion statusBkgLeft;
+	private final TextureRegion statusBkgLeft;
 	/** Middle portion of the status background (grey region) */
-	private TextureRegion statusBkgMiddle;
+	private final TextureRegion statusBkgMiddle;
 	/** Right cap to the status background (grey region) */
-	private TextureRegion statusBkgRight;
+	private final TextureRegion statusBkgRight;
 	/** Left cap to the status forground (colored region) */
-	private TextureRegion statusFrgLeft;
+	private final TextureRegion statusFrgLeft;
 	/** Middle portion of the status forground (colored region) */
-	private TextureRegion statusFrgMiddle;
+	private final TextureRegion statusFrgMiddle;
 	/** Right cap to the status forground (colored region) */
-	private TextureRegion statusFrgRight;
+	private final TextureRegion statusFrgRight;
 	/** Texture for cursor */
-	private TextureRegion cursorTexture;
+	private final TextureRegion cursorTexture;
 
 	/** Default budget for asset loader (do nothing but load 60 fps) */
-	private static int DEFAULT_BUDGET = 15;
+	private static final int DEFAULT_BUDGET = 15;
 	/** Standard window size (for scaling) */
-	private static int STANDARD_WIDTH  = 800;
+	private static final int STANDARD_WIDTH  = 800;
 	/** Standard window height (for scaling) */
-	private static int STANDARD_HEIGHT = 700;
+	private static final int STANDARD_HEIGHT = 700;
 	/** Ratio of the bar width to the screen */
-	private static float BAR_WIDTH_RATIO  = 0.66f;
+	private static final float BAR_WIDTH_RATIO  = 0.66f;
 	/** Ration of the bar height to the screen */
-	private static float BAR_HEIGHT_RATIO = 0.25f;	
-	/** Height of the progress bar */
-	private static float BUTTON_SCALE  = 1.2f;
+	private static final float BAR_HEIGHT_RATIO = 0.25f;
+
+	private static final float BUTTON_SCALE  = 1.2f;
 	
 	/** Reference to GameCanvas created by the root */
-	private GameCanvas canvas;
+	private final GameCanvas canvas;
 	/** Listener that will update the player mode when we are done */
 	private ScreenListener listener;
 
 	/** The width of the progress bar */
-	private int width;
-	/** The y-coordinate of the center of the progress bar */
-	private int centerY;
-	/** The x-coordinate of the center of the progress bar */
-	private int centerX;
+	private final int width;
+	/** The viewport-world y-coordinate of the center of the progress bar */
+	private final int centerY;
+	/** The viewport-world x-coordinate of the center of the progress bar */
+	private final int centerX;
 	/** The height of the canvas window (necessary since sprite origin != screen origin) */
 	private int heightY;
 	/** Scaling factor for when the student changes the resolution. */
-	private float scale;
+	private final float scale;
 
 	/** Current progress (0 to 1) of the asset manager */
 	private float progress;
 	/** The current state of the play button */
-	private int   pressState;
+	private int  pressState;
 	/** The amount of time to devote to loading assets (as opposed to on screen hints, etc.) */
-	private int   budget;
+	private int  budget;
 
 	/** Whether or not this player mode is still active */
 	private boolean active;
@@ -240,6 +234,17 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		assets = new AssetDirectory( file );
 		assets.loadAssets();
 		active = true;
+
+		float viewWidth = canvas.getCamera().getViewWidth();
+		float viewHeight = canvas.getCamera().getViewHeight();
+		float sx = viewWidth/STANDARD_WIDTH;
+		float sy = viewHeight/STANDARD_HEIGHT;
+		scale = Math.min(sx, sy);
+
+		width = (int)(BAR_WIDTH_RATIO*viewWidth);
+		centerY = (int)(BAR_HEIGHT_RATIO*viewHeight);
+		centerX = (int) (viewWidth/2);
+		heightY = (int) viewHeight;
 	}
 	
 	/**
@@ -285,9 +290,10 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	 * of using the single render() method that LibGDX does.  We will talk about why we
 	 * prefer this in lecture.
 	 */
-	private void draw() {
+	public void draw() {
+		CameraController camera = canvas.getCamera();
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
+		canvas.draw(background, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 		if (playButton == null) {
 			drawProgress(canvas);
 		} else {
@@ -295,12 +301,18 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 			canvas.draw(playButton, tint, playButton.getRegionWidth()/2f, playButton.getRegionHeight()/2f,
 						centerX, centerY, 0, BUTTON_SCALE*scale, BUTTON_SCALE*scale);
 		}
-		//draw mouse
+		//draw mouse texture
 		int mx = Gdx.input.getX();
-		int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-		if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+		int my = Gdx.input.getY();
+		// retrieve the viewport coordinate to draw cursor
+		Vector2 pos = camera.unproject(mx, my);
+		if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
 			canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-					mx, my, 0, .4f, .4f);
+					pos.x, pos.y, 0, .4f, .4f);
+			Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+		}
+		else {
+			Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 		}
 
 		canvas.end();
@@ -370,36 +382,16 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 	 */
 	public void resize(int width, int height) {
 		// Compute the drawing scale
-		float sx = ((float)width)/STANDARD_WIDTH;
-		float sy = ((float)height)/STANDARD_HEIGHT;
-		scale = (sx < sy ? sx : sy);
-		
-		this.width = (int)(BAR_WIDTH_RATIO*width);
-		centerY = (int)(BAR_HEIGHT_RATIO*height);
-		centerX = width/2;
-		heightY = height;
+//		float sx = ((float)width)/STANDARD_WIDTH;
+//		float sy = ((float)height)/STANDARD_HEIGHT;
+//		scale = (sx < sy ? sx : sy);
+//
+//		this.width = (int)(BAR_WIDTH_RATIO*width);
+//		centerY = (int)(BAR_HEIGHT_RATIO*height);
+//		centerX = width/2;
+//		heightY = height;
 	}
 
-	/**
-	 * Called when the Screen is paused.
-	 * 
-	 * This is usually when it's not active or visible on screen. An Application is 
-	 * also paused before it is destroyed.
-	 */
-	public void pause() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * Called when the Screen is resumed from a paused state.
-	 *
-	 * This is usually when it regains focus.
-	 */
-	public void resume() {
-		// TODO Auto-generated method stub
-
-	}
 	
 	/**
 	 * Called when this screen becomes the current screen for a Game.
@@ -443,9 +435,6 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 		if (playButton == null || pressState == 2) {
 			return true;
 		}
-		
-		// Flip to match graphics coordinates
-		screenY = heightY-screenY;
 
 		if (checkClicked(screenX, screenY, centerX, centerY, playButton)) {
 			pressState = 1;
@@ -455,10 +444,18 @@ public class LoadingMode implements Screen, InputProcessor, ControllerListener {
 
 	/**
 	 * Checks if click was in bound for buttons
-	 *
+	 * @param screenX the x-coordinate of the mouse on the screen
+	 * @param screenY the y-coordinate of the mouse on the screen
+	 * @param buttonX the x-coordinate of the button in viewport world
+	 * @param buttonY the y-coordinate of the button in viewport world
 	 * @return boolean for whether button is pressed
 	 */
 	private boolean checkClicked(int screenX, int screenY, int buttonX, int buttonY, TextureRegion button) {
+
+		CameraController camera = canvas.getCamera();
+		Vector2 temp = camera.unproject(screenX, screenY);
+		screenX = (int) temp.x;
+		screenY = (int) temp.y;
 		boolean buttonPressedX = buttonX - BUTTON_SCALE*scale*button.getRegionWidth()/2 <= screenX &&
 				screenX <= buttonX + BUTTON_SCALE*scale*button.getRegionWidth()/2;
 		boolean buttonPressedY = buttonY - BUTTON_SCALE*scale*button.getRegionHeight()/2 <= screenY &&

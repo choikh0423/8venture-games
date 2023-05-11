@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
 import com.mygdx.game.mode.MenuButton;
@@ -79,6 +81,18 @@ public class VictoryScreen extends MenuScreen{
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.nextButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
+
+        int width = (int) canvas.getCamera().getViewWidth();
+        int height = (int) canvas.getCamera().getViewHeight();
+        this.menuButton.setPos(width, height, 1);
+        this.nextButton.setPos(width, height, 1);
+
+        winTagY = (int) (WIN_TAG_Y_RATIO * height);
+        winTagX = (int) (WIN_TAG_X_RATIO * width);
+
+        float sx = ((float)width)/STANDARD_WIDTH;
+        float sy = ((float)height)/STANDARD_HEIGHT;
+        scale = (sx < sy ? sx : sy);
     }
 
     /**
@@ -89,25 +103,25 @@ public class VictoryScreen extends MenuScreen{
     public void render(float delta) {
         //Gdx.input.setCursorCatched(false);
         int x=0, y=0;
-        if(first) {
-            x = Gdx.input.getX();
-            y = Gdx.input.getY();
-        }
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-        if(first){
-            Gdx.input.setCursorPosition(x, y);
-            first = false;
-        }
+//        if(first) {
+//            x = Gdx.input.getX();
+//            y = Gdx.input.getY();
+//        }
+//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+//        if(first){
+//            Gdx.input.setCursorPosition(x, y);
+//            first = false;
+//        }
 
         //comment this out if opaque foreground
-        gameScreen.draw(delta, false);
+        //gameScreen.draw(delta);
 
-        canvas.setCameraHUD();
         canvas.begin();
 
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
         //above line for opaque foreground, below line for transparent foreground
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
+        CameraController camera = canvas.getCamera();
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(winTag, Color.WHITE, winTag.getRegionWidth()/2f, winTag.getRegionHeight()/2f,
                 winTagX, winTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
@@ -115,12 +129,18 @@ public class VictoryScreen extends MenuScreen{
         menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
         nextButton.draw(canvas, nextPressState, BUTTON_SCALE, Color.WHITE);
 
-        //draw mouse
+        //draw mouse texture
         int mx = Gdx.input.getX();
-        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, my, 0, .4f, .4f);
+                    pos.x, pos.y, 0, .4f, .4f);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         canvas.end();
@@ -143,15 +163,15 @@ public class VictoryScreen extends MenuScreen{
     @Override
     public void resize(int width, int height) {
         // Scaling code from Professor White's code
-        float sx = ((float)width)/STANDARD_WIDTH;
-        float sy = ((float)height)/STANDARD_HEIGHT;
-        scale = (sx < sy ? sx : sy);
-
-        menuButton.setPos(width, height, scale);
-        nextButton.setPos(width, height, scale);
-
-        winTagY = (int)(WIN_TAG_Y_RATIO * height);
-        winTagX = (int)(WIN_TAG_X_RATIO * width);
+//        float sx = ((float)width)/STANDARD_WIDTH;
+//        float sy = ((float)height)/STANDARD_HEIGHT;
+//        scale = (sx < sy ? sx : sy);
+//
+//        menuButton.setPos(width, height, scale);
+//        nextButton.setPos(width, height, scale);
+//
+//        winTagY = (int)(WIN_TAG_Y_RATIO * height);
+//        winTagX = (int)(WIN_TAG_X_RATIO * width);
     }
 
     /**
@@ -188,7 +208,7 @@ public class VictoryScreen extends MenuScreen{
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        screenY = canvas.getHeight()-screenY;
+
         boolean menuPressed = checkClicked2(screenX, screenY, menuButton);
         boolean nextPressed = checkClicked2(screenX, screenY, nextButton);
 
@@ -222,6 +242,12 @@ public class VictoryScreen extends MenuScreen{
      * @return boolean for whether button is pressed
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
+        // convert mouse screen coordinate to viewport world coordinate
+        CameraController camera = canvas.getCamera();
+        Vector2 temp = camera.unproject(screenX, screenY);
+        screenX = (int) temp.x;
+        screenY = (int) temp.y;
+
         // TODO: TEMPORARY touch range to make it smaller than button
         // Gets positional data of button
         float buttonX = button.getX();

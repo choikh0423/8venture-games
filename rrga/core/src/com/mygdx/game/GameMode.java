@@ -5,6 +5,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -173,8 +174,8 @@ public class GameMode implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
-        this.scale.x = canvas.getWidth()/displayWidth;
-        this.scale.y = canvas.getHeight()/displayHeight;
+        this.scale.x = canvas.getCamera().getViewWidth()/displayWidth;
+        this.scale.y = canvas.getCamera().getViewHeight()/displayHeight;
         gameplayController.setScale(this.scale);
     }
 
@@ -223,7 +224,7 @@ public class GameMode implements Screen {
 
         // Create the controllers.
         inputController = new InputController();
-        gameplayController = new GameplayController(bounds, gravity, 0);
+        gameplayController = new GameplayController(bounds, gravity);
         cache = new Vector2(1,1);
     }
 
@@ -383,22 +384,22 @@ public class GameMode implements Screen {
      */
     public void update(float dt) {
         //contain cursor
-        Gdx.input.setCursorCatched(true);
-        int x = Gdx.input.getX();
-        int y = Gdx.input.getY();
-        if(Gdx.input.getY() < cursorTexture.getRegionHeight()/2f * cursorScl){
-            y = (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
-        }
-        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight()/2f * cursorScl)){
-            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
-        }
-        if(Gdx.input.getX() < cursorTexture.getRegionWidth()/2f * cursorScl){
-            x = (int) (cursorTexture.getRegionWidth()/2f * cursorScl);;
-        }
-        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth()/2f * cursorScl)){
-            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth()/2f * cursorScl);
-        }
-        Gdx.input.setCursorPosition(x,y);
+//        Gdx.input.setCursorCatched(true);
+//        int x = Gdx.input.getX();
+//        int y = Gdx.input.getY();
+//        if(Gdx.input.getY() < cursorTexture.getRegionHeight()/2f * cursorScl){
+//            y = (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
+//        }
+//        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight()/2f * cursorScl)){
+//            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
+//        }
+//        if(Gdx.input.getX() < cursorTexture.getRegionWidth()/2f * cursorScl){
+//            x = (int) (cursorTexture.getRegionWidth()/2f * cursorScl);;
+//        }
+//        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth()/2f * cursorScl)){
+//            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth()/2f * cursorScl);
+//        }
+//        Gdx.input.setCursorPosition(x,y);
 
         if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
             zoomAlpha += zoomAlphaDelta;
@@ -414,7 +415,7 @@ public class GameMode implements Screen {
         else if (zoomAlpha > 1){ zoomAlpha = 1; }
 
         zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
-        canvas.setDynamicCameraZoom(zoomScl);
+        canvas.getCamera().setZoom(zoomScl);
 
         gameplayController.update(inputController, dt);
         gameplayController.postUpdate(dt);
@@ -429,8 +430,10 @@ public class GameMode implements Screen {
      *
      * @param dt    Number of seconds since last animation frame
      */
-    public void draw(float dt, boolean cursor) {
+    public void draw(float dt) {
         canvas.clear();
+
+        CameraController camera = canvas.getCamera();
 
         // focus camera on player
         float px = gameplayController.getPlayerScreenX();
@@ -438,7 +441,6 @@ public class GameMode implements Screen {
         float gx = gameplayController.getLevelContainer().getShowGoal().getX();
         float gy = gameplayController.getLevelContainer().getShowGoal().getY();
 
-        canvas.setCameraDynamic();
         Vector2 scl = gameplayController.getPlayer().getDrawScale();
 
         //camera starts at the goal door then moves to the player the
@@ -449,26 +451,24 @@ public class GameMode implements Screen {
         } else {
             camPos.set(px,py);
         }
-        canvas.translateCameraToPoint(camPos.x,camPos.y);
-        canvas.begin();
-
-        float sclY = canvas.getWidth() * zoomScl/backgroundTexture.getRegionWidth();
-        float sclX = canvas.getHeight() * zoomScl /backgroundTexture.getRegionHeight();
+        canvas.beginTranslated(camPos.x,camPos.y);
+        float sclY = camera.getViewWidth() * zoomScl/backgroundTexture.getRegionWidth();
+        float sclX = camera.getViewHeight() * zoomScl /backgroundTexture.getRegionHeight();
 
         // center a background on player
-        // TODO: replace with repeating background? - Currently the background is drawn according to camera scale.
         canvas.draw(backgroundTexture, Color.WHITE, backgroundTexture.getRegionWidth()/2f,
                 backgroundTexture.getRegionHeight()/2f, camPos.x,camPos.y, 0, sclX, sclY);
 
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
-        //TODO: REMOVE THIS COMMENT FOR PARALLAX IMPLEMENTATION (IT NEEDS FURTHER SCALING AND CHANGE OF ASSET)
-        if (currentLevel == 2) {
-            canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
-            canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
-            canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
-        }
+        canvas.drawWrapped(skyLayerTextureA, -camPos.x * horizontalA, -camPos.y * verticalA, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+        canvas.drawWrapped(skyLayerTextureB, -camPos.x * horizontalB, -camPos.y * verticalB, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+        canvas.drawWrapped(skyLayerTextureC, -camPos.x * horizontalC, -camPos.y * verticalC, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
+//        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
+
         PlayerModel avatar = gameplayController.getPlayer();
 
         // draw all game objects + stickers + tile layers, these objects are "dynamic"
@@ -503,7 +503,6 @@ public class GameMode implements Screen {
                 objCount++;
             }
         }
-
         canvas.end();
 
         if (debug) {
@@ -529,49 +528,59 @@ public class GameMode implements Screen {
         }
 
         // Draw all HUD content
-        canvas.setCameraHUD();
-        PlayerModel p = gameplayController.getPlayer();
         canvas.begin();
-        p.drawInfo(canvas);
+        camera.setZoom(1.0f);
+        avatar.drawInfo(canvas);
 
-        //draw cursor
-        if(cursor) {
-            int mx = Gdx.input.getX();
-            int my = Gdx.graphics.getHeight() - Gdx.input.getY();
+        // draw cursor
+        //draw mouse texture
+        int mx = Gdx.input.getX();
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, cursorTexture.getRegionWidth() / 2f, cursorTexture.getRegionHeight() / 2f,
-                    mx, my, 0, cursorScl, cursorScl);
+                    pos.x, pos.y, 0, cursorScl, cursorScl);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         // debug information on screen to track FPS, etc
         if (debug){
+            PlayerModel p = avatar;
             debugFont.setColor(Color.BLACK);
             int fps = (int) (1/dt);
             String s = fps >= 59 ? "GOOD" : fps >= 57 ? "MEDIOCRE" : "BAD";
             Color c = fps >= 58 ? Color.GREEN : fps >= 56 ? Color.YELLOW : Color.RED;
-            canvas.drawText("FPS:" + fps, debugFont, 0.1f*canvas.getWidth(), 0.95f*canvas.getHeight());
+            canvas.drawText("FPS:" + fps, debugFont, 0.1f*camera.getViewWidth(), 0.95f*camera.getViewHeight());
             debugFont.setColor(c);
-            canvas.drawText("FPS status: " + s, debugFont, 0.1f * canvas.getWidth(), 0.9f * canvas.getHeight());
+            canvas.drawText("FPS status: " + s, debugFont, 0.1f * camera.getViewWidth(), 0.9f *camera.getViewHeight());
             debugFont.setColor(Color.BLACK);
-            canvas.drawText("X:" + p.getX(), debugFont, 0.1f*canvas.getWidth(), 0.85f*canvas.getHeight());
-            canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*canvas.getWidth(), 0.8f*canvas.getHeight());
-            canvas.drawText("VX:" + p.getVX(), debugFont, 0.1f*canvas.getWidth(), 0.75f*canvas.getHeight());
-            canvas.drawText("VY:" + p.getVY(), debugFont, 0.1f*canvas.getWidth(), 0.7f*canvas.getHeight());
-            canvas.drawText("HP:" + p.getHealth(), debugFont, 0.1f*canvas.getWidth(), 0.65f*canvas.getHeight());
+            canvas.drawText("X:" + p.getX(), debugFont, 0.1f*camera.getViewWidth(), 0.85f*camera.getViewHeight());
+            canvas.drawText("Y:" + p.getY(), debugFont, 0.1f*camera.getViewWidth(), 0.8f*camera.getViewHeight());
+            canvas.drawText("VX:" + p.getVX(), debugFont, 0.1f*camera.getViewWidth(), 0.75f*camera.getViewHeight());
+            canvas.drawText("VY:" + p.getVY(), debugFont, 0.1f*camera.getViewWidth(), 0.7f*camera.getViewHeight());
+            canvas.drawText("HP:" + p.getHealth(), debugFont, 0.1f*camera.getViewWidth(), 0.65f*camera.getViewHeight());
             cache.set(inputController.getMousePos());
-            canvas.drawText("MouseScreenX:" + cache.x, debugFont, 0.1f*canvas.getWidth(), 0.6f*canvas.getHeight());
-            canvas.drawText("MouseScreenY:" + cache.y, debugFont, 0.1f*canvas.getWidth(), 0.55f*canvas.getHeight());
-            canvas.drawText("MouseX:" + ((cache.x - canvas.getWidth()/2f)/scale.x + p.getX()),
-                    debugFont, 0.1f*canvas.getWidth(), 0.50f*canvas.getHeight());
-            canvas.drawText("MouseY:" + ((canvas.getHeight()/2f - cache.y)/scale.y + p.getY()),
-                    debugFont, 0.1f*canvas.getWidth(), 0.45f*canvas.getHeight());
+            canvas.drawText("MouseScreenX:" + cache.x, debugFont, 0.1f*camera.getViewWidth(), 0.6f*camera.getViewHeight());
+            canvas.drawText("MouseScreenY:" + cache.y, debugFont, 0.1f*camera.getViewWidth(), 0.55f*camera.getViewHeight());
+            canvas.drawText("MouseX:" + ((cache.x - camera.getViewWidth()/2f)/scale.x + p.getX()),
+                    debugFont, 0.1f*camera.getViewWidth(), 0.50f*camera.getViewHeight());
+            canvas.drawText("MouseY:" + ((camera.getViewHeight()/2f - cache.y)/scale.y + p.getY()),
+                    debugFont, 0.1f*camera.getViewWidth(), 0.45f*camera.getViewHeight());
             canvas.drawText("MouseAng:" + gameplayController.getLevelContainer().getUmbrella().getAngle(),
-                    debugFont, 0.1f*canvas.getWidth(), 0.4f*canvas.getHeight());
+                    debugFont, 0.1f*camera.getViewWidth(), 0.4f*camera.getViewHeight());
             canvas.drawText("Objects Drawn:" + (objCount + 1),
-                    debugFont, 0.1f*canvas.getWidth(), 0.35f*canvas.getHeight());
+                    debugFont, 0.1f*camera.getViewWidth(), 0.35f*camera.getViewHeight());
             canvas.drawText("Tiles Drawn:" + tileCount,
-                    debugFont, 0.1f*canvas.getWidth(), 0.30f*canvas.getHeight());
+                    debugFont, 0.1f*camera.getViewWidth(), 0.30f*camera.getViewHeight());
             canvas.drawText("Grounded:" + avatar.isGrounded(),
-                    debugFont, 0.1f*canvas.getWidth(), 0.25f*canvas.getHeight());
+                    debugFont, 0.1f*camera.getViewWidth(), 0.25f*camera.getViewHeight());
+            canvas.drawText("Level: " + currentLevel, debugFont,
+                    0.1f*camera.getViewWidth(), 0.2f*camera.getViewHeight());
+
         }
         canvas.end();
     }
@@ -645,7 +654,7 @@ public class GameMode implements Screen {
             if (preUpdate(delta)) {
                 update(delta); // This is the one that must be defined.
             }
-            draw(delta, true);
+            draw(delta);
     }
 
     /**
@@ -701,7 +710,7 @@ public class GameMode implements Screen {
      * Sets current level of the game
      */
     public void setNextLevel(){
-        if (currentLevel < 3) {
+        if (currentLevel < 16) {
             currentLevel += 1;
         } else {
             currentLevel = 1;
