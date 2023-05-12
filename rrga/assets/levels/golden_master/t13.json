@@ -97,6 +97,7 @@
         {
          "draworder":"topdown",
          "id":13,
+         "locked":true,
          "name":"Wind",
          "objects":[
                 {
@@ -3407,9 +3408,132 @@
         {
          "draworder":"topdown",
          "id":18,
-         "locked":true,
          "name":"Hazard_area",
-         "objects":[],
+         "objects":[
+                {
+                 "id":1071,
+                 "polygon":[
+                        {
+                         "x":-26,
+                         "y":-22.6666666666661
+                        }, 
+                        {
+                         "x":58.5445972552179,
+                         "y":-26.3333333333321
+                        }, 
+                        {
+                         "x":137.755861177103,
+                         "y":16.666666666667
+                        }, 
+                        {
+                         "x":190.84505568754,
+                         "y":-16
+                        }, 
+                        {
+                         "x":221.84505568754,
+                         "y":5.53357235747444
+                        }, 
+                        {
+                         "x":240.84505568754,
+                         "y":57.7338113816177
+                        }, 
+                        {
+                         "x":237.511722354207,
+                         "y":151.467622763235
+                        }, 
+                        {
+                         "x":207.739423726598,
+                         "y":153.634289429901
+                        }, 
+                        {
+                         "x":187.300458432322,
+                         "y":89.1342894299014
+                        }, 
+                        {
+                         "x":147.528159804713,
+                         "y":155.300956096568
+                        }, 
+                        {
+                         "x":125.089194510437,
+                         "y":148.134289429902
+                        }, 
+                        {
+                         "x":102.211263921885,
+                         "y":126.467622763235
+                        }, 
+                        {
+                         "x":16,
+                         "y":150.134289429901
+                        }, 
+                        {
+                         "x":-22.6666666666665,
+                         "y":105.600717072427
+                        }, 
+                        {
+                         "x":-32.6666666666665,
+                         "y":38.4004780482846
+                        }],
+                 "properties":[
+                        {
+                         "name":"fill_texture",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "x":3220,
+                 "y":6949.33333333333
+                }, 
+                {
+                 "id":1072,
+                 "polygon":[
+                        {
+                         "x":-81.333333333333,
+                         "y":-52.6666666666661
+                        }, 
+                        {
+                         "x":-17.4554027447816,
+                         "y":-73.333333333333
+                        }, 
+                        {
+                         "x":50.4225278437698,
+                         "y":-67.333333333333
+                        }, 
+                        {
+                         "x":127.633791765655,
+                         "y":-97.333333333333
+                        }, 
+                        {
+                         "x":218.178389020873,
+                         "y":-94
+                        }, 
+                        {
+                         "x":226.84505568754,
+                         "y":11.4676227632353
+                        }, 
+                        {
+                         "x":184.089194510436,
+                         "y":54.4676227632353
+                        }, 
+                        {
+                         "x":106.377930588551,
+                         "y":12.9676227632353
+                        }, 
+                        {
+                         "x":44.855631960942,
+                         "y":51.5509560965693
+                        }, 
+                        {
+                         "x":28.7611493138043,
+                         "y":65.5092894299023
+                        }, 
+                        {
+                         "x":-102.666666666667,
+                         "y":-5.19904390343163
+                        }],
+                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "x":3435.33333333333,
+                 "y":6450
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -3421,7 +3545,55 @@
          "id":17,
          "locked":true,
          "name":"Hazard_art",
-         "objects":[],
+         "objects":[
+                {
+                 "class":"",
+                 "gid":69,
+                 "height":256,
+                 "id":1065,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":256,
+                 "x":3580,
+                 "y":6423
+                }, 
+                {
+                 "class":"",
+                 "gid":70,
+                 "height":256,
+                 "id":1068,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":256,
+                 "x":3419.33333333333,
+                 "y":6452
+                }, 
+                {
+                 "class":"",
+                 "gid":70,
+                 "height":256,
+                 "id":1069,
+                 "name":"",
+                 "rotation":90,
+                 "visible":true,
+                 "width":256,
+                 "x":3386,
+                 "y":7020
+                }, 
+                {
+                 "class":"",
+                 "gid":69,
+                 "height":256,
+                 "id":1070,
+                 "name":"",
+                 "rotation":-90,
+                 "visible":true,
+                 "width":256,
+                 "x":3262,
+                 "y":7005.33333333333
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -3553,6 +3725,96 @@
                  "template":"..\/templates\/birds\/green_bird.json",
                  "x":5099.87878787879,
                  "y":7171.18181818182
+                }, 
+                {
+                 "id":1057,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":1058
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "x":6272,
+                 "y":5888
+                }, 
+                {
+                 "id":1058,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1059
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6016,
+                 "y":5632
+                }, 
+                {
+                 "id":1059,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1060
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5760,
+                 "y":5888
+                }, 
+                {
+                 "id":1060,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1061
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5376,
+                 "y":5632
+                }, 
+                {
+                 "id":1061,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1062
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5120,
+                 "y":5888
+                }, 
+                {
+                 "id":1062,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1063
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5376,
+                 "y":6016
+                }, 
+                {
+                 "id":1063,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1064
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5760,
+                 "y":5632
+                }, 
+                {
+                 "id":1064,
+                 "template":"..\/templates\/path_point.json",
+                 "x":6016,
+                 "y":6016
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -3563,6 +3825,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"Player",
          "objects":[
                 {
@@ -3574,8 +3837,8 @@
                 {
                  "id":608,
                  "template":"..\/templates\/spawn.json",
-                 "x":4220.30303030303,
-                 "y":7471.30303030304
+                 "x":6636.30303030303,
+                 "y":5795.30303030304
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4160,7 +4423,7 @@
          "y":0
         }],
  "nextlayerid":25,
- "nextobjectid":1050,
+ "nextobjectid":1073,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
