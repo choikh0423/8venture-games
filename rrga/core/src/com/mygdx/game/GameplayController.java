@@ -456,7 +456,6 @@ public class GameplayController implements ContactListener {
             }
         }
 
-
         if(count!=0){
             // TODO: We might want to make a separate update loop for sounds
             // Play Strong Wind SFX
@@ -470,9 +469,11 @@ public class GameplayController implements ContactListener {
             } else {
                 windStrongFrame --;
             }
-            avatar.applyWindForce(cache.x/count, cache.y/count);
             windPushed = cache.len2() > 0;
-
+            if(windPushed) {
+                avatar.applyWindForce(cache.x / count, cache.y / count);
+            }
+            
         } else {
             // Gradually Reset Strong Wind SFX
             if (windStrongFrame > 0) {
@@ -492,7 +493,8 @@ public class GameplayController implements ContactListener {
                 avatar.setMovement(input.getHorizontal() * avatar.getForce());
                 avatar.applyWalkingForce();
             }
-        } else if (!touching_wind && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
+        }
+        else if (!windPushed && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
             // player must be falling through AIR
             // apply horizontal force based on rotation, and upward drag.
             avatar.applyDragForce(dragScale.x * (float) Math.sin(2 * angle));
