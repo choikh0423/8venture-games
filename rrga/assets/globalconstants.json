@@ -58,7 +58,7 @@
   },
   "hazards": {
     "birdDamage": 1,
-    "birdSensorRadius": 6,
+    "birdSensorRadius": 4,
     "birdKnockBack": 6,
     "birdStillFrames": [ 3, 2, 3, 4],
     "lightningDamage": 1,
