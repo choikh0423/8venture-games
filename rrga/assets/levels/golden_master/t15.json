@@ -4013,6 +4013,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -6115,7 +6116,7 @@
                 }, 
                 {
                  "gid":2147483876,
-                 "height":236.5,
+                 "height":242,
                  "id":1483,
                  "properties":[
                         {
@@ -6130,7 +6131,7 @@
                         }],
                  "rotation":0,
                  "template":"..\/templates\/birds\/red_bird.json",
-                 "width":253.055,
+                 "width":258.94,
                  "x":11392,
                  "y":2560
                 }, 
