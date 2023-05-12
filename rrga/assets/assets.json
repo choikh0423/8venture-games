@@ -38,55 +38,100 @@
         "game:skylayerC" : "game/parallax/skylayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
-          "file":   "game/wind/windgust_waves.png",
+          "file":  "game/wind/windframe_00.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame0" : {
-          "file":   "game/wind/wind00.png",
+          "file":  "game/wind/windframe_00.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame1" : {
-          "file":   "game/wind/wind10.png",
+          "file":  "game/wind/windframe_01.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame2" : {
-          "file":   "game/wind/wind20.png",
+          "file":  "game/wind/windframe_02.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame3" : {
-          "file":   "game/wind/wind01.png",
+          "file":  "game/wind/windframe_03.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame4" : {
-          "file":   "game/wind/wind11.png",
+          "file":  "game/wind/windframe_04.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame5" : {
-          "file":   "game/wind/wind21.png",
+          "file":  "game/wind/windframe_05.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame6" : {
-          "file":   "game/wind/wind02.png",
+          "file":  "game/wind/windframe_06.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame7" : {
-          "file":   "game/wind/wind12.png",
+          "file":  "game/wind/windframe_07.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
         "game:wind_frame8" : {
-          "file":   "game/wind/wind22.png",
+          "file":  "game/wind/windframe_08.png",
           "wrapU": "repeated",
           "wrapV": "repeated"
         },
+      "game:wind_frame9" : {
+        "file":  "game/wind/windframe_09.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame10" : {
+        "file":  "game/wind/windframe_10.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame11" : {
+        "file":  "game/wind/windframe_11.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame12" : {
+        "file":  "game/wind/windframe_12.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame13" : {
+        "file":  "game/wind/windframe_13.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame14" : {
+        "file":  "game/wind/windframe_14.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame15" : {
+        "file":  "game/wind/windframe_15.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame16" : {
+        "file":  "game/wind/windframe_16.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
+      "game:wind_frame17" : {
+        "file":  "game/wind/windframe_17.png",
+        "wrapU": "repeated",
+        "wrapV": "repeated"
+      },
         "game:wind_particle_filmstrip1" : "game/windparticle_filmstrip1.png",
         "game:wind_particle_filmstrip2" : "game/windparticle_filmstrip2.png",
         "game:wind_particle_filmstrip3" : "game/windparticle_filmstrip3.png",
