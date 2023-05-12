@@ -3531,8 +3531,8 @@
                          "y":-5.19904390343163
                         }],
                  "template":"..\/templates\/static_hazards\/hazard.json",
-                 "x":3435.33333333333,
-                 "y":6450
+                 "x":3378.66666666667,
+                 "y":6540.66666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -3543,7 +3543,6 @@
         {
          "draworder":"topdown",
          "id":17,
-         "locked":true,
          "name":"Hazard_art",
          "objects":[
                 {
@@ -3555,8 +3554,8 @@
                  "rotation":0,
                  "visible":true,
                  "width":256,
-                 "x":3580,
-                 "y":6423
+                 "x":3523.33333333333,
+                 "y":6513.66666666667
                 }, 
                 {
                  "class":"",
@@ -3567,8 +3566,8 @@
                  "rotation":0,
                  "visible":true,
                  "width":256,
-                 "x":3419.33333333333,
-                 "y":6452
+                 "x":3362.66666666667,
+                 "y":6542.66666666667
                 }, 
                 {
                  "class":"",
@@ -3825,7 +3824,6 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"Player",
          "objects":[
                 {
@@ -3837,8 +3835,8 @@
                 {
                  "id":608,
                  "template":"..\/templates\/spawn.json",
-                 "x":6636.30303030303,
-                 "y":5795.30303030304
+                 "x":4300.30303030303,
+                 "y":7478.30303030304
                 }],
          "opacity":1,
          "type":"objectgroup",
