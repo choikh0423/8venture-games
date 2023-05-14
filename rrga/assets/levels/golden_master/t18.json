@@ -1770,15 +1770,15 @@
                  "id":1544,
                  "rotation":329.71354745393,
                  "template":"..\/templates\/static_hazards\/rock.json",
-                 "x":2825,
-                 "y":1363.33333333333
+                 "x":2817,
+                 "y":1351.33333333333
                 }, 
                 {
                  "id":1545,
                  "rotation":311.137001361771,
                  "template":"..\/templates\/static_hazards\/rock.json",
-                 "x":2643.66666666666,
-                 "y":1498
+                 "x":2634.99999999999,
+                 "y":1488.66666666667
                 }, 
                 {
                  "id":1546,
@@ -1846,11 +1846,11 @@
                 {
                  "height":130.679556560718,
                  "id":1556,
-                 "rotation":324.704252763676,
+                 "rotation":333.033718164031,
                  "template":"..\/templates\/static_hazards\/rock.json",
                  "width":222.155246153221,
-                 "x":3893.22657294619,
-                 "y":2285.04777464008
+                 "x":3883.22657294619,
+                 "y":2261.04777464008
                 }, 
                 {
                  "id":1559,
@@ -2114,7 +2114,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":12
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":2783.15151515151,
@@ -2152,7 +2152,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":12
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":2334.66666666667,
@@ -2220,7 +2220,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":16
+                         "value":14
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":3107.39393939394,
@@ -2254,7 +2254,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":18
+                         "value":16
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":3176,
@@ -2304,7 +2304,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":12
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":3548,
@@ -2937,9 +2937,75 @@
         {
          "draworder":"topdown",
          "id":16,
-         "locked":true,
          "name":"Enemies",
-         "objects":[],
+         "objects":[
+                {
+                 "height":80,
+                 "id":1660,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":8
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":1661
+                        }],
+                 "template":"..\/templates\/birds\/red_bird.json",
+                 "width":85.6,
+                 "x":2954.7,
+                 "y":2038
+                }, 
+                {
+                 "id":1661,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1662
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":3840,
+                 "y":1664
+                }, 
+                {
+                 "id":1662,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1663
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2944,
+                 "y":896
+                }, 
+                {
+                 "id":1663,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1664
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2304,
+                 "y":1408
+                }, 
+                {
+                 "id":1664,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":1660
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2430,
+                 "y":1814
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -3187,7 +3253,7 @@
          "y":0
         }],
  "nextlayerid":30,
- "nextobjectid":1660,
+ "nextobjectid":1665,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
