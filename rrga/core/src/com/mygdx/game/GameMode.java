@@ -118,6 +118,9 @@ public class GameMode implements Screen {
     /** level in development */
     private JsonValue sampleLevel;
 
+    /** maximum number of levels */
+    private int maxLevelCount;
+
     public static final float standardZoom = 1.0f;
 
     /** maximum camera zoom scale factor */
@@ -262,9 +265,11 @@ public class GameMode implements Screen {
     public void gatherAssets(AssetDirectory directory) {
         this.directory = directory;
 
-        JsonValue worldData = directory.getEntry("global:constants", JsonValue.class).get("world");
-        displayWidth = worldData.get("width").asFloat();
-        displayHeight = worldData.get("height").asFloat();
+        JsonValue globalConstants = directory.getEntry("global:constants", JsonValue.class);
+        maxLevelCount = globalConstants.getInt("levelCount");
+        JsonValue worldData = globalConstants.get("world");
+        displayWidth = worldData.getFloat("width");
+        displayHeight = worldData.getFloat("height");
 
         gameplayController.gatherAssets(directory);
 
@@ -713,7 +718,7 @@ public class GameMode implements Screen {
      * Sets current level of the game
      */
     public void setNextLevel(){
-        if (currentLevel < 16) {
+        if (currentLevel < maxLevelCount) {
             currentLevel += 1;
         } else {
             currentLevel = 1;

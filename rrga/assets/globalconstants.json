@@ -1,4 +1,5 @@
 {
+  "levelCount": 30,
   "defaults" : {
     "gravity" : -5.5,
     "friction": 0.4,
