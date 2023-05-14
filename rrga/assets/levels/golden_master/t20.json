@@ -1912,6 +1912,7 @@
         {
          "draworder":"topdown",
          "id":17,
+         "locked":true,
          "name":"Hazard_art",
          "objects":[
                 {
