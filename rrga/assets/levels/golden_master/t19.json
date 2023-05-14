@@ -63,6 +63,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":58,
          "id":24,
+         "locked":true,
          "name":"Background Leaves",
          "opacity":1,
          "type":"tilelayer",
@@ -366,6 +367,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"Boundaries",
          "objects":[
                 {
@@ -2513,7 +2515,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":13
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":4575.15151515151,
@@ -2585,7 +2587,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":13
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":4152,
@@ -2619,7 +2621,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":16
+                         "value":14
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":4899.39393939394,
@@ -2653,7 +2655,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":18
+                         "value":16
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":4968,
@@ -2703,7 +2705,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":14
+                         "value":13
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":5340,
