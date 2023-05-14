@@ -27,7 +27,7 @@ public class Sticker implements Drawable {
 
     private final float angle;
 
-    private final TextureRegion texture;
+    protected TextureRegion texture;
 
     private final Vector2 drawScale;
 

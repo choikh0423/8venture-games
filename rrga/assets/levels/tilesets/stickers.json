@@ -9,7 +9,7 @@
  "name":"stickers",
  "objectalignment":"center",
  "spacing":0,
- "tilecount":40,
+ "tilecount":41,
  "tiledversion":"1.10.0",
  "tileheight":446,
  "tiles":[
@@ -252,6 +252,12 @@
          "image":"..\/objects\/asset\/grass.png",
          "imageheight":79,
          "imagewidth":128
+        }, 
+        {
+         "id":40,
+         "image":"..\/objects\/asset\/sparks.png",
+         "imageheight":256,
+         "imagewidth":256
         }],
  "tilewidth":710,
  "transformations":

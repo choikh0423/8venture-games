@@ -26,13 +26,7 @@
          "draworder":"topdown",
          "id":2,
          "name":"objects",
-         "objects":[
-                {
-                 "id":255,
-                 "template":"..\/..\/templates\/nest.json",
-                 "x":1187.14968615235,
-                 "y":355.590726448147
-                }],
+         "objects":[],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -56,10 +50,100 @@
          "name":"Gale",
          "objects":[
                 {
-                 "id":256,
-                 "template":"..\/..\/templates\/birds\/blue_bird.json",
-                 "x":1531.03833807211,
-                 "y":142.269016447702
+                 "gid":132,
+                 "height":256,
+                 "id":263,
+                 "name":"",
+                 "rotation":48.3664606634298,
+                 "type":"",
+                 "visible":true,
+                 "width":256,
+                 "x":525,
+                 "y":-10.7142857142857
+                }, 
+                {
+                 "gid":131,
+                 "height":79,
+                 "id":264,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":1157.14285714286,
+                 "y":996.928571428571
+                }, 
+                {
+                 "gid":131,
+                 "height":79,
+                 "id":265,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":1300,
+                 "y":993.357142857143
+                }, 
+                {
+                 "gid":131,
+                 "height":79,
+                 "id":266,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":960.714285714286,
+                 "y":1004.07142857143
+                }, 
+                {
+                 "gid":131,
+                 "height":79,
+                 "id":267,
+                 "name":"",
+                 "rotation":58.4296530042978,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":778.571428571429,
+                 "y":986.214285714286
+                }, 
+                {
+                 "id":268,
+                 "template":"..\/..\/templates\/logs\/branch_00.json",
+                 "x":814.285714285714,
+                 "y":1060.71428571429
+                }, 
+                {
+                 "id":269,
+                 "template":"..\/..\/templates\/logs\/branch_00.json",
+                 "x":1407.14285714286,
+                 "y":1064.28571428571
+                }, 
+                {
+                 "id":270,
+                 "template":"..\/..\/templates\/spawn.json",
+                 "x":1453.57142857143,
+                 "y":960.714285714286
+                }, 
+                {
+                 "gid":132,
+                 "height":256,
+                 "id":271,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":256,
+                 "x":1225.57142857143,
+                 "y":779.142857142857
+                }, 
+                {
+                 "id":272,
+                 "template":"..\/..\/templates\/goal.json",
+                 "x":185.714285714286,
+                 "y":203.571428571429
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -79,7 +163,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":263,
+ "nextobjectid":273,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",
@@ -90,7 +174,7 @@
          "source":"..\/..\/objects\/json\/objects.json"
         }, 
         {
-         "firstgid":79,
+         "firstgid":92,
          "source":"..\/..\/tilesets\/stickers.json"
         }],
  "tilewidth":128,

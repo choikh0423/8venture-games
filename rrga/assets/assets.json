@@ -208,6 +208,7 @@
         "stickers:hazard_brambles_thick": "game/stickers/hazard_brambles_thick.png",
         "stickers:hazard_brambles_thin": "game/stickers/hazard_brambles_thin.png",
         "stickers:grass": "game/stickers/grass.png",
+        "stickers:sparks": "game/stickers/sparks.png",
         "tileset:bushes_old": "levels/tilesets/bushes_old.png",
         "tileset:trees_old": "levels/tilesets/trees_old.png",
         "tileset:cliffs_old": "levels/tilesets/cliffs_old.png",
