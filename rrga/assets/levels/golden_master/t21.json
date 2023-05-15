@@ -4072,7 +4072,6 @@
         {
          "draworder":"topdown",
          "id":15,
-         "locked":true,
          "name":"Platforms",
          "objects":[
                 {
@@ -4207,6 +4206,15 @@
                  "width":362.060200668896,
                  "x":7132.03010033445,
                  "y":6343.5
+                }, 
+                {
+                 "height":97,
+                 "id":2113,
+                 "rotation":150,
+                 "template":"..\/templates\/logs\/branch_05.json",
+                 "width":337.963800904977,
+                 "x":6657.98190045249,
+                 "y":5845
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4217,6 +4225,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4484,6 +4493,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"Player",
          "objects":[
                 {
@@ -4507,6 +4517,7 @@
         {
          "draworder":"topdown",
          "id":9,
+         "locked":true,
          "name":"Foliage_Front",
          "objects":[
                 {
@@ -5212,7 +5223,7 @@
          "y":0
         }],
  "nextlayerid":33,
- "nextobjectid":2113,
+ "nextobjectid":2114,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
