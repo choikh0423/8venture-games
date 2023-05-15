@@ -4217,7 +4217,6 @@
         {
          "draworder":"topdown",
          "id":16,
-         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4303,8 +4302,8 @@
                          "value":2018
                         }],
                  "template":"..\/templates\/birds\/brown_bird.json",
-                 "x":8960,
-                 "y":4736
+                 "x":8320,
+                 "y":5248
                 }, 
                 {
                  "id":2018,
@@ -4315,8 +4314,8 @@
                          "value":2019
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":9344,
-                 "y":4480
+                 "x":8704,
+                 "y":4992
                 }, 
                 {
                  "id":2019,
@@ -4327,8 +4326,8 @@
                          "value":2020
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":8960,
-                 "y":4224
+                 "x":8320,
+                 "y":4736
                 }, 
                 {
                  "id":2020,
@@ -4339,14 +4338,14 @@
                          "value":2021
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":8576,
-                 "y":4480
+                 "x":7936,
+                 "y":4992
                 }, 
                 {
                  "id":2021,
                  "template":"..\/templates\/path_point.json",
-                 "x":8960,
-                 "y":4736
+                 "x":8320,
+                 "y":5248
                 }, 
                 {
                  "id":2022,
@@ -4411,6 +4410,70 @@
                  "template":"..\/templates\/path_point.json",
                  "x":8404,
                  "y":6702
+                }, 
+                {
+                 "id":2108,
+                 "properties":[
+                        {
+                         "name":"atk_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2109
+                        }],
+                 "template":"..\/templates\/birds\/brown_bird.json",
+                 "x":9472,
+                 "y":4480
+                }, 
+                {
+                 "id":2109,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2110
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":9856,
+                 "y":4224
+                }, 
+                {
+                 "id":2110,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2111
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":9472,
+                 "y":3968
+                }, 
+                {
+                 "id":2111,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2112
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":9088,
+                 "y":4224
+                }, 
+                {
+                 "id":2112,
+                 "template":"..\/templates\/path_point.json",
+                 "x":9472,
+                 "y":4480
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5150,7 +5213,7 @@
          "y":0
         }],
  "nextlayerid":33,
- "nextobjectid":2108,
+ "nextobjectid":2113,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
