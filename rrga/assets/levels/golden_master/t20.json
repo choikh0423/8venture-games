@@ -3704,6 +3704,15 @@
                  "width":350.637824998138,
                  "x":6682.53598527934,
                  "y":1048.32478760238
+                }, 
+                {
+                 "height":359.346074065854,
+                 "id":1769,
+                 "rotation":12.679936704917,
+                 "template":"..\/templates\/logs\/branch_block_01.json",
+                 "width":239.045512473822,
+                 "x":7144.97088732695,
+                 "y":2385.29486314291
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -3826,7 +3835,6 @@
         {
          "draworder":"topdown",
          "id":9,
-         "locked":true,
          "name":"Foliage_Front",
          "objects":[
                 {
@@ -4152,6 +4160,42 @@
                  "width":115.038,
                  "x":6714.481,
                  "y":1385.83333333333
+                }, 
+                {
+                 "class":"",
+                 "gid":92,
+                 "height":119,
+                 "id":1770,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":125,
+                 "x":7127.83333333333,
+                 "y":2419.83333333333
+                }, 
+                {
+                 "class":"",
+                 "gid":91,
+                 "height":119,
+                 "id":1772,
+                 "name":"",
+                 "rotation":90,
+                 "visible":true,
+                 "width":139,
+                 "x":7216.5,
+                 "y":2324.5
+                }, 
+                {
+                 "class":"",
+                 "gid":90,
+                 "height":87,
+                 "id":1774,
+                 "name":"",
+                 "rotation":296.350954847953,
+                 "visible":true,
+                 "width":124,
+                 "x":7026.16666666667,
+                 "y":2488.33333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4160,7 +4204,7 @@
          "y":0
         }],
  "nextlayerid":30,
- "nextobjectid":1766,
+ "nextobjectid":1775,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

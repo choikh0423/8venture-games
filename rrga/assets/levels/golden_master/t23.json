@@ -3023,7 +3023,6 @@
         {
          "draworder":"topdown",
          "id":18,
-         "locked":true,
          "name":"Hazard_area",
          "objects":[
                 {
@@ -3071,8 +3070,8 @@
                          "value":140
                         }],
                  "template":"..\/templates\/lightning\/out_lightning.json",
-                 "x":5033.36363636364,
-                 "y":5642.57575757576
+                 "x":4775.78787878788,
+                 "y":5945.60606060606
                 }, 
                 {
                  "id":1916,
@@ -3083,8 +3082,8 @@
                          "value":130
                         }],
                  "template":"..\/templates\/lightning\/two_lightning.json",
-                 "x":4288.60606060606,
-                 "y":5663.63636363636
+                 "x":3763.27272727273,
+                 "y":6006.66666666666
                 }, 
                 {
                  "id":1917,
@@ -3095,8 +3094,8 @@
                          "value":120
                         }],
                  "template":"..\/templates\/lightning\/left_lightning.json",
-                 "x":3518.18181818182,
-                 "y":5745.45454545455
+                 "x":3084.84848484849,
+                 "y":6145.45454545455
                 }, 
                 {
                  "id":1918,
@@ -3107,8 +3106,8 @@
                          "value":110
                         }],
                  "template":"..\/templates\/lightning\/in_lightning.json",
-                 "x":2815.15151515152,
-                 "y":5603.0303030303
+                 "x":2545.45454545455,
+                 "y":5915.15151515151
                 }, 
                 {
                  "id":1987,
