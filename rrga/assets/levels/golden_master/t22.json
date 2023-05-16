@@ -97,6 +97,7 @@
         {
          "draworder":"topdown",
          "id":13,
+         "locked":true,
          "name":"Background_Wind",
          "objects":[
                 {

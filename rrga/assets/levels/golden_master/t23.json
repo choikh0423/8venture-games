@@ -2318,6 +2318,7 @@
         {
          "draworder":"topdown",
          "id":10,
+         "locked":true,
          "name":"Foliage_Back",
          "objects":[
                 {
