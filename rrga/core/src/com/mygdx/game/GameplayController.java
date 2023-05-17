@@ -98,6 +98,9 @@ public class GameplayController implements ContactListener {
     /** Strong Wind Sound Effect */
     private Sound windStrongSFX;
 
+    private Sound birdAlertSFX;
+    private Sound birdFlapSFX;
+
     /** Strong Wind Sound Effect Current Frame*/
     private int windStrongFrame = 0;
 
@@ -266,6 +269,8 @@ public class GameplayController implements ContactListener {
         levelContainer.gatherAssets(directory);
         backgroundMusic = directory.getEntry("music:cloud", Music.class);
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
+        birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
+        birdFlapSFX = directory.getEntry("sound:bird_flap", Sound.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -638,7 +643,7 @@ public class GameplayController implements ContactListener {
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
                                     bird.setFaceRight(!(px - bx < 0));
-                                    //play sound effect
+                                    birdAlertSFX.play(SFXVolume);
                                     bird.warning = true;
                                 }
                             }

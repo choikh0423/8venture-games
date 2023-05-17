@@ -302,7 +302,9 @@
         "data:tutorial_helpers": "levels/tilesets/tutorial_helpers.json"
     },
     "sounds" : {
-      "sound:wind_strong": "sound/wind_strong.wav"
+      "sound:wind_strong": "sound/wind_strong.wav",
+      "sound:bird_alert": "sound/Matt sfx/bird_alert_squawk.ogg",
+      "sound:bird_flap": "sound/Matt sfx/bird_flap.ogg"
     },
     "music" : {
       "music:menu": "music/menu.wav",
