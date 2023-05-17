@@ -2771,9 +2771,14 @@
                  "id":1915,
                  "properties":[
                         {
+                         "name":"strike_duration",
+                         "type":"int",
+                         "value":40
+                        }, 
+                        {
                          "name":"strike_timer",
                          "type":"int",
-                         "value":140
+                         "value":201
                         }],
                  "template":"..\/templates\/lightning\/out_lightning.json",
                  "x":5033.36363636364,
@@ -2783,9 +2788,14 @@
                  "id":1916,
                  "properties":[
                         {
+                         "name":"strike_duration",
+                         "type":"int",
+                         "value":40
+                        }, 
+                        {
                          "name":"strike_timer",
                          "type":"int",
-                         "value":130
+                         "value":163
                         }],
                  "template":"..\/templates\/lightning\/two_lightning.json",
                  "x":4288.60606060606,
@@ -2795,9 +2805,14 @@
                  "id":1917,
                  "properties":[
                         {
+                         "name":"strike_duration",
+                         "type":"int",
+                         "value":40
+                        }, 
+                        {
                          "name":"strike_timer",
                          "type":"int",
-                         "value":120
+                         "value":192
                         }],
                  "template":"..\/templates\/lightning\/left_lightning.json",
                  "x":3518.18181818182,
@@ -2807,9 +2822,14 @@
                  "id":1918,
                  "properties":[
                         {
+                         "name":"strike_duration",
+                         "type":"int",
+                         "value":40
+                        }, 
+                        {
                          "name":"strike_timer",
                          "type":"int",
-                         "value":110
+                         "value":175
                         }],
                  "template":"..\/templates\/lightning\/in_lightning.json",
                  "x":2815.15151515152,
@@ -3873,7 +3893,6 @@
         {
          "draworder":"topdown",
          "id":15,
-         "locked":true,
          "name":"Platforms",
          "objects":[
                 {
@@ -4093,21 +4112,44 @@
                         }],
                  "template":"..\/templates\/cloud_platforms\/smaller_cloud.json",
                  "x":1408,
-                 "y":8320
+                 "y":8448
                 }, 
                 {
                  "id":2139,
                  "template":"..\/templates\/path_point.json",
                  "x":1408,
-                 "y":7680
+                 "y":7808
                 }, 
                 {
                  "gid":2147483855,
                  "id":2145,
                  "rotation":0,
                  "template":"..\/templates\/cloud_platforms\/small_cloud.json",
-                 "x":964,
-                 "y":8668
+                 "x":767.939393939394,
+                 "y":8654.90909090909
+                }, 
+                {
+                 "id":2153,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":1.6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2154
+                        }],
+                 "template":"..\/templates\/cloud_platforms\/smaller_cloud.json",
+                 "x":1152,
+                 "y":7936
+                }, 
+                {
+                 "id":2154,
+                 "template":"..\/templates\/path_point.json",
+                 "x":1152,
+                 "y":8576
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4330,14 +4372,6 @@
                  "template":"..\/templates\/path_point.json",
                  "x":1898.72727272727,
                  "y":7570.12121212121
-                }, 
-                {
-                 "height":617.121212121212,
-                 "id":2152,
-                 "template":"..\/templates\/lightning\/one_lightning.json",
-                 "width":164.97299729973,
-                 "x":5163.47134713471,
-                 "y":6931.81818181818
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4440,14 +4474,13 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"Player",
          "objects":[
                 {
                  "id":607,
                  "template":"..\/templates\/goal.json",
-                 "x":1024,
-                 "y":8576
+                 "x":787.636363636364,
+                 "y":8569.93939393939
                 }, 
                 {
                  "id":608,
@@ -5182,7 +5215,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":2153,
+ "nextobjectid":2155,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

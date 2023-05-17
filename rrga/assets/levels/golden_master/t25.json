@@ -3218,7 +3218,6 @@
         {
          "draworder":"topdown",
          "id":18,
-         "locked":true,
          "name":"Hazard_area",
          "objects":[
                 {
