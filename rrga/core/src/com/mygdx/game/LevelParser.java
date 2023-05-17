@@ -340,7 +340,7 @@ public class LevelParser {
         String[] tileSetFileNames = globalConstants.get("textures").get("tilesets").asStringArray();
         for (String tileSetName : tileSetFileNames){
             tileSetTextureMap.put(tileSetName, directory.getEntry( "tileset:" + tileSetName, Texture.class));
-            tileSetJsonMap.put(tileSetName + ".json", directory.getEntry("data:"+tileSetName, JsonValue.class));
+            tileSetJsonMap.put(tileSetName, directory.getEntry("data:"+tileSetName, JsonValue.class));
         }
 
         // add object json
@@ -415,11 +415,12 @@ public class LevelParser {
         for (JsonValue ts : tileSets){
             String source = ts.getString("source");
             String[] pathNames = source.split("/");
-            if (pathNames[pathNames.length - 1].equals("stickers.json")){
+            String tileSetName = pathNames[pathNames.length - 1].split("\\.")[0];
+            if (tileSetName.equals("stickers")){
                 stickerMaker = new CollectionTileSetMaker(stickerTextureInfoMap, stickerNameMap, ts.getInt("firstgid"));
                 continue;
             }
-            JsonValue j = tileSetJsonMap.get(pathNames[pathNames.length - 1]);
+            JsonValue j = tileSetJsonMap.get(tileSetName);
             if (j == null){
                 continue;
             }
@@ -1373,10 +1374,13 @@ public class LevelParser {
         private final  int width;
         private final int height;
 
+        private String tileSetName;
+
         ImageTileSetMaker(JsonValue tileSetJson, int firstGid){
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
+            this.tileSetName = name;
             texture = tileSetTextureMap.get(name);
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -1398,7 +1402,9 @@ public class LevelParser {
             int row = index / columns;
             int col = index % columns;
             Tile tile = new Tile(texture);
-            tile.setRegion(col * width, row * height, width, height);
+            // two additional pixel padding added in both directions
+            // cut out region starting from second left corner of each 130x130 tile
+            tile.setRegion(col * (width + 2) + 1, row * (height + 2) + 1, width, height);
 
             // enumerate all 8 possible cases
             if (flipD && flipY && flipX){

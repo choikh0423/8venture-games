@@ -86,8 +86,8 @@ public class TiledLayer implements Drawable {
                 int idx = j * width + i;
                 Tile t = tiles[idx];
                 if (t != null) {
-                    canvas.draw(t, Color.WHITE, t.getRegionWidth()/2f, t.getRegionHeight()/2f,
-                            (i + 0.5f) * drawScale.x, (j + 0.5f) * drawScale.y, t.getRotationRad(),
+                    canvas.draw(t, Color.WHITE, (int)(t.getRegionWidth()/2f), (int)(t.getRegionHeight()/2f),
+                            (int)((i + 0.5f) * drawScale.x), (int) ((j + 0.5f) * drawScale.y), t.getRotationRad(),
                             drawScale.x/t.getRegionWidth(), drawScale.y/t.getRegionHeight()
                     );
                     tilesDrawn++;

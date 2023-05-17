@@ -11,6 +11,8 @@ public class Tile extends TextureRegion {
 
     private float angle;
 
+//    private int angleDeg;
+
     public Tile(Texture t){
         super(t);
         angle = 0;
@@ -24,11 +26,19 @@ public class Tile extends TextureRegion {
         this.angle = angle;
     }
 
+//    public void setRotationDeg(int deg){
+//        this.angleDeg = deg;
+//    }
+
     /**
      * get the COUNTER-CLOCKWISE rotation of this tile in RADIANS
      */
     public float getRotationRad(){
         return this.angle;
     }
+
+//    public int getRotationDeg(){
+//        return angleDeg;
+//    }
 
 }
