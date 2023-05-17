@@ -607,6 +607,7 @@ public class GameplayController implements ContactListener {
                     bird.warning = false;
                 } else if (bird.attackWait > 0) {
                     bird.attackWait--;
+                    bird.setFaceRight(!(avatar.getX() - bird.getX() < 0));
                 }
             }
 

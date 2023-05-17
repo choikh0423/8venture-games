@@ -466,6 +466,12 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
             if(moveSpeed > 0) {
                 patrol();
                 moveDir.set(move);
+
+                //Uncomment for rotating birds
+                /*for (Obstacle o : bodies){
+                    o.setAngle(getAngleFromVec(moveDir));
+                }
+                setAngle(getAngleFromVec(moveDir));*/
             }
         }
         //else target is seen
@@ -479,6 +485,20 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
                 setFaceRight(targetDir.x > 0);
             }
         }
+    }
+
+    /** Returns the angle above/below x axis */
+    private float getAngleFromVec(Vector2 vec){
+        float angle;
+        //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+        if (vec.x == 0) {
+            angle = (vec.y > 0) ? (float) Math.PI / 2 : (vec.y == 0) ? 0 : 3 * (float) Math.PI / 2;
+        } else if (vec.y == 0) {
+            angle = (vec.x >= 0) ? 0 : (float) Math.PI;
+        } else {
+            angle = (float) Math.atan(vec.y / vec.x);
+        }
+        return angle;
     }
 
     /**
