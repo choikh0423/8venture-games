@@ -41,223 +41,260 @@
          "id":4,
          "image":"..\/objects\/asset\/static\/hazard_brambles_thick.png",
          "imageheight":256,
-         "imagewidth":256
+         "imagewidth":256,
+         "type":"bramble_thick"
         }, 
         {
          "id":5,
          "image":"..\/objects\/asset\/static\/hazard_brambles_thin.png",
          "imageheight":256,
-         "imagewidth":256
+         "imagewidth":256,
+         "type":"bramble_thin"
         }, 
         {
          "id":6,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_00.png",
          "imageheight":446,
-         "imagewidth":351
+         "imagewidth":351,
+         "type":"green_bush_0"
         }, 
         {
          "id":7,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_01.png",
          "imageheight":260,
-         "imagewidth":226
+         "imagewidth":226,
+         "type":"green_bush_1"
         }, 
         {
          "id":8,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_02.png",
          "imageheight":247,
-         "imagewidth":232
+         "imagewidth":232,
+         "type":"green_bush_2"
         }, 
         {
          "id":9,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_03.png",
          "imageheight":227,
-         "imagewidth":233
+         "imagewidth":233,
+         "type":"green_bush_3"
         }, 
         {
          "id":10,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_04.png",
          "imageheight":171,
-         "imagewidth":248
+         "imagewidth":248,
+         "type":"green_bush_4"
         }, 
         {
          "id":11,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_05.png",
          "imageheight":216,
-         "imagewidth":311
+         "imagewidth":311,
+         "type":"green_bush_5"
         }, 
         {
          "id":12,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_06.png",
          "imageheight":192,
-         "imagewidth":281
+         "imagewidth":281,
+         "type":"green_bush_6"
         }, 
         {
          "id":13,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_07.png",
          "imageheight":94,
-         "imagewidth":135
+         "imagewidth":135,
+         "type":"green_bush_7"
         }, 
         {
          "id":14,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_08.png",
          "imageheight":87,
-         "imagewidth":124
+         "imagewidth":124,
+         "type":"green_bush_8"
         }, 
         {
          "id":15,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_09.png",
          "imageheight":119,
-         "imagewidth":139
+         "imagewidth":139,
+         "type":"green_bush_9"
         }, 
         {
          "id":16,
          "image":"..\/objects\/asset\/bush_stickers\/green_bush_10.png",
          "imageheight":119,
-         "imagewidth":125
+         "imagewidth":125,
+         "type":"green_bush_10"
         }, 
         {
          "id":17,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_00.png",
          "imageheight":446,
-         "imagewidth":351
+         "imagewidth":351,
+         "type":"ground_bush_0"
         }, 
         {
          "id":18,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_01.png",
          "imageheight":260,
-         "imagewidth":226
+         "imagewidth":226,
+         "type":"ground_bush_1"
         }, 
         {
          "id":19,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_02.png",
          "imageheight":247,
-         "imagewidth":232
+         "imagewidth":232,
+         "type":"ground_bush_2"
         }, 
         {
          "id":20,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_03.png",
          "imageheight":227,
-         "imagewidth":233
+         "imagewidth":233,
+         "type":"ground_bush_3"
         }, 
         {
          "id":21,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_04.png",
          "imageheight":171,
-         "imagewidth":248
+         "imagewidth":248,
+         "type":"ground_bush_4"
         }, 
         {
          "id":22,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_05.png",
          "imageheight":216,
-         "imagewidth":311
+         "imagewidth":311,
+         "type":"ground_bush_5"
         }, 
         {
          "id":23,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_06.png",
          "imageheight":192,
-         "imagewidth":281
+         "imagewidth":281,
+         "type":"ground_bush_6"
         }, 
         {
          "id":24,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_07.png",
          "imageheight":94,
-         "imagewidth":135
+         "imagewidth":135,
+         "type":"ground_bush_7"
         }, 
         {
          "id":25,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_08.png",
          "imageheight":87,
-         "imagewidth":124
+         "imagewidth":124,
+         "type":"ground_bush_8"
         }, 
         {
          "id":26,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_09.png",
          "imageheight":119,
-         "imagewidth":139
+         "imagewidth":139,
+         "type":"ground_bush_9"
         }, 
         {
          "id":27,
          "image":"..\/objects\/asset\/bush_stickers\/ground_bush_10.png",
          "imageheight":119,
-         "imagewidth":125
+         "imagewidth":125,
+         "type":"ground_bush_10"
         }, 
         {
          "id":28,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_00.png",
          "imageheight":446,
-         "imagewidth":351
+         "imagewidth":351,
+         "type":"pink_bush_0"
         }, 
         {
          "id":29,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_01.png",
          "imageheight":260,
-         "imagewidth":226
+         "imagewidth":226,
+         "type":"pink_bush_1"
         }, 
         {
          "id":30,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_02.png",
          "imageheight":247,
-         "imagewidth":232
+         "imagewidth":232,
+         "type":"pink_bush_2"
         }, 
         {
          "id":31,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_03.png",
          "imageheight":227,
-         "imagewidth":233
+         "imagewidth":233,
+         "type":"pink_bush_3"
         }, 
         {
          "id":32,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_04.png",
          "imageheight":171,
-         "imagewidth":248
+         "imagewidth":248,
+         "type":"pink_bush_4"
         }, 
         {
          "id":33,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_05.png",
          "imageheight":216,
-         "imagewidth":311
+         "imagewidth":311,
+         "type":"pink_bush_5"
         }, 
         {
          "id":34,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_06.png",
          "imageheight":192,
-         "imagewidth":281
+         "imagewidth":281,
+         "type":"pink_bush_6"
         }, 
         {
          "id":35,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_07.png",
          "imageheight":94,
-         "imagewidth":135
+         "imagewidth":135,
+         "type":"pink_bush_7"
         }, 
         {
          "id":36,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_08.png",
          "imageheight":87,
-         "imagewidth":124
+         "imagewidth":124,
+         "type":"pink_bush_8"
         }, 
         {
          "id":37,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_09.png",
          "imageheight":119,
-         "imagewidth":139
+         "imagewidth":139,
+         "type":"pink_bush_9"
         }, 
         {
          "id":38,
          "image":"..\/objects\/asset\/bush_stickers\/pink_bush_10.png",
          "imageheight":119,
-         "imagewidth":125
+         "imagewidth":125,
+         "type":"pink_bush_10"
         }, 
         {
          "id":39,
          "image":"..\/objects\/asset\/grass.png",
          "imageheight":79,
-         "imagewidth":128
+         "imagewidth":128,
+         "type":"grass"
         }, 
         {
          "id":40,
          "image":"..\/objects\/asset\/sparks.png",
          "imageheight":256,
-         "imagewidth":256
+         "imagewidth":256,
+         "type":"spark"
         }],
  "tilewidth":710,
  "transformations":
