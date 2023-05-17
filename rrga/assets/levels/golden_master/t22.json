@@ -3893,6 +3893,7 @@
         {
          "draworder":"topdown",
          "id":15,
+         "locked":true,
          "name":"Platforms",
          "objects":[
                 {
@@ -4160,7 +4161,6 @@
         {
          "draworder":"topdown",
          "id":16,
-         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4372,6 +4372,76 @@
                  "template":"..\/templates\/path_point.json",
                  "x":1898.72727272727,
                  "y":7570.12121212121
+                }, 
+                {
+                 "id":2155,
+                 "properties":[
+                        {
+                         "name":"atk_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2156
+                        }],
+                 "template":"..\/templates\/birds\/brown_bird.json",
+                 "x":768,
+                 "y":7680
+                }, 
+                {
+                 "id":2156,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2157
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1254,
+                 "y":7898
+                }, 
+                {
+                 "id":2157,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2158
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2008,
+                 "y":7714
+                }, 
+                {
+                 "id":2158,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2159
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1307.87878787879,
+                 "y":7467.27272727273
+                }, 
+                {
+                 "id":2159,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2156
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":768,
+                 "y":7680
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5215,7 +5285,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":2155,
+ "nextobjectid":2160,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
