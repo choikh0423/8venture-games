@@ -97,6 +97,7 @@
         {
          "draworder":"topdown",
          "id":13,
+         "locked":true,
          "name":"Background_Wind",
          "objects":[
                 {
@@ -4068,14 +4069,14 @@
                          "value":2137
                         }],
                  "template":"..\/templates\/cloud_platforms\/small_cloud.json",
-                 "x":1792,
-                 "y":8576
+                 "x":1722.81818181818,
+                 "y":8555.78787878788
                 }, 
                 {
                  "id":2137,
                  "template":"..\/templates\/path_point.json",
-                 "x":1792,
-                 "y":8064
+                 "x":1722.81818181818,
+                 "y":8043.78787878788
                 }, 
                 {
                  "id":2138,
@@ -4117,6 +4118,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4138,8 +4140,8 @@
                          "value":2011
                         }],
                  "template":"..\/templates\/birds\/brown_bird.json",
-                 "x":2258,
-                 "y":7552
+                 "x":2358,
+                 "y":7468
                 }, 
                 {
                  "id":2011,
@@ -4150,8 +4152,8 @@
                          "value":2012
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2898,
-                 "y":7808
+                 "x":2998,
+                 "y":7724
                 }, 
                 {
                  "id":2012,
@@ -4162,8 +4164,8 @@
                          "value":2013
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":3794,
-                 "y":7552
+                 "x":3894,
+                 "y":7468
                 }, 
                 {
                  "id":2013,
@@ -4174,14 +4176,20 @@
                          "value":2014
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":3026,
-                 "y":7296
+                 "x":3126,
+                 "y":7212
                 }, 
                 {
                  "id":2014,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2011
+                        }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2258,
-                 "y":7552
+                 "x":2379.21212121212,
+                 "y":7455.87878787879
                 }, 
                 {
                  "id":2140,
@@ -4202,8 +4210,8 @@
                          "value":2141
                         }],
                  "template":"..\/templates\/birds\/brown_bird.json",
-                 "x":2726,
-                 "y":7686
+                 "x":2826,
+                 "y":7602
                 }, 
                 {
                  "id":2141,
@@ -4214,8 +4222,8 @@
                          "value":2142
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2432,
-                 "y":7928
+                 "x":2532,
+                 "y":7844
                 }, 
                 {
                  "id":2142,
@@ -4226,8 +4234,8 @@
                          "value":2143
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2048,
-                 "y":7800
+                 "x":2148,
+                 "y":7716
                 }, 
                 {
                  "id":2143,
@@ -4238,14 +4246,98 @@
                          "value":2144
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2304,
-                 "y":7672
+                 "x":2404,
+                 "y":7588
                 }, 
                 {
                  "id":2144,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2141
+                        }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2726,
-                 "y":7686
+                 "x":2828,
+                 "y":7600
+                }, 
+                {
+                 "id":2146,
+                 "properties":[
+                        {
+                         "name":"atk_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2147
+                        }],
+                 "template":"..\/templates\/birds\/brown_bird.json",
+                 "x":1929.0303030303,
+                 "y":7536.78787878788
+                }, 
+                {
+                 "id":2147,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2148
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1668.36363636364,
+                 "y":7669.69696969697
+                }, 
+                {
+                 "id":2148,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2149
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1217.69696969697,
+                 "y":7541.69696969697
+                }, 
+                {
+                 "id":2149,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2150
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1607.0303030303,
+                 "y":7428.84848484848
+                }, 
+                {
+                 "id":2150,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2147
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":1898.72727272727,
+                 "y":7570.12121212121
+                }, 
+                {
+                 "height":617.121212121212,
+                 "id":2152,
+                 "template":"..\/templates\/lightning\/one_lightning.json",
+                 "width":164.97299729973,
+                 "x":5163.47134713471,
+                 "y":6931.81818181818
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4348,6 +4440,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"Player",
          "objects":[
                 {
@@ -5089,7 +5182,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":2146,
+ "nextobjectid":2153,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
