@@ -217,7 +217,7 @@
         "tileset:dirt": "game/tilesets/dirt_padded.png",
         "tileset:cliffs_interior": "game/tilesets/cliffs_interior_padded.png",
         "tileset:cliffs_exterior": "game/tilesets/cliffs_exterior_padded.png",
-        "tileset:trees_foreground": "levels/tilesets/trees_foreground.png",
+        "tileset:trees_foreground": "game/tilesets/trees_foreground_padded.png",
         "tileset:trees_background": "game/tilesets/trees_background_padded.png",
         "tileset:tutorial_helpers": "game/tilesets/tutorial_helpers_padded.png"
     },
