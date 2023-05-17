@@ -97,59 +97,8 @@
         {
          "draworder":"topdown",
          "id":13,
-         "locked":true,
          "name":"Background_Wind",
          "objects":[
-                {
-                 "id":1919,
-                 "polygon":[
-                        {
-                         "x":-1024,
-                         "y":808
-                        }, 
-                        {
-                         "x":-668,
-                         "y":548
-                        }, 
-                        {
-                         "x":-236,
-                         "y":708
-                        }, 
-                        {
-                         "x":-128,
-                         "y":1064
-                        }, 
-                        {
-                         "x":-384,
-                         "y":1448
-                        }, 
-                        {
-                         "x":-896,
-                         "y":1960
-                        }, 
-                        {
-                         "x":-1280,
-                         "y":1960
-                        }, 
-                        {
-                         "x":-1408,
-                         "y":1448
-                        }],
-                 "properties":[
-                        {
-                         "name":"dir",
-                         "type":"object",
-                         "value":1928
-                        }, 
-                        {
-                         "name":"magnitude",
-                         "type":"float",
-                         "value":12
-                        }],
-                 "template":"..\/templates\/wind.json",
-                 "x":4352,
-                 "y":6616
-                }, 
                 {
                  "id":1920,
                  "polygon":[
@@ -315,15 +264,8 @@
                  "y":4084
                 }, 
                 {
-                 "id":1928,
-                 "rotation":15,
-                 "template":"..\/templates\/wind_dir.json",
-                 "x":3489.69696969697,
-                 "y":6909.45454545455
-                }, 
-                {
                  "id":1931,
-                 "rotation":45,
+                 "rotation":60,
                  "template":"..\/templates\/wind_dir.json",
                  "x":4104,
                  "y":7016
@@ -356,8 +298,16 @@
                          "y":540
                         }, 
                         {
-                         "x":-120,
-                         "y":540
+                         "x":-86.666666666667,
+                         "y":530.909090909091
+                        }, 
+                        {
+                         "x":-197.121212121212,
+                         "y":407.333333333334
+                        }, 
+                        {
+                         "x":-250,
+                         "y":208
                         }],
                  "properties":[
                         {
@@ -459,241 +409,6 @@
                  "template":"..\/templates\/wind_dir.json",
                  "x":10424,
                  "y":3584
-                }, 
-                {
-                 "id":2034,
-                 "polygon":[
-                        {
-                         "x":1254.66666666667,
-                         "y":-130.787878787879
-                        }, 
-                        {
-                         "x":1764,
-                         "y":-308
-                        }, 
-                        {
-                         "x":2084,
-                         "y":-304
-                        }, 
-                        {
-                         "x":2340,
-                         "y":-180
-                        }, 
-                        {
-                         "x":2340,
-                         "y":204
-                        }, 
-                        {
-                         "x":2212,
-                         "y":460
-                        }, 
-                        {
-                         "x":1956,
-                         "y":653.939393939394
-                        }, 
-                        {
-                         "x":1596.9696969697,
-                         "y":731.151515151515
-                        }, 
-                        {
-                         "x":1191.75757575758,
-                         "y":682.666666666666
-                        }, 
-                        {
-                         "x":1014.18181818182,
-                         "y":546.181818181818
-                        }, 
-                        {
-                         "x":932,
-                         "y":332
-                        }, 
-                        {
-                         "x":988.969696969697,
-                         "y":112.484848484849
-                        }],
-                 "properties":[
-                        {
-                         "name":"dir",
-                         "type":"object",
-                         "value":2035
-                        }, 
-                        {
-                         "name":"magnitude",
-                         "type":"float",
-                         "value":16
-                        }],
-                 "template":"..\/templates\/wind.json",
-                 "x":3036,
-                 "y":6068
-                }, 
-                {
-                 "id":2035,
-                 "rotation":90,
-                 "template":"..\/templates\/wind_dir.json",
-                 "x":3708,
-                 "y":6296
-                }, 
-                {
-                 "id":2121,
-                 "polygon":[
-                        {
-                         "x":-411.030303030303,
-                         "y":-536.121212121212
-                        }, 
-                        {
-                         "x":-178.909090909091,
-                         "y":-669.818181818182
-                        }, 
-                        {
-                         "x":232,
-                         "y":-752
-                        }, 
-                        {
-                         "x":591.393939393939,
-                         "y":-721.333333333333
-                        }, 
-                        {
-                         "x":896.242424242424,
-                         "y":-496.727272727273
-                        }, 
-                        {
-                         "x":984.484848484848,
-                         "y":-115.393939393939
-                        }, 
-                        {
-                         "x":1000,
-                         "y":272
-                        }, 
-                        {
-                         "x":960.606060606061,
-                         "y":735.515151515151
-                        }, 
-                        {
-                         "x":872,
-                         "y":983.151515151516
-                        }, 
-                        {
-                         "x":598.969696969697,
-                         "y":1225.93939393939
-                        }, 
-                        {
-                         "x":232,
-                         "y":1296
-                        }, 
-                        {
-                         "x":-88,
-                         "y":1232
-                        }, 
-                        {
-                         "x":-414.060606060606,
-                         "y":1028.60606060606
-                        }, 
-                        {
-                         "x":-496.242424242424,
-                         "y":804.848484848485
-                        }, 
-                        {
-                         "x":-536,
-                         "y":272
-                        }, 
-                        {
-                         "x":-499.272727272727,
-                         "y":-248.727272727273
-                        }],
-                 "properties":[
-                        {
-                         "name":"dir",
-                         "type":"object",
-                         "value":2122
-                        }, 
-                        {
-                         "name":"magnitude",
-                         "type":"float",
-                         "value":16
-                        }],
-                 "template":"..\/templates\/wind.json",
-                 "x":792,
-                 "y":6896
-                }, 
-                {
-                 "id":2122,
-                 "rotation":180,
-                 "template":"..\/templates\/wind_dir.json",
-                 "x":245.454545454545,
-                 "y":7303.0303030303
-                }, 
-                {
-                 "id":2123,
-                 "polygon":[
-                        {
-                         "x":-695.151515151515,
-                         "y":-79.757575757576
-                        }, 
-                        {
-                         "x":-399.151515151515,
-                         "y":-191.757575757576
-                        }, 
-                        {
-                         "x":0.848484848484986,
-                         "y":-231.757575757576
-                        }, 
-                        {
-                         "x":392.848484848485,
-                         "y":-219.757575757576
-                        }, 
-                        {
-                         "x":736.848484848485,
-                         "y":-75.757575757576
-                        }, 
-                        {
-                         "x":896.848484848485,
-                         "y":152.242424242424
-                        }, 
-                        {
-                         "x":804.848484848485,
-                         "y":380.242424242424
-                        }, 
-                        {
-                         "x":492.848484848485,
-                         "y":540.242424242424
-                        }, 
-                        {
-                         "x":4.84848484848499,
-                         "y":576.242424242424
-                        }, 
-                        {
-                         "x":-483.151515151515,
-                         "y":512.242424242424
-                        }, 
-                        {
-                         "x":-763.151515151515,
-                         "y":376.242424242424
-                        }, 
-                        {
-                         "x":-895.151515151515,
-                         "y":152.242424242424
-                        }],
-                 "properties":[
-                        {
-                         "name":"dir",
-                         "type":"object",
-                         "value":2125
-                        }, 
-                        {
-                         "name":"magnitude",
-                         "type":"float",
-                         "value":10
-                        }],
-                 "template":"..\/templates\/wind.json",
-                 "x":2815.15151515152,
-                 "y":6375.75757575758
-                }, 
-                {
-                 "id":2125,
-                 "rotation":-60,
-                 "template":"..\/templates\/wind_dir.json",
-                 "x":2328,
-                 "y":6012
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4006,7 +3721,148 @@
          "id":25,
          "locked":true,
          "name":"Front_Wind",
-         "objects":[],
+         "objects":[
+                {
+                 "id":2130,
+                 "polygon":[
+                        {
+                         "x":-1351.15,
+                         "y":1559.76
+                        }, 
+                        {
+                         "x":-1175.9385,
+                         "y":1337.09
+                        }, 
+                        {
+                         "x":-1029.15,
+                         "y":1181.82633614291
+                        }, 
+                        {
+                         "x":-645.15,
+                         "y":1053.82633614291
+                        }, 
+                        {
+                         "x":-521.15,
+                         "y":1089.82633614291
+                        }, 
+                        {
+                         "x":-461.15,
+                         "y":1209.82633614291
+                        }, 
+                        {
+                         "x":-540.575,
+                         "y":1364.91316807145
+                        }, 
+                        {
+                         "x":-740.529924242424,
+                         "y":1586.63840221754
+                        }, 
+                        {
+                         "x":-1037.96193181818,
+                         "y":1835.13738292695
+                        }, 
+                        {
+                         "x":-1162.071875,
+                         "y":1895.11414600893
+                        }, 
+                        {
+                         "x":-1272,
+                         "y":1912
+                        }, 
+                        {
+                         "x":-1370,
+                         "y":1848
+                        }, 
+                        {
+                         "x":-1387.82,
+                         "y":1714.24
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":2131
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":12
+                        }],
+                 "template":"..\/templates\/wind.json",
+                 "x":4997.15,
+                 "y":6882.17366385709
+                }, 
+                {
+                 "id":2131,
+                 "rotation":30,
+                 "template":"..\/templates\/wind_dir.json",
+                 "x":2938.85,
+                 "y":8003.62366385709
+                }, 
+                {
+                 "id":2132,
+                 "polygon":[
+                        {
+                         "x":108,
+                         "y":-177
+                        }, 
+                        {
+                         "x":151,
+                         "y":-207.25
+                        }, 
+                        {
+                         "x":226,
+                         "y":-210.5
+                        }, 
+                        {
+                         "x":272,
+                         "y":-180
+                        }, 
+                        {
+                         "x":291,
+                         "y":-62
+                        }, 
+                        {
+                         "x":250,
+                         "y":52
+                        }, 
+                        {
+                         "x":177,
+                         "y":107
+                        }, 
+                        {
+                         "x":90,
+                         "y":97
+                        }, 
+                        {
+                         "x":37,
+                         "y":26
+                        }, 
+                        {
+                         "x":47,
+                         "y":-56
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":2133
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":14
+                        }],
+                 "template":"..\/templates\/wind.json",
+                 "x":4566,
+                 "y":7988
+                }, 
+                {
+                 "id":2133,
+                 "template":"..\/templates\/wind_dir.json",
+                 "x":4649.33333333333,
+                 "y":8210.66666666667
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -4153,75 +4009,104 @@
                  "y":6343.5
                 }, 
                 {
-                 "id":2114,
+                 "id":2128,
                  "properties":[
                         {
                          "name":"move_speed",
                          "type":"float",
-                         "value":1
+                         "value":0.2
                         }, 
                         {
                          "name":"path",
                          "type":"object",
-                         "value":2115
+                         "value":2129
+                        }],
+                 "template":"..\/templates\/cloud_platforms\/large_cloud.json",
+                 "x":2690.33333333333,
+                 "y":8498.66666666667
+                }, 
+                {
+                 "id":2129,
+                 "template":"..\/templates\/path_point.json",
+                 "x":2689.33333333333,
+                 "y":8752
+                }, 
+                {
+                 "id":2134,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":0.4
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2135
+                        }],
+                 "template":"..\/templates\/cloud_platforms\/medium_cloud.json",
+                 "x":2176,
+                 "y":8576
+                }, 
+                {
+                 "id":2135,
+                 "template":"..\/templates\/path_point.json",
+                 "x":2176,
+                 "y":8320
+                }, 
+                {
+                 "id":2136,
+                 "properties":[
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":0.8
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2137
                         }],
                  "template":"..\/templates\/cloud_platforms\/small_cloud.json",
-                 "x":1664,
-                 "y":7168
+                 "x":1792,
+                 "y":8576
                 }, 
                 {
-                 "id":2115,
+                 "id":2137,
                  "template":"..\/templates\/path_point.json",
-                 "x":896,
-                 "y":7168
+                 "x":1792,
+                 "y":8064
                 }, 
                 {
-                 "id":2116,
+                 "id":2138,
                  "properties":[
                         {
                          "name":"move_speed",
                          "type":"float",
-                         "value":1
+                         "value":1.6
                         }, 
                         {
                          "name":"path",
                          "type":"object",
-                         "value":2117
+                         "value":2139
                         }],
                  "template":"..\/templates\/cloud_platforms\/smaller_cloud.json",
-                 "x":768,
-                 "y":7552
+                 "x":1408,
+                 "y":8320
                 }, 
                 {
-                 "id":2117,
+                 "id":2139,
                  "template":"..\/templates\/path_point.json",
-                 "x":1536,
-                 "y":7552
+                 "x":1408,
+                 "y":7680
                 }, 
                 {
-                 "gid":2147483856,
-                 "id":2118,
-                 "properties":[
-                        {
-                         "name":"move_speed",
-                         "type":"float",
-                         "value":1
-                        }, 
-                        {
-                         "name":"path",
-                         "type":"object",
-                         "value":2119
-                        }],
+                 "gid":2147483855,
+                 "id":2145,
                  "rotation":0,
-                 "template":"..\/templates\/cloud_platforms\/smaller_cloud.json",
-                 "x":1152,
-                 "y":6784
-                }, 
-                {
-                 "id":2119,
-                 "template":"..\/templates\/path_point.json",
-                 "x":1920,
-                 "y":6784
+                 "template":"..\/templates\/cloud_platforms\/small_cloud.json",
+                 "x":964,
+                 "y":8668
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4232,7 +4117,6 @@
         {
          "draworder":"topdown",
          "id":16,
-         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4254,7 +4138,7 @@
                          "value":2011
                         }],
                  "template":"..\/templates\/birds\/brown_bird.json",
-                 "x":1920,
+                 "x":2258,
                  "y":7552
                 }, 
                 {
@@ -4266,7 +4150,7 @@
                          "value":2012
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2560,
+                 "x":2898,
                  "y":7808
                 }, 
                 {
@@ -4278,7 +4162,7 @@
                          "value":2013
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":3456,
+                 "x":3794,
                  "y":7552
                 }, 
                 {
@@ -4290,14 +4174,78 @@
                          "value":2014
                         }],
                  "template":"..\/templates\/path_point.json",
-                 "x":2688,
+                 "x":3026,
                  "y":7296
                 }, 
                 {
                  "id":2014,
                  "template":"..\/templates\/path_point.json",
-                 "x":1920,
+                 "x":2258,
                  "y":7552
+                }, 
+                {
+                 "id":2140,
+                 "properties":[
+                        {
+                         "name":"atk_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"move_speed",
+                         "type":"float",
+                         "value":6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2141
+                        }],
+                 "template":"..\/templates\/birds\/brown_bird.json",
+                 "x":2726,
+                 "y":7686
+                }, 
+                {
+                 "id":2141,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2142
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2432,
+                 "y":7928
+                }, 
+                {
+                 "id":2142,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2143
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2048,
+                 "y":7800
+                }, 
+                {
+                 "id":2143,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2144
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":2304,
+                 "y":7672
+                }, 
+                {
+                 "id":2144,
+                 "template":"..\/templates\/path_point.json",
+                 "x":2726,
+                 "y":7686
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -4400,20 +4348,19 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"Player",
          "objects":[
                 {
                  "id":607,
                  "template":"..\/templates\/goal.json",
-                 "x":1152,
-                 "y":7808
+                 "x":1024,
+                 "y":8576
                 }, 
                 {
                  "id":608,
                  "template":"..\/templates\/spawn.json",
-                 "x":6271.0303030303,
-                 "y":6810.27272727273
+                 "x":4992,
+                 "y":7168
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5142,7 +5089,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":2127,
+ "nextobjectid":2146,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
