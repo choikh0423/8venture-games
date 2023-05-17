@@ -1,6 +1,7 @@
 package com.mygdx.game.model.hazard;
 
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -54,12 +55,16 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
 
     private final float knockBack;
 
+    private Sound sfx;
+    private float sfxVol;
+    public void setSfxVol(float vol){sfxVol = vol;}
+
     /**
      * Creates an animating lightning whose properties are contained within the given data.
      * @param data JSON data with properties: position, dimensions, filmstrip size
      * @param animationTexture the filmstrip containing each frame of the animation
      */
-    public AnimatedLightningHazard(JsonValue data, Texture animationTexture, int dmg, float knockBack){
+    public AnimatedLightningHazard(JsonValue data, Texture animationTexture, int dmg, float knockBack, Sound sfx){
         super(data.getFloat("x"), data.getFloat("y"));
         drawDepth = data.getInt("depth");
         flippedX = data.getBoolean("flipped");
@@ -71,6 +76,7 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         int cols = animationTexture.getWidth() / data.getInt("filmStripWidth");
         int rows = animationTexture.getHeight() / data.getInt("filmStripHeight");
         frames = new FilmStrip(animationTexture, rows, cols);
+        this.sfx=sfx;
 
         // set duration of final frame
         int growDuration = 0;
@@ -169,6 +175,7 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         }
         else if (waitCounter == 0){
             // finished waiting, transition to strike cycle
+            sfx.play(sfxVol*.2f);
             switchFrames();
             waitCounter--;
         }

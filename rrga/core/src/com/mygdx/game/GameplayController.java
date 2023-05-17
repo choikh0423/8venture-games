@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -97,9 +98,9 @@ public class GameplayController implements ContactListener {
 
     /** Strong Wind Sound Effect */
     private Sound windStrongSFX;
-
     private Sound birdAlertSFX;
     private Sound birdFlapSFX;
+    private Sound lightningSFX;
 
     /** Strong Wind Sound Effect Current Frame*/
     private int windStrongFrame = 0;
@@ -271,6 +272,7 @@ public class GameplayController implements ContactListener {
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
         birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
         birdFlapSFX = directory.getEntry("sound:bird_flap", Sound.class);
+        lightningSFX = directory.getEntry("sound:lightning", Sound.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -732,6 +734,7 @@ public class GameplayController implements ContactListener {
                 entry.remove();
             } else {
                 // Note that update is called last!
+                if (obj instanceof AnimatedLightningHazard) ((AnimatedLightningHazard) obj).setSfxVol(SFXVolume);
                 obj.update(dt);
             }
         }

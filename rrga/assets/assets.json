@@ -304,7 +304,8 @@
     "sounds" : {
       "sound:wind_strong": "sound/wind_strong.wav",
       "sound:bird_alert": "sound/Matt sfx/bird_alert_squawk.ogg",
-      "sound:bird_flap": "sound/Matt sfx/bird_flap.ogg"
+      "sound:bird_flap": "sound/Matt sfx/bird_flap.ogg",
+      "sound:lightning": "sound/Matt sfx/lightning-3.ogg"
     },
     "music" : {
       "music:menu": "music/menu.wav",

@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -328,6 +329,7 @@ public class LevelContainer{
         }
     }
 
+    private Sound lightningSFX;
     /**
      * Gather the assets for this controller.
      * <p>
@@ -424,6 +426,7 @@ public class LevelContainer{
             logTextures.put(fileName, new TextureRegion(directory.getEntry("game:" + fileName, Texture.class)));
         }
 
+        lightningSFX = directory.getEntry("sound:lightning", Sound.class);
     }
     /**
      * Resets the level container (emptying the container)
@@ -619,7 +622,7 @@ public class LevelContainer{
             }
             else {
                 obj = new AnimatedLightningHazard(data, animatedLightningTextures[data.getInt("tileIndex")],
-                        lightningDmg, lightningKnockBackScl);
+                        lightningDmg, lightningKnockBackScl, lightningSFX);
             }
             obj.setDrawScale(scale);
             obj.setName(lightningName + ii);
