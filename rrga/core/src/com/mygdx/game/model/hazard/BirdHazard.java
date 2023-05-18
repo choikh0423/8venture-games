@@ -1,6 +1,8 @@
 package com.mygdx.game.model.hazard;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -238,6 +240,10 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     @Override
     public float getKnockBackScl() { return knockBackScl; }
 
+    private Music sfx;
+    private float sfxVol;
+    public void setSfxVol(float vol){sfxVol = vol;}
+
     /**
      * Sets bird flapping animation
      */
@@ -261,6 +267,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         }
         // Adjust frame duration here
         this.flapAnimation = new Animation<>(1f/10f, flapAnimationFrames);
+        flapAnimation.setPlayMode(Animation.PlayMode.LOOP);
         this.stillFrame = flapAnimationFrames[stillFrameIndex];
     }
 
@@ -323,7 +330,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         }
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex) {
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex, Music sfx) {
         super(data.getFloat("x"), data.getFloat("y"));
 
         // this is the bounding box dimensions of the texture that contains all animation frames.
@@ -381,6 +388,8 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
             o.setFriction(0);
             o.setRestitution(0);
         }
+
+        this.sfx = sfx;
     }
 
     @Override
@@ -506,6 +515,10 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
             // moving/angry => flapping
             flapElapsedTime += Gdx.graphics.getDeltaTime();
             birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
+            if (flapAnimation.getKeyFrameIndex(flapElapsedTime)==3){
+                sfx.setVolume(sfxVol);
+                sfx.play();
+            }
 
             canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
                     (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),

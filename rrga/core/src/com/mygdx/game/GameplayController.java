@@ -99,7 +99,7 @@ public class GameplayController implements ContactListener {
     /** Strong Wind Sound Effect */
     private Sound windStrongSFX;
     private Sound birdAlertSFX;
-    private Sound birdFlapSFX;
+    private Music birdFlapSFX;
     private Sound lightningSFX;
 
     /** Strong Wind Sound Effect Current Frame*/
@@ -271,7 +271,7 @@ public class GameplayController implements ContactListener {
         backgroundMusic = directory.getEntry("music:cloud", Music.class);
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
         birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
-        birdFlapSFX = directory.getEntry("sound:bird_flap", Sound.class);
+        birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
         lightningSFX = directory.getEntry("sound:lightning", Sound.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
@@ -574,6 +574,7 @@ public class GameplayController implements ContactListener {
 
         //loop through birds
         for (BirdHazard bird : levelContainer.getBirds()) {
+            bird.setSfxVol(SFXVolume);
             //If sees target, wait before attacking
             if(bird.seesTarget){
                 if(bird.attackWait == 0){
@@ -659,6 +660,7 @@ public class GameplayController implements ContactListener {
 
         //update nests
         for(NestHazard n: nests){
+            n.setSfxVol(SFXVolume);
             BirdHazard b = n.update();
             if(b != null){
                 //TODO if references to level container change, need to add to gameplay controller lists

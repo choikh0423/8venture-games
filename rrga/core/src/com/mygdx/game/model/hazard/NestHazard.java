@@ -1,5 +1,6 @@
 package com.mygdx.game.model.hazard;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,6 +13,7 @@ import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.obstacle.SimpleObstacle;
 import com.mygdx.game.utility.util.PooledList;
+import com.badlogic.gdx.audio.Sound;
 
 public class NestHazard extends PolygonObstacle {
     private final float[] path;
@@ -26,9 +28,11 @@ public class NestHazard extends PolygonObstacle {
     private boolean drawSpawnIn;
     private final JsonValue blueData;
     private final float[] blueAABB;
-
+    private Music sfx;
+    private float sfxVol;
+    public void setSfxVol(float vol){sfxVol = vol;}
     public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb,
-                      Vector2 scl, Texture birdAnimation, JsonValue blueData){
+                      Vector2 scl, Texture birdAnimation, JsonValue blueData, Music sfx){
         super(points, x, y);
         setGravityScale(0);
         setDensity(0);
@@ -55,6 +59,8 @@ public class NestHazard extends PolygonObstacle {
         TextureRegion[][] flapTmpFrames = TextureRegion.split(birdAnimation, blueData.getInt("filmStripWidth"),
                 blueData.getInt("filmStripHeight"));
         birdTex = flapTmpFrames[0][0];
+
+        this.sfx = sfx;
     }
 
     public BirdHazard update(){
@@ -74,7 +80,7 @@ public class NestHazard extends PolygonObstacle {
             //data.remove("movespeed");
             data.addChild("movespeed", new JsonValue(birdSpeed));
 
-            BirdHazard obj = new BirdHazard(data, birdDamage, 0, birdKnockBack, null);
+            BirdHazard obj = new BirdHazard(data, birdDamage, 0, birdKnockBack, null, sfx);
             obj.setDrawScale(scale);
             // TODO: get still frame index from global constants
             obj.setFlapAnimation(birdTex.getTexture(), 0);

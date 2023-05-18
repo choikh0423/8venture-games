@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -330,6 +331,7 @@ public class LevelContainer{
     }
 
     private Sound lightningSFX;
+    private Music birdFlapSFX;
     /**
      * Gather the assets for this controller.
      * <p>
@@ -427,6 +429,7 @@ public class LevelContainer{
         }
 
         lightningSFX = directory.getEntry("sound:lightning", Sound.class);
+        birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
     }
     /**
      * Resets the level container (emptying the container)
@@ -579,7 +582,7 @@ public class LevelContainer{
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture, birdFlapSFX);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
@@ -599,7 +602,7 @@ public class LevelContainer{
             JsonValue blueData = parser.getBlueBirdData();
             obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
                     jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
-                    birdDamage, birdKnockBack, scale, getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), blueData);
+                    birdDamage, birdKnockBack, scale, getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), blueData, birdFlapSFX);
             obj.setDrawScale(scale);
             obj.setTexture(nestTexture);
             obj.setName("nest" + ii);

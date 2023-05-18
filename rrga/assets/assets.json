@@ -304,13 +304,13 @@
     "sounds" : {
       "sound:wind_strong": "sound/Matt sfx/ambient_wind.ogg",
       "sound:bird_alert": "sound/Matt sfx/bird_alert_squawk.ogg",
-      "sound:bird_flap": "sound/Matt sfx/bird_flap.ogg",
       "sound:lightning": "sound/Matt sfx/lightning-3.ogg"
     },
     "music" : {
       "music:menu": "music/menu.wav",
       "music:cloud": "music/a_world_of_clouds.wav",
-      "music:forest": "music/exploring_the_forest.wav"
+      "music:forest": "music/exploring_the_forest.wav",
+      "music:bird_flap": "sound/Matt sfx/bird_flap.ogg"
     },
     "fonts": {
         "shared:retro": {
