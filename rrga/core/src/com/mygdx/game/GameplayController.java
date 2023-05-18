@@ -318,6 +318,7 @@ public class GameplayController implements ContactListener {
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
+        stopSFX();
 
         resetCounter++;
     }
@@ -467,8 +468,8 @@ public class GameplayController implements ContactListener {
             // TODO: We might want to make a separate update loop for sounds
             // Play Strong Wind SFX
             if (windStrongFrame < 0 && !prevInWind) {
-//                windStrongSFX.stop();
-//                windStrongSFX.play(SFXVolume);
+                windStrongSFX.stop();
+                windStrongSFX.play(SFXVolume*15);
                 windStrongFrame = WIND_STRONG_DURATION;
 
                 // To prevent repeat all the time - only if you go out and come back in
@@ -486,6 +487,7 @@ public class GameplayController implements ContactListener {
             if (windStrongFrame > 0) {
                 windStrongFrame--;
             }
+            windStrongSFX.stop();
             prevInWind = false;
         }
 
@@ -973,6 +975,17 @@ public class GameplayController implements ContactListener {
      */
     public void pause() {
         backgroundMusic.pause();
+        windStrongSFX.pause();
+        lightningSFX.pause();
+        birdAlertSFX.pause();
+        birdFlapSFX.pause();
+    }
+
+    public void stopSFX(){
+        windStrongSFX.stop();
+        lightningSFX.stop();
+        birdAlertSFX.stop();
+        birdFlapSFX.stop();
     }
 
     /**
