@@ -307,7 +307,12 @@
     "music" : {
       "music:menu": "music/menu.wav",
       "music:cloud": "music/a_world_of_clouds.wav",
-      "music:forest": "music/exploring_the_forest.wav"
+      "music:forest": "music/exploring_the_forest.wav",
+      "music:droplets": "music/droplets.wav",
+      "music:the_storm": "music/the_storm.wav",
+      "music:over_the_cliffs": "music/over_the_cliffs.wav",
+      "music:victory": "music/victory.wav",
+      "music:game_over": "music/game_over.wav"
     },
     "fonts": {
         "shared:retro": {
