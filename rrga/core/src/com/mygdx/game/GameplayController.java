@@ -884,9 +884,12 @@ public class GameplayController implements ContactListener {
                 // this bug happens when collision is not on a point but due to overlapping area (ie: flat surfaces)
                 if (Math.abs(norm.len() - 1) > 1e-10) {
                     norm.set(avatar.getLinearVelocity()).scl(-1).nor();
+                    h.setKnockBackForce(norm);
                 }
-                float flip = (bd1 instanceof HazardModel ? 1 : -1);
-                h.setKnockBackForce(norm.scl(flip));
+                else {
+                    float flip = (bd1 instanceof HazardModel ? 1 : -1);
+                    h.setKnockBackForce(norm.scl(flip));
+                }
             }
 
             // Check for win condition
