@@ -651,6 +651,18 @@
                  "width":128,
                  "x":7868,
                  "y":2920.5
+                }, 
+                {
+                 "class":"",
+                 "gid":79,
+                 "height":87,
+                 "id":403,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":124,
+                 "x":3578,
+                 "y":2915.16666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1038,7 +1050,6 @@
         {
          "draworder":"topdown",
          "id":9,
-         "locked":true,
          "name":"Foliage",
          "objects":[
                 {
@@ -1235,18 +1246,6 @@
                 }, 
                 {
                  "class":"",
-                 "gid":79,
-                 "height":87,
-                 "id":389,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":124,
-                 "x":3559.33581597222,
-                 "y":2901.16651041667
-                }, 
-                {
-                 "class":"",
                  "gid":80,
                  "height":119,
                  "id":390,
@@ -1254,20 +1253,20 @@
                  "rotation":0,
                  "visible":true,
                  "width":139,
-                 "x":3714.50581597222,
-                 "y":2886.49651041667
+                 "x":3673.17248263889,
+                 "y":2888.49651041667
                 }, 
                 {
                  "class":"",
                  "gid":2147483725,
-                 "height":192,
+                 "height":134.025234551925,
                  "id":392,
                  "name":"",
                  "rotation":0,
                  "visible":true,
-                 "width":281,
-                 "x":3072.38581597222,
-                 "y":2868.29651041667
+                 "width":196.151515151515,
+                 "x":3058.1433917298,
+                 "y":2901.95055980737
                 }, 
                 {
                  "class":"",
@@ -1396,7 +1395,7 @@
          "y":0
         }],
  "nextlayerid":21,
- "nextobjectid":403,
+ "nextobjectid":404,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
