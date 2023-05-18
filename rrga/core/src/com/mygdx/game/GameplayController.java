@@ -163,7 +163,7 @@ public class GameplayController implements ContactListener {
      */
     private final ObjectSet<NestHazard> nests = new ObjectSet<>();
 
-    protected ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
+    protected final ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
     /**
      * The set of all hazard fixtures that umbrella in contact with
@@ -565,8 +565,12 @@ public class GameplayController implements ContactListener {
             // player is only vulnerable to further damage and effects if the level is still ongoing
             boolean vulnerable = !failed && !completed;
             if (avatar.getiFrames() == 0 && vulnerable) {
+                float avatarSpeed = avatar.getLinearVelocity().len();
                 if (h.getKnockBackScl() != 0) {
-                    cache.set(h.getKnockBackForce()).scl(h.getKnockBackScl());
+                    cache.set(h.getKnockBackForce());
+                    // apply scaling to provide speed
+                    // at bare minimum, our speed should not really decrease since we need to get player out of contact.
+                    cache.scl(Math.max(h.getKnockBackScl(), avatarSpeed));
                     avatar.getBody().setLinearVelocity(cache);
                 }
                 if (avatar.getHealth() - dam > 0) {
@@ -860,25 +864,29 @@ public class GameplayController implements ContactListener {
             // implementation? If so, want to change to fd1 == "damage"
             if (((fd2 == "umbrellaSensor" || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
+
+                contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
+
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                //norm from a to b
-
-                //subtract position vectors for now
-                Body hazBod = (bd1 instanceof HazardModel ? body1 : body2);
-                Body playerBod = (bd1 instanceof HazardModel ? body2 : body1);
-                cache.set(playerBod.getPosition().sub(hazBod.getPosition()));
-                //h.setKnockBackForce(cache.nor());
-
-                //contact normal being weird, may need for static hazards
-                WorldManifold wm = contact.getWorldManifold();
-                Vector2 norm = wm.getNormal();
-                if (norm.len() != 0.0F) {
-                    norm.nor();
-                    float flip = (bd1 instanceof HazardModel ? 1 : -1);
-                    h.setKnockBackForce(norm.scl(flip));
-
-                    contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
+                // hazard already updated contact knock-back! skip updates.
+                // ideally, enough knock back would remove this [hazard] from [contactHazard] such that:
+                // - we can enable knock back updates again.
+                if (contactHazards.contains(h)){
+                    return;
                 }
+                contactHazards.add(h);
+
+                //norm from a to b
+                WorldManifold wm = contact.getWorldManifold();
+                Vector2 norm = cache.set(wm.getNormal());
+                norm.nor();
+                // bugs with normal vector resulting in not unit length when normalized, use player velocity vector negated.
+                // this bug happens when collision is not on a point but due to overlapping area (ie: flat surfaces)
+                if (Math.abs(norm.len() - 1) > 1e-10) {
+                    norm.set(avatar.getLinearVelocity()).scl(-1).nor();
+                }
+                float flip = (bd1 instanceof HazardModel ? 1 : -1);
+                h.setKnockBackForce(norm.scl(flip));
             }
 
             // Check for win condition
@@ -950,7 +958,7 @@ public class GameplayController implements ContactListener {
         if (((umbrella == bd2 || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                 ((umbrella == bd1 || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
             HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-            if (h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
+//            if (h instanceof BirdHazard) ((BirdHazard) h).setSetKB(true);
             contactHazardFixtures.remove(bd1 instanceof HazardModel ? fix1 : fix2);
         }
     }

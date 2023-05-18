@@ -65,7 +65,7 @@
     "lightningDamage": 1,
     "lightningKnockBack": 10,
     "staticHazardDamage": 1,
-    "staticHazardKnockBack": 4
+    "staticHazardKnockBack": 5
   },
   "textures": {
     "tilesets": [ "bushes_old", "cliffs_old", "trees_old", "bushes_pink", "bushes_ground", "trees_foreground",
