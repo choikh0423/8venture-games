@@ -84,7 +84,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     /** Particle System Queue */
     private final ParticleModel[] queue;
     /** density: # of particles per area */
-    private static final float PARTICLE_DENSITY = 1.5f;
+    private static final float PARTICLE_DENSITY = 1.2f;
     /** Inward force applied to keep particles inside the wind */
     private static final float INWARD_VELOCITY = 0.000025f;
     /** Start offset to particles */
