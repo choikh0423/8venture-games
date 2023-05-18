@@ -874,7 +874,7 @@ public class GameplayController implements ContactListener {
                 //norm from a to b
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = cache.set(wm.getNormal());
-                if (norm.len() != 0.0F) {
+                if (Math.abs(norm.len() - 1) < 1e-3) {
                     norm.nor();
                     float flip = (bd1 instanceof HazardModel ? 1 : -1);
                     h.setKnockBackForce(norm.scl(flip));
