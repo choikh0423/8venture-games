@@ -815,9 +815,9 @@ public class GameplayController implements ContactListener {
             // See if we have landed on the ground.
             boolean isAvatarSensor = avatar.getSensorName().equals(fd2) || avatar.getSensorName().equals(fd1);
             if ((isAvatarSensor && bd1.getName().contains("platform")) ||
-                    (isAvatarSensor && bd2.getName().contains("platform")) ||
-                    (isAvatarSensor && bd1 instanceof RockHazard) ||
-                    (isAvatarSensor && bd2 instanceof RockHazard)) {
+                    (isAvatarSensor && bd2.getName().contains("platform"))
+                    // ||(isAvatarSensor && bd1 instanceof RockHazard) || (isAvatarSensor && bd2 instanceof RockHazard)
+                ) {
                 boolean prev = avatar.isGrounded();
                 avatar.setGrounded(true);
                 if (avatar.isGrounded() != prev) {
@@ -864,9 +864,6 @@ public class GameplayController implements ContactListener {
             // implementation? If so, want to change to fd1 == "damage"
             if (((fd2 == "umbrellaSensor" || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
-
-                contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
-
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
                 // hazard already updated contact knock-back! skip updates.
                 // ideally, enough knock back would remove this [hazard] from [contactHazard] such that:
@@ -874,21 +871,16 @@ public class GameplayController implements ContactListener {
                 if (contactHazards.contains(h)){
                     return;
                 }
-                contactHazards.add(h);
-
                 //norm from a to b
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = cache.set(wm.getNormal());
-                norm.nor();
-                // bugs with normal vector resulting in not unit length when normalized, use player velocity vector negated.
-                // this bug happens when collision is not on a point but due to overlapping area (ie: flat surfaces)
-                if (Math.abs(norm.len() - 1) > 1e-10) {
-                    norm.set(avatar.getLinearVelocity()).scl(-1).nor();
-                    h.setKnockBackForce(norm);
-                }
-                else {
+                if (norm.len() != 0.0F) {
+                    norm.nor();
                     float flip = (bd1 instanceof HazardModel ? 1 : -1);
                     h.setKnockBackForce(norm.scl(flip));
+
+                    contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
+                    contactHazards.add(h);
                 }
             }
 
