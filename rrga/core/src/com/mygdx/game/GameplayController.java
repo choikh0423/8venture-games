@@ -102,6 +102,7 @@ public class GameplayController implements ContactListener {
     private Music birdFlapSFX;
     private Sound lightningSFX;
     private Music walkingSFX;
+    private Music cloudWalkingSFX;
 
     /** Strong Wind Sound Effect Current Frame*/
     private int windStrongFrame = 0;
@@ -275,6 +276,7 @@ public class GameplayController implements ContactListener {
         birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
         lightningSFX = directory.getEntry("sound:lightning", Sound.class);
         walkingSFX = directory.getEntry("music:walking", Music.class);
+        cloudWalkingSFX = directory.getEntry("music:walking_clouds", Music.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -504,8 +506,13 @@ public class GameplayController implements ContactListener {
                 avatar.setMovement(input.getHorizontal() * avatar.getForce());
                 avatar.applyWalkingForce();
                 if(moveInputted){
-                    walkingSFX.setVolume(0.2f*SFXVolume);
-                    walkingSFX.play();
+                    if (avatar.onCloud){
+                        cloudWalkingSFX.setVolume(0.2f*SFXVolume);
+                        cloudWalkingSFX.play();
+                    } else {
+                        walkingSFX.setVolume(0.2f*SFXVolume);
+                        walkingSFX.play();
+                    }
                 }
             }
         }
@@ -802,6 +809,7 @@ public class GameplayController implements ContactListener {
                     (isAvatarSensor && bd1 instanceof RockHazard) ||
                     (isAvatarSensor && bd2 instanceof RockHazard)) {
                 boolean prev = avatar.isGrounded();
+                if(bd1.getName().contains("moving_platform") || bd2.getName().contains("moving_platform")) avatar.onCloud = true;
                 avatar.setGrounded(true);
                 if(avatar.isGrounded()!=prev){
                     avatar.startLand();

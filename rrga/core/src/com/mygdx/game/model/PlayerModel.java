@@ -63,6 +63,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	private boolean isJumping;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
+	public boolean onCloud;
 	/** Whether we are zooming out or not */
 	private boolean isZooming;
 	/** The physics shape of this object */

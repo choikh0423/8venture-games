@@ -175,7 +175,7 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         }
         else if (waitCounter == 0){
             // finished waiting, transition to strike cycle
-            sfx.play(sfxVol*.2f);
+            sfx.play(sfxVol*.1f);
             switchFrames();
             waitCounter--;
         }
