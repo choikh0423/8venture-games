@@ -573,10 +573,11 @@ public class LevelContainer{
         float birdKnockBack = hazardsjv.getInt("birdKnockBack");
         // indices for each bird type indicating the preferred still frame.
         int[] indices = hazardsjv.get("birdStillFrames").asIntArray();
+        int birdCount = 0;
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
@@ -584,24 +585,29 @@ public class LevelContainer{
             addObject(obj);
             birds.add(obj);
             drawables.add(obj);
+            birdCount++;
         }
 
-        //TODO
-        //create nests
+        //create nests and their bird
         String nestName = "nest";
         JsonValue[] nestData = parser.getNestData();
         for(int ii = 0; ii<nestData.length; ii++){
-            NestHazard obj;
-            JsonValue jv = nestData[ii];
-            JsonValue blueData = parser.getBlueBirdData();
-            obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
-                    jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
-                    birdDamage, birdKnockBack, scale, getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), blueData);
-            obj.setDrawScale(scale);
-            obj.setTexture(nestTexture);
-            obj.setName("nest" + ii);
-            addObject(obj);
-            nests.add(obj);
+            NestHazard nest = new NestHazard(nestData[ii], parser.getBlueBirdData());
+            nest.setDrawScale(scale);
+            nest.setTexture(nestTexture);
+            nest.setName("nest" + ii);
+            addObject(nest);
+            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack);
+            bird.setDrawScale(scale);
+            bird.setFlapAnimation(getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), indices[BirdHazard.BirdColor.BLUE.ordinal()]);
+            // bird.setWarningAnimation(warningTexture);
+            bird.setName("bird" + (birdCount + ii));
+            addObject(bird);
+            bird.setSpawning();
+            birds.add(bird);
+            // nests.add(obj);
+            drawables.add(nest);
+            drawables.add(bird);
         }
 
         //create lightning (animated lightning bolts and still-frame lightning bolts)
