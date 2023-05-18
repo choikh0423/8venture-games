@@ -101,6 +101,7 @@ public class GameplayController implements ContactListener {
     private Sound birdAlertSFX;
     private Music birdFlapSFX;
     private Sound lightningSFX;
+    private Music walkingSFX;
 
     /** Strong Wind Sound Effect Current Frame*/
     private int windStrongFrame = 0;
@@ -273,6 +274,7 @@ public class GameplayController implements ContactListener {
         birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
         birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
         lightningSFX = directory.getEntry("sound:lightning", Sound.class);
+        walkingSFX = directory.getEntry("music:walking", Music.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -501,6 +503,10 @@ public class GameplayController implements ContactListener {
             if (!umbrella.isBoosting()){
                 avatar.setMovement(input.getHorizontal() * avatar.getForce());
                 avatar.applyWalkingForce();
+                if(moveInputted){
+                    walkingSFX.setVolume(0.2f*SFXVolume);
+                    walkingSFX.play();
+                }
             }
         }
         else if (!windPushed && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
@@ -510,6 +516,7 @@ public class GameplayController implements ContactListener {
         } else if (!umbrella.isOpen()) {
             avatar.dampAirHoriz();
         }
+
         if ((umbrella.isOpen() && angle < Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
         }
@@ -981,6 +988,7 @@ public class GameplayController implements ContactListener {
         lightningSFX.pause();
         birdAlertSFX.pause();
         birdFlapSFX.pause();
+        walkingSFX.pause();
     }
 
     public void stopSFX(){
@@ -988,6 +996,7 @@ public class GameplayController implements ContactListener {
         lightningSFX.stop();
         birdAlertSFX.stop();
         birdFlapSFX.stop();
+        walkingSFX.stop();
     }
 
     /**
