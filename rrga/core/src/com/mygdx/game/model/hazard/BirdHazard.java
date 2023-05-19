@@ -82,6 +82,9 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
      */
     private MoveBehavior patrol;
 
+    /** whether the bird is following their assigned path (empty paths => true) */
+    private boolean followingPath;
+
     /**
      * The color of this bird. Determines the bird's behavior.
      * Red: Patrolling Passively.
@@ -94,7 +97,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     /**
      * Move speed of this bird
      */
-    private final int moveSpeed;
+    private float moveSpeed;
 
     /**
      * The amount (in physics units) this bird is currently trying to move
@@ -141,10 +144,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
 
     /** Bird flap animation elapsed time */
     float flapElapsedTime;
-
-    /** Bird warning animation filmstrip texture */
-    private final Texture warningTex;
-
 
     /** Bird warning animation frames */
     private TextureRegion[][] warningTmpFrames;
@@ -321,9 +320,22 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         else {
             patrol = MoveBehavior.FORWARD;
         }
+        followingPath = true;
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex) {
+    /** updates the bird's speed to the given speed >= 0*/
+    public void setMoveSpeed(float moveSpeed){
+        this.moveSpeed = moveSpeed;
+    }
+
+    /** resets the bird's progress (puts bird back onto start of path and follows the path) */
+    protected void reset(){
+        followingPath = true;
+        this.setPosition(path[0], path[1]);
+        this.currentPathIndex = 0;
+    }
+
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack) {
         super(data.getFloat("x"), data.getFloat("y"));
 
         // this is the bounding box dimensions of the texture that contains all animation frames.
@@ -341,7 +353,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         path = data.get("path").asFloatArray();
         setPath(data.get("path").asFloatArray(), data.getInt("loopTo", -1));
         attack = data.getBoolean("attack");
-        moveSpeed = data.getInt("movespeed");
+        moveSpeed = data.getFloat("movespeed");
 
         color = convertToColor(data.getString("color"));
         faceRight = data.getBoolean("facing_right");
@@ -354,7 +366,6 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         knockBackScl = birdKnockBack;
 //        setKB = true;
         warning = false;
-        this.warningTex = warningTex;
 
         // make hit-box objects
         float x = data.getFloat("x");
@@ -429,6 +440,10 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         if (move.x != 0){
             setFaceRight(move.x > 0);
         }
+        // specific to blue birds, after setting initial direction along last segment of path, abandon path
+        if (color.equals(BirdColor.BLUE) && currentPathIndex == path.length - 2){
+            followingPath = false;
+        }
         if (Math.abs(deltaX) < .001 && Math.abs(deltaY) < .001){
             // determine next point to move to
             switch (patrol){
@@ -464,14 +479,16 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         //if target not seen
         if (!seesTarget) {
             if(moveSpeed > 0) {
-                patrol();
-                moveDir.set(move);
-
-                //Uncomment for rotating birds
-                /*for (Obstacle o : bodies){
-                    o.setAngle(getAngleFromVec(moveDir));
+                if (!followingPath){
+                    // end of path for blue bird, continuing heading in same direction
+                    // DO NOT REVERSE (that is patrolling behavior), MOVE FORWARD
+                    setX(getX() + moveDir.x);
+                    setY(getY() + moveDir.y);
                 }
-                setAngle(getAngleFromVec(moveDir));*/
+                else {
+                    patrol();
+                    moveDir.set(move);  // save move direction
+                }
             }
         }
         //else target is seen
@@ -610,6 +627,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         }
     }
 
+    public TextureRegion getStillFrame(){
+        return this.stillFrame;
+    }
+
+    public boolean isFaceRight() {
+        return faceRight;
+    }
+
     /**
      * swaps the active states of the two hit-box bodies
      */
@@ -662,4 +687,16 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         }
     }
 
+    @Override
+    public void setPosition(float x, float y) {
+        super.setPosition(x,y);
+        for (Obstacle bodies: this.bodies){
+            bodies.setPosition(x,y);
+        }
+    }
+
+    @Override
+    public void setPosition(Vector2 value) {
+        this.setPosition(value.x, value.y);
+    }
 }

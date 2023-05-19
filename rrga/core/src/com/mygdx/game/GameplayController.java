@@ -161,7 +161,7 @@ public class GameplayController implements ContactListener {
     /**
      * The set of all nests currently in the level
      */
-    private final ObjectSet<NestHazard> nests = new ObjectSet<>();
+//    private final ObjectSet<NestHazard> nests = new ObjectSet<>();
 
     protected final ObjectSet<HazardModel> contactHazards = new ObjectSet<>();
 
@@ -620,9 +620,15 @@ public class GameplayController implements ContactListener {
 
             if (bird.getAABBx() > bounds.width || bird.getAABBy() < 0
                     || bird.getAABBx() + bird.getWidth() < 0
-                    || bird.getAABBy() - bird.getHeight() > bounds.height * bounds.height) {
-                //mark removed so that it is garbage collected at end of update loop
-                bird.markRemoved(true);
+                    || bird.getAABBy() - bird.getHeight() > bounds.height * bounds.height ) {
+                //(brown/green/red) mark removed so that it is garbage collected at end of update loop
+                // blue: set spawning again
+                if (bird.getColor().equals(BirdHazard.BirdColor.BLUE)){
+                    ((NestedBirdHazard) bird).setSpawning();
+                }
+                else {
+                    bird.markRemoved(true);
+                }
                 continue;
             }
 
@@ -685,15 +691,16 @@ public class GameplayController implements ContactListener {
         }
 
         //update nests
-        for (NestHazard n : nests) {
-            BirdHazard b = n.update();
-            if (b != null) {
-                //TODO if references to level container change, need to add to gameplay controller lists
-                levelContainer.objects.add(b);
-                b.activatePhysics(world);
-                levelContainer.getBirds().add(b);
-            }
-        }
+//        for(NestHazard n: nests){
+//            BirdHazard b = n.update();
+//            if(b != null){
+//                //TODO if references to level container change, need to add to gameplay controller lists
+//                levelContainer.objects.add(b);
+//                b.activatePhysics(world);
+//                levelContainer.getBirds().add(b);
+//            }
+//        }
+
 
         //criterion to disconnect player from moving platform when ANY of the following holds
         // - player can move (on platform) and tries to move

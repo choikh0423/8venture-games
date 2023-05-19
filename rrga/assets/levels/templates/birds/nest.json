@@ -8,7 +8,7 @@
             {
              "name":"bird_speed",
              "type":"float",
-             "value":0
+             "value":10
             }, 
             {
              "name":"path",
@@ -18,7 +18,7 @@
             {
              "name":"spawn_delay",
              "type":"int",
-             "value":1
+             "value":100
             }],
      "rotation":0,
      "type":"nest",
