@@ -122,11 +122,8 @@ public class LevelParser {
     /** the default JSONs of movable cloud objects */
     private final JsonValue[] cloudDefaultObjects;
 
-    /** the default JSON properties of a nest object */
+    /** the default JSON object of a nest object */
     private final JsonValue nestDefault;
-
-    /** the default JSON polygon of a nest object */
-    private final JsonValue nestDefaultPoly;
 
     /** the default JSONs of animated lightning objects */
     private final JsonValue[] lightningDefaultObjects;
@@ -310,8 +307,7 @@ public class LevelParser {
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
 
-        nestDefault = nestTemplate.get("object").get("properties");
-        nestDefaultPoly = nestTemplate.get("object").get("polygon");
+        nestDefault = nestTemplate.get("object");
 
         cloudDefaultObjects = new JsonValue[]{
                 cloud0Template.get("object"),
@@ -1079,47 +1075,45 @@ public class LevelParser {
 
     private void processNests(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         nestData = new JsonValue[rawData.size()];
-        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < nestData.length; ii++) {
-            seen.clear();
             //data we pass in to nest constructor
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //nest raw data
             JsonValue n = rawData.get(ii);
             JsonValue props = n.get("properties");
-
             // set position data
             readPositionAndConvert(n, temp);
             addPosition(data, temp);
-
             // the resulting path should be stored as a list of floats which is Json array of Json floats.
             JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
-            // implicitly, the platform's location is the FIRST point on its path.
             pathJson.addChild(new JsonValue(temp.x));
             pathJson.addChild(new JsonValue(temp.y));
-
-            // this takes either the platform's next point along its path or take from default (which should be 0)
-            JsonValue jsonId = getFromProperties(props, "path", null);
-            int next = jsonId.asInt();
-            int idx = 1;
-            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
-                seen.put(next, idx);
-                idx++;
-                JsonValue nodeData = trajectory.get(next);
-                // put path point (x,y) into vector cache and perform conversion
-                readPositionAndConvert(nodeData, temp);
-                // add this node to bird's path
-                pathJson.addChild(new JsonValue(temp.x));
-                pathJson.addChild(new JsonValue(temp.y));
-                // get next
-                nodeData = nodeData.get("properties");
-                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
-                next = jsonId.asInt();
-            }
-            data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
-            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
-            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            JsonValue defaultProps = nestDefault.get("properties");
+            int nextPointID = getFromProperties(props, "path", defaultProps).asInt();
+            processPath(pathJson, trajectory, nextPointID, n.getInt("id") );
             data.addChild("path", pathJson);
+            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", defaultProps).asFloat()));
+            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", defaultProps).asFloat()));
+
+            boolean horizontalFlipped = isObjectHorizontallyFlipped(n);
+            boolean verticalFlipped = isObjectVerticallyFlipped(n);
+            data.addChild("flipX", new JsonValue(horizontalFlipped));
+            // data.addChild("flipY", new JsonValue(verticalFlipped));
+
+            // add AABB and hitbox
+            JsonValue tileJson = gameObjectTiles.get(getProcessedGid(nestDefault) - 1);
+            int assetWidth = tileJson.getInt("imagewidth");
+            int assetHeight = tileJson.getInt("imageheight");
+            data.addChild("filmStripWidth", new JsonValue(assetWidth));
+            data.addChild("filmStripHeight", new JsonValue(assetHeight));
+            data.addChild("AABB", processTileObjectAABB(nestDefault, nestDefault, assetWidth, assetHeight));
+            JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+            float ox = hitBoxPoints.getFloat("x");
+            float oy = hitBoxPoints.getFloat("y");
+            JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                    horizontalFlipped, verticalFlipped, assetWidth, assetHeight);
+            data.addChild("points", shape);
+            data.addChild("depth", new JsonValue(n.getInt("__DEPTH__", -1)));
             nestData[ii] = data;
         }
     }

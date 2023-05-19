@@ -185,8 +185,8 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             this.partRadius = Math.max(partRadius, (float)Math.sqrt(distX * distX + distY * distY));
         }
 
-        System.out.println(relMaxX);
-        System.out.println(relMinX);
+        //System.out.println(relMaxX);
+        //System.out.println(relMinX);
 
         // Computing width and height of bounding box - currently inaccurate representation of actual wind area
         float width = (maxx - minx);

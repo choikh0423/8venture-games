@@ -35,7 +35,9 @@ public class PolygonHazard extends PolygonObstacle implements HazardModel {
     public Vector2 getKnockBackForce() { return temp.set(knockBackForce); }
 
     @Override
-    public void setKnockBackForce(Vector2 kbForce) { knockBackForce.set(kbForce.nor()); }
+    public void setKnockBackForce(Vector2 kbForce) {
+        knockBackForce.set(kbForce.nor());
+    }
 
     /** the (x,y) position of the top corner of the AABB enclosing this polygon.<br>
      *  this does not get updated when polygon is resized, so the polygon should not be resized.<br>
