@@ -186,7 +186,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":16
+                         "value":12
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":8832,
@@ -249,7 +249,7 @@
                 }, 
                 {
                  "id":1927,
-                 "rotation":-75,
+                 "rotation":-30,
                  "template":"..\/templates\/wind_dir.json",
                  "x":9252,
                  "y":3800
@@ -444,7 +444,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":12
+                         "value":10
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":8237.55950385518,
@@ -452,10 +452,10 @@
                 }, 
                 {
                  "id":2306,
-                 "rotation":40,
+                 "rotation":0,
                  "template":"..\/templates\/wind_dir.json",
-                 "x":8349.55950385518,
-                 "y":5890
+                 "x":8004.10495840064,
+                 "y":4044.54545454545
                 }, 
                 {
                  "id":2360,
@@ -545,7 +545,7 @@
                         {
                          "name":"magnitude",
                          "type":"float",
-                         "value":12
+                         "value":11
                         }],
                  "template":"..\/templates\/wind.json",
                  "x":2744,
@@ -894,6 +894,7 @@
         {
          "draworder":"topdown",
          "id":31,
+         "locked":true,
          "name":"deathzone",
          "objects":[
                 {
@@ -975,6 +976,79 @@
                  "width":0,
                  "x":10232,
                  "y":240
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":2377,
+                 "name":"death",
+                 "polygon":[
+                        {
+                         "x":-38.666666666667,
+                         "y":3
+                        }, 
+                        {
+                         "x":214.166666666666,
+                         "y":62.5
+                        }, 
+                        {
+                         "x":315,
+                         "y":205
+                        }, 
+                        {
+                         "x":169.333333333333,
+                         "y":273.333333333333
+                        }, 
+                        {
+                         "x":-49.333333333333,
+                         "y":237.333333333333
+                        }, 
+                        {
+                         "x":-180.000000000001,
+                         "y":126.666666666667
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":5706.24242424242,
+                 "y":3622.30303030303
+                }, 
+                {
+                 "id":2388,
+                 "polygon":[
+                        {
+                         "x":249.333333333333,
+                         "y":4
+                        }, 
+                        {
+                         "x":520.845055687539,
+                         "y":56
+                        }, 
+                        {
+                         "x":622.178389020873,
+                         "y":217.467622763235
+                        }, 
+                        {
+                         "x":468,
+                         "y":293.467622763235
+                        }, 
+                        {
+                         "x":232,
+                         "y":256.067144714951
+                        }, 
+                        {
+                         "x":92.666666666667,
+                         "y":141.366905690808
+                        }],
+                 "properties":[
+                        {
+                         "name":"fill_texture",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "x":5414.66666666667,
+                 "y":3612
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2959,7 +3033,228 @@
          "id":25,
          "locked":true,
          "name":"Front_Wind",
-         "objects":[],
+         "objects":[
+                {
+                 "id":2381,
+                 "polygon":[
+                        {
+                         "x":40,
+                         "y":392
+                        }, 
+                        {
+                         "x":-64,
+                         "y":98.5
+                        }, 
+                        {
+                         "x":20,
+                         "y":-131
+                        }, 
+                        {
+                         "x":340,
+                         "y":-366
+                        }, 
+                        {
+                         "x":788,
+                         "y":-461
+                        }, 
+                        {
+                         "x":1252,
+                         "y":-408
+                        }, 
+                        {
+                         "x":1598,
+                         "y":-229
+                        }, 
+                        {
+                         "x":1744,
+                         "y":182
+                        }, 
+                        {
+                         "x":1624,
+                         "y":500
+                        }, 
+                        {
+                         "x":1368,
+                         "y":696
+                        }, 
+                        {
+                         "x":940,
+                         "y":728
+                        }, 
+                        {
+                         "x":402,
+                         "y":618
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":2384
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":16
+                        }],
+                 "template":"..\/templates\/wind.json",
+                 "x":2904,
+                 "y":2192
+                }, 
+                {
+                 "id":2382,
+                 "polygon":[
+                        {
+                         "x":40,
+                         "y":392
+                        }, 
+                        {
+                         "x":-64,
+                         "y":98.5
+                        }, 
+                        {
+                         "x":20,
+                         "y":-131
+                        }, 
+                        {
+                         "x":340,
+                         "y":-366
+                        }, 
+                        {
+                         "x":788,
+                         "y":-461
+                        }, 
+                        {
+                         "x":1252,
+                         "y":-408
+                        }, 
+                        {
+                         "x":1598,
+                         "y":-229
+                        }, 
+                        {
+                         "x":1744,
+                         "y":182
+                        }, 
+                        {
+                         "x":1624,
+                         "y":500
+                        }, 
+                        {
+                         "x":1368,
+                         "y":696
+                        }, 
+                        {
+                         "x":940,
+                         "y":728
+                        }, 
+                        {
+                         "x":402,
+                         "y":618
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":2386
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":18
+                        }],
+                 "rotation":301.521816072504,
+                 "template":"..\/templates\/wind.json",
+                 "x":1236.52763458567,
+                 "y":3206.2536754929
+                }, 
+                {
+                 "id":2383,
+                 "polygon":[
+                        {
+                         "x":40,
+                         "y":392
+                        }, 
+                        {
+                         "x":-64,
+                         "y":98.5
+                        }, 
+                        {
+                         "x":20,
+                         "y":-131
+                        }, 
+                        {
+                         "x":340,
+                         "y":-366
+                        }, 
+                        {
+                         "x":788,
+                         "y":-461
+                        }, 
+                        {
+                         "x":1252,
+                         "y":-408
+                        }, 
+                        {
+                         "x":1598,
+                         "y":-229
+                        }, 
+                        {
+                         "x":1744,
+                         "y":182
+                        }, 
+                        {
+                         "x":1624,
+                         "y":500
+                        }, 
+                        {
+                         "x":1368,
+                         "y":696
+                        }, 
+                        {
+                         "x":940,
+                         "y":728
+                        }, 
+                        {
+                         "x":402,
+                         "y":618
+                        }],
+                 "properties":[
+                        {
+                         "name":"dir",
+                         "type":"object",
+                         "value":2385
+                        }, 
+                        {
+                         "name":"magnitude",
+                         "type":"float",
+                         "value":16
+                        }],
+                 "rotation":0,
+                 "template":"..\/templates\/wind.json",
+                 "x":2104,
+                 "y":3768
+                }, 
+                {
+                 "id":2384,
+                 "rotation":120,
+                 "template":"..\/templates\/wind_dir.json",
+                 "x":3728,
+                 "y":1096
+                }, 
+                {
+                 "id":2385,
+                 "rotation":60,
+                 "template":"..\/templates\/wind_dir.json",
+                 "x":1760,
+                 "y":4584
+                }, 
+                {
+                 "id":2386,
+                 "rotation":-90,
+                 "template":"..\/templates\/wind_dir.json",
+                 "x":392,
+                 "y":3464
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -3989,7 +4284,7 @@
                         {
                          "name":"spawn_delay",
                          "type":"int",
-                         "value":127
+                         "value":101
                         }],
                  "template":"..\/templates\/birds\/nest.json",
                  "x":6803.33333333333,
@@ -4174,6 +4469,11 @@
                          "name":"path",
                          "type":"object",
                          "value":2329
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":49
                         }],
                  "template":"..\/templates\/birds\/nest.json",
                  "x":7107.5,
@@ -4265,7 +4565,7 @@
                         {
                          "name":"spawn_delay",
                          "type":"int",
-                         "value":161
+                         "value":77
                         }],
                  "template":"..\/templates\/birds\/nest.json",
                  "x":7054.5,
@@ -4362,7 +4662,7 @@
                         {
                          "name":"spawn_delay",
                          "type":"int",
-                         "value":177
+                         "value":121
                         }],
                  "template":"..\/templates\/birds\/nest.json",
                  "x":7331.83333333333,
@@ -4396,7 +4696,7 @@
                         {
                          "name":"spawn_delay",
                          "type":"int",
-                         "value":101
+                         "value":64
                         }],
                  "template":"..\/templates\/birds\/nest.json",
                  "x":6733.5,
@@ -4506,6 +4806,618 @@
         }, 
         {
          "draworder":"topdown",
+         "id":37,
+         "locked":true,
+         "name":"blues_nonest",
+         "objects":[
+                {
+                 "id":2431,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":8
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2432
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":67
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7071.8,
+                 "y":4819.67
+                }, 
+                {
+                 "id":2432,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2459
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5693.19121212121,
+                 "y":4598.90424242424
+                }, 
+                {
+                 "id":2433,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2434
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7063,
+                 "y":4763
+                }, 
+                {
+                 "id":2434,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2460
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5850.86121212121,
+                 "y":4555.74424242424
+                }, 
+                {
+                 "id":2435,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2436
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":147
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7007,
+                 "y":4920
+                }, 
+                {
+                 "id":2436,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2461
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5717.05121212121,
+                 "y":4713.88424242424
+                }, 
+                {
+                 "id":2437,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2438
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7046,
+                 "y":4804
+                }, 
+                {
+                 "id":2438,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2462
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5696.47121212121,
+                 "y":4638.75424242424
+                }, 
+                {
+                 "id":2439,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2440
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7149,
+                 "y":5018
+                }, 
+                {
+                 "id":2440,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2463
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5962.88121212121,
+                 "y":4657.07424242424
+                }, 
+                {
+                 "id":2441,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2442
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7369,
+                 "y":4918
+                }, 
+                {
+                 "id":2442,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2464
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6110.73121212121,
+                 "y":4526.47424242424
+                }, 
+                {
+                 "id":2443,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":10
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2444
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7398,
+                 "y":4911
+                }, 
+                {
+                 "id":2444,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2465
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6000.41121212121,
+                 "y":4538.03424242424
+                }, 
+                {
+                 "id":2445,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":6
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2446
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":87
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":6838,
+                 "y":4937
+                }, 
+                {
+                 "id":2446,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2466
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5879.68121212121,
+                 "y":4425.67424242424
+                }, 
+                {
+                 "id":2447,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2448
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7295,
+                 "y":4913
+                }, 
+                {
+                 "id":2448,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2467
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6004.07121212121,
+                 "y":4394.38424242424
+                }, 
+                {
+                 "id":2449,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2450
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":132
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7143,
+                 "y":5038
+                }, 
+                {
+                 "id":2450,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2468
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5865.45121212121,
+                 "y":4373.62424242424
+                }, 
+                {
+                 "id":2451,
+                 "properties":[
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2452
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7375,
+                 "y":5416
+                }, 
+                {
+                 "id":2452,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2469
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6144.04121212121,
+                 "y":4394.09424242424
+                }, 
+                {
+                 "id":2453,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":12
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2454
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":121
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7365,
+                 "y":5416
+                }, 
+                {
+                 "id":2454,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2470
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6307.52121212121,
+                 "y":4404.12424242424
+                }, 
+                {
+                 "id":2455,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":8
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2456
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":118
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":7390.3,
+                 "y":4946.33
+                }, 
+                {
+                 "id":2456,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2471
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":6145.74121212121,
+                 "y":4318.68424242424
+                }, 
+                {
+                 "id":2457,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":8
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":2458
+                        }, 
+                        {
+                         "name":"spawn_delay",
+                         "type":"int",
+                         "value":111
+                        }, 
+                        {
+                         "name":"visible",
+                         "type":"bool",
+                         "value":false
+                        }],
+                 "template":"..\/templates\/birds\/nest.json",
+                 "x":6810,
+                 "y":4964
+                }, 
+                {
+                 "id":2458,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":2472
+                        }],
+                 "template":"..\/templates\/path_point.json",
+                 "x":5701.66121212121,
+                 "y":4782.79424242424
+                }, 
+                {
+                 "id":2459,
+                 "template":"..\/templates\/path_point.json",
+                 "x":1267.74,
+                 "y":2906.53
+                }, 
+                {
+                 "id":2460,
+                 "template":"..\/templates\/path_point.json",
+                 "x":152.610000000001,
+                 "y":3152.1
+                }, 
+                {
+                 "id":2461,
+                 "template":"..\/templates\/path_point.json",
+                 "x":215.42,
+                 "y":3905.42
+                }, 
+                {
+                 "id":2462,
+                 "template":"..\/templates\/path_point.json",
+                 "x":140.48,
+                 "y":3578.9
+                }, 
+                {
+                 "id":2463,
+                 "template":"..\/templates\/path_point.json",
+                 "x":871.74,
+                 "y":2832.06
+                }, 
+                {
+                 "id":2464,
+                 "template":"..\/templates\/path_point.json",
+                 "x":747.67,
+                 "y":2405.99
+                }, 
+                {
+                 "id":2465,
+                 "template":"..\/templates\/path_point.json",
+                 "x":482.51,
+                 "y":2717.03
+                }, 
+                {
+                 "id":2466,
+                 "template":"..\/templates\/path_point.json",
+                 "x":-98.3299999999999,
+                 "y":2924.44
+                }, 
+                {
+                 "id":2467,
+                 "template":"..\/templates\/path_point.json",
+                 "x":135.07,
+                 "y":2391.98
+                }, 
+                {
+                 "id":2468,
+                 "template":"..\/templates\/path_point.json",
+                 "x":1272.32,
+                 "y":2084.52
+                }, 
+                {
+                 "id":2469,
+                 "template":"..\/templates\/path_point.json",
+                 "x":492.01,
+                 "y":1978.47
+                }, 
+                {
+                 "id":2470,
+                 "template":"..\/templates\/path_point.json",
+                 "x":939.68,
+                 "y":1582.57
+                }, 
+                {
+                 "id":2471,
+                 "template":"..\/templates\/path_point.json",
+                 "x":301.84,
+                 "y":1779.47
+                }, 
+                {
+                 "id":2472,
+                 "template":"..\/templates\/path_point.json",
+                 "x":353.52,
+                 "y":4122.94
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":3,
          "locked":true,
          "name":"Player",
@@ -4513,8 +5425,8 @@
                 {
                  "id":607,
                  "template":"..\/templates\/goal.json",
-                 "x":1808,
-                 "y":2384
+                 "x":1176,
+                 "y":1364
                 }, 
                 {
                  "id":608,
@@ -5140,8 +6052,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":37,
- "nextobjectid":2377,
+ "nextlayerid":38,
+ "nextobjectid":2473,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
