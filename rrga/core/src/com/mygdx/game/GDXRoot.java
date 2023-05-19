@@ -264,7 +264,7 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
 			}
 		} else if (screen == confirmation){
-			if (exitCode == ConfirmationMode.EXIT_LEVEL || exitCode == ConfirmationMode.EXIT_SETTINGS){
+			if (exitCode == ConfirmationMode.EXIT_LEVEL_SELECTOR || exitCode == ConfirmationMode.EXIT_SETTINGS){
 				menu.setScreenListener(this);
 				menu.reset();
 				menu.setScreenMode(exitCode);
