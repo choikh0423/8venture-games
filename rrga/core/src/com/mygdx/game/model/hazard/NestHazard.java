@@ -30,6 +30,8 @@ public class NestHazard extends PolygonObstacle implements Drawable {
     private final Vector2 temp = new Vector2();
     private final int drawDepth;
 
+    private final boolean visible;
+
     public NestHazard(JsonValue nestData, JsonValue blueBirdData) {
         super(nestData.get("points").asFloatArray(), nestData.getFloat("x"), nestData.getFloat("y"));
         setGravityScale(0);
@@ -41,6 +43,7 @@ public class NestHazard extends PolygonObstacle implements Drawable {
         this.path = nestData.get("path").asFloatArray();
         birdSpeed = nestData.getFloat("bird_speed");
         spawnDelay = nestData.getInt("spawn_delay");
+        visible = nestData.getBoolean("visible");
 
         // load Drawable-necessary information
         float[] aabb = nestData.get("AABB").asFloatArray();
@@ -109,9 +112,11 @@ public class NestHazard extends PolygonObstacle implements Drawable {
     }
 
     public void draw(GameCanvas canvas){
-        canvas.draw(texture, Color.WHITE, texture.getRegionWidth() / 2f, texture.getRegionHeight() / 2f,
-                getX() * drawScale.x, getY() * drawScale.y, 0,
-                dimensions.x / texture.getRegionWidth() * drawScale.x,
-                dimensions.y / texture.getRegionHeight() * drawScale.y);
+        if (visible) {
+            canvas.draw(texture, Color.WHITE, texture.getRegionWidth() / 2f, texture.getRegionHeight() / 2f,
+                    getX() * drawScale.x, getY() * drawScale.y, 0,
+                    dimensions.x / texture.getRegionWidth() * drawScale.x,
+                    dimensions.y / texture.getRegionHeight() * drawScale.y);
+        }
     }
 }

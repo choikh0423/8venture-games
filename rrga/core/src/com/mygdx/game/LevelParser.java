@@ -1092,6 +1092,7 @@ public class LevelParser {
             int nextPointID = getFromProperties(props, "path", defaultProps).asInt();
             processPath(pathJson, trajectory, nextPointID, n.getInt("id") );
             data.addChild("path", pathJson);
+            data.addChild("visible", new JsonValue(getFromProperties(props, "visible", defaultProps).asBoolean()));
             data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", defaultProps).asFloat()));
             data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", defaultProps).asFloat()));
 
