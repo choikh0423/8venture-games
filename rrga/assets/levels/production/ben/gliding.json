@@ -78,7 +78,7 @@
                          "x":3256,
                          "y":632
                         }],
-                 "template":"..\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "x":-3256,
                  "y":4488
                 }],
@@ -454,7 +454,7 @@
                          "x":0,
                          "y":112.134289429902
                         }],
-                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "template":"..\/..\/templates\/static_hazards\/hazard.json",
                  "width":1597.87283346532,
                  "x":4646.99074074074,
                  "y":1018.51851851852
@@ -479,7 +479,7 @@
                          "x":0,
                          "y":112.134
                         }],
-                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "template":"..\/..\/templates\/static_hazards\/hazard.json",
                  "width":2002.96259259259,
                  "x":3338.79648148148,
                  "y":2009.90522222222
@@ -504,7 +504,7 @@
                          "x":0,
                          "y":112.134
                         }],
-                 "template":"..\/templates\/static_hazards\/hazard.json",
+                 "template":"..\/..\/templates\/static_hazards\/hazard.json",
                  "width":1985.60148148148,
                  "x":4293.65759259259,
                  "y":2860.59966666667
@@ -552,7 +552,7 @@
                          "x":0,
                          "y":82.6202419592801
                         }],
-                 "template":"..\/templates\/platform.json",
+                 "template":"..\/..\/templates\/platform.json",
                  "width":558.07486631016,
                  "x":5757.57575757576,
                  "y":525.84670231729
@@ -635,14 +635,14 @@
                 {
                  "gid":204,
                  "id":99,
-                 "template":"..\/templates\/spawn.json",
+                 "template":"..\/..\/templates\/spawn.json",
                  "visible":true,
                  "x":5978.35020595234,
                  "y":474.956713875267
                 }, 
                 {
                  "id":174,
-                 "template":"..\/templates\/goal.json",
+                 "template":"..\/..\/templates\/goal.json",
                  "x":3588.26944680992,
                  "y":3547.74017563491
                 }],
@@ -1237,35 +1237,35 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/tilesets\/dirt.json"
+         "source":"..\/..\/tilesets\/dirt.json"
         }, 
         {
          "firstgid":65,
-         "source":"..\/tilesets\/stickers.json"
+         "source":"..\/..\/tilesets\/stickers.json"
         }, 
         {
          "firstgid":106,
-         "source":"..\/tilesets\/bushes_ground.json"
+         "source":"..\/..\/tilesets\/bushes_ground.json"
         }, 
         {
          "firstgid":155,
-         "source":"..\/objects\/json\/objects.json"
+         "source":"..\/..\/objects\/json\/objects.json"
         }, 
         {
          "firstgid":246,
-         "source":"..\/tilesets\/cliffs_interior.json"
+         "source":"..\/..\/tilesets\/cliffs_interior.json"
         }, 
         {
          "firstgid":310,
-         "source":"..\/tilesets\/trees_background.json"
+         "source":"..\/..\/tilesets\/trees_background.json"
         }, 
         {
          "firstgid":454,
-         "source":"..\/tilesets\/cliffs_exterior.json"
+         "source":"..\/..\/tilesets\/cliffs_exterior.json"
         }, 
         {
          "firstgid":518,
-         "source":"..\/tilesets\/tutorial_helpers.json"
+         "source":"..\/..\/tilesets\/tutorial_helpers.json"
         }],
  "tilewidth":128,
  "type":"map",
