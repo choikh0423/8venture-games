@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.Obstacle;
+import com.mygdx.game.utility.util.FilmStrip;
 
 /**
  * A nested bird is one that will respawn at their spawner (nest) after it leaves the game screen.
@@ -19,28 +20,31 @@ public class NestedBirdHazard extends BirdHazard{
     private final NestHazard spawner;
 
     /** the number of remaining frames in spawning mode/blinking */
-    private int blinkingCountDown;
+    private int spawningCountDown;
 
     /** the total number of frames in spawning mode/blinking */
-    private final int blinkingDuration;
+    private final int spawningDuration;
 
-    /** the number of frames to draw per blink */
-    private static final int DRAW_DURATION_BLINKING = 10;
+    /** the spawn animation */
+    private FilmStrip spawnFilmStrip;
+    private int totalFrameCount;
+    private int currentFrame;
 
     public NestedBirdHazard(NestHazard spawner, int damage, int birdSensorRadius, float birdKnockBack){
         super(spawner.getBirdInitializerData(), damage, birdSensorRadius, birdKnockBack);
         this.spawner = spawner;
-        blinkingDuration = spawner.getSpawnDelay();
-        blinkingCountDown = 0;
+        spawningDuration = spawner.getSpawnDelay();
+        spawningCountDown = 0;
         setFaceRight(spawner.getPath().length > 2 && spawner.getPath()[2] - getX() > 0);
     }
 
-    private void setBlinking(){
-        blinkingCountDown = blinkingDuration;
+    private void beginSpawnTimer(){
+        spawningCountDown = spawningDuration;
+        currentFrame = 0;
     }
 
     public void setSpawning(){
-        setBlinking();
+        beginSpawnTimer();
         setMoveSpeed(0);
         setPath(spawner.getPath());
         super.reset();
@@ -50,18 +54,25 @@ public class NestedBirdHazard extends BirdHazard{
         super.setPath(path, -1);
     }
 
+    public void setSpawnAnimation(Texture texture, int rows, int columns){
+        this.spawnFilmStrip = new FilmStrip(texture, rows, columns);
+        totalFrameCount = rows * columns;
+        currentFrame = 0;
+    }
+
     @Override
     public void draw(GameCanvas canvas) {
-        if (blinkingCountDown > 0) {
-            float effect = isFaceRight() ? -1f : 1f;
-            float scl = 1 - 1.0f*blinkingCountDown / blinkingDuration;
-            TextureRegion birdRegion = getStillFrame();
-            Vector2 dimensions = getDimensions();
-            // not angry + not moving => still
-            canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
-                    (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
-                    scl * effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
-                    scl * dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+        if (spawningCountDown > 0) {
+            if (spawningCountDown <= 3 * totalFrameCount){
+                spawnFilmStrip.setFrame(totalFrameCount - (int) Math.ceil(spawningCountDown/3.0));
+                TextureRegion birdRegion = spawnFilmStrip;
+                Vector2 dimensions = getDimensions();
+                int effect = isFaceRight() ? -1 : 1;
+                canvas.draw(birdRegion, Color.WHITE, birdRegion.getRegionWidth() / 2f, birdRegion.getRegionHeight() / 2f,
+                        (getX()) * drawScale.x, (getY()) * drawScale.y, getAngle(),
+                        effect * dimensions.x / birdRegion.getRegionWidth() * drawScale.x,
+                        dimensions.y / birdRegion.getRegionHeight() * drawScale.y);
+            }
             return;
         }
         // default bird animation
@@ -70,12 +81,12 @@ public class NestedBirdHazard extends BirdHazard{
 
     @Override
     public void update(float delta) {
-        if (blinkingCountDown > 0){
-            blinkingCountDown -= 1;
+        if (spawningCountDown > 0){
+            spawningCountDown -= 1;
         }
-        else if (blinkingCountDown == 0){
+        else if (spawningCountDown == 0){
             setMoveSpeed(spawner.getBirdSpeed());
-            blinkingCountDown -= 1;
+            spawningCountDown -= 1;
         }
         super.update(delta);
     }

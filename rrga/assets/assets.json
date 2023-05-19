@@ -144,6 +144,7 @@
         "game:brown_bird_flapping" : "game/hazard/bird_brown_flapping.png",
         "game:bird_warning" : "game/hazard/annoy.png",
         "game:nest" : "game/hazard/obj_birdnest.png",
+        "game:blue_bird_spawn" : "game/hazard/blue_bird_spawn.png",
         "game:lightning" : {
           "file":  "game/hazard/lightning_fill.png",
           "wrapU": "repeated",

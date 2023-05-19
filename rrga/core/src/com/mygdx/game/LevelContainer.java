@@ -188,6 +188,8 @@ public class LevelContainer{
     /** Texture asset for blue bird animation */
     private Texture blueBirdAnimationTexture;
 
+    private Texture bluebirdSpawnAnimation;
+
     /** Texture asset for green bird animation */
     private Texture greenBirdAnimationTexture;
 
@@ -364,6 +366,7 @@ public class LevelContainer{
         
         warningTexture = directory.getEntry("game:bird_warning", Texture.class);
         nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
+        bluebirdSpawnAnimation = directory.getEntry("game:blue_bird_spawn", Texture.class);
 
         fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
         fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
@@ -605,8 +608,8 @@ public class LevelContainer{
             addObject(nest);
             NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack);
             bird.setDrawScale(scale);
-            bird.setFlapAnimation(getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), indices[BirdHazard.BirdColor.BLUE.ordinal()]);
-            // bird.setWarningAnimation(warningTexture);
+            bird.setFlapAnimation(blueBirdAnimationTexture, indices[BirdHazard.BirdColor.BLUE.ordinal()]);
+            bird.setSpawnAnimation(bluebirdSpawnAnimation, 2, 7);
             bird.setName("bird" + (birdCount + ii));
             addObject(bird);
             bird.setSpawning();
