@@ -426,7 +426,9 @@ public class GameMode implements Screen {
         zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
         canvas.getCamera().setZoom(zoomScl);
 
-        gameplayController.update(inputController, dt);
+        if (!showGoal){
+            gameplayController.update(inputController, dt);
+        }
         gameplayController.postUpdate(dt);
     };
 
@@ -734,7 +736,6 @@ public class GameMode implements Screen {
         resetCounter = 0;
         showGoal = true;
         gameplayController.resetCounter = 0;
-        gameplayController.showGoal = true;
     }
 
     /**

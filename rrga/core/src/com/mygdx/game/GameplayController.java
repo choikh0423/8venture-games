@@ -342,7 +342,6 @@ public class GameplayController implements ContactListener {
         resetCounter++;
     }
 
-    public boolean showGoal = true;
     public int resetCounter = 0;
 
     // track updates to player
@@ -388,15 +387,10 @@ public class GameplayController implements ContactListener {
             countdown--;
         }
 
-        if (levelContainer.getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0)
-            showGoal = false;
-        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition()) > 0.0001)
-            levelContainer.getShowGoal().move();
-
         //UMBRELLA
         umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
-        if ((!input.didZoom() || (avatar.isMoving() || !avatar.isGrounded() || avatar.getLinearVelocity().len() > 0.0001f)) && !showGoal) {
+        if ((!input.didZoom() || (avatar.isMoving() || !avatar.isGrounded() || avatar.getLinearVelocity().len() > 0.0001f))) {
             // Check for whether the player toggled the umbrella being open/closed
             if (!input.secondaryControlMode) {
                 if (input.didToggle() && !umbrella.isBoosting()) {
@@ -522,7 +516,7 @@ public class GameplayController implements ContactListener {
         // Process player movement
         float angle = umbrella.getRotation();
         moveInputted = input.getHorizontal() != 0;
-        if (avatar.isGrounded() && !showGoal && (!input.didZoom() || (avatar.isMoving() || avatar.getLinearVelocity().len() > 0.0001f))) {
+        if (avatar.isGrounded() && (!input.didZoom() || (avatar.isMoving() || avatar.getLinearVelocity().len() > 0.0001f))) {
             // frame N: Gale on ground, press boost
             // frame N+1: Gale still on ground, do not apply dampening.
             if (!umbrella.isBoosting()) {
@@ -584,10 +578,6 @@ public class GameplayController implements ContactListener {
                 }
             }
         }
-
-        // TODO: (design) enable this and put it in a conditional statement if we decide to still have an arrow key mode
-//        umbrella.setTurning(input.getMouseMovement() * umbrella.getForce());
-//        umbrella.applyForce();
 
         //move moving platforms
         for (MovingPlatformModel mp : levelContainer.getMovingPlats()) {
@@ -690,17 +680,6 @@ public class GameplayController implements ContactListener {
             }
         }
 
-        //update nests
-//        for(NestHazard n: nests){
-//            BirdHazard b = n.update();
-//            if(b != null){
-//                //TODO if references to level container change, need to add to gameplay controller lists
-//                levelContainer.objects.add(b);
-//                b.activatePhysics(world);
-//                levelContainer.getBirds().add(b);
-//            }
-//        }
-
 
         //criterion to disconnect player from moving platform when ANY of the following holds
         // - player can move (on platform) and tries to move
@@ -794,6 +773,10 @@ public class GameplayController implements ContactListener {
                 entry.remove();
             }
         }
+
+        // TODO: TEMPORARY SCROLL
+        if (levelContainer.getShowGoal().getPosition().dst(avatar.getPosition()) > 0.0001)
+            levelContainer.getShowGoal().move();
     }
 
     /**
@@ -875,9 +858,7 @@ public class GameplayController implements ContactListener {
                 // hazard already updated contact knock-back! skip updates.
                 // ideally, enough knock back would remove this [hazard] from [contactHazard] such that:
                 // - we can enable knock back updates again.
-                if (contactHazards.contains(h)){
-                    return;
-                }
+
                 //norm from a to b
                 WorldManifold wm = contact.getWorldManifold();
                 Vector2 norm = cache.set(wm.getNormal());
@@ -885,13 +866,13 @@ public class GameplayController implements ContactListener {
                     norm.nor();
                     float flip = (bd1 instanceof HazardModel ? 1 : -1);
                     h.setKnockBackForce(norm.scl(flip));
+                    contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
                 }
-                else {
-                    norm.set(avatar.getLinearVelocity()).scl(-1);
-                    h.setKnockBackForce(norm.nor());
+                else if (h.getDamage() == avatar.getMaxHealth()){
+                    // death zone
+                    contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
                 }
-                contactHazardFixtures.add(bd1 instanceof HazardModel ? fix1 : fix2);
-                contactHazards.add(h);
+
             }
 
             // Check for win condition
