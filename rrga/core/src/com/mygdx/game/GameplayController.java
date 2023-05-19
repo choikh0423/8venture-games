@@ -588,8 +588,8 @@ public class GameplayController implements ContactListener {
             //move the birds
             bird.move();
 
-            if (bird.getAABBx() > bounds.width || bird.getAABBy() < 0
-                    || bird.getAABBx() + bird.getWidth() < 0
+            if (bird.getAABBx() > bounds.width || bird.getAABBy() < -bounds.height/2f
+                    || bird.getAABBx() + bird.getWidth() < -bounds.width/2f
                     || bird.getAABBy() - bird.getHeight() > bounds.height * bounds.height ) {
                 //(brown/green/red) mark removed so that it is garbage collected at end of update loop
                 // blue: set spawning again
