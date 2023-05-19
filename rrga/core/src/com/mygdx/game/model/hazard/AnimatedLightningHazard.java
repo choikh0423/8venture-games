@@ -123,6 +123,7 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
 
     @Override
     public void draw(GameCanvas canvas) {
+        if (waitCounter==0) sfx.play(sfxVol*.1f);
         if (bodies.get(activeFrameIndex).isActive()) {
             int effect = flippedX ? -1 : 1;
             frames.setFrame(activeFrameIndex);
@@ -175,7 +176,6 @@ public class AnimatedLightningHazard extends ComplexObstacle implements HazardMo
         }
         else if (waitCounter == 0){
             // finished waiting, transition to strike cycle
-            sfx.play(sfxVol*.1f);
             switchFrames();
             waitCounter--;
         }
