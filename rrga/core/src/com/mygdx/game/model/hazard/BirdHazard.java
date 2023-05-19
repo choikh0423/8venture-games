@@ -118,7 +118,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     private final Vector2 knockBackVec = new Vector2();
     /** Whether this bird's kockback vector should be set. Upon initial collision, set to false.
      * Once the collision is resolved, set to true */
-    private boolean setKB;
+//    private boolean setKB;
 
     /** the physics dimensions of object's AABB */
     private final Vector2 dimensions = new Vector2();
@@ -217,14 +217,14 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
     }
     @Override
     public void setKnockBackForce(Vector2 in) {
-        if(setKB) {
+//        if(setKB) {
             knockBackVec.set(in.nor());
-            setKB = false;
-        }
+//            setKB = false;
+//        }
     }
 
     public void setSetKB(boolean b){
-        setKB = b;
+//        setKB = b;
     }
 
     public BirdColor getColor() {
@@ -364,7 +364,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         seesTarget = false;
         damage = birdDamage;
         knockBackScl = birdKnockBack;
-        setKB = true;
+//        setKB = true;
         warning = false;
 
         // make hit-box objects
@@ -502,6 +502,20 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
                 setFaceRight(targetDir.x > 0);
             }
         }
+    }
+
+    /** Returns the angle above/below x axis */
+    private float getAngleFromVec(Vector2 vec){
+        float angle;
+        //adapted from https://stackoverflow.com/questions/6247153/angle-from-2d-unit-vector
+        if (vec.x == 0) {
+            angle = (vec.y > 0) ? (float) Math.PI / 2 : (vec.y == 0) ? 0 : 3 * (float) Math.PI / 2;
+        } else if (vec.y == 0) {
+            angle = (vec.x >= 0) ? 0 : (float) Math.PI;
+        } else {
+            angle = (float) Math.atan(vec.y / vec.x);
+        }
+        return angle;
     }
 
     /**
