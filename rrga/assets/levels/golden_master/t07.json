@@ -277,26 +277,6 @@
         }, 
         {
          "draworder":"topdown",
-         "id":15,
-         "locked":true,
-         "name":"Platforms",
-         "objects":[
-                {
-                 "height":90.9838447567158,
-                 "id":418,
-                 "template":"..\/templates\/logs\/branch_03.json",
-                 "width":505.99787347156,
-                 "x":3872.36469962786,
-                 "y":2024.59898671255
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
          "id":9,
          "locked":true,
          "name":"Tree_Bushes",
@@ -672,6 +652,26 @@
                  "width":351,
                  "x":3952.5835,
                  "y":1933.04166666667
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":15,
+         "locked":true,
+         "name":"Platforms",
+         "objects":[
+                {
+                 "height":90.9838447567158,
+                 "id":418,
+                 "template":"..\/templates\/logs\/branch_03.json",
+                 "width":505.99787347156,
+                 "x":3872.36469962786,
+                 "y":2024.59898671255
                 }],
          "opacity":1,
          "type":"objectgroup",
