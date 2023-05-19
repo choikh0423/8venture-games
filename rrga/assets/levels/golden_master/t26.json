@@ -2772,6 +2772,7 @@
         {
          "draworder":"topdown",
          "id":18,
+         "locked":true,
          "name":"Hazard_area",
          "objects":[
                 {
@@ -2997,6 +2998,7 @@
         {
          "draworder":"topdown",
          "id":17,
+         "locked":true,
          "name":"Hazard_art",
          "objects":[
                 {
@@ -4193,6 +4195,7 @@
         {
          "draworder":"topdown",
          "id":32,
+         "locked":true,
          "name":"Sparks",
          "objects":[
                 {
@@ -5435,42 +5438,6 @@
                 }, 
                 {
                  "class":"",
-                 "gid":77,
-                 "height":192,
-                 "id":2095,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":281,
-                 "x":7061.16666666667,
-                 "y":4788
-                }, 
-                {
-                 "class":"",
-                 "gid":72,
-                 "height":260,
-                 "id":2097,
-                 "name":"",
-                 "rotation":-90,
-                 "visible":true,
-                 "width":226,
-                 "x":7357.33333333333,
-                 "y":4886.66666666667
-                }, 
-                {
-                 "class":"",
-                 "gid":73,
-                 "height":247,
-                 "id":2098,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":232,
-                 "x":6811.33333333333,
-                 "y":4950.83333333333
-                }, 
-                {
-                 "class":"",
                  "gid":78,
                  "height":94,
                  "id":2100,
@@ -5483,18 +5450,6 @@
                 }, 
                 {
                  "class":"",
-                 "gid":81,
-                 "height":119,
-                 "id":2102,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":125,
-                 "x":7456.5,
-                 "y":5057.83333333333
-                }, 
-                {
-                 "class":"",
                  "gid":74,
                  "height":227,
                  "id":2103,
@@ -5504,30 +5459,6 @@
                  "width":233,
                  "x":7376.5,
                  "y":5425.83333333333
-                }, 
-                {
-                 "class":"",
-                 "gid":78,
-                 "height":94,
-                 "id":2106,
-                 "name":"",
-                 "rotation":180,
-                 "visible":true,
-                 "width":135,
-                 "x":6996.5,
-                 "y":4925.33333333333
-                }, 
-                {
-                 "class":"",
-                 "gid":2147483722,
-                 "height":193.666666666667,
-                 "id":2107,
-                 "name":"",
-                 "rotation":90,
-                 "visible":true,
-                 "width":198.785609397945,
-                 "x":7158.5,
-                 "y":5015.39280469897
                 }, 
                 {
                  "class":"",
@@ -5557,13 +5488,13 @@
                  "class":"",
                  "gid":3221225568,
                  "height":227,
-                 "id":2190,
+                 "id":2549,
                  "name":"",
                  "rotation":-180,
                  "visible":true,
                  "width":233,
-                 "x":6599.5,
-                 "y":4834.5
+                 "x":6637.25,
+                 "y":4865
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -6724,9 +6655,93 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":38,
+         "locked":true,
+         "name":"Front Bushes",
+         "objects":[
+                {
+                 "class":"",
+                 "gid":77,
+                 "height":192,
+                 "id":2542,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":281,
+                 "x":7134.84944444444,
+                 "y":4810.66038888889
+                }, 
+                {
+                 "class":"",
+                 "gid":72,
+                 "height":260,
+                 "id":2543,
+                 "name":"",
+                 "rotation":-90,
+                 "visible":true,
+                 "width":226,
+                 "x":7331.84277777778,
+                 "y":4898.66372222222
+                }, 
+                {
+                 "class":"",
+                 "gid":73,
+                 "height":247,
+                 "id":2544,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":232,
+                 "x":6827.34277777778,
+                 "y":4990.82372222222
+                }, 
+                {
+                 "class":"",
+                 "gid":81,
+                 "height":119,
+                 "id":2545,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":125,
+                 "x":7456.51277777778,
+                 "y":5057.82372222222
+                }, 
+                {
+                 "class":"",
+                 "gid":78,
+                 "height":94,
+                 "id":2546,
+                 "name":"",
+                 "rotation":180,
+                 "visible":true,
+                 "width":135,
+                 "x":6988.51277777778,
+                 "y":4954.65705555555
+                }, 
+                {
+                 "class":"",
+                 "gid":2147483722,
+                 "height":193.667,
+                 "id":2547,
+                 "name":"",
+                 "rotation":90,
+                 "visible":true,
+                 "width":198.786,
+                 "x":7147.84611111111,
+                 "y":5023.38372222222
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":38,
- "nextobjectid":2542,
+ "nextlayerid":39,
+ "nextobjectid":2550,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
