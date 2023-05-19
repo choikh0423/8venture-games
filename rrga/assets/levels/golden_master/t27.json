@@ -2535,20 +2535,19 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"Player",
          "objects":[
                 {
                  "id":607,
                  "template":"..\/templates\/goal.json",
-                 "x":7062,
-                 "y":6106
+                 "x":4631.33333333333,
+                 "y":7878.48484848485
                 }, 
                 {
                  "id":608,
                  "template":"..\/templates\/spawn.json",
-                 "x":6764,
-                 "y":6176
+                 "x":2604,
+                 "y":7568
                 }],
          "opacity":1,
          "type":"objectgroup",
