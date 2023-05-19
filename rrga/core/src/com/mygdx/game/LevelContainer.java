@@ -206,6 +206,11 @@ public class LevelContainer{
      * Texture asset for boost timer
      */
     private Texture boostTexture;
+
+    /**
+     * Texture for directional indicator to scarf
+     */
+    private TextureRegion indicatorTexture;
     /**
      * Fill Texture asset for lightning
      */
@@ -349,6 +354,7 @@ public class LevelContainer{
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
         boostTexture = directory.getEntry("game:boost", Texture.class);
+        indicatorTexture = new TextureRegion(directory.getEntry("game:player_indicator", Texture.class));
 
         // Hazard Textures
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
@@ -676,7 +682,6 @@ public class LevelContainer{
         avatar.setFrontTexture(avatarFrontTexture);
         avatar.setSideTexture(avatarSideTexture);
         avatar.useSideTexture();
-        // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(hpTexture);
         avatar.setBoostTexture(boostTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
@@ -686,6 +691,7 @@ public class LevelContainer{
         avatar.setTakeoffAnimation(avatarTakeoffAnimationTexture);
         avatar.setLandAnimation(avatarLandAnimationTexture);
         avatar.setFlipAnimation(avatarFlipAnimationTexture);
+        avatar.setIndicatorTexture(indicatorTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);

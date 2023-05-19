@@ -14,8 +14,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.model.GoalDoor;
 import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.PlayerModel;
+import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.util.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -486,6 +488,15 @@ public class GameMode implements Screen {
 //        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
 
         PlayerModel avatar = gameplayController.getPlayer();
+        avatar.showIndicator(false);
+        // find direction to scarf
+        BoxObstacle scarf = gameplayController.getLevelContainer().getGoalDoor();
+        cache.set(scarf.getPosition()).sub(avatar.getPosition());
+        float indicatorAngle = (float) Math.acos(cache.nor().dot(0,1));
+        if (scarf.getPosition().x > avatar.getPosition().x){
+            indicatorAngle *= -1;
+        }
+        avatar.setIndicatorDirection(indicatorAngle);
 
         // draw all game objects + stickers + tile layers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
@@ -513,12 +524,17 @@ public class GameMode implements Screen {
                 float height = cache.y;
                 if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
                     || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+                    if (drawable instanceof GoalDoor){
+                        // goal not in sight, draw indicator
+                        avatar.showIndicator(true);
+                    }
                     continue;
                 }
                 drawable.draw(canvas);
                 objCount++;
             }
         }
+        avatar.drawIndicator(canvas);
         canvas.end();
 
         if (debug) {

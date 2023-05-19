@@ -367,11 +367,6 @@ public class GameplayController implements ContactListener {
             return;
         }
 
-//        // decrement countdown towards rendering victory/fail screen
-//        if (countdown > 0) {
-//            countdown--;
-//        }
-
         //UMBRELLA
         umbrella.canBoost = avatar.canBoost();
         //only allow control when not zooming and not showing goal
@@ -840,9 +835,6 @@ public class GameplayController implements ContactListener {
             if (((fd2 == "umbrellaSensor" || avatar == bd2) && (bd1 instanceof HazardModel && fd1 == null) ||
                     ((fd1 == "umbrellaSensor" || avatar == bd1) && (bd2 instanceof HazardModel && fd2 == null)))) {
                 HazardModel h = (HazardModel) (bd1 instanceof HazardModel ? bd1 : bd2);
-                // hazard already updated contact knock-back! skip updates.
-                // ideally, enough knock back would remove this [hazard] from [contactHazard] such that:
-                // - we can enable knock back updates again.
 
                 //norm from a to b
                 WorldManifold wm = contact.getWorldManifold();
