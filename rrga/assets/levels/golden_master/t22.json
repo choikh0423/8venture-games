@@ -4161,6 +4161,7 @@
         {
          "draworder":"topdown",
          "id":16,
+         "locked":true,
          "name":"Enemies",
          "objects":[
                 {
@@ -4544,6 +4545,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"Player",
          "objects":[
                 {
@@ -4555,8 +4557,8 @@
                 {
                  "id":608,
                  "template":"..\/templates\/spawn.json",
-                 "x":4992,
-                 "y":7168
+                 "x":5832,
+                 "y":6944
                 }],
          "opacity":1,
          "type":"objectgroup",
