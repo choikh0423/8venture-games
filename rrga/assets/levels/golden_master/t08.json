@@ -184,6 +184,7 @@
         {
          "draworder":"topdown",
          "id":10,
+         "locked":true,
          "name":"Bushes",
          "objects":[
                 {
@@ -1516,14 +1517,14 @@
                 {
                  "class":"",
                  "gid":72,
-                 "height":260,
+                 "height":204.778761061947,
                  "id":491,
                  "name":"",
                  "rotation":-90,
                  "visible":true,
-                 "width":226,
-                 "x":4381.81818181818,
-                 "y":2884.84848484848
+                 "width":178,
+                 "x":4391.42880128721,
+                 "y":2918.84848484848
                 }, 
                 {
                  "class":"",

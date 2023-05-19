@@ -92,6 +92,7 @@
         {
          "draworder":"topdown",
          "id":13,
+         "locked":true,
          "name":"Wind",
          "objects":[
                 {
@@ -683,6 +684,7 @@
         {
          "draworder":"topdown",
          "id":10,
+         "locked":true,
          "name":"Bushes",
          "objects":[
                 {
@@ -1986,14 +1988,14 @@
                 {
                  "class":"",
                  "gid":72,
-                 "height":260,
+                 "height":196,
                  "id":491,
                  "name":"",
                  "rotation":-90,
                  "visible":true,
-                 "width":226,
-                 "x":4381.81818181818,
-                 "y":3652.84848484848
+                 "width":170.369230769231,
+                 "x":4389.81818181818,
+                 "y":3689.66386946387
                 }, 
                 {
                  "class":"",
