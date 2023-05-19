@@ -146,8 +146,8 @@ public class LevelParser {
     /** all objects in game that needs asset information can be found in an objects.json */
     private final JsonValue gameObjectTiles;
 
-    /** the list of texture region cutters, one for each tileset */
-    private final ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
+    /** map of (id -> tileset cutters / texture region cutters) where integer IDs are grid IDs */
+    private final IntMap<ImageTileSetMaker> tileSetMakers = new IntMap<>();
 
     /** the texture producer for stickers */
     private CollectionTileSetMaker stickerMaker;
@@ -424,9 +424,13 @@ public class LevelParser {
             if (j == null){
                 continue;
             }
-            tileSetMakers.add(
-                    new ImageTileSetMaker(j, ts.getInt("firstgid"))
-            );
+            ImageTileSetMaker tileSetMaker = new ImageTileSetMaker(j, ts.getInt("firstgid"));
+            int minId = ts.getInt("firstgid");
+            int maxId = j.getInt("tilecount") - 1 + minId;
+            for (int i = minId; i <= maxId; i++){
+                tileSetMakers.put(i, tileSetMaker);
+            }
+
         }
         stickers.clear();
         layers.clear();
@@ -533,11 +537,12 @@ public class LevelParser {
         float angle = convertAngle(obj.getFloat("rotation", 0));
         int depth = obj.getInt("__DEPTH__", -1);
         // see if the sticker is coming from a tileset...
-        TextureRegion tile = getTileFromImages(gid);
+        Tile tile = getTileFromImages(gid);
         if (tile != null){
-            JsonValue AABB = processTileObjectAABB(obj, null, tile.getRegionWidth(), tile.getRegionHeight());
-            // since tile was retrieved from tilesets, flipping has been set.
-            stickers.add(new Sticker(x, y, angle, depth, AABB, tile));
+            TextureRegion tileRegion = tile.getRegionCopy();
+            JsonValue AABB = processTileObjectAABB(obj, null, tileRegion.getRegionWidth(), tileRegion.getRegionHeight());
+            tileRegion.flip(tile.isFlipX(), tile.isFlipY());
+            stickers.add(new Sticker(x, y, angle, depth, AABB, tileRegion));
             return;
         }
         // see if the sticker is from stickers.json
@@ -556,9 +561,9 @@ public class LevelParser {
             }
             else {
                 // make still-frame sticker
-                tile = textureInfo.getTextureRegion();
-                tile.flip(flipX, flipY);
-                stickers.add(new Sticker(x, y, angle, depth, AABB, tile));
+                TextureRegion textureRegion = textureInfo.getTextureRegion();
+                textureRegion.flip(flipX, flipY);
+                stickers.add(new Sticker(x, y, angle, depth, AABB, textureRegion));
             }
         }
     }
@@ -1318,22 +1323,22 @@ public class LevelParser {
         boolean flipX = (gid & (1L << 31)) != 0;
         boolean flipY = (gid & (1L << 30)) != 0;
         boolean flipD = (gid & (1L << 29)) != 0;
-        // this loop should be fast with small number of tilesets
-        for (ImageTileSetMaker imageSet : tileSetMakers) {
-            if (imageSet.contains(id)) return imageSet.getTileFromId(id, flipD, flipX, flipY);
+        ImageTileSetMaker tileSetMaker = tileSetMakers.get(id);
+        if (tileSetMaker != null){
+            return tileSetMaker.getTileFromId(id, flipD, flipX, flipY);
         }
         return null;
     }
 
     private void parseTileLayer(JsonValue layer){
-        // loop over array data and make texture regions
-        JsonValue data = layer.get("data");
-        Tile[] tiles = new Tile[data.size];
+        // loop over array data and make tiles
+        long[] data = layer.get("data").asLongArray();
+        Tile[] tiles = new Tile[data.length];
         int worldWidth = (int) worldSize.x;
         int worldHeight = (int) worldSize.y;
         for (int i = 0; i < tiles.length; i++){
             // the Tiled ID is a 32-bit UNSIGNED integer
-            long rawId = data.get(i).asLong();
+            long rawId = data[i];
             if (rawId == 0){
                 continue;
             }
@@ -1369,24 +1374,24 @@ public class LevelParser {
      * A ImageTileSetMaker produces texture regions upon request by cutting texture regions from a single texture.
      */
     private class ImageTileSetMaker extends TileSetMaker {
-        private final int columns;
-        private final Texture texture;
-        private final  int width;
-        private final int height;
-
-        private String tileSetName;
+        private final FilmStrip tileset;
+//        private final  int width;
+//        private final int height;
+//        private String tileSetName;
 
         ImageTileSetMaker(JsonValue tileSetJson, int firstGid){
+            double tileCount = tileSetJson.getInt("tilecount");
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
-            this.tileSetName = name;
-            texture = tileSetTextureMap.get(name);
+            //this.tileSetName = name;
+            Texture texture = tileSetTextureMap.get(name);
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            width = tileSetJson.getInt("tilewidth");
-            height = tileSetJson.getInt("tileheight");
-            columns = tileSetJson.getInt("columns");
+            //width = tileSetJson.getInt("tilewidth");
+            //height = tileSetJson.getInt("tileheight");
+            int columns = tileSetJson.getInt("columns");
+            tileset = new FilmStrip(texture, (int) Math.ceil(tileCount/ columns), columns);
         }
 
         /**
@@ -1399,22 +1404,16 @@ public class LevelParser {
          */
         public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
-            int row = index / columns;
-            int col = index % columns;
-            Tile tile = new Tile(texture);
-            // two additional pixel padding added in both directions
-            // cut out region starting from second left corner of each 130x130 tile
-            tile.setRegion(col * (width + 2) + 1, row * (height + 2) + 1, width, height);
-
+            Tile tile = new Tile(tileset, index);
             // enumerate all 8 possible cases
             if (flipD && flipY && flipX){
                 // 30, 31, 32 => flip x THEN counter-clock-wise rotate 270 deg
-                tile.flip(true, false);
+                tile.setFlip(true, false);
                 tile.setRotation((float) Math.PI * 1.5f);
             }
             else if (flipY && flipX){
                 // 31, 32 => rotate 180 (flip both axes)
-                tile.flip(true, true);
+                tile.setFlip(true, true);
             }
             else if (flipD && flipX){
                 // 30, 32 => counter-clock-wise rotate 270 deg
@@ -1426,15 +1425,15 @@ public class LevelParser {
             }
             else if (flipX){
                 // 32 => flip x
-                tile.flip(true, false);
+                tile.setFlip(true, false);
             }
             else if (flipY){
                 // 31 => flip y
-                tile.flip(false, true);
+                tile.setFlip(false, true);
             }
             else if (flipD){
                 // 30 => flip x THEN counter-clock-wise rotate 90 deg
-                tile.flip(true, false);
+                tile.setFlip(true, false);
                 tile.setRotation((float) Math.PI /2f);
             }
             return tile;
@@ -1457,7 +1456,6 @@ public class LevelParser {
         }
 
         /**
-         * returns one of the textures as a texture region <br>
          * @param id the associated id of the desired Tile, where contains(id) is true.
          * @return texture data from the collection set corresponding to the given id
          */
