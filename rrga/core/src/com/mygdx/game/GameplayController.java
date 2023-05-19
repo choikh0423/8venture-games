@@ -79,21 +79,6 @@ public class GameplayController implements ContactListener {
     private boolean failed;
 
     /**
-     * Countdown active for winning or losing
-     */
-    private int countdown;
-
-    /**
-     * the delay after game is lost before we transition to new screen.
-     */
-    private static final int LOSE_COUNTDOWN_TIMER = 40;
-
-    /**
-     * the delay after game is won before we transition to new screen.
-     */
-    private static final int WIN_COUNTDOWN_TIMER = 20;
-
-    /**
      * Background music
      */
     private Music backgroundMusic;
@@ -382,10 +367,10 @@ public class GameplayController implements ContactListener {
             return;
         }
 
-        // decrement countdown towards rendering victory/fail screen
-        if (countdown > 0) {
-            countdown--;
-        }
+//        // decrement countdown towards rendering victory/fail screen
+//        if (countdown > 0) {
+//            countdown--;
+//        }
 
         //UMBRELLA
         umbrella.canBoost = avatar.canBoost();
@@ -1101,39 +1086,31 @@ public class GameplayController implements ContactListener {
 
 
     /**
-     * player officially wins if they finished the level and
-     * a small countdown is over.
-     *
      * @return whether player finished level
      */
     public boolean isCompleted() {
-        return completed && countdown <= 0;
+        return completed;
     }
 
     /**
-     * player officially fails if they failed the level and
-     * a small countdown is over.
-     *
      * @return whether player failed
      */
     public boolean isFailed() {
-        return failed && countdown <= 0;
+        return failed;
     }
 
     /**
-     * set player level status to completed and start a countdown timer
+     * set player level status to completed
      */
     private void setCompleted() {
         completed = true;
-        countdown = WIN_COUNTDOWN_TIMER;
     }
 
     /**
-     * set player level status to failed and start a countdown timer
+     * set player level status to failed
      */
     private void setFailed() {
         failed = true;
-        countdown = LOSE_COUNTDOWN_TIMER;
     }
 
     /**
@@ -1149,5 +1126,12 @@ public class GameplayController implements ContactListener {
      */
     public void setBackgroundVolume(float volume) {
         this.musicVolume = volume;
+    }
+
+    /**
+     * @return whether avatar can zoom out
+     */
+    public boolean canAvatarZoom() {
+        return avatar.isGrounded() && !avatar.isMoving() && avatar.getLinearVelocity().epsilonEquals(0,0);
     }
 }

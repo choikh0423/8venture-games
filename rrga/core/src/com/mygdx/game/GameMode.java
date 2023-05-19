@@ -135,6 +135,8 @@ public class GameMode implements Screen {
     /** the current zoom factor */
     private float zoomScl = 1;
 
+    private boolean showGoal = true;
+
     /**
      * Returns true if debug mode is active.
      *
@@ -289,7 +291,7 @@ public class GameMode implements Screen {
     }
 
     public int resetCounter = -1;
-    private Vector2 camPos = new Vector2();
+    private final Vector2 camPos = new Vector2();
     /**
      * Resets the status of the game so that we can play again.
      *
@@ -365,7 +367,9 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // Now it is time to maybe switch screens.
+        // leave game
+        // TODO: this has no keybinds on keyboard,
+        //  this conditional supports xbox controller's back button though.
         if (inputController.didExit()) {
             listener.exitScreen(this, EXIT_QUIT);
             return false;
@@ -410,7 +414,7 @@ public class GameMode implements Screen {
 //        }
 //        Gdx.input.setCursorPosition(x,y);
 
-        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
+        if (!showGoal && inputController.didZoom() && gameplayController.canAvatarZoom()){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
@@ -432,7 +436,6 @@ public class GameMode implements Screen {
         gameplayController.postUpdate(dt);
     };
 
-    public boolean showGoal = true;
     /**
      * Draw the physics objects to the canvas
      *
@@ -454,10 +457,11 @@ public class GameMode implements Screen {
 
         Vector2 scl = gameplayController.getPlayer().getDrawScale();
 
-        //camera starts at the goal door then moves to the player the
-        //first time we reset the level (i.e. when loading in)
-        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE ||
-                resetCounter > 0 && debug) showGoal = false;
+        //camera starts at the goal door then moves to the player until it finishes (showgoal => false)
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || debug) {
+            showGoal = false;
+        }
+
         if (showGoal){
             camPos.set(gx*scl.x, gy*scl.y);
         } else {
