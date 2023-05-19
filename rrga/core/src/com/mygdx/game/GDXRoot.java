@@ -42,6 +42,7 @@ public class GDXRoot extends Game implements ScreenListener {
     private PauseMode pausing;
 
 	private ConfirmationMode confirmation;
+    private CutSceneMode cutscene;
 
 	/** Screen mode for transitioning between levels */
 	private VictoryScreen victory;
@@ -88,12 +89,14 @@ public class GDXRoot extends Game implements ScreenListener {
         victory = new VictoryScreen(canvas);
         defeat = new LoseScreen(canvas);
         confirmation = new ConfirmationMode(canvas);
+        cutscene = new CutSceneMode(canvas);
 
         loading.setScreenListener(this);
         pausing.setScreenListener(this);
         victory.setScreenListener(this);
         defeat.setScreenListener(this);
         confirmation.setScreenListener(this);
+        cutscene.setScreenListener(this);
         setScreen(loading);
     }
 
@@ -118,6 +121,8 @@ public class GDXRoot extends Game implements ScreenListener {
         victory = null;
         defeat.dispose();
         defeat = null;
+        cutscene.dispose();
+        cutscene = null;
 
         // Unload all of the resources
         if (directory != null) {
@@ -161,6 +166,7 @@ public class GDXRoot extends Game implements ScreenListener {
 			victory.gatherAssets(directory);
 			defeat.gatherAssets(directory);
 			confirmation.gatherAssets(directory);
+            cutscene.gatherAssets(directory);
 
             // transition to gameplay screen.
             menu.setScreenListener(this);
@@ -263,6 +269,12 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
 				case GameMode.EXIT_QUIT:
 					Gdx.app.exit();
+                case GameMode.EXIT_CUTSCENE:
+                    cutscene.setBackgroundScreen(playing);
+                    cutscene.first = true;
+                    cutscene.setCurrentLevel(playing.getCurrentLevel());
+                    cutscene.setCurrentScene(playing.getCutsceneNum());
+                    setScreen(cutscene);
 				default:
 					break;
 			}
@@ -304,6 +316,21 @@ public class GDXRoot extends Game implements ScreenListener {
                     playing.pause();
                     setScreen(menu);
                     break;
+            }
+        } else if (screen == cutscene) {
+            switch (exitCode) {
+                case CutSceneMode.EXIT_RESUME:
+                    setScreen(cutscene.getBackgroundScreen());
+                    playing.setCutsceneBool();
+                    playing.setSecondaryControlMode(menu.getControlToggle());
+                    break;
+                case CutSceneMode.EXIT_MENU:
+                    menu.setScreenListener(this);
+                    menu.cameForPauseSettings = false;
+                    menu.reset();
+                    playing.getMusic().stop();
+                    setScreen(menu);
+                    playing.setSecondaryControlMode(menu.getControlToggle());
             }
         }
     }

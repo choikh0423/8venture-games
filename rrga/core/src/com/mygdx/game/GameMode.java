@@ -66,6 +66,8 @@ public class GameMode implements Screen {
 
     /** Exit code for fail screen */
     public static final int EXIT_FAIL = 3;
+    /** Exit code for cutscene */
+    public static final int EXIT_CUTSCENE = 4;
 
     /** Current Width of the game world in Box2d units */
     private float physicsWidth;
@@ -135,6 +137,11 @@ public class GameMode implements Screen {
     /** the current zoom factor */
     private float zoomScl = 1;
 
+    /** Cutscene Number */
+    private int cutsceneNum = 0;
+
+    /** Cutscene Boolean*/
+    private boolean cutsceneBool = true;
     /**
      * Returns true if debug mode is active.
      *
@@ -335,9 +342,14 @@ public class GameMode implements Screen {
         }
 
         if (gameplayController.isCompleted()) {
-            listener.exitScreen(this, EXIT_VICTORY);
-            unlocked.putBoolean((currentLevel+1)+"unlocked", true);
-            unlocked.flush();
+            //TODO: Change this if total number of level changes
+            if (currentLevel == 30) {
+                listener.exitScreen(this, EXIT_CUTSCENE);
+            } else {
+                listener.exitScreen(this, EXIT_VICTORY);
+                unlocked.putBoolean((currentLevel+1)+"unlocked", true);
+                unlocked.flush();
+            }
             return false;
         } else if (gameplayController.isFailed()) {
             listener.exitScreen(this, EXIT_FAIL);
@@ -375,6 +387,13 @@ public class GameMode implements Screen {
             listener.exitScreen(this, EXIT_PAUSE);
             return false;
         }
+
+        if (!cutsceneBool) {
+            listener.exitScreen(this, EXIT_CUTSCENE);
+            cutsceneBool = true;
+            return false;
+        }
+
 
         return true;
     }
@@ -709,9 +728,34 @@ public class GameMode implements Screen {
      */
     public void setLevel(int level){
         currentLevel = level;
+        setCutScene();
+
         resetShowGoal();
         resetCounter--;
         gameplayController.resetCounter--;
+    }
+
+    /**
+     * Sets cutscene
+     */
+    public void setCutScene() {
+        // TODO: Change this manual cutscene allocation with Parser
+        if (currentLevel == 1) {
+            cutsceneNum = 1;
+            cutsceneBool = false;
+        } else if(currentLevel == 8) {
+            cutsceneNum = 3;
+            cutsceneBool = false;
+            System.out.println("HI");
+        } else if(currentLevel == 15) {
+            cutsceneNum = 4;
+            cutsceneBool = false;
+        } else if(currentLevel == 23) {
+            cutsceneNum = 5;
+            cutsceneBool = false;
+        } else if(currentLevel == 30) {
+            cutsceneNum = 7;
+        }
     }
 
     /**
@@ -723,6 +767,7 @@ public class GameMode implements Screen {
         } else {
             currentLevel = 1;
         }
+        setCutScene();
         resetShowGoal();
         resetCounter--;
         gameplayController.resetCounter--;
@@ -735,9 +780,21 @@ public class GameMode implements Screen {
         gameplayController.showGoal = true;
     }
 
-    /**
-     * Sets current level of the game
-     */
+    public int getCutsceneNum() {
+        return cutsceneNum;
+    }
+
+    public void setCutsceneBool() {
+        cutsceneBool = true;
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+        /**
+         * Sets current level of the game
+         */
     public void setVolume(float sfxVolume, float musicVolume){
         gameplayController.setVolume(sfxVolume, musicVolume);
     }

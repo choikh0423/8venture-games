@@ -5,9 +5,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
 import com.mygdx.game.GameMode;
@@ -30,52 +32,18 @@ public class CutSceneMode extends MenuScreen {
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
-    /** overlay texture */
-    private TextureRegion foregroundTexture;
-
     /** The background tinting color cache */
     private Color overlayTint;
 
-    /** A reference to a text font (changes to any of its properties will be global) */
-    private BitmapFont bigFont;
-
-    private BitmapFont smallFont;
-
-    /** exit code to toggle pause state */
+    /** exit code for returning to game */
     public static final int EXIT_RESUME = 1;
-
-    /** exit code to restart game */
-    public static final int EXIT_RESTART = 2;
-    /** exit code to restart game */
-    public static final int EXIT_MENU = 3;
-    public static final int EXIT_SETTINGS = 4;
+    /** exit code to toggle pause state */
+    public static final int EXIT_MENU = 2;
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
 
-
-    /** The current state of the level menu button */
-    private int menuPressState;
-    /** The current state of the restart button */
-    private int restartPressState;
-    /** The current state of the back button */
-    private int backPressState;
-    private int settingsPressState;
-
-    /** exit button*/
-    private MenuButton menuButton;
-    /** start button */
-    private MenuButton restartButton;
-    /** back button */
-    private MenuButton backButton;
-    /** settings button */
-    private MenuButton settingsButton;
-
-    /** Height of the button */
-    private static float BUTTON_SCALE  = 1.0f;
-    /** Touch range constant */
-    private static float TOUCH_AREA_RATIO = 0.95f;
-    private float TAG_SCL = 1;
+    private float TAG_SCL = 0.6f;
     /** Scaling factor for when the player changes the resolution. */
     private float scale;
 
@@ -86,18 +54,32 @@ public class CutSceneMode extends MenuScreen {
 
     /** Pause text related variables */
     private TextureRegion skipTag;
-    private static float SKIP_X_RATIO = .5f;
-    private static float SKIP_Y_RATIO = .65f;
+    private static float SKIP_X_RATIO = .8f;
+    private static float SKIP_Y_RATIO = .07f;
     private int skipTagX;
     private int skipTagY;
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
     /** true until the first call to render*/
     public boolean first;
+    /** Current level in game*/
+    public int currentLevel;
 
+    /** Number of frames for each cutscene*/
+    private final int[] cutsceneFrameCount = new int[]{4, 10, 5, 6, 4, 0, 2, 2, 10};
+    /** Cutscene animation elapsed time */
+    private float sceneElapsedTime;
+    /** Remaining number of scenes to play */
+    private int numScenes;
+    /** currentSceneNumber*/
+    private int currentSceneNumber;
+    /** Cutscene animation */
+    private Animation<TextureRegion> sceneAnimation;
+
+    private Array<TextureRegion[]> textureList = new Array<>(9);
     public CutSceneMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(1,1,1,1f);
         currentExitCode = Integer.MIN_VALUE;
         first = true;
 
@@ -107,13 +89,10 @@ public class CutSceneMode extends MenuScreen {
         float sy = ((float)height)/STANDARD_HEIGHT;
         scale = Math.min(sx, sy);
 
-        menuButton.setPos(width, height, scale);
-        restartButton.setPos(width, height, scale);
-        backButton.setPos(width, height, scale);
-        settingsButton.setPos(width, height, scale);
-
         skipTagY = (int)(SKIP_Y_RATIO * height);
         skipTagX = (int)(SKIP_X_RATIO * width);
+
+        sceneElapsedTime = 0;
     }
 
     /**
@@ -125,21 +104,24 @@ public class CutSceneMode extends MenuScreen {
      */
     public void gatherAssets(AssetDirectory directory) {
         //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
-        foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
+        skipTag= new TextureRegion(directory.getEntry("cutscene:skip", Texture.class));
 
-        TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
-        TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
-        TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
-        TextureRegion settingsTexture = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
+        // List of cutscene textures
+        for (int i = 0; i < cutsceneFrameCount.length; i++) {
+            textureList.add(new TextureRegion[cutsceneFrameCount[i]]);
+        }
 
-//        pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
+        // Populating cutscenes
+        for (int i = 1; i <= cutsceneFrameCount.length; i++) {
+            TextureRegion[] tempFrame = new TextureRegion[cutsceneFrameCount[i-1]];
+            for (int j = 1; j <= cutsceneFrameCount[i-1]; j++) {
+                tempFrame[j-1] = new TextureRegion(directory.getEntry("cutscene:scene"+i+"_frame"+j, Texture.class));
+            }
+            textureList.set(i-1, tempFrame);
+        }
 
         cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
 
-        menuButton.setTexture(menuTexture);
-        restartButton.setTexture(restartTexture);
-        backButton.setTexture(backButtonTexture);
-        settingsButton.setTexture(settingsTexture);
     }
 
     /**
@@ -173,18 +155,20 @@ public class CutSceneMode extends MenuScreen {
      */
     private void draw(float delta){
         canvas.begin();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
-
-
-        canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
-                pauseTagX, pauseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
-
-        menuButton.draw(canvas, menuPressState, BUTTON_SCALE, Color.WHITE);
-        restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
-        backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
-        settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
-
+//        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
         CameraController camera = canvas.getCamera();
+
+        setAnimation();
+        sceneElapsedTime += Gdx.graphics.getDeltaTime();
+        TextureRegion t;
+        t = sceneAnimation.getKeyFrame(sceneElapsedTime, true);
+        canvas.draw(t, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+
+        if (sceneElapsedTime > 2) {
+            canvas.draw(skipTag, Color.WHITE, skipTag.getRegionWidth() / 2f, skipTag.getRegionHeight() / 2f,
+                    skipTagX, skipTagY, 0, TAG_SCL * scale, TAG_SCL * scale);
+        }
+
         //draw mouse texture
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -210,16 +194,27 @@ public class CutSceneMode extends MenuScreen {
         listener = null;
         gameScreen = null;
         canvas = null;
-        foregroundTexture = null;
         overlayTint = null;
-        bigFont = null;
-        smallFont = null;
     }
 
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.SPACE){
-            currentExitCode = EXIT_RESUME;
+            //TODO: Change this if total number of levels change
+            if (sceneElapsedTime > 2) {
+                if (numScenes <= 1) {
+                    if (currentLevel != 30) {
+                        currentExitCode = EXIT_RESUME;
+                    } else {
+                        currentExitCode = EXIT_MENU;
+                    }
+                } else {
+                    sceneElapsedTime = 0;
+                    numScenes -= 1;
+                    currentSceneNumber += 1;
+                    setAnimation();
+                }
+            }
         }
         return false;
     }
@@ -228,6 +223,7 @@ public class CutSceneMode extends MenuScreen {
         if (currentExitCode > 0) {
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
+            sceneElapsedTime = 0;
         }
 
         return false;
@@ -247,6 +243,35 @@ public class CutSceneMode extends MenuScreen {
 
     public GameMode getBackgroundScreen(){
         return this.gameScreen;
+    }
+
+    public void setCurrentScene(int sceneNumber) {
+        this.currentSceneNumber = sceneNumber;
+        if (sceneNumber == 1) {
+            numScenes = 2;
+        } else if(sceneNumber == 7) {
+            numScenes = 3;
+        } else {
+            numScenes = 1;
+        }
+    }
+
+    public void setAnimation() {
+        TextureRegion[] frames = textureList.get(currentSceneNumber-1);
+
+        // Adjust idle animation speed here
+        if(currentSceneNumber == 1) {
+            sceneAnimation = new Animation<>(1f / 5f, textureList.get(currentSceneNumber - 1));
+        }
+        if (currentSceneNumber == 4) {
+            sceneAnimation = new Animation<>(1f / 1f, textureList.get(currentSceneNumber - 1));
+        } else {
+            sceneAnimation = new Animation<>(1f / 2f, textureList.get(currentSceneNumber - 1));
+        }
+    }
+
+    public void setCurrentLevel(int level) {
+        currentLevel = level;
     }
 
     public void reset() {
