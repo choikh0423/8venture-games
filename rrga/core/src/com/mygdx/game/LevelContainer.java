@@ -559,7 +559,7 @@ public class LevelContainer{
         JsonValue[] deathZones = parser.getDeathZoneData();
         for(int ii = 0; ii < deathZones.length; ii++){
             JsonValue jv = deathZones[ii];
-            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            StaticHazard obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
             obj.setName("death_zone"+ii);
             obj.setDrawScale(scale);
             obj.setSensor(true);

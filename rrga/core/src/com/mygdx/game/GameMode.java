@@ -315,6 +315,7 @@ public class GameMode implements Screen {
         gameplayController.reset();
 
         resetCounter++;
+        showGoal = true;
     }
 
     Preferences unlocked = Gdx.app.getPreferences("unlocked");
@@ -453,7 +454,8 @@ public class GameMode implements Screen {
 
         //camera starts at the goal door then moves to the player the
         //first time we reset the level (i.e. when loading in)
-        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE ||
+                resetCounter > 0 && debug) showGoal = false;
         if (showGoal){
             camPos.set(gx*scl.x, gy*scl.y);
         } else {
