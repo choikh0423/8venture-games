@@ -440,6 +440,10 @@
         "shared:minecraft": {
             "file": "shared/Minecraft.ttf",
             "size": 20
+        },
+        "menu:level_font": {
+          "file": "menu/menuFont.ttf",
+          "size": 32
         }
     }
 }
