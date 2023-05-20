@@ -144,7 +144,7 @@ public class GameMode implements Screen {
     public static final float standardZoom = 1.0f;
 
     /** maximum camera zoom scale factor */
-    private static final float maximumZoom = 1.25f;
+    private static final float maximumZoom = 1.4f;
 
     /** interpolation coefficient for zooming */
     private float zoomAlpha = 0;
@@ -350,14 +350,13 @@ public class GameMode implements Screen {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
-        // TODO: REMOVE FOR SUBMISSION
         // this ignores all levels, always runs the given file
-        if (sampleLevel != null){
-            parser.parseLevel(sampleLevel);
-        }
-        else {
-            parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
-        }
+//        if (sampleLevel != null){
+//            parser.parseLevel(sampleLevel);
+//        }
+//        else { parse the level }
+        parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
+
         // set music and parallax after parsing
         backgroundMusic = backgroundMusicCollection.get(parser.getSelectedMusic());
         selectedParallax = parser.getSelectedParallax().equals("sky") ? ParallaxType.SKY : ParallaxType.FOREST;
@@ -409,31 +408,23 @@ public class GameMode implements Screen {
 
         inputController.readInput(bounds, scale);
 
-        // Toggle debug
-        if (inputController.didDebug()) {
-            debug = !debug;
-        }
+//        // Toggle debug
+//        if (inputController.didDebug()) {
+//            debug = !debug;
+//        }
 
-        // Handle resets
-        if (inputController.didReset()) {
-            reset();
-            return true;
-        }
-
-        // TODO: TEMPORARY NEXT LEVEL
-        if (inputController.didNext()) {
-            setNextLevel();
-            reset();
-            return true;
-        }
-
-        // leave game
-        // TODO: this has no keybinds on keyboard,
-        //  this conditional supports xbox controller's back button though.
-        if (inputController.didExit()) {
-            listener.exitScreen(this, EXIT_QUIT);
-            return false;
-        }
+//        if (inputController.didReset()) {
+//            backgroundMusic.stop();
+//            reset();
+//            return true;
+//        }
+//
+//        if (inputController.didNext()) {
+//            backgroundMusic.stop();
+//            setNextLevel();
+//            reset();
+//            return true;
+//        }
 
         // Pause button pressed, no changes to internal state of game world
         if (inputController.didPause()) {
@@ -447,6 +438,10 @@ public class GameMode implements Screen {
             return false;
         }
 
+        // TODO: HARDCODED level 7, but okay.
+        if (showGoal && inputController.didZoom() && currentLevel >= 7){
+            showGoal = false;
+        }
 
         return true;
     }
@@ -463,24 +458,6 @@ public class GameMode implements Screen {
      * @param dt    Number of seconds since last animation frame
      */
     public void update(float dt) {
-        //contain cursor
-//        Gdx.input.setCursorCatched(true);
-//        int x = Gdx.input.getX();
-//        int y = Gdx.input.getY();
-//        if(Gdx.input.getY() < cursorTexture.getRegionHeight()/2f * cursorScl){
-//            y = (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
-//        }
-//        if(Gdx.input.getY() > Gdx.graphics.getHeight() - (cursorTexture.getRegionHeight()/2f * cursorScl)){
-//            y = Gdx.graphics.getHeight() - (int) (cursorTexture.getRegionHeight()/2f * cursorScl);
-//        }
-//        if(Gdx.input.getX() < cursorTexture.getRegionWidth()/2f * cursorScl){
-//            x = (int) (cursorTexture.getRegionWidth()/2f * cursorScl);;
-//        }
-//        if(Gdx.input.getX() > Gdx.graphics.getWidth() - (cursorTexture.getRegionWidth()/2f * cursorScl)){
-//            x = Gdx.graphics.getWidth() - (int) (cursorTexture.getRegionWidth()/2f * cursorScl);
-//        }
-//        Gdx.input.setCursorPosition(x,y);
-
         if (!showGoal && inputController.didZoom() && gameplayController.canAvatarZoom()){
             zoomAlpha += zoomAlphaDelta;
         }
@@ -525,7 +502,7 @@ public class GameMode implements Screen {
         Vector2 scl = gameplayController.getPlayer().getDrawScale();
 
         //camera starts at the goal door then moves to the player until it finishes (showgoal => false)
-        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || debug) {
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE) {
             showGoal = false;
         }
 
@@ -813,7 +790,6 @@ public class GameMode implements Screen {
      * Sets cutscene
      */
     public void setCutScene() {
-        // TODO: Change this manual cutscene allocation with Parser
         if (currentLevel == 1) {
             cutsceneNum = 1;
             cutsceneBool = false;

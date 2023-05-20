@@ -653,35 +653,6 @@ public class LevelContainer{
         dheight = bounds.height;
         String wallName = "barrier";
 
-        // TODO: create some loop, too much duplication.
-        // Create the left wall
-        BoxObstacle wall = new BoxObstacle(-0.5f, dheight/2f, 1, 2*dheight);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-
-        // Create the right wall
-        wall = new BoxObstacle(dwidth-0.5f, dheight/2f, 1, 2*dheight);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-
-        // Create the bottom wall
-        // TODO: if ground is y-level 0, the wall's y-position should be around [-0.5, -2].
-        wall = new BoxObstacle(dwidth/2f, -dheight/2f, dwidth, 1);
-        wall.setDensity(0);
-        wall.setFriction(0);
-        wall.setBodyType(BodyDef.BodyType.StaticBody);
-        wall.setName(wallName);
-        wall.setDrawScale(scale);
-        addObject(wall);
-
         // Create player
         dwidth = globalConstants.get("player").get("size").getFloat(0);
         dheight = globalConstants.get("player").get("size").getFloat(1);
