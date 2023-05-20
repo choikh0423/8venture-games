@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.audio.*;
-import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.model.*;
 import com.mygdx.game.model.hazard.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
@@ -19,7 +17,6 @@ import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
-import com.mygdx.game.utility.util.ScreenListener;
 
 import java.util.Iterator;
 
@@ -80,19 +77,9 @@ public class GameplayController implements ContactListener {
     private boolean failed;
 
     /**
-     * Background music
-     */
-    private Music backgroundMusic;
-
-    /**
      * Strong Wind Sound Effect
      */
     private Sound windStrongSFX;
-
-    /**
-     * Strong Wind Sound Effect Current Frame
-     */
-    private static final int WIN_COUNTDOWN_TIMER = 20;
     private Sound birdAlertSFX;
     private Music birdFlapSFX;
     private Sound lightningSFX;
@@ -106,7 +93,7 @@ public class GameplayController implements ContactListener {
      * Strong Wind Sound Effect Duration Frame
      */
     //TODO: This needs to be meticulously calculated later
-    private int WIND_STRONG_DURATION = 60;
+    private final int WIND_STRONG_DURATION = 60;
     /**
      * Boolean to check if previously was in wind
      */
@@ -240,10 +227,6 @@ public class GameplayController implements ContactListener {
     // ====================== (BEGIN) SOUND-related fields =============================
 
     /**
-     * The background music volume
-     */
-    private float musicVolume = 0.0f;
-    /**
      * The sound effects volume
      */
     private float SFXVolume = 0.0f;
@@ -285,7 +268,6 @@ public class GameplayController implements ContactListener {
 
         // Level container gather assets
         levelContainer.gatherAssets(directory);
-        backgroundMusic = directory.getEntry("music:cloud", Music.class);
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
         birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
         birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
@@ -334,18 +316,10 @@ public class GameplayController implements ContactListener {
         avatar = levelContainer.getAvatar();
         umbrella = levelContainer.getUmbrella();
 
-        backgroundMusic.play();
-        backgroundMusic.setVolume(musicVolume);
-        backgroundMusic.setLooping(true);
         stopSFX();
-
-        resetCounter++;
     }
 
-    public int resetCounter = 0;
-
     // track updates to player
-
     /**
      * whether there is input to move player
      */
@@ -940,8 +914,8 @@ public class GameplayController implements ContactListener {
             contactWindFix.remove(windFix);
         }
 
-        if ((umbrella == bd2 && bd1.getName().contains("wind")) ||
-                (umbrella == bd1 && bd2.getName().contains("wind"))) {
+        if ((umbrella == bd2 && bd1 instanceof NewWindModel) ||
+                (umbrella == bd1 && bd2 instanceof NewWindModel)) {
             Fixture windFix = (umbrella == bd2 ? fix1 : fix2);
             contactNewWindFix.remove(windFix);
         }
@@ -996,8 +970,7 @@ public class GameplayController implements ContactListener {
      * We need this method to stop all sounds when we pause.
      * Pausing happens when we switch game modes.
      */
-    public void pause() {
-        backgroundMusic.pause();
+    public void pauseSFX() {
         windStrongSFX.pause();
         lightningSFX.pause();
         birdAlertSFX.pause();
@@ -1103,9 +1076,6 @@ public class GameplayController implements ContactListener {
         return avatar;
     }
 
-    public Music getMusic() {
-        return backgroundMusic;
-    }
 
     /**
      * set world bounds to be the given rectangle dimensions.
@@ -1149,16 +1119,8 @@ public class GameplayController implements ContactListener {
     /**
      * Sets SFX Volume
      */
-    public void setVolume(float sfxVolume, float musicVolume) {
+    public void setSFXVolume(float sfxVolume) {
         this.SFXVolume = sfxVolume;
-        this.musicVolume = musicVolume;
-    }
-
-    /**
-     * Sets Background Volume
-     */
-    public void setBackgroundVolume(float volume) {
-        this.musicVolume = volume;
     }
 
     /**

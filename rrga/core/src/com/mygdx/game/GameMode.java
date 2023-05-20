@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.model.GoalDoor;
 import com.mygdx.game.model.MovingPlatformModel;
@@ -23,7 +22,18 @@ import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.util.ScreenListener;
 
+import java.util.HashMap;
+
 public class GameMode implements Screen {
+
+    /** map of all music for Game ["droplets" => Music(droplet)] */
+    private HashMap<String, Music> backgroundMusicCollection;
+
+    /** the background music used for the current game mode */
+    private Music backgroundMusic;
+
+    private float backgroundMusicVolume;
+
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
 
@@ -37,7 +47,7 @@ public class GameMode implements Screen {
     private TextureRegion skyLayerTextureC;
     /** Texture for cursor */
     private TextureRegion cursorTexture;
-    private final float cursorScl = .33f;
+    private final static float cursorScl = .33f;
 
     //TODO: Want to move this to constant.json later
     /** Horizontal Parallax Constant A*/
@@ -195,7 +205,9 @@ public class GameMode implements Screen {
         gameplayController.setScale(this.scale);
     }
 
-    public Music getMusic(){return gameplayController.getMusic();}
+    public Music getMusic(){
+        return backgroundMusic;
+    }
 
     /**
      * Creates a new game world with the default values.
@@ -298,9 +310,15 @@ public class GameMode implements Screen {
         parser = new LevelParser(directory);
         // pass parser reference to level container to lessen the traffic on GameMode -> Gameplay -> Container.
         gameplayController.getLevelContainer().setParser(parser);
+
+        backgroundMusicCollection = new HashMap<>();
+        backgroundMusicCollection.put("a_world_of_clouds", directory.getEntry("music:a_world_of_clouds", Music.class));
+        backgroundMusicCollection.put("droplets", directory.getEntry("music:droplets", Music.class));
+        backgroundMusicCollection.put("the_storm", directory.getEntry("music:the_storm", Music.class));
+        backgroundMusicCollection.put("over_the_cliffs", directory.getEntry("music:over_the_cliffs", Music.class));
+        backgroundMusicCollection.put("exploring_the_forest", directory.getEntry("music:exploring_the_forest", Music.class));
     }
 
-    public int resetCounter = -1;
     private final Vector2 camPos = new Vector2();
     /**
      * Resets the status of the game so that we can play again.
@@ -308,9 +326,6 @@ public class GameMode implements Screen {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
-        // level may have changed, parse data
-        // this is instantaneous if the level has been parsed in previous reset.
-
         // TODO: REMOVE FOR SUBMISSION
         // this ignores all levels, always runs the given file
         if (sampleLevel != null){
@@ -319,6 +334,9 @@ public class GameMode implements Screen {
         else {
             parser.parseLevel(directory.getEntry("tiled:level"+currentLevel, JsonValue.class));
         }
+        // set music and parallax after parsing
+        backgroundMusic = backgroundMusicCollection.get(parser.getSelectedMusic());
+        // parser.getSelectedParallax();
 
         physicsWidth = parser.getWorldSize().x;
         physicsHeight = parser.getWorldSize().y;
@@ -326,8 +344,11 @@ public class GameMode implements Screen {
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
 
-        resetCounter++;
         showGoal = true;
+        backgroundMusic.play();
+        backgroundMusic.setVolume(backgroundMusicVolume);
+        backgroundMusic.setLooping(true);
+        stopSFX();
     }
 
     Preferences unlocked = Gdx.app.getPreferences("unlocked");
@@ -710,11 +731,11 @@ public class GameMode implements Screen {
     }
 
     /**
-     * Called when transitioning to other modes
+     *
      *
      */
     public void pause() {
-        gameplayController.pause();
+
     }
     public void stopSFX(){gameplayController.stopSFX();}
     /**
@@ -737,7 +758,7 @@ public class GameMode implements Screen {
      * Called when this screen is no longer the current screen for a Game.
      */
     public void hide() {
-        // Useless if called in outside animation loop
+        gameplayController.pauseSFX();
     }
 
     /**
@@ -755,10 +776,6 @@ public class GameMode implements Screen {
     public void setLevel(int level){
         currentLevel = level;
         setCutScene();
-
-        resetShowGoal();
-        resetCounter--;
-        gameplayController.resetCounter--;
     }
 
     /**
@@ -796,15 +813,6 @@ public class GameMode implements Screen {
             currentLevel = 1;
         }
         setCutScene();
-        resetShowGoal();
-        resetCounter--;
-        gameplayController.resetCounter--;
-    }
-
-    public void resetShowGoal(){
-        resetCounter = 0;
-        showGoal = true;
-        gameplayController.resetCounter = 0;
     }
 
     public int getCutsceneNum() {
@@ -819,11 +827,13 @@ public class GameMode implements Screen {
         return currentLevel;
     }
 
-        /**
-         * Sets current level of the game
-         */
+    /**
+     * Sets current background and SFX volume of the game.
+     * The background music must be updated on a reset().
+     */
     public void setVolume(float sfxVolume, float musicVolume){
-        gameplayController.setVolume(sfxVolume, musicVolume);
+        backgroundMusicVolume = musicVolume;
+        gameplayController.setSFXVolume(sfxVolume);
     }
 
     /**
@@ -832,6 +842,7 @@ public class GameMode implements Screen {
     public void setSecondaryControlMode(boolean toggleOn){
         inputController.setSecondaryControlMode(toggleOn);
     }
+
     /**
      * temporary override of levels with sample level
      * @param sampleLevel tiled json
