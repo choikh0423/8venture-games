@@ -5,6 +5,7 @@
         {
          "draworder":"topdown",
          "id":41,
+         "locked":true,
          "name":"Winds",
          "objects":[
                 {
@@ -9670,6 +9671,7 @@
         {
          "draworder":"topdown",
          "id":32,
+         "locked":true,
          "name":"Sparks",
          "objects":[
                 {
@@ -11482,7 +11484,6 @@
         {
          "draworder":"topdown",
          "id":39,
-         "locked":true,
          "name":"deathzones",
          "objects":[
                 {
@@ -14212,6 +14213,98 @@
                  "width":0,
                  "x":1379,
                  "y":4616
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":3980,
+                 "name":"death",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":200,
+                         "y":-146.666666666667
+                        }, 
+                        {
+                         "x":546.666666666667,
+                         "y":12
+                        }, 
+                        {
+                         "x":306.666666666667,
+                         "y":98.6666666666667
+                        }, 
+                        {
+                         "x":233.333333333333,
+                         "y":68
+                        }, 
+                        {
+                         "x":53.333333333333,
+                         "y":48
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":6501.33333333333,
+                 "y":1509.33333333333
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":3981,
+                 "name":"death",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":225,
+                         "y":-151
+                        }, 
+                        {
+                         "x":544,
+                         "y":41
+                        }, 
+                        {
+                         "x":286,
+                         "y":143
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":8972,
+                 "y":1063
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":3982,
+                 "name":"death",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":216,
+                         "y":-152
+                        }, 
+                        {
+                         "x":540.333333333333,
+                         "y":9.66666666666652
+                        }, 
+                        {
+                         "x":216.333333333333,
+                         "y":93.6666666666665
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":3633,
+                 "y":1261
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -14220,7 +14313,7 @@
          "y":0
         }],
  "nextlayerid":42,
- "nextobjectid":3980,
+ "nextobjectid":3983,
  "orientation":"orthogonal",
  "properties":[
         {
