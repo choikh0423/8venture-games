@@ -2,6 +2,7 @@ package com.mygdx.game.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,8 +30,6 @@ public class VictoryScreen extends MenuScreen{
     /** The background tinting color cache */
     private Color overlayTint;
 
-    /** true until the first call to render*/
-    public boolean first;
     /** The Screen to draw underneath the pause screen*/
     private GameMode gameScreen;
 
@@ -73,11 +72,14 @@ public class VictoryScreen extends MenuScreen{
     /** The current state of the restart button */
     private int nextPressState;
 
+    private Music victoryMusic;
+
+    private float musicVolume;
+
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
-        first = true;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.nextButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
@@ -92,7 +94,7 @@ public class VictoryScreen extends MenuScreen{
 
         float sx = ((float)width)/STANDARD_WIDTH;
         float sy = ((float)height)/STANDARD_HEIGHT;
-        scale = (sx < sy ? sx : sy);
+        scale = Math.min(sx, sy);
     }
 
     /**
@@ -101,12 +103,8 @@ public class VictoryScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
-        //comment this out if opaque foreground
-        //gameScreen.draw(delta);
         canvas.begin();
 
-        //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
-        //above line for opaque foreground, below line for transparent foreground
         CameraController camera = canvas.getCamera();
         canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
@@ -145,20 +143,11 @@ public class VictoryScreen extends MenuScreen{
         canvas = null;
         foregroundTexture = null;
         overlayTint = null;
+        victoryMusic = null;
     }
 
     @Override
     public void resize(int width, int height) {
-        // Scaling code from Professor White's code
-//        float sx = ((float)width)/STANDARD_WIDTH;
-//        float sy = ((float)height)/STANDARD_HEIGHT;
-//        scale = (sx < sy ? sx : sy);
-//
-//        menuButton.setPos(width, height, scale);
-//        nextButton.setPos(width, height, scale);
-//
-//        winTagY = (int)(WIN_TAG_Y_RATIO * height);
-//        winTagX = (int)(WIN_TAG_X_RATIO * width);
     }
 
     /**
@@ -179,6 +168,7 @@ public class VictoryScreen extends MenuScreen{
 
         winTag = new TextureRegion(directory.getEntry("menu:win_text", Texture.class));
         cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
+        victoryMusic = directory.getEntry("music:victory", Music.class);
     }
 
     /**
@@ -187,10 +177,6 @@ public class VictoryScreen extends MenuScreen{
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
-    }
-
-    public void setBackgroundScreen(GameMode gameScreen){
-        this.gameScreen = gameScreen;
     }
 
     @Override
@@ -257,8 +243,21 @@ public class VictoryScreen extends MenuScreen{
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
+        overlayTint = new Color(1, 1, 1, 0.9f);
         currentExitCode = Integer.MIN_VALUE;
+        victoryMusic.setVolume(musicVolume);
+        victoryMusic.play();
+
     }
+
+    /** set victory music volume */
+    public void setVolume(float volume){
+        musicVolume = volume;
+    }
+
+    public void stopMusic(){
+        this.victoryMusic.stop();
+    }
+
 }
 

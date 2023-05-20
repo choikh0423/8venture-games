@@ -60,8 +60,7 @@ public class CutSceneMode extends MenuScreen {
     private int skipTagY;
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
-    /** true until the first call to render*/
-    public boolean first;
+
     /** Current level in game*/
     public int currentLevel;
 
@@ -81,7 +80,6 @@ public class CutSceneMode extends MenuScreen {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,1f);
         currentExitCode = Integer.MIN_VALUE;
-        first = true;
 
         int width = (int) canvas.getCamera().getViewWidth();
         int height = (int) canvas.getCamera().getViewHeight();
@@ -129,21 +127,6 @@ public class CutSceneMode extends MenuScreen {
      * @param delta The time in seconds since the last render.
      */
     public void render(float delta) {
-//        if (background != null){
-//            background.render(delta);
-//        }
-
-        //Gdx.input.setCursorCatched(false);
-//        int x=0, y=0;
-//        if(first) {
-//            x = Gdx.input.getX();
-//            y = Gdx.input.getY();
-//        }
-//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-//        if(first){
-//            Gdx.input.setCursorPosition(x, y);
-//            first = false;
-//        }
 
         //gameScreen.draw(delta);
         draw(delta);
@@ -155,7 +138,6 @@ public class CutSceneMode extends MenuScreen {
      */
     private void draw(float delta){
         canvas.begin();
-//        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
         CameraController camera = canvas.getCamera();
 
         setAnimation();
@@ -197,7 +179,6 @@ public class CutSceneMode extends MenuScreen {
 
     public void dispose() {
         listener = null;
-        gameScreen = null;
         canvas = null;
         overlayTint = null;
     }
@@ -230,7 +211,6 @@ public class CutSceneMode extends MenuScreen {
             currentExitCode = Integer.MIN_VALUE;
             sceneElapsedTime = 0;
         }
-
         return false;
     }
 
@@ -240,10 +220,6 @@ public class CutSceneMode extends MenuScreen {
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
-    }
-
-    public void setBackgroundScreen(GameMode gameScreen){
-        this.gameScreen = gameScreen;
     }
 
     public GameMode getBackgroundScreen(){

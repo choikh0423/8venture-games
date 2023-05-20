@@ -289,8 +289,9 @@ public class PauseMode extends MenuScreen {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.P){
+        if (keycode == Input.Keys.ESCAPE){
             currentExitCode = EXIT_RESUME;
+            return true;
         }
         return false;
     }
@@ -299,8 +300,8 @@ public class PauseMode extends MenuScreen {
         if (currentExitCode > 0) {
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
+            return true;
         }
-
         return false;
     }
 
