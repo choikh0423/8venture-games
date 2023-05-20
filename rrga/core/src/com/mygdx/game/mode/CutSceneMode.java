@@ -62,7 +62,7 @@ public class CutSceneMode extends MenuScreen {
     public int currentLevel;
 
     /** Number of frames for each cutscene*/
-    private final int[] cutsceneFrameCount = new int[]{4, 10, 5, 6, 4, 0, 2, 44, 8, 2, 15, 10};
+    private final int[] cutsceneFrameCount = new int[]{4, 10, 5, 6, 4, 0, 2, 44, 8, 2, 16, 10};
     /** Cutscene animation elapsed time */
     private float sceneElapsedTime;
     /** Remaining number of scenes to play */

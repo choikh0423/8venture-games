@@ -51,6 +51,9 @@ public class GameMode implements Screen {
     /** Texture asset for FOREST parallax layer C*/
     private TextureRegion forestLayerTextureC;
 
+    /** Texture asset for skip prompt image */
+    private TextureRegion skipPromptTexture;
+
     /** Texture for cursor */
     private TextureRegion cursorTexture;
     private final static float cursorScl = .33f;
@@ -120,6 +123,8 @@ public class GameMode implements Screen {
 
     /** The world scale */
     protected Vector2 scale;
+    /** The HUD display scale */
+    protected float displayScale;
 
     private boolean debug;
 
@@ -341,6 +346,8 @@ public class GameMode implements Screen {
         backgroundMusicCollection.put("the_storm", directory.getEntry("music:the_storm", Music.class));
         backgroundMusicCollection.put("over_the_cliffs", directory.getEntry("music:over_the_cliffs", Music.class));
         backgroundMusicCollection.put("exploring_the_forest", directory.getEntry("music:exploring_the_forest", Music.class));
+
+        skipPromptTexture = new TextureRegion(directory.getEntry("game:skip_prompt", Texture.class));
     }
 
     private final Vector2 camPos = new Vector2();
@@ -366,6 +373,11 @@ public class GameMode implements Screen {
         this.bounds.set(0,0, physicsWidth, physicsHeight);
         gameplayController.setBounds(this.bounds);
         gameplayController.reset();
+
+        // Setting scale for display
+        float sx = ((float)canvas.getCamera().getViewWidth()/1024);
+        float sy = ((float)canvas.getCamera().getViewHeight())/576;
+        displayScale = Math.min(sx, sy);
 
         showGoal = true;
         backgroundMusic.play();
@@ -612,6 +624,11 @@ public class GameMode implements Screen {
         canvas.begin();
         camera.setZoom(1.0f);
         avatar.drawInfo(canvas);
+
+        if (showGoal && currentLevel > 6) {
+            canvas.draw(skipPromptTexture, Color.WHITE, skipPromptTexture.getRegionWidth() / 2f, skipPromptTexture.getRegionHeight() / 2f,
+                    (int)camera.getViewWidth()*0.8f, (int)camera.getViewHeight()*.07f, 0, 0.6f * displayScale, 0.6f * displayScale);
+        }
 
         // draw cursor
         //draw mouse texture
