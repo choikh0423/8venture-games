@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.mygdx.game.model.NewWindModel;
 import com.mygdx.game.model.PlayerModel;
 import com.mygdx.game.model.UmbrellaModel;
 import com.mygdx.game.model.WindModel;
@@ -21,6 +22,7 @@ public class BirdRayCastCallback implements RayCastCallback {
         //add see-through objects here
         if (!(fixture.getBody().getUserData() instanceof UmbrellaModel) &&
                 !(fixture.getBody().getUserData() instanceof WindModel) &&
+                !(fixture.getBody().getUserData() instanceof NewWindModel) &&
                 !(fixture.getBody().getUserData() instanceof LightningHazard) &&
                 !(fixture.getBody().getUserData() instanceof BirdHazard)) {
             collisions.put(fixture, v);

@@ -122,11 +122,8 @@ public class LevelParser {
     /** the default JSONs of movable cloud objects */
     private final JsonValue[] cloudDefaultObjects;
 
-    /** the default JSON properties of a nest object */
+    /** the default JSON object of a nest object */
     private final JsonValue nestDefault;
-
-    /** the default JSON polygon of a nest object */
-    private final JsonValue nestDefaultPoly;
 
     /** the default JSONs of animated lightning objects */
     private final JsonValue[] lightningDefaultObjects;
@@ -146,8 +143,8 @@ public class LevelParser {
     /** all objects in game that needs asset information can be found in an objects.json */
     private final JsonValue gameObjectTiles;
 
-    /** the list of texture region cutters, one for each tileset */
-    private final ArrayList<ImageTileSetMaker> tileSetMakers = new ArrayList<>();
+    /** map of (id -> tileset cutters / texture region cutters) where integer IDs are grid IDs */
+    private final IntMap<ImageTileSetMaker> tileSetMakers = new IntMap<>();
 
     /** the texture producer for stickers */
     private CollectionTileSetMaker stickerMaker;
@@ -310,8 +307,7 @@ public class LevelParser {
         windDefault = windTemplate.get("object").get("properties");
         windDefaultPoly = windTemplate.get("object").get("polygon");
 
-        nestDefault = nestTemplate.get("object").get("properties");
-        nestDefaultPoly = nestTemplate.get("object").get("polygon");
+        nestDefault = nestTemplate.get("object");
 
         cloudDefaultObjects = new JsonValue[]{
                 cloud0Template.get("object"),
@@ -424,9 +420,13 @@ public class LevelParser {
             if (j == null){
                 continue;
             }
-            tileSetMakers.add(
-                    new ImageTileSetMaker(j, ts.getInt("firstgid"))
-            );
+            ImageTileSetMaker tileSetMaker = new ImageTileSetMaker(j, ts.getInt("firstgid"));
+            int minId = ts.getInt("firstgid");
+            int maxId = j.getInt("tilecount") - 1 + minId;
+            for (int i = minId; i <= maxId; i++){
+                tileSetMakers.put(i, tileSetMaker);
+            }
+
         }
         stickers.clear();
         layers.clear();
@@ -533,11 +533,12 @@ public class LevelParser {
         float angle = convertAngle(obj.getFloat("rotation", 0));
         int depth = obj.getInt("__DEPTH__", -1);
         // see if the sticker is coming from a tileset...
-        TextureRegion tile = getTileFromImages(gid);
+        Tile tile = getTileFromImages(gid);
         if (tile != null){
-            JsonValue AABB = processTileObjectAABB(obj, null, tile.getRegionWidth(), tile.getRegionHeight());
-            // since tile was retrieved from tilesets, flipping has been set.
-            stickers.add(new Sticker(x, y, angle, depth, AABB, tile));
+            TextureRegion tileRegion = tile.getRegionCopy();
+            JsonValue AABB = processTileObjectAABB(obj, null, tileRegion.getRegionWidth(), tileRegion.getRegionHeight());
+            tileRegion.flip(tile.isFlipX(), tile.isFlipY());
+            stickers.add(new Sticker(x, y, angle, depth, AABB, tileRegion));
             return;
         }
         // see if the sticker is from stickers.json
@@ -556,9 +557,9 @@ public class LevelParser {
             }
             else {
                 // make still-frame sticker
-                tile = textureInfo.getTextureRegion();
-                tile.flip(flipX, flipY);
-                stickers.add(new Sticker(x, y, angle, depth, AABB, tile));
+                TextureRegion textureRegion = textureInfo.getTextureRegion();
+                textureRegion.flip(flipX, flipY);
+                stickers.add(new Sticker(x, y, angle, depth, AABB, textureRegion));
             }
         }
     }
@@ -1074,47 +1075,46 @@ public class LevelParser {
 
     private void processNests(ArrayList<JsonValue> rawData, HashMap<Integer, JsonValue> trajectory){
         nestData = new JsonValue[rawData.size()];
-        IntIntMap seen = new IntIntMap(16);
         for (int ii = 0; ii < nestData.length; ii++) {
-            seen.clear();
             //data we pass in to nest constructor
             JsonValue data = new JsonValue(JsonValue.ValueType.object);
             //nest raw data
             JsonValue n = rawData.get(ii);
             JsonValue props = n.get("properties");
-
             // set position data
             readPositionAndConvert(n, temp);
             addPosition(data, temp);
-
             // the resulting path should be stored as a list of floats which is Json array of Json floats.
             JsonValue pathJson = new JsonValue(JsonValue.ValueType.array);
-            // implicitly, the platform's location is the FIRST point on its path.
             pathJson.addChild(new JsonValue(temp.x));
             pathJson.addChild(new JsonValue(temp.y));
-
-            // this takes either the platform's next point along its path or take from default (which should be 0)
-            JsonValue jsonId = getFromProperties(props, "path", null);
-            int next = jsonId.asInt();
-            int idx = 1;
-            while (next != 0 && !seen.containsKey(next) && trajectory.get(next) != null) {
-                seen.put(next, idx);
-                idx++;
-                JsonValue nodeData = trajectory.get(next);
-                // put path point (x,y) into vector cache and perform conversion
-                readPositionAndConvert(nodeData, temp);
-                // add this node to bird's path
-                pathJson.addChild(new JsonValue(temp.x));
-                pathJson.addChild(new JsonValue(temp.y));
-                // get next
-                nodeData = nodeData.get("properties");
-                jsonId = getFromProperties(nodeData, "next_trajectory", pointDefault);
-                next = jsonId.asInt();
-            }
-            data.addChild("points", polyPoints(n.get("polygon"), nestDefaultPoly));
-            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", nestDefault).asFloat()));
-            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", nestDefault).asFloat()));
+            JsonValue defaultProps = nestDefault.get("properties");
+            int nextPointID = getFromProperties(props, "path", defaultProps).asInt();
+            processPath(pathJson, trajectory, nextPointID, n.getInt("id") );
             data.addChild("path", pathJson);
+            data.addChild("visible", new JsonValue(getFromProperties(props, "visible", defaultProps).asBoolean()));
+            data.addChild("bird_speed", new JsonValue(getFromProperties(props, "bird_speed", defaultProps).asFloat()));
+            data.addChild("spawn_delay", new JsonValue(getFromProperties(props, "spawn_delay", defaultProps).asFloat()));
+
+            boolean horizontalFlipped = isObjectHorizontallyFlipped(n);
+            boolean verticalFlipped = isObjectVerticallyFlipped(n);
+            data.addChild("flipX", new JsonValue(horizontalFlipped));
+            // data.addChild("flipY", new JsonValue(verticalFlipped));
+
+            // add AABB and hitbox
+            JsonValue tileJson = gameObjectTiles.get(getProcessedGid(nestDefault) - 1);
+            int assetWidth = tileJson.getInt("imagewidth");
+            int assetHeight = tileJson.getInt("imageheight");
+            data.addChild("filmStripWidth", new JsonValue(assetWidth));
+            data.addChild("filmStripHeight", new JsonValue(assetHeight));
+            data.addChild("AABB", processTileObjectAABB(nestDefault, nestDefault, assetWidth, assetHeight));
+            JsonValue hitBoxPoints = tileJson.get("objectgroup").get("objects").get(0);
+            float ox = hitBoxPoints.getFloat("x");
+            float oy = hitBoxPoints.getFloat("y");
+            JsonValue shape = processAssetHitBox( hitBoxPoints.get("polygon"), temp.set(ox,oy), scalars,
+                    horizontalFlipped, verticalFlipped, assetWidth, assetHeight);
+            data.addChild("points", shape);
+            data.addChild("depth", new JsonValue(n.getInt("__DEPTH__", -1)));
             nestData[ii] = data;
         }
     }
@@ -1318,22 +1318,22 @@ public class LevelParser {
         boolean flipX = (gid & (1L << 31)) != 0;
         boolean flipY = (gid & (1L << 30)) != 0;
         boolean flipD = (gid & (1L << 29)) != 0;
-        // this loop should be fast with small number of tilesets
-        for (ImageTileSetMaker imageSet : tileSetMakers) {
-            if (imageSet.contains(id)) return imageSet.getTileFromId(id, flipD, flipX, flipY);
+        ImageTileSetMaker tileSetMaker = tileSetMakers.get(id);
+        if (tileSetMaker != null){
+            return tileSetMaker.getTileFromId(id, flipD, flipX, flipY);
         }
         return null;
     }
 
     private void parseTileLayer(JsonValue layer){
-        // loop over array data and make texture regions
-        JsonValue data = layer.get("data");
-        Tile[] tiles = new Tile[data.size];
+        // loop over array data and make tiles
+        long[] data = layer.get("data").asLongArray();
+        Tile[] tiles = new Tile[data.length];
         int worldWidth = (int) worldSize.x;
         int worldHeight = (int) worldSize.y;
         for (int i = 0; i < tiles.length; i++){
             // the Tiled ID is a 32-bit UNSIGNED integer
-            long rawId = data.get(i).asLong();
+            long rawId = data[i];
             if (rawId == 0){
                 continue;
             }
@@ -1369,24 +1369,24 @@ public class LevelParser {
      * A ImageTileSetMaker produces texture regions upon request by cutting texture regions from a single texture.
      */
     private class ImageTileSetMaker extends TileSetMaker {
-        private final int columns;
-        private final Texture texture;
-        private final  int width;
-        private final int height;
-
-        private String tileSetName;
+        private final FilmStrip tileset;
+//        private final  int width;
+//        private final int height;
+//        private String tileSetName;
 
         ImageTileSetMaker(JsonValue tileSetJson, int firstGid){
+            double tileCount = tileSetJson.getInt("tilecount");
             minId = firstGid;
             maxId = tileSetJson.getInt("tilecount") - 1 + minId;
             String name = tileSetJson.getString("name");
-            this.tileSetName = name;
-            texture = tileSetTextureMap.get(name);
+            //this.tileSetName = name;
+            Texture texture = tileSetTextureMap.get(name);
             // removes flickering on square tiles
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            width = tileSetJson.getInt("tilewidth");
-            height = tileSetJson.getInt("tileheight");
-            columns = tileSetJson.getInt("columns");
+            //width = tileSetJson.getInt("tilewidth");
+            //height = tileSetJson.getInt("tileheight");
+            int columns = tileSetJson.getInt("columns");
+            tileset = new FilmStrip(texture, (int) Math.ceil(tileCount/ columns), columns);
         }
 
         /**
@@ -1399,22 +1399,16 @@ public class LevelParser {
          */
         public Tile getTileFromId(int id, boolean flipD, boolean flipX, boolean flipY){
             int index = id - minId;
-            int row = index / columns;
-            int col = index % columns;
-            Tile tile = new Tile(texture);
-            // two additional pixel padding added in both directions
-            // cut out region starting from second left corner of each 130x130 tile
-            tile.setRegion(col * (width + 2) + 1, row * (height + 2) + 1, width, height);
-
+            Tile tile = new Tile(tileset, index);
             // enumerate all 8 possible cases
             if (flipD && flipY && flipX){
                 // 30, 31, 32 => flip x THEN counter-clock-wise rotate 270 deg
-                tile.flip(true, false);
+                tile.setFlip(true, false);
                 tile.setRotation((float) Math.PI * 1.5f);
             }
             else if (flipY && flipX){
                 // 31, 32 => rotate 180 (flip both axes)
-                tile.flip(true, true);
+                tile.setFlip(true, true);
             }
             else if (flipD && flipX){
                 // 30, 32 => counter-clock-wise rotate 270 deg
@@ -1426,15 +1420,15 @@ public class LevelParser {
             }
             else if (flipX){
                 // 32 => flip x
-                tile.flip(true, false);
+                tile.setFlip(true, false);
             }
             else if (flipY){
                 // 31 => flip y
-                tile.flip(false, true);
+                tile.setFlip(false, true);
             }
             else if (flipD){
                 // 30 => flip x THEN counter-clock-wise rotate 90 deg
-                tile.flip(true, false);
+                tile.setFlip(true, false);
                 tile.setRotation((float) Math.PI /2f);
             }
             return tile;
@@ -1457,7 +1451,6 @@ public class LevelParser {
         }
 
         /**
-         * returns one of the textures as a texture region <br>
          * @param id the associated id of the desired Tile, where contains(id) is true.
          * @return texture data from the collection set corresponding to the given id
          */

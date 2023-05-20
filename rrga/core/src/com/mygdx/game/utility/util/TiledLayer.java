@@ -84,11 +84,15 @@ public class TiledLayer implements Drawable {
         for (int j = minY; j <= maxY; j++) {
             for (int i = minX; i <= maxX; i++) {
                 int idx = j * width + i;
-                Tile t = tiles[idx];
-                if (t != null) {
+                Tile tile = tiles[idx];
+                if (tile != null) {
+                    int effectX = tile.isFlipX() ? -1 : 1;
+                    int effectY = tile.isFlipY() ? -1 : 1;
+                    TextureRegion t = tile.getRegion();
                     canvas.draw(t, Color.WHITE, (int)(t.getRegionWidth()/2f), (int)(t.getRegionHeight()/2f),
-                            (int)((i + 0.5f) * drawScale.x), (int) ((j + 0.5f) * drawScale.y), t.getRotationRad(),
-                            drawScale.x/t.getRegionWidth(), drawScale.y/t.getRegionHeight()
+                            (int)((i + 0.5f) * drawScale.x), (int) ((j + 0.5f) * drawScale.y), tile.getRotationRad(),
+                            effectX * drawScale.x/t.getRegionWidth(),
+                            effectY * drawScale.y/t.getRegionHeight()
                     );
                     tilesDrawn++;
                 }

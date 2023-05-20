@@ -4,110 +4,119 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.utility.obstacle.Obstacle;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
-import com.mygdx.game.utility.obstacle.SimpleObstacle;
+import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
+import com.sun.org.apache.bcel.internal.generic.DADD;
 
-public class NestHazard extends PolygonObstacle {
+public class NestHazard extends PolygonObstacle implements Drawable {
+
     private final float[] path;
-    private final float birdSpeed;
     private final int spawnDelay;
-    private int countdown;
-    private final int birdDamage;
-    private final float birdKnockBack;
-    private final Vector2 scale;
-    private final TextureRegion birdTex;
-    private int spawnInCountdown;
-    private boolean drawSpawnIn;
-    private final JsonValue blueData;
-    private final float[] blueAABB;
 
-    public NestHazard(float[] points, float x, float y, float[] path, float spd, int delay, int dam, float kb,
-                      Vector2 scl, Texture birdAnimation, JsonValue blueData){
-        super(points, x, y);
+    /** blue bird json data for bird initializer*/
+    private final JsonValue blueBirdData;
+
+    private final float birdSpeed;
+
+    /** the physics dimensions of object's AABB */
+    private final Vector2 dimensions = new Vector2();
+
+    /** the top left corner coordinate of object AABB (coordinate is relative to entity) */
+    private final Vector2 boxCoordinate = new Vector2();
+
+    private final Vector2 temp = new Vector2();
+    private final int drawDepth;
+
+    private final boolean visible;
+
+    public NestHazard(JsonValue nestData, JsonValue blueBirdData) {
+        super(nestData.get("points").asFloatArray(), nestData.getFloat("x"), nestData.getFloat("y"));
         setGravityScale(0);
         setDensity(0);
         setFriction(0);
         setRestitution(0);
         setSensor(true);
+        this.blueBirdData = blueBirdData;
+        this.path = nestData.get("path").asFloatArray();
+        birdSpeed = nestData.getFloat("bird_speed");
+        spawnDelay = nestData.getInt("spawn_delay");
+        visible = nestData.getBoolean("visible");
 
-        this.path = path;
-        birdSpeed = spd;
-        spawnDelay = delay;
-        countdown = spawnDelay;
-        System.out.println("countdown initial: " + countdown );
+        // load Drawable-necessary information
+        float[] aabb = nestData.get("AABB").asFloatArray();
+        boxCoordinate.x = aabb[0];
+        boxCoordinate.y = aabb[1];
+        dimensions.x = aabb[2];
+        dimensions.y = aabb[3];
+        drawDepth = nestData.getInt("depth");
 
-        birdDamage = dam;
-        birdKnockBack = kb;
-        scale = scl;
-        // TODO: better memory allocation with PooledList
-        PooledList<BirdHazard> birdList = new PooledList<>();
-        this.blueData = blueData;
-        blueAABB = blueData.get("AABB").asFloatArray();
-
-        spawnInCountdown = 0;
-        drawSpawnIn = false;
-        TextureRegion[][] flapTmpFrames = TextureRegion.split(birdAnimation, blueData.getInt("filmStripWidth"),
-                blueData.getInt("filmStripHeight"));
-        birdTex = flapTmpFrames[0][0];
+        // offset bird upwards so bird rests on nests
+        this.path[1] = getY() + 0.5f * dimensions.y;
     }
 
-    public BirdHazard update(){
-        if(countdown == 0){
-            countdown = spawnDelay;
-            JsonValue data = blueData;
+    /**
+     * NOTE: for correctness, this data needs to be consumed immediately because there's shared data between nests.
+     * @return blue nested bird initializer data
+     */
+    public JsonValue getBirdInitializerData(){
+        // update blue bird data with essential properties before returning
+        // no need to set real speed. bird will be stationary until spawn is over.
+        blueBirdData.remove("movespeed");
+        blueBirdData.addChild("movespeed", new JsonValue(birdSpeed));
+        blueBirdData.remove("x");
+        blueBirdData.remove("y");
+        blueBirdData.addChild("x", new JsonValue(path[0]));
+        blueBirdData.addChild("y", new JsonValue(path[1]));
+        blueBirdData.remove("depth");
+        blueBirdData.addChild("depth", new JsonValue(drawDepth));
+        return blueBirdData;
+    }
 
-            //data.remove("x");
-            //data.remove("y");
-            data.addChild("x", new JsonValue(getX()));
-            data.addChild("y", new JsonValue(getY()));
+    public float getBirdSpeed(){
+        return this.birdSpeed;
+    }
 
-            //data.remove("facing_right");
-            boolean right = path[2] - getX() > 0;
-            data.addChild("facing_right", new JsonValue(right));
+    /**
+     * @return number of frames of immobility for bird
+     */
+    public int getSpawnDelay() {
+        return spawnDelay;
+    }
 
-            //data.remove("movespeed");
-            data.addChild("movespeed", new JsonValue(birdSpeed));
+    /**
+     * NOTE: this is a reference to path data. This is not an allocator.
+     * @return path that the bird should follow, if at end of path: bird continues in the same direction.
+     */
+    public float[] getPath() {
+        return path;
+    }
 
-            BirdHazard obj = new BirdHazard(data, birdDamage, 0, birdKnockBack, null);
-            obj.setDrawScale(scale);
-            // TODO: get still frame index from global constants
-            obj.setFlapAnimation(birdTex.getTexture(), 0);
-            obj.setPath(path, -1);
-            obj.setName("blue_bird");
-            return obj;
-        }
-        else{
-            countdown--;
-            return null;
-        }
+    // DRAWABLE INTERFACE
+
+    @Override
+    public Vector2 getDimensions() {
+        return temp.set(dimensions);
+    }
+
+    @Override
+    public Vector2 getBoxCorner() {
+        return temp.set(boxCoordinate).add(getX(), getY());
+    }
+
+    @Override
+    public int getDepth() {
+        return drawDepth;
     }
 
     public void draw(GameCanvas canvas){
-        //TODO size nests automatically
-        canvas.draw(texture, Color.WHITE, texture.getRegionWidth()/2f, texture.getRegionHeight()/2f,
-                getX() * drawScale.x, getY() * drawScale.y, getAngle(), .1f, .1f);
-
-        float effect = path[2] - getX() > 0 ? -1.0f : 1.0f;
-        int duration = 20;
-        int num_flashes = 3;
-        if(countdown < duration * num_flashes * 2 + 1 && countdown>0){
-            if (spawnInCountdown == 0){
-                spawnInCountdown = duration;
-                drawSpawnIn = !drawSpawnIn;
-            }
-            if(drawSpawnIn){
-                canvas.draw(birdTex, Color.WHITE, birdTex.getRegionWidth()/2f, birdTex.getRegionHeight()/2f,
-                        getX() * scale.x, getY() * scale.y, getAngle(),
-                        effect * blueAABB[2]/birdTex.getRegionWidth() * drawScale.x,
-                        blueAABB[3]/birdTex.getRegionHeight() * drawScale.y);
-            }
-            spawnInCountdown--;
+        if (visible) {
+            canvas.draw(texture, Color.WHITE, texture.getRegionWidth() / 2f, texture.getRegionHeight() / 2f,
+                    getX() * drawScale.x, getY() * drawScale.y, 0,
+                    dimensions.x / texture.getRegionWidth() * drawScale.x,
+                    dimensions.y / texture.getRegionHeight() * drawScale.y);
         }
     }
 }

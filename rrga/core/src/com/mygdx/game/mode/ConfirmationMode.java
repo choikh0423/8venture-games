@@ -2,15 +2,15 @@ package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.util.ScreenListener;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -22,8 +22,8 @@ public class ConfirmationMode extends MenuScreen {
     /** Listener that will update the player mode when we are done */
     private ScreenListener listener;
 
-    /** The Screen to draw underneath the pause screen*/
-    private MenuScreen gameScreen;
+    /** The Screen to draw underneath this screen*/
+    private MenuScreen backgroundScreen;
 
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
@@ -33,11 +33,6 @@ public class ConfirmationMode extends MenuScreen {
 
     /** The background tinting color cache */
     private Color overlayTint;
-
-    /** A reference to a text font (changes to any of its properties will be global) */
-    private BitmapFont bigFont;
-
-    private BitmapFont smallFont;
 
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
@@ -53,9 +48,9 @@ public class ConfirmationMode extends MenuScreen {
     private int noPressState;
 
     /** yes button*/
-    private MenuButton yesButton;
+    private final MenuButton yesButton;
     /** no button */
-    private MenuButton noButton;
+    private final MenuButton noButton;
 
     /** Height of the button */
     private static float BUTTON_SCALE  = 1.0f;
@@ -80,7 +75,7 @@ public class ConfirmationMode extends MenuScreen {
     private int popupX;
     private int popupY;
 
-    public static final int EXIT_LEVEL = 2;
+    public static final int EXIT_LEVEL_SELECTOR = 2;
     public static final int EXIT_SETTINGS = 3;
     public static final int EXIT_PAUSE = 4;
 
@@ -102,6 +97,22 @@ public class ConfirmationMode extends MenuScreen {
 
         this.yesButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.4f, 0);
         this.noButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.4f, 0);
+
+        // scaling
+        CameraController camera = canvas.getCamera();
+        float width = camera.getViewWidth();
+        float height = camera.getViewHeight();
+        float sx = width /STANDARD_WIDTH;
+        float sy = height /STANDARD_HEIGHT;
+        scale = Math.min(sx, sy);
+
+        yesButton.setPos((int)width, (int)height, scale);
+        noButton.setPos((int)width, (int)height, scale);
+
+        confirmationTagY = (int)(CONFIRMATION_TAG_Y_RATIO * height);
+        confirmationTagX = (int)(CONFIRMATION_TAG_X_RATIO * width);
+        popupY = (int)((CONFIRMATION_TAG_Y_RATIO-0.05f) * height);
+        popupX = (int)(CONFIRMATION_TAG_X_RATIO * width);
     }
 
     /**
@@ -112,24 +123,19 @@ public class ConfirmationMode extends MenuScreen {
      * @param directory    Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry("game:platform", Texture.class));
         cursorTexture = new TextureRegion(directory.getEntry( "menu:cursor_menu", Texture.class ));
-
+        confirmationTag = new TextureRegion(directory.getEntry("menu:confirm_text", Texture.class));
         popup = new TextureRegion(directory.getEntry("menu:popup", Texture.class));
+
         TextureRegion yesTexture = new TextureRegion(directory.getEntry("menu:checkmark", Texture.class));
         TextureRegion noTexture = new TextureRegion(directory.getEntry("menu:x", Texture.class));
-
-        confirmationTag = new TextureRegion(directory.getEntry("menu:confirm_text", Texture.class));
-
         yesButton.setTexture(yesTexture);
         noButton.setTexture(noTexture);
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-        // Setup
-        screenY = canvas.getHeight()-screenY;
         boolean yesPressed = checkClicked2(screenX, screenY, yesButton);
         boolean noPressed = checkClicked2(screenX, screenY, noButton);
 
@@ -155,7 +161,7 @@ public class ConfirmationMode extends MenuScreen {
                 settings.putFloat("sfxVolume", 0.5f);
                 settings.putBoolean("toggle", false);
                 settings.flush();
-            } else if (prevModeExitCode == EXIT_LEVEL){
+            } else if (prevModeExitCode == EXIT_LEVEL_SELECTOR){
                 for (int i = 2; i <= MenuMode.LEVEL_COUNT; i++){
                     unlocked.putBoolean(i+"unlocked", false);
                 }
@@ -179,6 +185,12 @@ public class ConfirmationMode extends MenuScreen {
      */
     private boolean checkClicked2(int screenX, int screenY,  MenuButton button) {
 
+        // convert mouse screen coordinate to viewport world coordinate
+        CameraController camera = canvas.getCamera();
+        Vector2 temp = camera.unproject(screenX, screenY);
+        screenX = (int) temp.x;
+        screenY = (int) temp.y;
+
         // TODO: TEMPORARY touch range to make it smaller than button
         // Gets positional data of button
         float buttonX = button.getX();
@@ -200,32 +212,16 @@ public class ConfirmationMode extends MenuScreen {
         return buttonPressedX && buttonPressedY;
     }
 
-    /**
-     * Checks if click was in bound for circular buttons
-     *
-     * @return boolean for whether button is pressed
-     */
-    private boolean checkCircleClicked2(float screenX, float screenY, MenuButton button, float scl) {
-
-        float buttonX = button.getX();
-        float buttonY = button.getY();
-        float radius = scl*scale*button.getRegionWidth()/2.0f;
-        float dist = (screenX-buttonX)*(screenX-buttonX)+(screenY-buttonY)*(screenY-buttonY);
-
-        // Checks if space inside the circle has been clicked
-        return dist < radius*radius;
-    }
-
 
     /**
      * Draw the Pause menu and exit pause mode if possible.
      * @param delta The time in seconds since the last render.
      */
     public void render(float delta) {
-//        if (background != null){
-//            background.render(delta);
-//        }
-        gameScreen.draw();
+        // safe guard conditional
+        if (backgroundScreen != null){
+            backgroundScreen.render(delta);
+        }
         draw(delta);
     }
 
@@ -235,7 +231,8 @@ public class ConfirmationMode extends MenuScreen {
      */
     private void draw(float delta){
         canvas.begin();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
+        CameraController camera = canvas.getCamera();
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(popup, Color.WHITE, popup.getRegionWidth()/2f, popup.getRegionHeight()/2f,
                 popupX, popupY, 0, scale, scale);
@@ -245,41 +242,33 @@ public class ConfirmationMode extends MenuScreen {
         yesButton.draw(canvas, yesPressState, BUTTON_SCALE, Color.WHITE);
         noButton.draw(canvas, noPressState, 1.3f, Color.WHITE);
 
-        //draw cursor
+        // draw mouse texture
         int mx = Gdx.input.getX();
-        int my = Gdx.graphics.getHeight() - Gdx.input.getY();
-        if(mx<Gdx.graphics.getWidth() && mx>0 && my<Gdx.graphics.getHeight() && my>0) {
+        int my = Gdx.input.getY();
+        // retrieve the viewport coordinate to draw cursor
+        Vector2 pos = camera.unproject(mx, my);
+        if(pos.x <= camera.getViewWidth() && pos.x>= 0 && pos.y < camera.getViewHeight() && pos.y >0) {
             canvas.draw(cursorTexture, Color.WHITE, 0, cursorTexture.getRegionHeight(),
-                    mx, my, 0, .4f, .4f);
+                    pos.x, pos.y, 0, .4f, .4f);
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+        }
+        else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
         canvas.end();
     }
 
     public void resize(int width, int height) {
-
-        // Scaling code from Professor White's code
-        float sx = ((float)width)/STANDARD_WIDTH;
-        float sy = ((float)height)/STANDARD_HEIGHT;
-        scale = (sx < sy ? sx : sy);
-
-        yesButton.setPos(width, height, scale);
-        noButton.setPos(width, height, scale);
-
-        confirmationTagY = (int)(CONFIRMATION_TAG_Y_RATIO * height);
-        confirmationTagX = (int)(CONFIRMATION_TAG_X_RATIO * width);
-        popupY = (int)((CONFIRMATION_TAG_Y_RATIO-0.05f) * height);
-        popupX = (int)(CONFIRMATION_TAG_X_RATIO * width);
+        // resize handled through viewport
     }
 
     public void dispose() {
         listener = null;
-        gameScreen = null;
+        backgroundScreen = null;
         canvas = null;
         foregroundTexture = null;
         overlayTint = null;
-        bigFont = null;
-        smallFont = null;
     }
 
     @Override
@@ -308,12 +297,12 @@ public class ConfirmationMode extends MenuScreen {
         this.listener = listener;
     }
 
-    public void setBackgroundScreen(MenuScreen gameScreen){
-        this.gameScreen = gameScreen;
+    public void setBackgroundScreen(MenuScreen backgroundScreen){
+        this.backgroundScreen = backgroundScreen;
     }
 
     public MenuScreen getBackgroundScreen(){
-        return this.gameScreen;
+        return this.backgroundScreen;
     }
 
     public void reset() {

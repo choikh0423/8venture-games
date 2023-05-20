@@ -4,7 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.game.mode.*;
@@ -150,7 +149,6 @@ public class GDXRoot extends Game implements ScreenListener {
 
 	/**
 	 * The given screen has made a request to exit its player mode.
-	 *
 	 * The value exitCode can be used to implement menu options.
 	 *
 	 * @param screen   The screen requesting to exit
@@ -180,6 +178,7 @@ public class GDXRoot extends Game implements ScreenListener {
                     break;
                 case MenuMode.EXIT_PLAY:
                     menu.cameForPauseSettings = false;
+                    // TODO: DISABLE FOR SUBMISSION
                     if (filePath.length() > 0) {
                         String filePath = Gdx.files.local(this.filePath).file().getAbsolutePath();
 
@@ -215,7 +214,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
                 case MenuMode.EXIT_PAUSE:
                     menu.cameForPauseSettings = false;
-                    pausing.setBackgroundScreen(playing);
                     playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
                     setScreen(pausing);
                     break;
@@ -223,7 +221,8 @@ public class GDXRoot extends Game implements ScreenListener {
 		} else if (screen == pausing){
 			switch (exitCode){
 				case PauseMode.EXIT_RESUME:
-					setScreen(pausing.getBackgroundScreen());
+                    // Pause screen -> return -> gameplay
+					setScreen(playing);
                     playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
 				case PauseMode.EXIT_RESTART:
@@ -263,8 +262,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					setScreen(defeat);
 					break;
 				case GameMode.EXIT_PAUSE:
-					pausing.setBackgroundScreen(playing);
-                    pausing.first = true;
 					setScreen(pausing);
 					break;
 				case GameMode.EXIT_QUIT:
@@ -279,14 +276,13 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
 			}
 		} else if (screen == confirmation){
-			if (exitCode == ConfirmationMode.EXIT_LEVEL || exitCode == ConfirmationMode.EXIT_SETTINGS){
+			if (exitCode == ConfirmationMode.EXIT_LEVEL_SELECTOR || exitCode == ConfirmationMode.EXIT_SETTINGS){
 				menu.setScreenListener(this);
 				menu.reset();
 				menu.setScreenMode(exitCode);
 				setScreen(menu);
 			}
 			else if (exitCode == ConfirmationMode.EXIT_PAUSE){
-				pausing.setBackgroundScreen(playing);
 				setScreen(pausing);
 			}
 		

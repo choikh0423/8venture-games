@@ -5,16 +5,12 @@ import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
-import com.mygdx.game.GameMode;
 import com.mygdx.game.screen.MenuScreen;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.util.ScreenListener;
-
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.mygdx.game.utility.assets.*;
 
 /**
  * A PauseMode is a pause menu screen. User can interact with this screen
@@ -25,9 +21,6 @@ public class PauseMode extends MenuScreen {
     /** Listener that will update the player mode when we are done */
     private ScreenListener listener;
 
-    /** The Screen to draw underneath the pause screen*/
-    private GameMode gameScreen;
-
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
@@ -36,11 +29,6 @@ public class PauseMode extends MenuScreen {
 
     /** The background tinting color cache */
     private Color overlayTint;
-
-    /** A reference to a text font (changes to any of its properties will be global) */
-    private BitmapFont bigFont;
-
-    private BitmapFont smallFont;
 
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
@@ -64,43 +52,41 @@ public class PauseMode extends MenuScreen {
     private int settingsPressState;
 
     /** exit button*/
-    private MenuButton menuButton;
+    private final MenuButton menuButton;
     /** start button */
-    private MenuButton restartButton;
+    private final MenuButton restartButton;
     /** back button */
-    private MenuButton backButton;
+    private final MenuButton backButton;
     /** settings button */
-    private MenuButton settingsButton;
+    private final MenuButton settingsButton;
 
     /** Height of the button */
-    private static float BUTTON_SCALE  = 1.0f;
+    private static final float BUTTON_SCALE  = 1.0f;
     /** Touch range constant */
-    private static float TOUCH_AREA_RATIO = 0.95f;
-    private float TAG_SCL = 1;
+    private static final float TOUCH_AREA_RATIO = 0.95f;
+    private final float TAG_SCL = 1;
     /** Scaling factor for when the player changes the resolution. */
-    private float scale;
+    private final float scale;
 
     /** Standard window size (for scaling) */
-    private static int STANDARD_WIDTH  = 1024;
+    private static final int STANDARD_WIDTH  = 1024;
     /** Standard window height (for scaling) */
-    private static int STANDARD_HEIGHT = 576;
+    private static final int STANDARD_HEIGHT = 576;
 
     /** Pause text related variables */
     private TextureRegion pauseTag;
-    private static float PAUSE_TAG_X_RATIO = .5f;
-    private static float PAUSE_TAG_Y_RATIO = .65f;
-    private int pauseTagX;
-    private int pauseTagY;
+    private static final float PAUSE_TAG_X_RATIO = .5f;
+    private static final float PAUSE_TAG_Y_RATIO = .65f;
+    private final int pauseTagX;
+    private final int pauseTagY;
+
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
-    /** true until the first call to render*/
-    public boolean first;
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
-        first = true;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.restartButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
@@ -131,7 +117,6 @@ public class PauseMode extends MenuScreen {
      * @param directory    Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
 
         TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
@@ -252,23 +237,6 @@ public class PauseMode extends MenuScreen {
      * @param delta The time in seconds since the last render.
      */
     public void render(float delta) {
-//        if (background != null){
-//            background.render(delta);
-//        }
-
-        //Gdx.input.setCursorCatched(false);
-//        int x=0, y=0;
-//        if(first) {
-//            x = Gdx.input.getX();
-//            y = Gdx.input.getY();
-//        }
-//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-//        if(first){
-//            Gdx.input.setCursorPosition(x, y);
-//            first = false;
-//        }
-
-        //gameScreen.draw(delta);
         draw(delta);
     }
 
@@ -278,7 +246,8 @@ public class PauseMode extends MenuScreen {
      */
     private void draw(float delta){
         canvas.begin();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, canvas.getWidth(), canvas.getHeight());
+        CameraController camera = canvas.getCamera();
+        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
 
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
@@ -289,7 +258,6 @@ public class PauseMode extends MenuScreen {
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
         settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
 
-        CameraController camera = canvas.getCamera();
         //draw mouse texture
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -309,16 +277,14 @@ public class PauseMode extends MenuScreen {
 
     public void resize(int width, int height) {
         // resizing done through viewport
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
     }
 
     public void dispose() {
         listener = null;
-        gameScreen = null;
         canvas = null;
         foregroundTexture = null;
         overlayTint = null;
-        bigFont = null;
-        smallFont = null;
     }
 
     @Override
@@ -345,14 +311,6 @@ public class PauseMode extends MenuScreen {
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
-    }
-
-    public void setBackgroundScreen(GameMode gameScreen){
-        this.gameScreen = gameScreen;
-    }
-
-    public GameMode getBackgroundScreen(){
-        return this.gameScreen;
     }
 
     public void reset() {

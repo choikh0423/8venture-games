@@ -188,6 +188,8 @@ public class LevelContainer{
     /** Texture asset for blue bird animation */
     private Texture blueBirdAnimationTexture;
 
+    private Texture bluebirdSpawnAnimation;
+
     /** Texture asset for green bird animation */
     private Texture greenBirdAnimationTexture;
 
@@ -206,6 +208,11 @@ public class LevelContainer{
      * Texture asset for boost timer
      */
     private Texture boostTexture;
+
+    /**
+     * Texture for directional indicator to scarf
+     */
+    private TextureRegion indicatorTexture;
     /**
      * Fill Texture asset for lightning
      */
@@ -349,6 +356,7 @@ public class LevelContainer{
         goalTexture = new TextureRegion(directory.getEntry("game:goal", Texture.class));
         hpTexture = directory.getEntry("game:hp_indicator", Texture.class);
         boostTexture = directory.getEntry("game:boost", Texture.class);
+        indicatorTexture = new TextureRegion(directory.getEntry("game:player_indicator", Texture.class));
 
         // Hazard Textures
         redBirdAnimationTexture = directory.getEntry("game:red_bird_flapping", Texture.class);
@@ -358,6 +366,7 @@ public class LevelContainer{
         
         warningTexture = directory.getEntry("game:bird_warning", Texture.class);
         nestTexture = new TextureRegion(directory.getEntry("game:nest", Texture.class));
+        bluebirdSpawnAnimation = directory.getEntry("game:blue_bird_spawn", Texture.class);
 
         fillLightningTexture = new TextureRegion(directory.getEntry("game:lightning", Texture.class));
         fillBrambleTexture = new TextureRegion(directory.getEntry("game:brambles_fill", Texture.class));
@@ -559,7 +568,7 @@ public class LevelContainer{
         JsonValue[] deathZones = parser.getDeathZoneData();
         for(int ii = 0; ii < deathZones.length; ii++){
             JsonValue jv = deathZones[ii];
-            PolygonObstacle obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
+            StaticHazard obj = new StaticHazard(jv, globalConstants.get("player").getInt("maxhealth"), 0);
             obj.setName("death_zone"+ii);
             obj.setDrawScale(scale);
             obj.setSensor(true);
@@ -573,10 +582,11 @@ public class LevelContainer{
         float birdKnockBack = hazardsjv.getInt("birdKnockBack");
         // indices for each bird type indicating the preferred still frame.
         int[] indices = hazardsjv.get("birdStillFrames").asIntArray();
+        int birdCount = 0;
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
@@ -584,24 +594,29 @@ public class LevelContainer{
             addObject(obj);
             birds.add(obj);
             drawables.add(obj);
+            birdCount++;
         }
 
-        //TODO
-        //create nests
+        //create nests and their bird
         String nestName = "nest";
         JsonValue[] nestData = parser.getNestData();
         for(int ii = 0; ii<nestData.length; ii++){
-            NestHazard obj;
-            JsonValue jv = nestData[ii];
-            JsonValue blueData = parser.getBlueBirdData();
-            obj = new NestHazard(jv.get("points").asFloatArray(), jv.getFloat("x"), jv.getFloat("y"),
-                    jv.get("path").asFloatArray(), jv.getFloat("bird_speed"), jv.getInt("spawn_delay"),
-                    birdDamage, birdKnockBack, scale, getFlapAnimationTexture(BirdHazard.BirdColor.BLUE), blueData);
-            obj.setDrawScale(scale);
-            obj.setTexture(nestTexture);
-            obj.setName("nest" + ii);
-            addObject(obj);
-            nests.add(obj);
+            NestHazard nest = new NestHazard(nestData[ii], parser.getBlueBirdData());
+            nest.setDrawScale(scale);
+            nest.setTexture(nestTexture);
+            nest.setName("nest" + ii);
+            addObject(nest);
+            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack);
+            bird.setDrawScale(scale);
+            bird.setFlapAnimation(blueBirdAnimationTexture, indices[BirdHazard.BirdColor.BLUE.ordinal()]);
+            bird.setSpawnAnimation(bluebirdSpawnAnimation, 2, 7);
+            bird.setName("bird" + (birdCount + ii));
+            addObject(bird);
+            bird.setSpawning();
+            birds.add(bird);
+            // nests.add(obj);
+            drawables.add(nest);
+            drawables.add(bird);
         }
 
         //create lightning (animated lightning bolts and still-frame lightning bolts)
@@ -670,7 +685,6 @@ public class LevelContainer{
         avatar.setFrontTexture(avatarFrontTexture);
         avatar.setSideTexture(avatarSideTexture);
         avatar.useSideTexture();
-        // TODO: (technical) load an HP texture and set texture here
         avatar.setHpTexture(hpTexture);
         avatar.setBoostTexture(boostTexture);
         avatar.setWalkAnimation(avatarWalkAnimationTexture);
@@ -680,6 +694,7 @@ public class LevelContainer{
         avatar.setTakeoffAnimation(avatarTakeoffAnimationTexture);
         avatar.setLandAnimation(avatarLandAnimationTexture);
         avatar.setFlipAnimation(avatarFlipAnimationTexture);
+        avatar.setIndicatorTexture(indicatorTexture);
 
         avatar.healthFont = avatarHealthFont;
         addObject(avatar);
