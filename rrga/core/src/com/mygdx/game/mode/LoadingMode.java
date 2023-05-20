@@ -57,6 +57,8 @@ public class LoadingMode extends MenuScreen {
 	
 	/** Background texture for start-up */
 	private final Texture background;
+	/** Background texture 2 for start-up */
+	private final Texture background2;
 	/** Play button to display when done */
 	private TextureRegion playButton;
 	/** Texture atlas to support a progress bar */
@@ -205,6 +207,8 @@ public class LoadingMode extends MenuScreen {
 		playButton = null;
 		background = internal.getEntry( "background", Texture.class );
 		background.setFilter( TextureFilter.Linear, TextureFilter.Linear );
+		background2 = internal.getEntry( "background2", Texture.class );
+		background2.setFilter( TextureFilter.Linear, TextureFilter.Linear );
 		statusBar = internal.getEntry( "progress", Texture.class );
 
 		// Break up the status bar texture into regions
@@ -293,7 +297,13 @@ public class LoadingMode extends MenuScreen {
 	public void draw() {
 		CameraController camera = canvas.getCamera();
 		canvas.begin();
-		canvas.draw(background, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+
+		Color backColor1 = new Color (1f, 1f, 1f, 1f-progress);
+		Color backColor2 = new Color (1f, 1f, 1f, progress);
+		canvas.draw(background, backColor1, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+		canvas.draw(background2, backColor2, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+
+
 		if (playButton == null) {
 			drawProgress(canvas);
 		} else {
