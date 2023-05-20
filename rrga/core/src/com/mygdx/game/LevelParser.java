@@ -173,6 +173,28 @@ public class LevelParser {
     private int goalDepth;
     private JsonValue[] deathZoneData;
 
+    /** level background music */
+    private String music;
+
+    /** level parallax */
+    private String parallax;
+
+    /**
+     * the music assigned to be used as background music for the level
+     * @return one of {"a_world_of_clouds"; "exploring_the_forest", "droplets"; "over_the_cliffs", "the_storm"}
+     */
+    public String getSelectedMusic() {
+        return music;
+    }
+
+    /**
+     * the parallax assigned to be used on the level
+     * @return one of {"forest"; "sky"}
+     */
+    public String getSelectedParallax() {
+        return parallax;
+    }
+
     /**
      * @return tile texture layers
      */
@@ -260,7 +282,6 @@ public class LevelParser {
     ArrayList<JsonValue> staticHazardRawData = new ArrayList<>();
     ArrayList<JsonValue> movingPlatRawData = new ArrayList<>();
     ArrayList<JsonValue> nestRawData = new ArrayList<>();
-
     ArrayList<JsonValue> deathZoneRawData = new ArrayList<>();
 
     public LevelParser(AssetDirectory directory){
@@ -400,6 +421,22 @@ public class LevelParser {
         worldSize.y = levelData.getInt("height", 18);
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
+
+        // set default music/parallax and then if custom properties, set music and parallax
+        music = "a_world_of_clouds";
+        parallax = "sky";
+        JsonValue levelProperties = levelData.get("properties");
+        if (levelProperties != null){
+            JsonValue musicName = getFromProperties(levelProperties, "music");
+            if (musicName != null){
+                music = musicName.asString();
+            }
+            JsonValue parallaxName = getFromProperties(levelProperties, "parallax");
+            if (parallaxName != null){
+                parallax = musicName.asString();
+            }
+        }
+
         //get blue bird data for nests
         blueBirdData = processBird(getBirdDefaultObj("blue"), null);
 

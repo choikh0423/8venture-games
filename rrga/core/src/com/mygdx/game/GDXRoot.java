@@ -199,7 +199,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					playing.setVolume(menu.getSfxVolume(), menu.getMusicVolume());
 					playing.setSecondaryControlMode(menu.getControlToggle());
 					playing.reset();
-					playing.resetShowGoal();
 					setScreen(playing);
 					menu.pause();
 					break;
