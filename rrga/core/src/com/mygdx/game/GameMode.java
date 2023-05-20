@@ -34,6 +34,8 @@ public class GameMode implements Screen {
 
     private float backgroundMusicVolume;
 
+    private ParallaxType selectedParallax;
+
     /** Texture asset for background image */
     private TextureRegion backgroundTexture;
 
@@ -45,6 +47,10 @@ public class GameMode implements Screen {
 
     /** Texture asset for SKY parallax layer C*/
     private TextureRegion skyLayerTextureC;
+
+    /** Texture asset for FOREST parallax layer C*/
+    private TextureRegion forestLayerTextureC;
+
     /** Texture for cursor */
     private TextureRegion cursorTexture;
     private final static float cursorScl = .33f;
@@ -156,6 +162,11 @@ public class GameMode implements Screen {
     private boolean cutsceneBool = true;
     
     private boolean showGoal = true;
+
+    private enum ParallaxType {
+        SKY,
+        FOREST
+    }
 
     /**
      * Returns true if debug mode is active.
@@ -313,6 +324,7 @@ public class GameMode implements Screen {
         skyLayerTextureA =  new TextureRegion(directory.getEntry("game:skylayerA", Texture.class));
         skyLayerTextureB =  new TextureRegion(directory.getEntry("game:skylayerB", Texture.class));
         skyLayerTextureC =  new TextureRegion(directory.getEntry("game:skylayerC", Texture.class));
+        forestLayerTextureC =  new TextureRegion(directory.getEntry("game:forestLayerC", Texture.class));
 
         cursorTexture = new TextureRegion(directory.getEntry("game:cursor_ingame", Texture.class));
 
@@ -348,7 +360,7 @@ public class GameMode implements Screen {
         }
         // set music and parallax after parsing
         backgroundMusic = backgroundMusicCollection.get(parser.getSelectedMusic());
-        // parser.getSelectedParallax();
+        selectedParallax = parser.getSelectedParallax().equals("sky") ? ParallaxType.SKY : ParallaxType.FOREST;
 
         physicsWidth = parser.getWorldSize().x;
         physicsHeight = parser.getWorldSize().y;
@@ -533,9 +545,16 @@ public class GameMode implements Screen {
         float worldHeight = physicsHeight * scale.y;
 
         // Parallax Drawing
+        TextureRegion layerC;
+        if (selectedParallax.equals(ParallaxType.SKY)){
+            layerC = skyLayerTextureC;
+        }
+        else {
+            layerC = forestLayerTextureC;
+        }
         canvas.drawWrapped(skyLayerTextureA, -camPos.x * horizontalA, -camPos.y * verticalA, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
         canvas.drawWrapped(skyLayerTextureB, -camPos.x * horizontalB, -camPos.y * verticalB, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
-        canvas.drawWrapped(skyLayerTextureC, -camPos.x * horizontalC, -camPos.y * verticalC, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
+        canvas.drawWrapped(layerC, -camPos.x * horizontalC, -camPos.y * verticalC, camPos.x, camPos.y, worldHeight, zoomScl, sclX, sclY);
 //        canvas.drawWrapped(skyLayerTextureA, -px * horizontalA, -py * verticalA, px, py, worldHeight, zoomScl, sclX, sclY);
 //        canvas.drawWrapped(skyLayerTextureB, -px * horizontalB, -py * verticalB, px, py, worldHeight, zoomScl, sclX, sclY);
 //        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);

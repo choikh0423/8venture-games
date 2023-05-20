@@ -36,6 +36,7 @@
         "game:skylayerA" : "game/parallax/skylayerA.png",
         "game:skylayerB" : "game/parallax/skylayerB.png",
         "game:skylayerC" : "game/parallax/skylayerC.png",
+        "game:forestLayerC" : "game/parallax/forestLayerC.png",
         "game:platform" : "game/small_platform.png",
         "game:wind" : {
           "file":  "game/wind/windframe_00.png",
