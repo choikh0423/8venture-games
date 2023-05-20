@@ -32,9 +32,6 @@ public class CutSceneMode extends MenuScreen {
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
-    /** The background tinting color cache */
-    private Color overlayTint;
-
     /** exit code for returning to game */
     public static final int EXIT_RESUME = 1;
     /** exit code to toggle pause state */
@@ -78,7 +75,6 @@ public class CutSceneMode extends MenuScreen {
     private Array<TextureRegion[]> textureList = new Array<>(12);
     public CutSceneMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,1f);
         currentExitCode = Integer.MIN_VALUE;
 
         int width = (int) canvas.getCamera().getViewWidth();
@@ -149,7 +145,7 @@ public class CutSceneMode extends MenuScreen {
         } else {
             t = sceneAnimation.getKeyFrame(sceneElapsedTime, true);
         }
-        canvas.draw(t, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(t, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         if (sceneElapsedTime > 2) {
             canvas.draw(skipTag, Color.WHITE, skipTag.getRegionWidth() / 2f, skipTag.getRegionHeight() / 2f,
@@ -180,7 +176,6 @@ public class CutSceneMode extends MenuScreen {
     public void dispose() {
         listener = null;
         canvas = null;
-        overlayTint = null;
     }
 
     @Override
@@ -263,7 +258,6 @@ public class CutSceneMode extends MenuScreen {
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
     }
 }

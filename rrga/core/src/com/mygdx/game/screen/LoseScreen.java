@@ -74,7 +74,6 @@ public class LoseScreen extends MenuScreen{
 
     public LoseScreen(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
@@ -105,7 +104,7 @@ public class LoseScreen extends MenuScreen{
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
         //above line for opaque foreground, below line for transparent foreground
         CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(loseTag, Color.WHITE, loseTag.getRegionWidth()/2f, loseTag.getRegionHeight()/2f,
                 loseTagX, loseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale );
@@ -141,7 +140,6 @@ public class LoseScreen extends MenuScreen{
         listener = null;
         canvas = null;
         foregroundTexture = null;
-        overlayTint = null;
         gameOverMusic = null;
     }
 
@@ -239,7 +237,6 @@ public class LoseScreen extends MenuScreen{
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
         gameOverMusic.setVolume(musicVolume);
         gameOverMusic.play();

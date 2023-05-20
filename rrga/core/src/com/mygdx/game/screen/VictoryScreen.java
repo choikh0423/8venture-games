@@ -24,11 +24,8 @@ public class VictoryScreen extends MenuScreen{
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
-    /** overlay texture */
+    /** screen texture */
     private TextureRegion foregroundTexture;
-
-    /** The background tinting color cache */
-    private Color overlayTint;
 
     /** The Screen to draw underneath the pause screen*/
     private GameMode gameScreen;
@@ -78,7 +75,6 @@ public class VictoryScreen extends MenuScreen{
 
     public VictoryScreen(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
@@ -106,7 +102,7 @@ public class VictoryScreen extends MenuScreen{
         canvas.begin();
 
         CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(winTag, Color.WHITE, winTag.getRegionWidth()/2f, winTag.getRegionHeight()/2f,
                 winTagX, winTagY, 0 , TAG_SCL * scale, TAG_SCL * scale);
@@ -142,7 +138,6 @@ public class VictoryScreen extends MenuScreen{
         listener = null;
         canvas = null;
         foregroundTexture = null;
-        overlayTint = null;
         victoryMusic = null;
     }
 
@@ -243,7 +238,6 @@ public class VictoryScreen extends MenuScreen{
     }
 
     public void reset() {
-        overlayTint = new Color(1, 1, 1, 0.9f);
         currentExitCode = Integer.MIN_VALUE;
         victoryMusic.setVolume(musicVolume);
         victoryMusic.play();

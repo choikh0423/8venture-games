@@ -25,11 +25,8 @@ public class PauseMode extends MenuScreen {
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
-    /** overlay texture */
+    /** screen texture */
     private TextureRegion foregroundTexture;
-
-    /** The background tinting color cache */
-    private Color overlayTint;
 
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
@@ -95,7 +92,6 @@ public class PauseMode extends MenuScreen {
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
@@ -261,7 +257,7 @@ public class PauseMode extends MenuScreen {
     private void draw(float delta){
         canvas.begin();
         CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
 
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
@@ -300,7 +296,6 @@ public class PauseMode extends MenuScreen {
         listener = null;
         canvas = null;
         foregroundTexture = null;
-        overlayTint = null;
     }
 
     @Override
@@ -336,7 +331,6 @@ public class PauseMode extends MenuScreen {
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
     }
 }
