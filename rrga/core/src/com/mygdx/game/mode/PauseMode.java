@@ -2,6 +2,7 @@ package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
@@ -42,7 +43,6 @@ public class PauseMode extends MenuScreen {
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
 
-
     /** The current state of the level menu button */
     private int menuPressState;
     /** The current state of the restart button */
@@ -80,8 +80,18 @@ public class PauseMode extends MenuScreen {
     private final int pauseTagX;
     private final int pauseTagY;
 
+    /** Level display font related variables */
+    private BitmapFont levelFont;
+    private static final float LEVEL_FONT_X_RATIO = .87f;
+    private static final float LEVEL_FONT_Y_RATIO = .97f;
+    private final int levelFontX;
+    private final int levelFontY;
+    private Color fontColor = new Color(244f/255f,92f/255f,20f/255f,1f);
+
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
+    /** current level */
+    private int currentLevel;
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
@@ -107,6 +117,8 @@ public class PauseMode extends MenuScreen {
 
         pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
         pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
+        levelFontY = (int)(LEVEL_FONT_Y_RATIO * height);
+        levelFontX = (int)(LEVEL_FONT_X_RATIO * width);
     }
 
     /**
@@ -123,9 +135,11 @@ public class PauseMode extends MenuScreen {
         TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
         TextureRegion settingsTexture = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
+        levelFont = directory.getEntry("menu:level_font", BitmapFont.class);
+        levelFont.setColor(fontColor);
+
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
-
         cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
 
         menuButton.setTexture(menuTexture);
@@ -258,6 +272,8 @@ public class PauseMode extends MenuScreen {
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
         settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
 
+        canvas.drawText("Level " + currentLevel, levelFont, levelFontX, levelFontY);
+
         //draw mouse texture
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -303,6 +319,11 @@ public class PauseMode extends MenuScreen {
             return true;
         }
         return false;
+    }
+
+    /** Sets current level */
+    public void setCurrentLevel(int level){
+        currentLevel = level;
     }
 
 

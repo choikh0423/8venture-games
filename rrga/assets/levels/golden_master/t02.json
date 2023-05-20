@@ -577,6 +577,13 @@
  "nextlayerid":17,
  "nextobjectid":190,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"droplets"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,

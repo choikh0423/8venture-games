@@ -144,7 +144,7 @@ public class CutSceneMode extends MenuScreen {
         sceneElapsedTime += Gdx.graphics.getDeltaTime();
         TextureRegion t;
 
-        if (currentSceneNumber == 8 || currentSceneNumber == 11) {
+        if (currentSceneNumber == 2 || currentSceneNumber == 8 || currentSceneNumber == 11) {
             t = sceneAnimation.getKeyFrame(sceneElapsedTime, false);
         } else {
             t = sceneAnimation.getKeyFrame(sceneElapsedTime, true);

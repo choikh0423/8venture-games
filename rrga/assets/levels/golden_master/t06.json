@@ -374,6 +374,7 @@
         {
          "draworder":"topdown",
          "id":10,
+         "locked":true,
          "name":"Bushes",
          "objects":[
                 {
@@ -1014,6 +1015,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":34,
          "id":20,
+         "locked":true,
          "name":"tut_helpers",
          "opacity":1,
          "type":"tilelayer",
@@ -1397,6 +1399,13 @@
  "nextlayerid":21,
  "nextobjectid":404,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"droplets"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,
