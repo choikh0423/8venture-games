@@ -168,6 +168,25 @@ public class GameMode implements Screen {
     
     private boolean showGoal = true;
 
+    /**
+     * Countdown active for winning or losing
+     */
+    private int countdown;
+
+    /** Exit Code */
+    private int exitCode;
+
+    /**
+     * the delay after game is lost before we transition to new screen.
+     */
+    private static final int LOSE_COUNTDOWN_TIMER = 10;
+
+    /**
+     * the delay after game is won before we transition to new screen.
+     */
+    private static final int WIN_COUNTDOWN_TIMER = 10;
+
+
     private enum ParallaxType {
         SKY,
         FOREST
@@ -379,6 +398,7 @@ public class GameMode implements Screen {
         float sy = ((float)canvas.getCamera().getViewHeight())/576;
         displayScale = Math.min(sx, sy);
 
+        countdown = 0;
         showGoal = true;
         backgroundMusic.play();
         backgroundMusic.setVolume(backgroundMusicVolume);
@@ -403,18 +423,31 @@ public class GameMode implements Screen {
             return true;
         }
 
-        if (gameplayController.isCompleted()) {
+        if (countdown > 0) {
+            countdown--;
             //TODO: Change this if total number of level changes
+            if (countdown == 0) {
+                listener.exitScreen(this, exitCode);
+                if (exitCode == EXIT_VICTORY) {
+                    unlocked.putBoolean((currentLevel + 1) + "unlocked", true);
+                    unlocked.flush();
+                }
+                return false;
+            }
+            return false;
+        }
+
+        if (gameplayController.isCompleted()) {
+            countdown = WIN_COUNTDOWN_TIMER;
             if (currentLevel == 30) {
-                listener.exitScreen(this, EXIT_CUTSCENE);
+                exitCode = EXIT_CUTSCENE;
             } else {
-                listener.exitScreen(this, EXIT_VICTORY);
-                unlocked.putBoolean((currentLevel+1)+"unlocked", true);
-                unlocked.flush();
+                exitCode = EXIT_VICTORY;
             }
             return false;
         } else if (gameplayController.isFailed()) {
-            listener.exitScreen(this, EXIT_FAIL);
+            countdown = LOSE_COUNTDOWN_TIMER;
+            exitCode = EXIT_FAIL;
             return false;
         }
 

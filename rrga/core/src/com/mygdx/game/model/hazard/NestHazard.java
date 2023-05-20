@@ -10,7 +10,6 @@ import com.mygdx.game.GameCanvas;
 import com.mygdx.game.utility.obstacle.PolygonObstacle;
 import com.mygdx.game.utility.util.Drawable;
 import com.mygdx.game.utility.util.PooledList;
-import com.sun.org.apache.bcel.internal.generic.DADD;
 
 public class NestHazard extends PolygonObstacle implements Drawable {
 
