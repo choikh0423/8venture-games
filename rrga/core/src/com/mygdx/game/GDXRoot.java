@@ -225,15 +225,16 @@ public class GDXRoot extends Game implements ScreenListener {
                     playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
 				case PauseMode.EXIT_RESTART:
+                    playing.stopMusic();
 					playing.reset();
 					setScreen(playing);
                     playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
 				case PauseMode.EXIT_MENU:
+                    playing.stopMusic();
 					menu.setScreenListener(this);
                     menu.cameForPauseSettings = false;
 					menu.reset();
-					playing.getMusic().stop();
 					setScreen(menu);
                     playing.setSecondaryControlMode(menu.getControlToggle());
 					break;
@@ -252,25 +253,27 @@ public class GDXRoot extends Game implements ScreenListener {
 			switch (exitCode){
 				case GameMode.EXIT_VICTORY:
                     playing.stopSFX();
-					victory.setBackgroundScreen(playing);
-                    victory.first = true;
+                    playing.stopMusic(); //play victory music only
+                    victory.setVolume(playing.getVolume());
+                    victory.reset();
 					setScreen(victory);
 					break;
 				case GameMode.EXIT_FAIL:
                     playing.stopSFX();
-                    defeat.setBackgroundScreen(playing);
-                    defeat.first = true;
+                    // in defeat, play the short game over music on top of level music
+                    // MAKE SURE TO STOP GAME-MODE MUSIC WHEN EXITING LOSE SCREEN
+                    defeat.setVolume(playing.getVolume());
 					setScreen(defeat);
+                    defeat.reset();
 					break;
 				case GameMode.EXIT_PAUSE:
                     playing.stopSFX();
+                    pausing.setCurrentLevel(playing.getCurrentLevel());
 					setScreen(pausing);
 					break;
 				case GameMode.EXIT_QUIT:
 					Gdx.app.exit();
                 case GameMode.EXIT_CUTSCENE:
-                    cutscene.setBackgroundScreen(playing);
-                    cutscene.first = true;
                     cutscene.setCurrentLevel(playing.getCurrentLevel());
                     cutscene.setCurrentScene(playing.getCutsceneNum());
                     setScreen(cutscene);
@@ -291,12 +294,13 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == victory) {
             switch (exitCode){
                 case VictoryScreen.EXIT_MENU:
+                    victory.stopMusic();
                     menu.setScreenListener(this);
                     menu.reset();
-                    playing.pause();
                     setScreen(menu);
                     break;
                 case VictoryScreen.EXIT_NEXT:
+                    victory.stopMusic();
                     playing.setNextLevel();
                     playing.reset();
                     setScreen(playing);
@@ -305,20 +309,21 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == defeat) {
             switch (exitCode) {
                 case LoseScreen.EXIT_TRY_AGAIN:
+                    playing.stopMusic();    // made sure to stop music
                     playing.reset();
                     setScreen(playing);
                     break;
                 case LoseScreen.EXIT_MENU:
+                    playing.stopMusic();     // made sure to stop music
                     menu.setScreenListener(this);
                     menu.reset();
-                    playing.pause();
                     setScreen(menu);
                     break;
             }
         } else if (screen == cutscene) {
             switch (exitCode) {
                 case CutSceneMode.EXIT_RESUME:
-                    setScreen(cutscene.getBackgroundScreen());
+                    setScreen(playing);
                     playing.setCutsceneBool();
                     playing.setSecondaryControlMode(menu.getControlToggle());
                     break;
@@ -326,7 +331,7 @@ public class GDXRoot extends Game implements ScreenListener {
                     menu.setScreenListener(this);
                     menu.cameForPauseSettings = false;
                     menu.reset();
-                    playing.getMusic().stop();
+                    playing.stopMusic();
                     setScreen(menu);
                     playing.setSecondaryControlMode(menu.getControlToggle());
             }

@@ -2,6 +2,7 @@ package com.mygdx.game.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,11 +29,6 @@ public class LoseScreen extends MenuScreen{
 
     /** The background tinting color cache */
     private Color overlayTint;
-
-    /** true until the first call to render*/
-    public boolean first;
-    /** The Screen to draw underneath the pause screen*/
-    private GameMode gameScreen;
 
     /////////////////////DRAWING BUTTONS AND TAGS/////////////////////////
     /** menu button*/
@@ -73,11 +69,12 @@ public class LoseScreen extends MenuScreen{
     /** The current state of the restart button */
     private int tryAgainPressState;
 
+    private Music gameOverMusic;
+    private float musicVolume;
+
     public LoseScreen(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
-        first = true;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
         this.tryAgainButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.63f, 0.25f, 0);
@@ -101,27 +98,13 @@ public class LoseScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
-        //Gdx.input.setCursorCatched(false);
-        int x=0, y=0;
-//        if(first) {
-//            x = Gdx.input.getX();
-//            y = Gdx.input.getY();
-//        }
-//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-//        if(first){
-//            Gdx.input.setCursorPosition(x, y);
-//            first = false;
-//        }
-
-        //comment this out if opaque foreground
-        //gameScreen.draw(delta, false);
 
         canvas.begin();
 
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());
         //above line for opaque foreground, below line for transparent foreground
         CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
         canvas.draw(loseTag, Color.WHITE, loseTag.getRegionWidth()/2f, loseTag.getRegionHeight()/2f,
                 loseTagX, loseTagY, 0 , TAG_SCL * scale, TAG_SCL * scale );
@@ -157,19 +140,11 @@ public class LoseScreen extends MenuScreen{
         listener = null;
         canvas = null;
         foregroundTexture = null;
-        overlayTint = null;
-        gameScreen = null;
+        gameOverMusic = null;
     }
 
     @Override
     public void resize(int width, int height) {
-        // Scaling code from Professor White's code
-//
-//        menuButton.setPos(width, height, scale);
-//        tryAgainButton.setPos(width, height, scale);
-//
-//        loseTagY = (int)(LOSE_TAG_Y_RATIO * height);
-//        loseTagX = (int)(LOSE_TAG_X_RATIO * width);
     }
 
     /**
@@ -180,16 +155,14 @@ public class LoseScreen extends MenuScreen{
      * @param directory	Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        //TODO: texture is unnecessary, use shapes (see prof White's lectures on drawing shapes without textures)
         foregroundTexture = new TextureRegion(directory.getEntry( "menu:background2", Texture.class ));
-
         TextureRegion menuTexture = new TextureRegion(directory.getEntry("menu:menu_button", Texture.class));
         TextureRegion tryAgainTexture = new TextureRegion(directory.getEntry("menu:tryagain_button", Texture.class));
         menuButton.setTexture(menuTexture);
         tryAgainButton.setTexture(tryAgainTexture);
-
         loseTag = new TextureRegion(directory.getEntry("menu:lose_text", Texture.class));
         cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
+        gameOverMusic = directory.getEntry("music:game_over", Music.class);
     }
 
     /**
@@ -198,10 +171,6 @@ public class LoseScreen extends MenuScreen{
      */
     public void setScreenListener(ScreenListener listener){
         this.listener = listener;
-    }
-
-    public void setBackgroundScreen(GameMode gameScreen){
-        this.gameScreen = gameScreen;
     }
 
     @Override
@@ -268,8 +237,13 @@ public class LoseScreen extends MenuScreen{
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
+        gameOverMusic.setVolume(musicVolume);
+        gameOverMusic.play();
+    }
+
+    public void setVolume(float volume){
+        musicVolume = volume;
     }
 }
 

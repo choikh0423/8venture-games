@@ -2,6 +2,7 @@ package com.mygdx.game.mode;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.CameraController;
 import com.mygdx.game.GameCanvas;
@@ -24,11 +25,8 @@ public class PauseMode extends MenuScreen {
     /** Reference to GameCanvas created by the root */
     protected GameCanvas canvas;
 
-    /** overlay texture */
+    /** screen texture */
     private TextureRegion foregroundTexture;
-
-    /** The background tinting color cache */
-    private Color overlayTint;
 
     /** exit code to toggle pause state */
     public static final int EXIT_RESUME = 1;
@@ -41,7 +39,6 @@ public class PauseMode extends MenuScreen {
 
     /** current assigned exit code of mode (valid exits are non-negative) */
     private int currentExitCode;
-
 
     /** The current state of the level menu button */
     private int menuPressState;
@@ -80,12 +77,21 @@ public class PauseMode extends MenuScreen {
     private final int pauseTagX;
     private final int pauseTagY;
 
+    /** Level display font related variables */
+    private BitmapFont levelFont;
+    private static final float LEVEL_FONT_X_RATIO = .87f;
+    private static final float LEVEL_FONT_Y_RATIO = .97f;
+    private final int levelFontX;
+    private final int levelFontY;
+    private Color fontColor = new Color(244f/255f,92f/255f,20f/255f,1f);
+
     /** Texture for the cursor */
     private TextureRegion cursorTexture;
+    /** current level */
+    private int currentLevel;
 
     public PauseMode(GameCanvas canvas) {
         this.canvas = canvas;
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
 
         this.menuButton = new MenuButton(MenuMode.ButtonShape.RECTANGLE, 0.37f, 0.25f, 0);
@@ -107,6 +113,8 @@ public class PauseMode extends MenuScreen {
 
         pauseTagY = (int)(PAUSE_TAG_Y_RATIO * height);
         pauseTagX = (int)(PAUSE_TAG_X_RATIO * width);
+        levelFontY = (int)(LEVEL_FONT_Y_RATIO * height);
+        levelFontX = (int)(LEVEL_FONT_X_RATIO * width);
     }
 
     /**
@@ -123,9 +131,11 @@ public class PauseMode extends MenuScreen {
         TextureRegion restartTexture = new TextureRegion(directory.getEntry("menu:restart_button", Texture.class));
         TextureRegion backButtonTexture = new TextureRegion(directory.getEntry("menu:back_button", Texture.class));
         TextureRegion settingsTexture = new TextureRegion(directory.getEntry("menu:settings_button", Texture.class));
+        levelFont = directory.getEntry("menu:level_font", BitmapFont.class);
+        levelFont.setColor(fontColor);
+
 
         pauseTag = new TextureRegion(directory.getEntry("pause:pause_tag", Texture.class));
-
         cursorTexture = new TextureRegion(directory.getEntry("menu:cursor_menu", Texture.class));
 
         menuButton.setTexture(menuTexture);
@@ -247,7 +257,7 @@ public class PauseMode extends MenuScreen {
     private void draw(float delta){
         canvas.begin();
         CameraController camera = canvas.getCamera();
-        canvas.draw(foregroundTexture, overlayTint, 0, 0, camera.getViewWidth(), camera.getViewHeight());
+        canvas.draw(foregroundTexture, Color.WHITE, 0, 0, camera.getViewWidth(), camera.getViewHeight());
 
 
         canvas.draw(pauseTag, Color.WHITE, pauseTag.getRegionWidth()/2f, pauseTag.getRegionHeight()/2f,
@@ -257,6 +267,8 @@ public class PauseMode extends MenuScreen {
         restartButton.draw(canvas, restartPressState, BUTTON_SCALE, Color.WHITE);
         backButton.draw(canvas, backPressState, BUTTON_SCALE, Color.WHITE);
         settingsButton.draw(canvas, settingsPressState, BUTTON_SCALE, Color.WHITE);
+
+        canvas.drawText("Level " + currentLevel, levelFont, levelFontX, levelFontY);
 
         //draw mouse texture
         int mx = Gdx.input.getX();
@@ -284,13 +296,13 @@ public class PauseMode extends MenuScreen {
         listener = null;
         canvas = null;
         foregroundTexture = null;
-        overlayTint = null;
     }
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.P){
+        if (keycode == Input.Keys.ESCAPE){
             currentExitCode = EXIT_RESUME;
+            return true;
         }
         return false;
     }
@@ -299,9 +311,14 @@ public class PauseMode extends MenuScreen {
         if (currentExitCode > 0) {
             listener.exitScreen(this, currentExitCode);
             currentExitCode = Integer.MIN_VALUE;
+            return true;
         }
-
         return false;
+    }
+
+    /** Sets current level */
+    public void setCurrentLevel(int level){
+        currentLevel = level;
     }
 
 
@@ -314,7 +331,6 @@ public class PauseMode extends MenuScreen {
     }
 
     public void reset() {
-        overlayTint = new Color(1,1,1,0.9f);
         currentExitCode = Integer.MIN_VALUE;
     }
 }

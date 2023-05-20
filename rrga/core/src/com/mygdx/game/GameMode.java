@@ -209,6 +209,18 @@ public class GameMode implements Screen {
         return backgroundMusic;
     }
 
+    public void stopMusic(){
+        if (backgroundMusic != null){
+            backgroundMusic.stop();
+        }
+    }
+
+    public void pauseMusic(){
+        if (backgroundMusic != null){
+            backgroundMusic.pause();
+        }
+    }
+
     /**
      * Creates a new game world with the default values.
      *
@@ -834,6 +846,10 @@ public class GameMode implements Screen {
     public void setVolume(float sfxVolume, float musicVolume){
         backgroundMusicVolume = musicVolume;
         gameplayController.setSFXVolume(sfxVolume);
+    }
+
+    public float getVolume(){
+        return this.backgroundMusicVolume;
     }
 
     /**
