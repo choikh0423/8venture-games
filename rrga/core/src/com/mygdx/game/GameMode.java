@@ -772,13 +772,13 @@ public class GameMode implements Screen {
         } else if(currentLevel == 8) {
             cutsceneNum = 3;
             cutsceneBool = false;
-        } else if(currentLevel == 15) {
+        } else if(currentLevel == 16) {
             cutsceneNum = 4;
             cutsceneBool = false;
-        } else if(currentLevel == 20) {
+        } else if(currentLevel == 21) {
             cutsceneNum = 5;
             cutsceneBool = false;
-        } else if(currentLevel == 26) {
+        } else if(currentLevel == 27) {
             cutsceneNum = 7;
             cutsceneBool = false;
         } else if(currentLevel == 30) {

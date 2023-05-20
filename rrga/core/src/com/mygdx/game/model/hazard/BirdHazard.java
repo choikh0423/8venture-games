@@ -553,7 +553,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
             flapElapsedTime += Gdx.graphics.getDeltaTime();
             birdRegion = flapAnimation.getKeyFrame(flapElapsedTime, true);
             if (flapAnimation.getKeyFrameIndex(flapElapsedTime)==3){
-                sfx.setVolume(sfxVol);
+                sfx.setVolume(sfxVol * 0.7f);
                 sfx.play();
             }
 
