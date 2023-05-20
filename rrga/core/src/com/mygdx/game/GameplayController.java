@@ -93,12 +93,6 @@ public class GameplayController implements ContactListener {
      * Strong Wind Sound Effect Current Frame
      */
     private static final int WIN_COUNTDOWN_TIMER = 20;
-
-    /** Background music */
-    private Music backgroundMusic;
-
-    /** Strong Wind Sound Effect */
-    private Sound windStrongSFX;
     private Sound birdAlertSFX;
     private Music birdFlapSFX;
     private Sound lightningSFX;

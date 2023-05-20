@@ -259,8 +259,6 @@ public class GDXRoot extends Game implements ScreenListener {
 					break;
 				case GameMode.EXIT_PAUSE:
                     playing.stopSFX();
-					pausing.setBackgroundScreen(playing);
-                    pausing.first = true;
 					setScreen(pausing);
 					break;
 				case GameMode.EXIT_QUIT:

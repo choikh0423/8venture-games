@@ -342,7 +342,7 @@ public class BirdHazard extends ComplexObstacle implements HazardModel, Drawable
         this.currentPathIndex = 0;
     }
 
-    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Texture warningTex, Music sfx) {
+    public BirdHazard(JsonValue data, int birdDamage, int birdSensorRadius, float birdKnockBack, Music sfx) {
         super(data.getFloat("x"), data.getFloat("y"));
 
         // this is the bounding box dimensions of the texture that contains all animation frames.

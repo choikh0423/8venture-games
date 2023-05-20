@@ -592,7 +592,7 @@ public class LevelContainer{
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, warningTexture, birdFlapSFX);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, birdFlapSFX);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
@@ -612,7 +612,7 @@ public class LevelContainer{
             nest.setTexture(nestTexture);
             nest.setName("nest" + ii);
             addObject(nest);
-            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack);
+            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack, birdFlapSFX);
             bird.setDrawScale(scale);
             bird.setFlapAnimation(blueBirdAnimationTexture, indices[BirdHazard.BirdColor.BLUE.ordinal()]);
             bird.setSpawnAnimation(bluebirdSpawnAnimation, 2, 7);
