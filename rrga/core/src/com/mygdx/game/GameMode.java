@@ -14,8 +14,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.model.GoalDoor;
 import com.mygdx.game.model.MovingPlatformModel;
 import com.mygdx.game.model.PlayerModel;
+import com.mygdx.game.utility.obstacle.BoxObstacle;
 import com.mygdx.game.utility.util.*;
 import com.mygdx.game.utility.assets.AssetDirectory;
 import com.mygdx.game.utility.obstacle.Obstacle;
@@ -134,6 +136,8 @@ public class GameMode implements Screen {
 
     /** the current zoom factor */
     private float zoomScl = 1;
+
+    private boolean showGoal = true;
 
     /**
      * Returns true if debug mode is active.
@@ -289,7 +293,7 @@ public class GameMode implements Screen {
     }
 
     public int resetCounter = -1;
-    private Vector2 camPos = new Vector2();
+    private final Vector2 camPos = new Vector2();
     /**
      * Resets the status of the game so that we can play again.
      *
@@ -315,6 +319,7 @@ public class GameMode implements Screen {
         gameplayController.reset();
 
         resetCounter++;
+        showGoal = true;
     }
 
     Preferences unlocked = Gdx.app.getPreferences("unlocked");
@@ -364,7 +369,9 @@ public class GameMode implements Screen {
             return true;
         }
 
-        // Now it is time to maybe switch screens.
+        // leave game
+        // TODO: this has no keybinds on keyboard,
+        //  this conditional supports xbox controller's back button though.
         if (inputController.didExit()) {
             listener.exitScreen(this, EXIT_QUIT);
             return false;
@@ -409,7 +416,7 @@ public class GameMode implements Screen {
 //        }
 //        Gdx.input.setCursorPosition(x,y);
 
-        if (inputController.didZoom() && gameplayController.getPlayer().isGrounded() && !gameplayController.getPlayer().isMoving() && gameplayController.getPlayer().getLinearVelocity().epsilonEquals(0,0)){
+        if (!showGoal && inputController.didZoom() && gameplayController.canAvatarZoom()){
             zoomAlpha += zoomAlphaDelta;
         }
         else {
@@ -425,11 +432,12 @@ public class GameMode implements Screen {
         zoomScl = standardZoom * (1 - zoomAlpha) + (zoomAlpha) * (maximumZoom);
         canvas.getCamera().setZoom(zoomScl);
 
-        gameplayController.update(inputController, dt);
+        if (!showGoal){
+            gameplayController.update(inputController, dt);
+        }
         gameplayController.postUpdate(dt);
     };
 
-    public boolean showGoal = true;
     /**
      * Draw the physics objects to the canvas
      *
@@ -451,9 +459,11 @@ public class GameMode implements Screen {
 
         Vector2 scl = gameplayController.getPlayer().getDrawScale();
 
-        //camera starts at the goal door then moves to the player the
-        //first time we reset the level (i.e. when loading in)
-        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || resetCounter > 0) showGoal = false;
+        //camera starts at the goal door then moves to the player until it finishes (showgoal => false)
+        if (gameplayController.getLevelContainer().getShowGoal().getPatrol() == MovingPlatformModel.MoveBehavior.REVERSE || debug) {
+            showGoal = false;
+        }
+
         if (showGoal){
             camPos.set(gx*scl.x, gy*scl.y);
         } else {
@@ -478,6 +488,15 @@ public class GameMode implements Screen {
 //        canvas.drawWrapped(skyLayerTextureC, -px * horizontalC, -py * verticalC, px, py, worldHeight, zoomScl, sclX, sclY);
 
         PlayerModel avatar = gameplayController.getPlayer();
+        avatar.showIndicator(false);
+        // find direction to scarf
+        BoxObstacle scarf = gameplayController.getLevelContainer().getGoalDoor();
+        cache.set(scarf.getPosition()).sub(avatar.getPosition());
+        float indicatorAngle = (float) Math.acos(cache.nor().dot(0,1));
+        if (scarf.getPosition().x > avatar.getPosition().x){
+            indicatorAngle *= -1;
+        }
+        avatar.setIndicatorDirection(indicatorAngle);
 
         // draw all game objects + stickers + tile layers, these objects are "dynamic"
         // a change in player's position should yield a different perspective.
@@ -505,12 +524,17 @@ public class GameMode implements Screen {
                 float height = cache.y;
                 if (bx > ax + zoomScl * displayWidth/2f || bx + width < ax - zoomScl * displayWidth/2f
                     || by < ay - zoomScl * displayHeight/2f || by - height > ay + zoomScl * displayHeight/2f ){
+                    if (drawable instanceof GoalDoor){
+                        // goal not in sight, draw indicator
+                        avatar.showIndicator(true);
+                    }
                     continue;
                 }
                 drawable.draw(canvas);
                 objCount++;
             }
         }
+        avatar.drawIndicator(canvas);
         canvas.end();
 
         if (debug) {
@@ -733,7 +757,6 @@ public class GameMode implements Screen {
         resetCounter = 0;
         showGoal = true;
         gameplayController.resetCounter = 0;
-        gameplayController.showGoal = true;
     }
 
     /**

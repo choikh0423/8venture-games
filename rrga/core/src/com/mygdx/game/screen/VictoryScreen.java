@@ -101,21 +101,8 @@ public class VictoryScreen extends MenuScreen{
      */
     @Override
     public void render(float delta) {
-        //Gdx.input.setCursorCatched(false);
-        int x=0, y=0;
-//        if(first) {
-//            x = Gdx.input.getX();
-//            y = Gdx.input.getY();
-//        }
-//        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
-//        if(first){
-//            Gdx.input.setCursorPosition(x, y);
-//            first = false;
-//        }
-
         //comment this out if opaque foreground
         //gameScreen.draw(delta);
-
         canvas.begin();
 
         //canvas.draw(foregroundTexture, Color.WHITE, 0, 0, canvas.getWidth(), canvas.getHeight());

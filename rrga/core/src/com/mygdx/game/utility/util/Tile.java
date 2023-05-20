@@ -4,17 +4,25 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * A tile is a square texture region with flipping already applied.
- * To render a tile correctly, retrieve the rotation to be used by a SpriteBatch.
+ * A tile is a square texture region cut from a tileset.
+ * To render a tile correctly, retrieve the rotation and flipping properties to be used by a drawing context.
  */
-public class Tile extends TextureRegion {
+public class Tile {
+
+    private boolean flipX;
+
+    private boolean flipY;
 
     private float angle;
 
-//    private int angleDeg;
+    /** this should be a reference to the filmstrip (tileset but optimized for memory) */
+    private final FilmStrip textureFilmStrip;
 
-    public Tile(Texture t){
-        super(t);
+    private final int frameId;
+
+    public Tile(FilmStrip textureFilmStrip, int frameId){
+        this.textureFilmStrip = textureFilmStrip;
+        this.frameId = frameId;
         angle = 0;
     }
 
@@ -26,10 +34,6 @@ public class Tile extends TextureRegion {
         this.angle = angle;
     }
 
-//    public void setRotationDeg(int deg){
-//        this.angleDeg = deg;
-//    }
-
     /**
      * get the COUNTER-CLOCKWISE rotation of this tile in RADIANS
      */
@@ -37,8 +41,39 @@ public class Tile extends TextureRegion {
         return this.angle;
     }
 
-//    public int getRotationDeg(){
-//        return angleDeg;
-//    }
+    public void setFlip(boolean flipX, boolean flipY){
+        this.flipX = flipX;
+        this.flipY = flipY;
+    }
+
+    public boolean isFlipX() {
+        return flipX;
+    }
+
+    public boolean isFlipY() {
+        return flipY;
+    }
+
+    /**
+     * @return reference to tile texture region selected from tileset
+     */
+    public TextureRegion getRegion(){
+        textureFilmStrip.setFrame(this.frameId);
+        // cut out region starting from second left corner of each 130x130 tile
+        int x = textureFilmStrip.getRegionX() + 1;
+        int y = textureFilmStrip.getRegionY() + 1;
+        int width = textureFilmStrip.getRegionWidth() - 2;
+        int height = textureFilmStrip.getRegionHeight() - 2;
+        textureFilmStrip.setRegion(x, y, width, height);
+        return textureFilmStrip;
+    }
+
+    /**
+     * allocates an texture region object
+     * @return deep copy of reference to tile texture region selected from tileset
+     */
+    public TextureRegion getRegionCopy(){
+        return new TextureRegion(this.getRegion());
+    }
 
 }

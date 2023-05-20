@@ -26,7 +26,19 @@
          "draworder":"topdown",
          "id":2,
          "name":"objects",
-         "objects":[],
+         "objects":[
+                {
+                 "id":268,
+                 "template":"..\/..\/templates\/logs\/branch_00.json",
+                 "x":814.285714285714,
+                 "y":1060.71428571429
+                }, 
+                {
+                 "id":269,
+                 "template":"..\/..\/templates\/logs\/branch_00.json",
+                 "x":1407.54901448822,
+                 "y":1061.22076326064
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -50,18 +62,6 @@
          "name":"Gale",
          "objects":[
                 {
-                 "gid":132,
-                 "height":256,
-                 "id":263,
-                 "name":"",
-                 "rotation":48.3664606634298,
-                 "type":"",
-                 "visible":true,
-                 "width":256,
-                 "x":525,
-                 "y":-10.7142857142857
-                }, 
-                {
                  "gid":131,
                  "height":79,
                  "id":264,
@@ -70,8 +70,8 @@
                  "type":"",
                  "visible":true,
                  "width":128,
-                 "x":1157.14285714286,
-                 "y":996.928571428571
+                 "x":835.850081477461,
+                 "y":1002.6319934818
                 }, 
                 {
                  "gid":131,
@@ -98,30 +98,6 @@
                  "y":1004.07142857143
                 }, 
                 {
-                 "gid":131,
-                 "height":79,
-                 "id":267,
-                 "name":"",
-                 "rotation":58.4296530042978,
-                 "type":"",
-                 "visible":true,
-                 "width":128,
-                 "x":778.571428571429,
-                 "y":986.214285714286
-                }, 
-                {
-                 "id":268,
-                 "template":"..\/..\/templates\/logs\/branch_00.json",
-                 "x":814.285714285714,
-                 "y":1060.71428571429
-                }, 
-                {
-                 "id":269,
-                 "template":"..\/..\/templates\/logs\/branch_00.json",
-                 "x":1407.14285714286,
-                 "y":1064.28571428571
-                }, 
-                {
                  "id":270,
                  "template":"..\/..\/templates\/spawn.json",
                  "x":1453.57142857143,
@@ -136,14 +112,61 @@
                  "type":"",
                  "visible":true,
                  "width":256,
-                 "x":1225.57142857143,
-                 "y":779.142857142857
+                 "x":1007.23081721772,
+                 "y":664.514036182158
                 }, 
                 {
                  "id":272,
                  "template":"..\/..\/templates\/goal.json",
                  "x":185.714285714286,
                  "y":203.571428571429
+                }, 
+                {
+                 "id":273,
+                 "properties":[
+                        {
+                         "name":"bird_speed",
+                         "type":"float",
+                         "value":2
+                        }, 
+                        {
+                         "name":"path",
+                         "type":"object",
+                         "value":274
+                        }],
+                 "template":"..\/..\/templates\/birds\/nest.json",
+                 "x":608.069971853242,
+                 "y":1001.43943508963
+                }, 
+                {
+                 "id":274,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":275
+                        }],
+                 "template":"..\/..\/templates\/path_point.json",
+                 "x":773.754234694845,
+                 "y":717.474429348636
+                }, 
+                {
+                 "id":275,
+                 "properties":[
+                        {
+                         "name":"next_trajectory",
+                         "type":"object",
+                         "value":276
+                        }],
+                 "template":"..\/..\/templates\/path_point.json",
+                 "x":1251.64851829686,
+                 "y":696.94749926206
+                }, 
+                {
+                 "id":276,
+                 "template":"..\/..\/templates\/path_point.json",
+                 "x":588.531187122736,
+                 "y":694.164989939638
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -163,7 +186,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":273,
+ "nextobjectid":277,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

@@ -177,6 +177,18 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 	/** Player flip animation elapsed time */
 	private float flipElapsedTime;
 
+	// <=============================== Animation objects end here ===============================>
+
+	/** whether to draw the indicator opaque*/
+	private boolean drawIndicator = false;
+
+	/** the angle at which the indicator points at towards the scarf */
+	private float indicatorAngle;
+
+	private TextureRegion indicatorTexture;
+
+	private final Color fade = new Color(255, 255, 255, 0.5f);
+
 	/**
 	 * Returns left/right movement of this character.
 	 *
@@ -452,6 +464,11 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 				count ++;
 			}
 		}
+	}
+
+	/** sets the directional indicator texture */
+	public void setIndicatorTexture(TextureRegion texture){
+		this.indicatorTexture = texture;
 	}
 
 	/**
@@ -989,6 +1006,22 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
 					effect * size[0] / t.getRegionWidth() * drawScale.x, size[1] / t.getRegionHeight() * drawScale.y);
 		}
 	}
+
+	public void drawIndicator(GameCanvas canvas){
+		Color tint = fade;
+		if (drawIndicator){
+			tint = Color.WHITE;
+		}
+		// formula to compute angle from y-axis(0 rads) to angle from x-axis(0 rads)
+		float cartesianAngle= indicatorAngle + (float) Math.PI / 2;
+		float offset = getHeight() * 0.75f;
+		float offsetX = (float) (offset * Math.cos(cartesianAngle));
+		float offsetY = (float) (offset * Math.sin(cartesianAngle));
+		canvas.draw(indicatorTexture, tint, indicatorTexture.getRegionWidth() / 2f,
+				indicatorTexture.getRegionHeight() / 2f,
+				(getX() + offsetX) * drawScale.x, (getY() + offsetY) * drawScale.y,
+				indicatorAngle, 0.1f, 0.1f);
+	}
       
     /**
      * Draws the physics object.
@@ -1014,9 +1047,7 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
     }
 
     /**
-     * Draws player HP information on screen and
-     * TODO: possibly other status information
-     *
+     * Draws HUD information on screen.
      * @param canvas the game canvas
      */
 
@@ -1038,8 +1069,17 @@ public class PlayerModel extends CapsuleObstacle implements Drawable {
                 boostTexture[health].getRegionHeight() / 2f, drawScale.x,
 				canvas.getCamera().getViewHeight() - drawScale.y * 2,
                 0, 0.3f, 0.3f);
-
     }
+
+	/** set the angle at which the indicator will point at, towards the scarf*/
+	public void setIndicatorDirection(float indicatorAngle){
+		this.indicatorAngle = indicatorAngle;
+	}
+
+	/** toggle whether to draw indicator opaque */
+	public void showIndicator(boolean drawIndicator){
+		this.drawIndicator = drawIndicator;
+	}
 
     /**
      * Draws the outline of the physics body.

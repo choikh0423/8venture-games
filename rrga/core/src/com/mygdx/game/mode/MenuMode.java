@@ -235,6 +235,7 @@ public class MenuMode extends MenuScreen {
         this.backButton = new MenuButton(ButtonShape.CIRCLE, 0.05f, 0.93f, 0);
         resetButton = new MenuButton(ButtonShape.RECTANGLE, 0.85f,0.1f,0);
 
+        // save viewport width and height
         CameraController camera = canvas.getCamera();
         viewWidth = (int) camera.getViewWidth();
         viewHeight = (int) camera.getViewHeight();
@@ -289,8 +290,6 @@ public class MenuMode extends MenuScreen {
         newCursor = Gdx.graphics.newCursor(pm, 0, 0);
         pm.dispose();
 
-
-        // TODO: To reduce global variables, made temporary texture region variables, Let me know if this is too much of a bad practice
         // MENU COMPONENTS
         TextureRegion exitTexture = new TextureRegion(directory.getEntry("menu:exit_button", Texture.class));
         TextureRegion startTexture = new TextureRegion(directory.getEntry("menu:start_button", Texture.class));
@@ -340,19 +339,12 @@ public class MenuMode extends MenuScreen {
         sfxSliderKnob = new TextureRegion(directory.getEntry("menu:sliderKnob", Texture.class));
         sfxSlider = new MySlider(sfxSliderBar, sfxSliderKnob, 20, sfxSliderX, sfxSliderY, SLIDER_SCL_X, SLIDER_SCL_Y);
 
-        musicSlider.setY(MUSIC_Y_RATIO * viewHeight);
-        musicSlider.setX(MUSIC_X_RATIO * viewWidth);
-        sfxSlider.setY(SFX_Y_RATIO * viewHeight);
-        sfxSlider.setX(SFX_X_RATIO * viewWidth);
 
         backgroundMusic = directory.getEntry("music:menu", Music.class);
         menuMusic = directory.getEntry("music:menu", Music.class);
 
-        //load in user settings
-        musicVolume = settings.getFloat("musicVolume", 0.5f);
-        musicSlider.ratio = musicVolume;
-        sfxVolume = settings.getFloat("sfxVolume", 0.5f);
-        sfxSlider.ratio = sfxVolume;
+        //load in user settings and modify sliders accordingly
+        updateSliders();
         toggleOn = settings.getBoolean("toggle", false);
 
         //load in whether player has unlocked each level
@@ -717,13 +709,7 @@ public class MenuMode extends MenuScreen {
 
     @Override
     public void resize(int width, int height) {
-        //update sliders. for some reason, they don't work properly unless we do this
-        viewWidth = (int) canvas.getCamera().getViewWidth();
-        viewHeight = (int) canvas.getCamera().getViewHeight();
-        musicSlider.setY(MUSIC_Y_RATIO * viewHeight);
-        musicSlider.setX(MUSIC_X_RATIO * viewWidth);
-        sfxSlider.setY(SFX_Y_RATIO * viewHeight);
-        sfxSlider.setX(SFX_X_RATIO * viewWidth);
+        // resize done through viewport
     }
 
     /** Returns current level selected */
@@ -767,13 +753,25 @@ public class MenuMode extends MenuScreen {
         }
     }
 
-    /** Reset is for transitioning from other mode to current mode*/
-    public void reset() {
+    /**
+     * reads settings and update sliders to reflect correct knob positions
+     */
+    private void updateSliders(){
         musicVolume = settings.getFloat("musicVolume", 0.5f);
         sfxVolume = settings.getFloat("sfxVolume", 0.5f);
-        toggleOn = settings.getBoolean("toggle", false);
-        musicSlider.ratio = musicVolume;
+        musicSlider.ratio = musicVolume;    // publicly modified ratio and knob position is dependent on this
         sfxSlider.ratio = sfxVolume;
+
+        musicSlider.setY(MUSIC_Y_RATIO * viewHeight);
+        musicSlider.setX(MUSIC_X_RATIO * viewWidth);
+        sfxSlider.setY(SFX_Y_RATIO * viewHeight);
+        sfxSlider.setX(SFX_X_RATIO * viewWidth);
+    }
+
+    /** Reset is for transitioning from other mode to current mode*/
+    public void reset() {
+        updateSliders();
+        toggleOn = settings.getBoolean("toggle", false);
 
         if (!cameForPauseSettings)
             backgroundMusic = menuMusic;

@@ -61,8 +61,7 @@ public class ParticleModel {
     private int countOffset;
     private static final int MAX_LIFE = 10;
     private static final int OFFSET_CONST = 50;
-    private static final float VELOCITY_SCALE = 1/15f;
-
+    private static final float VELOCITY_SCALE = 1/10f;
     private TextureRegion texture;
 
     private int textureIndex;

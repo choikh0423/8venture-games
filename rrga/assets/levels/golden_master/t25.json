@@ -3218,6 +3218,7 @@
         {
          "draworder":"topdown",
          "id":18,
+         "locked":true,
          "name":"Hazard_area",
          "objects":[
                 {
@@ -4183,42 +4184,6 @@
                  "width":405,
                  "x":824.742424242424,
                  "y":5809.59090909091
-                }, 
-                {
-                 "class":"",
-                 "gid":66,
-                 "height":337,
-                 "id":2159,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":646,
-                 "x":4815,
-                 "y":7207.5
-                }, 
-                {
-                 "class":"",
-                 "gid":68,
-                 "height":146,
-                 "id":2160,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":220,
-                 "x":4450,
-                 "y":7111
-                }, 
-                {
-                 "class":"",
-                 "gid":2147483713,
-                 "height":381,
-                 "id":2161,
-                 "name":"",
-                 "rotation":0,
-                 "visible":true,
-                 "width":710,
-                 "x":4273,
-                 "y":7321.13636363636
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5866,6 +5831,42 @@
                  "width":124,
                  "x":5176.65643939394,
                  "y":7265.16022727273
+                }, 
+                {
+                 "class":"",
+                 "gid":66,
+                 "height":337,
+                 "id":2186,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":646,
+                 "x":4814.9375,
+                 "y":7207.43
+                }, 
+                {
+                 "class":"",
+                 "gid":68,
+                 "height":146,
+                 "id":2187,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":220,
+                 "x":4449.9375,
+                 "y":7110.93
+                }, 
+                {
+                 "class":"",
+                 "gid":2147483713,
+                 "height":381,
+                 "id":2188,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":710,
+                 "x":4272.9375,
+                 "y":7321.07
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5874,7 +5875,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":2186,
+ "nextobjectid":2189,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

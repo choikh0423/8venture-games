@@ -60,6 +60,10 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     private float relMinY;
     /** Maximum Y coordinate (in body frame) at which particles will spawn */
     private float relMaxY;
+    /** Minimum X coordinate (in body frame) at which particles will spawn */
+    private float relMinX;
+    /** Maximum X coordinate (in body frame) at which particles will spawn */
+    private float relMaxX;
 
     /** draw depth */
     private final int depth;
@@ -80,7 +84,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     /** Particle System Queue */
     private final ParticleModel[] queue;
     /** density: # of particles per area */
-    private static final float PARTICLE_DENSITY = 1f;
+    private static final float PARTICLE_DENSITY = 1.2f;
     /** Inward force applied to keep particles inside the wind */
     private static final float INWARD_VELOCITY = 0.000025f;
     /** Start offset to particles */
@@ -156,15 +160,21 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         float transformX = -(float)Math.sin(direction);
         float transformY = (float)Math.cos(direction);
         float transformAng = -center.y*(float)Math.cos(direction) + center.x*(float)Math.sin(direction);
+        float transformAng2 = -center.x*(float)Math.cos(direction) - center.y*(float)Math.sin(direction);
 
         relMaxY = Float.NEGATIVE_INFINITY;
         relMinY = Float.POSITIVE_INFINITY;
+        relMaxX = Float.NEGATIVE_INFINITY;
+        relMinX = Float.POSITIVE_INFINITY;
         for(int ii = 0; ii < points.length; ii += 2) {
 
             // Relative Minimum and Maximum in wind body frame
             float relY = transformX*(originX + points[ii]) + transformY*(originY + points[ii+1]) + transformAng;
             relMaxY = Math.max(relY, relMaxY);
             relMinY = Math.min(relY, relMinY);
+            float relX = transformY*(originX + points[ii]) - transformX*(originY + points[ii+1]) + transformAng2;
+            relMaxX = Math.max(relX, relMaxX);
+            relMinX = Math.min(relX, relMinX);
 
             // For Checking In Polygon
             polygonPoints.add(new Vector2(originX + points[ii], originY + points[ii+1]));
@@ -174,6 +184,9 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             float distY = points[ii+1] - centroid.y;
             this.partRadius = Math.max(partRadius, (float)Math.sqrt(distX * distX + distY * distY));
         }
+
+        //System.out.println(relMaxX);
+        //System.out.println(relMinX);
 
         // Computing width and height of bounding box - currently inaccurate representation of actual wind area
         float width = (maxx - minx);
@@ -188,7 +201,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
         while (particleCount < numParticles) {
 
             // Random Sampling that goes across the wind area (WILL NOT SPAWN IN AREA THAT DOES NOT GO ACROSS THE WIND)
-            Vector2 sample = particleRandomSample();
+            Vector2 sample = particleInitialSample();
 
             float sampleX = sample.x;
             float sampleY = sample.y;
@@ -199,6 +212,23 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
             queue[particleCount].setParticleSize(partWidth, partHeight);
             particleCount += 1;
         }
+    }
+
+    /**
+     * Samples randomly all around the wind for initial sampling
+     * NOTE: particles will not only be sampled in the "start area" of wind, but throughout the wind region. Particles
+     * will not be spawned in locations that are not visible.
+     *
+     * @return Vector2 (x,y) sampled point (this is not an allocator, same vector returned every time)
+     */
+    private Vector2 particleInitialSample() {
+
+        float sampleY = (float)Math.random() * (relMaxY-relMinY) + relMinY;
+        float sampleX = (float)Math.random() * (relMaxX-relMinX) + relMinX;
+
+        float sampleGlobX = (float)Math.cos(direction) * sampleX - (float)Math.sin(direction) * sampleY + center.x;
+        float sampleGlobY = (float)Math.sin(direction) * sampleX + (float)Math.cos(direction) * sampleY + center.y;
+        return temp.set(sampleGlobX, sampleGlobY);
     }
 
     /**
@@ -283,7 +313,7 @@ public class NewWindModel extends PolygonObstacle implements Drawable {
     }
 
     /** Sets particle texture(still image) with alternating leaf and cloud texture
-     * NOTE: used for previous implementation and is remains for future usage */
+     * NOTE: used for previous implementation and remains for future usage */
     public void setParticleTexture(TextureRegion t_cloud, TextureRegion t_leaf) {
         int leaf_counter = 0;
         for (int i = 0; i < numParticles; i++) {
