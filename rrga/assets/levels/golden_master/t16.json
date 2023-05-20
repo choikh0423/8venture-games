@@ -7174,6 +7174,13 @@
  "nextlayerid":28,
  "nextobjectid":1679,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"over_the_cliffs"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,

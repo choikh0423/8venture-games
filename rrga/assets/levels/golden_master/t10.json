@@ -2282,6 +2282,13 @@
  "nextlayerid":21,
  "nextobjectid":621,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"exploring_the_forest"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,

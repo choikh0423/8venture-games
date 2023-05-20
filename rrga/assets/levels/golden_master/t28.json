@@ -10673,6 +10673,13 @@
  "nextlayerid":41,
  "nextobjectid":3844,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"the_storm"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,

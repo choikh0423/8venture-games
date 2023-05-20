@@ -5283,6 +5283,13 @@
  "nextlayerid":34,
  "nextobjectid":2142,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"music",
+         "propertytype":"music",
+         "type":"string",
+         "value":"a_world_of_clouds"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":128,
