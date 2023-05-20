@@ -1,5 +1,7 @@
 package com.mygdx.game.model.hazard;
 
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -30,8 +32,8 @@ public class NestedBirdHazard extends BirdHazard{
     private int totalFrameCount;
     private int currentFrame;
 
-    public NestedBirdHazard(NestHazard spawner, int damage, int birdSensorRadius, float birdKnockBack){
-        super(spawner.getBirdInitializerData(), damage, birdSensorRadius, birdKnockBack);
+    public NestedBirdHazard(NestHazard spawner, int damage, int birdSensorRadius, float birdKnockBack, Music sfx){
+        super(spawner.getBirdInitializerData(), damage, birdSensorRadius, birdKnockBack, sfx);
         this.spawner = spawner;
         spawningDuration = spawner.getSpawnDelay();
         spawningCountDown = 0;

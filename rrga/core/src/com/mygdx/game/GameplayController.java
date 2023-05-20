@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -91,6 +92,14 @@ public class GameplayController implements ContactListener {
     /**
      * Strong Wind Sound Effect Current Frame
      */
+    private static final int WIN_COUNTDOWN_TIMER = 20;
+    private Sound birdAlertSFX;
+    private Music birdFlapSFX;
+    private Sound lightningSFX;
+    private Music walkingSFX;
+    private Music cloudWalkingSFX;
+
+    /** Strong Wind Sound Effect Current Frame*/
     private int windStrongFrame = 0;
 
     /**
@@ -278,6 +287,11 @@ public class GameplayController implements ContactListener {
         levelContainer.gatherAssets(directory);
         backgroundMusic = directory.getEntry("music:cloud", Music.class);
         windStrongSFX = directory.getEntry("sound:wind_strong", Sound.class);
+        birdAlertSFX = directory.getEntry("sound:bird_alert", Sound.class);
+        birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
+        lightningSFX = directory.getEntry("sound:lightning", Sound.class);
+        walkingSFX = directory.getEntry("music:walking", Music.class);
+        cloudWalkingSFX = directory.getEntry("music:walking_clouds", Music.class);
 
         dragScale.x = globalConstants.get("player").getFloat("drag_x", 1);
         dragScale.y = globalConstants.get("player").getFloat("drag_y", 1);
@@ -323,6 +337,7 @@ public class GameplayController implements ContactListener {
         backgroundMusic.play();
         backgroundMusic.setVolume(musicVolume);
         backgroundMusic.setLooping(true);
+        stopSFX();
 
         resetCounter++;
     }
@@ -470,8 +485,8 @@ public class GameplayController implements ContactListener {
             // TODO: We might want to make a separate update loop for sounds
             // Play Strong Wind SFX
             if (windStrongFrame < 0 && !prevInWind) {
-//                windStrongSFX.stop();
-//                windStrongSFX.play(SFXVolume);
+                windStrongSFX.stop();
+                windStrongSFX.play(SFXVolume*15);
                 windStrongFrame = WIND_STRONG_DURATION;
 
                 // To prevent repeat all the time - only if you go out and come back in
@@ -489,6 +504,7 @@ public class GameplayController implements ContactListener {
             if (windStrongFrame > 0) {
                 windStrongFrame--;
             }
+            windStrongSFX.stop();
             prevInWind = false;
         }
 
@@ -502,6 +518,15 @@ public class GameplayController implements ContactListener {
             if (!umbrella.isBoosting()) {
                 avatar.setMovement(input.getHorizontal() * avatar.getForce());
                 avatar.applyWalkingForce();
+                if(moveInputted){
+                    if (avatar.onCloud){
+                        cloudWalkingSFX.setVolume(0.2f*SFXVolume);
+                        cloudWalkingSFX.play();
+                    } else {
+                        walkingSFX.setVolume(0.2f*SFXVolume);
+                        walkingSFX.play();
+                    }
+                }
             }
         } else if (!windPushed && umbrella.isOpen() && angle < Math.PI && avatar.getVY() < 0) {
             // player must be falling through AIR
@@ -510,6 +535,7 @@ public class GameplayController implements ContactListener {
         } else if (!umbrella.isOpen()) {
             avatar.dampAirHoriz();
         }
+
         if ((umbrella.isOpen() && angle < Math.PI) && avatar.getVY() < avatar.getMaxSpeedDownOpen()) {
             avatar.setVY(avatar.getMaxSpeedDownOpen());
         }
@@ -573,6 +599,7 @@ public class GameplayController implements ContactListener {
 
         //loop through birds
         for (BirdHazard bird : levelContainer.getBirds()) {
+            bird.setSfxVol(SFXVolume);
             //If sees target, wait before attacking
             if (bird.seesTarget) {
                 if (bird.attackWait == 0) {
@@ -650,7 +677,7 @@ public class GameplayController implements ContactListener {
                                 if (!bird.seesTarget) {
                                     bird.seesTarget = true;
                                     bird.setFaceRight(!(px - bx < 0));
-                                    //play sound effect
+                                    birdAlertSFX.play(SFXVolume);
                                     bird.warning = true;
                                 }
                             }
@@ -659,7 +686,6 @@ public class GameplayController implements ContactListener {
                 }
             }
         }
-
 
         //criterion to disconnect player from moving platform when ANY of the following holds
         // - player can move (on platform) and tries to move
@@ -729,6 +755,7 @@ public class GameplayController implements ContactListener {
                 entry.remove();
             } else {
                 // Note that update is called last!
+                if (obj instanceof AnimatedLightningHazard) ((AnimatedLightningHazard) obj).setSfxVol(SFXVolume);
                 obj.update(dt);
             }
         }
@@ -789,6 +816,7 @@ public class GameplayController implements ContactListener {
                     // ||(isAvatarSensor && bd1 instanceof RockHazard) || (isAvatarSensor && bd2 instanceof RockHazard)
                 ) {
                 boolean prev = avatar.isGrounded();
+                if(bd1.getName().contains("moving_platform") || bd2.getName().contains("moving_platform")) avatar.onCloud = true;
                 avatar.setGrounded(true);
                 if (avatar.isGrounded() != prev) {
                     avatar.startLand();
@@ -970,6 +998,19 @@ public class GameplayController implements ContactListener {
      */
     public void pause() {
         backgroundMusic.pause();
+        windStrongSFX.pause();
+        lightningSFX.pause();
+        birdAlertSFX.pause();
+        birdFlapSFX.pause();
+        walkingSFX.pause();
+    }
+
+    public void stopSFX(){
+        windStrongSFX.stop();
+        lightningSFX.stop();
+        birdAlertSFX.stop();
+        birdFlapSFX.stop();
+        walkingSFX.stop();
     }
 
     /**

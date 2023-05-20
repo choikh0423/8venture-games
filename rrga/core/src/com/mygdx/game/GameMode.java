@@ -696,6 +696,7 @@ public class GameMode implements Screen {
     public void pause() {
         gameplayController.pause();
     }
+    public void stopSFX(){gameplayController.stopSFX();}
     /**
      * Called when the Screen is resumed from a paused state.
      *

@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -335,6 +337,8 @@ public class LevelContainer{
         }
     }
 
+    private Sound lightningSFX;
+    private Music birdFlapSFX;
     /**
      * Gather the assets for this controller.
      * <p>
@@ -433,6 +437,8 @@ public class LevelContainer{
             logTextures.put(fileName, new TextureRegion(directory.getEntry("game:" + fileName, Texture.class)));
         }
 
+        lightningSFX = directory.getEntry("sound:lightning", Sound.class);
+        birdFlapSFX = directory.getEntry("music:bird_flap", Music.class);
     }
     /**
      * Resets the level container (emptying the container)
@@ -586,7 +592,7 @@ public class LevelContainer{
         for (int ii = 0; ii < birdData.length; ii++) {
             BirdHazard obj;
             JsonValue jv = birdData[ii];
-            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack);
+            obj = new BirdHazard(jv, birdDamage, birdSensorRadius, birdKnockBack, birdFlapSFX);
             obj.setDrawScale(scale);
             obj.setFlapAnimation(getFlapAnimationTexture(obj.getColor()), indices[obj.getColor().ordinal()]);
             obj.setWarningAnimation(warningTexture);
@@ -606,7 +612,7 @@ public class LevelContainer{
             nest.setTexture(nestTexture);
             nest.setName("nest" + ii);
             addObject(nest);
-            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack);
+            NestedBirdHazard bird = new NestedBirdHazard(nest, birdDamage, birdSensorRadius, birdKnockBack, birdFlapSFX);
             bird.setDrawScale(scale);
             bird.setFlapAnimation(blueBirdAnimationTexture, indices[BirdHazard.BirdColor.BLUE.ordinal()]);
             bird.setSpawnAnimation(bluebirdSpawnAnimation, 2, 7);
@@ -634,7 +640,7 @@ public class LevelContainer{
             }
             else {
                 obj = new AnimatedLightningHazard(data, animatedLightningTextures[data.getInt("tileIndex")],
-                        lightningDmg, lightningKnockBackScl);
+                        lightningDmg, lightningKnockBackScl, lightningSFX);
             }
             obj.setDrawScale(scale);
             obj.setName(lightningName + ii);

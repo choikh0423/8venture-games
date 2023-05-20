@@ -304,15 +304,20 @@
         "data:tutorial_helpers": "levels/tilesets/tutorial_helpers.json"
     },
     "sounds" : {
-      "sound:wind_strong": "sound/wind_strong.wav"
+      "sound:wind_strong": "sound/Matt sfx/ambient_wind.ogg",
+      "sound:bird_alert": "sound/Matt sfx/bird_alert_squawk.ogg",
+      "sound:lightning": "sound/Matt sfx/lightning-3.ogg"
     },
     "music" : {
+      "music:bird_flap": "sound/Matt sfx/bird_flap.ogg",
+      "music:walking":"sound/Matt sfx/bootwalking2.ogg",
+      "music:walking_clouds": "sound/Matt sfx/cloudwalking2.ogg",
       "music:menu": "music/menu.wav",
-      "music:cloud": "music/a_world_of_clouds.wav",
-      "music:forest": "music/exploring_the_forest.wav",
       "music:droplets": "music/droplets.wav",
       "music:the_storm": "music/the_storm.wav",
       "music:over_the_cliffs": "music/over_the_cliffs.wav",
+      "music:cloud": "music/a_world_of_clouds.wav",
+      "music:forest": "music/exploring_the_forest.wav",
       "music:victory": "music/victory.wav",
       "music:game_over": "music/game_over.wav"
     },
