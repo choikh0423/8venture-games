@@ -422,21 +422,19 @@ public class LevelParser {
         tileScale.x = levelData.getInt("tilewidth", 32);
         tileScale.y = levelData.getInt("tileheight", 32);
 
-        // set music and parallax
+        // set default music/parallax and then if custom properties, set music and parallax
+        music = "a_world_of_clouds";
+        parallax = "sky";
         JsonValue levelProperties = levelData.get("properties");
-        JsonValue musicName = getFromProperties(levelProperties, "music");
-        if (musicName != null){
-            music = musicName.asString();
-        }
-        else {
-            music = "a_world_of_clouds";
-        }
-        JsonValue parallaxName = getFromProperties(levelProperties, "parallax");
-        if (parallaxName != null){
-            parallax = musicName.asString();
-        }
-        else {
-            parallax = "sky";
+        if (levelProperties != null){
+            JsonValue musicName = getFromProperties(levelProperties, "music");
+            if (musicName != null){
+                music = musicName.asString();
+            }
+            JsonValue parallaxName = getFromProperties(levelProperties, "parallax");
+            if (parallaxName != null){
+                parallax = musicName.asString();
+            }
         }
 
         //get blue bird data for nests
