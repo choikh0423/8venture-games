@@ -66,7 +66,7 @@ public class CutSceneMode extends MenuScreen {
     public int currentLevel;
 
     /** Number of frames for each cutscene*/
-    private final int[] cutsceneFrameCount = new int[]{4, 10, 5, 6, 4, 0, 2, 2, 10};
+    private final int[] cutsceneFrameCount = new int[]{4, 10, 5, 6, 4, 0, 2, 44, 8, 2, 15, 10};
     /** Cutscene animation elapsed time */
     private float sceneElapsedTime;
     /** Remaining number of scenes to play */
@@ -76,7 +76,7 @@ public class CutSceneMode extends MenuScreen {
     /** Cutscene animation */
     private Animation<TextureRegion> sceneAnimation;
 
-    private Array<TextureRegion[]> textureList = new Array<>(9);
+    private Array<TextureRegion[]> textureList = new Array<>(12);
     public CutSceneMode(GameCanvas canvas) {
         this.canvas = canvas;
         overlayTint = new Color(1,1,1,1f);
@@ -249,8 +249,8 @@ public class CutSceneMode extends MenuScreen {
         this.currentSceneNumber = sceneNumber;
         if (sceneNumber == 1) {
             numScenes = 2;
-        } else if(sceneNumber == 7) {
-            numScenes = 3;
+        } else if(sceneNumber == 8) {
+            numScenes = 5;
         } else {
             numScenes = 1;
         }
@@ -260,11 +260,18 @@ public class CutSceneMode extends MenuScreen {
         TextureRegion[] frames = textureList.get(currentSceneNumber-1);
 
         // Adjust idle animation speed here
-        if(currentSceneNumber == 1) {
+        if(currentSceneNumber == 1 || currentSceneNumber == 2) {
             sceneAnimation = new Animation<>(1f / 5f, textureList.get(currentSceneNumber - 1));
-        }
-        if (currentSceneNumber == 4) {
+        } else if(currentSceneNumber == 3) {
+            sceneAnimation = new Animation<>(1f / 7f, textureList.get(currentSceneNumber - 1));
+        }  else if (currentSceneNumber == 4) {
             sceneAnimation = new Animation<>(1f / 1f, textureList.get(currentSceneNumber - 1));
+        } else if (currentSceneNumber == 5) {
+            sceneAnimation = new Animation<>(1f / 7f, textureList.get(currentSceneNumber - 1));
+        } else if (currentSceneNumber == 8) {
+            sceneAnimation = new Animation<>(1f / 7f, textureList.get(currentSceneNumber - 1));
+        } else if (currentSceneNumber == 9 || currentSceneNumber == 11 || currentSceneNumber == 12) {
+            sceneAnimation = new Animation<>(1f / 4f, textureList.get(currentSceneNumber - 1));
         } else {
             sceneAnimation = new Animation<>(1f / 2f, textureList.get(currentSceneNumber - 1));
         }

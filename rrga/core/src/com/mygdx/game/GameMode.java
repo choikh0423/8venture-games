@@ -746,15 +746,17 @@ public class GameMode implements Screen {
         } else if(currentLevel == 8) {
             cutsceneNum = 3;
             cutsceneBool = false;
-            System.out.println("HI");
         } else if(currentLevel == 15) {
             cutsceneNum = 4;
             cutsceneBool = false;
-        } else if(currentLevel == 23) {
+        } else if(currentLevel == 20) {
             cutsceneNum = 5;
             cutsceneBool = false;
-        } else if(currentLevel == 30) {
+        } else if(currentLevel == 26) {
             cutsceneNum = 7;
+            cutsceneBool = false;
+        } else if(currentLevel == 30) {
+            cutsceneNum = 8;
         }
     }
 
