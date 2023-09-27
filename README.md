@@ -4,7 +4,8 @@
 Gale is a puzzle platformer in which the player's primary mechanism of movement is parachute physics represented by an umbrella catching gusts of wind. By aiming their umbrella in the right position at the right time, the player is able to propel themselves from platform to platform. They must also be aware of hazards that can inhibit their progress or damage the umbrella.
 
 ---
-## Readme will be updated soon! But, Gale is officially released! Hooray!
+
+
 ---
 
 ## Getting Started
@@ -30,11 +31,6 @@ java -XstartOnFirstThread -jar [file_name].jar
 
 For Windows:
 java -jar [file_name].jar
-
-
----
-## Features
-To be updated.
 
 ---
 ## Contributors
